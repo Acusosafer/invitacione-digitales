@@ -429,7 +429,7 @@
 
         function generarLink() {
             const n = document.getElementById('g-nombre').value; const c = document.getElementById('g-cupos').value;
-            const url = `${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?evento=${eventoId}&invitado=${encodeURIComponent(n)}&personas=${c}`;
+            const url = `${window.location.origin}${window.location.pathname.replace('admin.html', 'invitacion.html')}?evento=${eventoId}&invitado=${encodeURIComponent(n)}&personas=${c}`;
             document.getElementById('g-url').textContent = url; document.getElementById('g-res').style.display = 'block';
         }
         function copiarLink() { navigator.clipboard.writeText(document.getElementById('g-url').textContent); alert('Copiado'); }

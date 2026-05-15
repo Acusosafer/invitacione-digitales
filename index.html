@@ -218,6 +218,13 @@
     </style>
 </head>
 <body>
+    <script>
+        // Redirección inteligente: Si hay un evento en la URL, mandar a invitacion.html
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('evento')) {
+            window.location.href = 'invitacion.html' + window.location.search;
+        }
+    </script>
 
     <nav>
         <div class="logo">INVITACIONES DIGITALES OFICIAL</div>
