@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:title" content="¡Estás invitado!">
-    <meta property="og:description" content="Quiero que seas parte de este momento tan especial.">
-    <meta property="og:image" content="logo.png">
-    <title>Invitación</title>
+    <title id="page-title">Invitación</title>
+    <meta id="meta-og-title" property="og:title" content="¡Estás invitado!">
+    <meta id="meta-og-desc" property="og:description" content="Quiero que seas parte de este momento tan especial.">
+    <meta id="meta-og-img" property="og:image" content="logo.png">
     <link id="dynamic-font" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Jost:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -439,7 +439,13 @@
             }
 
             // 2. Initialize UI with C
-            document.title = "Invitación - " + C.nombre;
+            const pageTitle = `${C.nombre} — Mis 15`;
+            document.title = pageTitle;
+            document.getElementById('page-title').textContent = pageTitle;
+            document.getElementById('meta-og-title').content = pageTitle;
+            document.getElementById('meta-og-desc').content = `Quiero que seas parte de este momento — ${C.nombre} — Mis 15`;
+            if (C.foto_hero) document.getElementById('meta-og-img').content = C.foto_hero;
+
             document.getElementById('s-tipo').textContent = C.tipo;
             document.getElementById('h-tipo').textContent = C.tipo;
             document.getElementById('s-nombre').textContent = C.nombre;
@@ -465,12 +471,18 @@
             // 3. Personalized URL Params Logic
             const hInvitado = document.getElementById('h-invitado');
             if (invitado) {
-                hInvitado.textContent = invitado + (personasParam ? ` — ${personasParam} lugares reservados` : "");
+                hInvitado.innerHTML = `<span style="display:block; font-size: 0.8rem; letter-spacing: 3px; margin-bottom: 5px; opacity: 0.6;">HOLA ${invitado.toUpperCase()}</span>` + 
+                                     `TE ESPERAMOS EN ESTE MOMENTO TAN ESPECIAL` + 
+                                     (personasParam ? `<br><small style="font-size: 0.7rem; letter-spacing: 1px; opacity: 0.5;">(${personasParam} LUGARES RESERVADOS)</small>` : "");
                 hInvitado.style.display = "block";
-                if (!invitado.toLowerCase().includes('familia')) {
-                    const nameParts = invitado.split(' ');
-                    document.getElementById('f-nombre').value = nameParts[0] || '';
-                    document.getElementById('f-apellido').value = nameParts.slice(1).join(' ') || '';
+                
+                // Pre-cargar formulario
+                const nameParts = invitado.trim().split(' ');
+                if (nameParts.length > 0) {
+                    document.getElementById('f-nombre').value = nameParts[0];
+                    if (nameParts.length > 1) {
+                        document.getElementById('f-apellido').value = nameParts.slice(1).join(' ');
+                    }
                 }
             } else {
                 hInvitado.textContent = "Estás invitado a celebrar conmigo";
