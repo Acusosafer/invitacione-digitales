@@ -328,12 +328,32 @@
         };
 
         const params = new URLSearchParams(window.location.search);
-        const eventoId = params.get('evento') || 'valentina15'; // Default fallback
+        const eventoId = params.get('evento') || 'valentina15'; 
         const invitado = params.get('invitado');
         const personasParam = params.get('personas');
-        let maxPersonas = C.rsvp_max;
+        let maxPersonas = 5;
+
+        // Inyección inmediata (Bypass Supabase)
+        function injectGuestInfo() {
+            const hInvitado = document.getElementById('h-invitado');
+            if (invitado && hInvitado) {
+                hInvitado.innerHTML = `
+                    <span style="display:block; font-size: 0.9rem; letter-spacing: 4px; margin-bottom: 8px; opacity: 0.8; color: var(--primary);">HOLA ${invitado.toUpperCase()}</span>
+                    <span style="font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-style: italic; color: var(--primary);">Te esperamos en este momento tan especial</span>
+                    ${personasParam ? `<br><small style="font-size: 0.75rem; letter-spacing: 1px; opacity: 0.6; color: var(--primary);">(${personasParam} LUGARES RESERVADOS)</small>` : ""}
+                `;
+                const fN = document.getElementById('f-nombre');
+                const fA = document.getElementById('f-apellido');
+                if (fN && fA) {
+                    const parts = invitado.trim().split(' ');
+                    fN.value = parts[0] || '';
+                    fA.value = parts.slice(1).join(' ') || '';
+                }
+            }
+        }
 
         async function initApp() {
+            injectGuestInfo(); // Ejecutar de inmediato
             // 1. Fetch Event Config from Supabase
             try {
                 const { data, error } = await sb
