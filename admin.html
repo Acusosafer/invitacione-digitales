@@ -62,6 +62,25 @@
         .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 59, 111, 0.4); }
         .btn-black { background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); box-shadow: none; }
 
+        /* Layout Builder Styles */
+        .builder-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
+        .block-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 20px; border-radius: 15px; display: flex; align-items: center; justify-content: space-between; transition: 0.3s; }
+        .block-item:hover { border-color: var(--primary); background: rgba(255,59,111,0.02); }
+        .block-info { display: flex; align-items: center; gap: 15px; }
+        .block-icon { width: 40px; height: 40px; background: var(--card-bg); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--primary); }
+        .block-name { font-weight: 600; font-size: 0.95rem; }
+        .block-controls { display: flex; align-items: center; gap: 20px; }
+        
+        /* Toggle Switch */
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background: var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
+        
+        .style-select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; }
+
         table { width: 100%; border-collapse: collapse; }
         th { padding: 18px; background: rgba(255,255,255,0.02); font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); text-align: left; }
         td { padding: 18px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-main); }
@@ -152,6 +171,82 @@
                     <div class="form-group"><label>Color 1 (Oscuro/Textos)</label><input type="color" id="c-color-1" class="gen-input" style="height: 50px;"></div>
                     <div class="form-group"><label>Color 2 (Acento/Iconos)</label><input type="color" id="c-color-2" class="gen-input" style="height: 50px;"></div>
                     <div class="form-group"><label>Color 3 (Fondo Página)</label><input type="color" id="c-color-bg" class="gen-input" style="height: 50px;" value="#ffffff"></div>
+
+                    <div class="full-width">
+                        <h3>🏗️ Constructor de Invitación (Franjas)</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px;">Activa, oculta y personaliza el estilo de cada sección de la invitación.</p>
+                        
+                        <div class="builder-grid" id="layout-builder" style="margin-bottom: 30px;">
+                            <div class="block-item">
+                                <div class="block-info">
+                                    <div class="block-icon">🖼️</div>
+                                    <div class="block-name">Portada (Hero)</div>
+                                </div>
+                                <div class="block-controls">
+                                    <select class="style-select" id="style-hero">
+                                        <option value="full">Pantalla Completa</option>
+                                        <option value="boxed">Contenido Centrado</option>
+                                    </select>
+                                    <label class="switch">
+                                        <input type="checkbox" id="show-hero" checked disabled>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="block-item">
+                                <div class="block-info">
+                                    <div class="block-icon">⏰</div>
+                                    <div class="block-name">Cuenta Regresiva</div>
+                                </div>
+                                <div class="block-controls">
+                                    <label class="switch">
+                                        <input type="checkbox" id="show-countdown" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="block-item">
+                                <div class="block-info">
+                                    <div class="block-icon">📸</div>
+                                    <div class="block-name">Galería de Fotos</div>
+                                </div>
+                                <div class="block-controls">
+                                    <label class="switch">
+                                        <input type="checkbox" id="show-gallery" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="block-item">
+                                <div class="block-info">
+                                    <div class="block-icon">#️⃣</div>
+                                    <div class="block-name">Sección Hashtag</div>
+                                </div>
+                                <div class="block-controls">
+                                    <label class="switch">
+                                        <input type="checkbox" id="show-hashtag" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="block-item">
+                                <div class="block-info">
+                                    <div class="block-icon">🎁</div>
+                                    <div class="block-name">Regalos / CBU</div>
+                                </div>
+                                <div class="block-controls">
+                                    <label class="switch">
+                                        <input type="checkbox" id="show-gift" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="full-width"><h3>6. Multimedia y Ajustes de Imagen</h3></div>
                     <div class="form-group">
@@ -328,6 +423,16 @@
                 document.getElementById('c-color-bg').value = c.color_bg || '#ffffff';
                 document.getElementById('c-fit-hero').value = c.fit_hero || 'cover';
 
+                // Cargar Layout
+                const l = c.layout || {};
+                if(document.getElementById('show-countdown')) document.getElementById('show-countdown').checked = l.show_countdown !== false;
+                if(document.getElementById('show-gallery')) document.getElementById('show-gallery').checked = l.show_gallery !== false;
+                if(document.getElementById('show-hashtag')) document.getElementById('show-hashtag').checked = l.show_hashtag !== false;
+                if(document.getElementById('show-gift')) document.getElementById('show-gift').checked = l.show_gift !== false;
+                
+                if(document.getElementById('style-hero')) document.getElementById('style-hero').value = l.style_hero || 'full';
+                if(document.getElementById('style-countdown')) document.getElementById('style-countdown').value = l.style_countdown || 'classic';
+
                 const status = (id, url) => { if(url) document.getElementById(id).textContent = "✓ Cargado"; };
                 status('s-musica', c.musica_url); status('s-hero', c.foto_hero); status('s-splash', c.foto_splash); status('s-hash', c.foto_hashtag);
                 status('s-g1', c.foto_galeria_1); status('s-g2', c.foto_galeria_2); status('s-g3', c.foto_galeria_3); status('s-g4', c.foto_galeria_4);
@@ -383,7 +488,15 @@
                 foto_galeria_1: await uploadFile('c-foto-g1', 'foto_galeria_1', newId),
                 foto_galeria_2: await uploadFile('c-foto-g2', 'foto_galeria_2', newId),
                 foto_galeria_3: await uploadFile('c-foto-g3', 'foto_galeria_3', newId),
-                foto_galeria_4: await uploadFile('c-foto-g4', 'foto_galeria_4', newId)
+                foto_galeria_4: await uploadFile('c-foto-g4', 'foto_galeria_4', newId),
+                layout: {
+                    show_countdown: document.getElementById('show-countdown').checked,
+                    show_gallery: document.getElementById('show-gallery').checked,
+                    show_hashtag: document.getElementById('show-hashtag').checked,
+                    show_gift: document.getElementById('show-gift').checked,
+                    style_hero: document.getElementById('style-hero').value,
+                    style_countdown: document.getElementById('style-countdown').value
+                }
             };
 
             const { error } = await sb.from('eventos').upsert({ id: newId, config, admin_password: document.getElementById('c-pass').value });
