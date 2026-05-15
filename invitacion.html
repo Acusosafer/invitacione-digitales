@@ -444,14 +444,15 @@
             }
 
             // 2. Initialize UI with C
-            const pageTitle = `${C.nombre} — Mis 15`;
+            const pageTitle = (invitado ? `Invitación para ${invitado}` : `${C.nombre} — Mis 15`);
             document.title = pageTitle;
-            document.getElementById('page-title').textContent = pageTitle;
-            document.getElementById('meta-og-title').content = pageTitle;
-            document.getElementById('meta-og-desc').content = `Quiero que seas parte de este momento — ${C.nombre} — Mis 15`;
-            if (C.foto_hero) document.getElementById('meta-og-img').content = C.foto_hero;
+            if(document.getElementById('page-title')) document.getElementById('page-title').textContent = pageTitle;
+            if(document.getElementById('meta-og-title')) document.getElementById('meta-og-title').content = pageTitle;
+            if(document.getElementById('meta-og-desc')) document.getElementById('meta-og-desc').content = `Quiero que seas parte de este momento tan especial — ${C.nombre}`;
+            if (C.foto_hero && document.getElementById('meta-og-img')) document.getElementById('meta-og-img').content = C.foto_hero;
 
-            document.getElementById('s-tipo').textContent = C.tipo;
+            const safeSetText = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+            safeSetText('s-tipo', C.tipo);
             document.getElementById('h-tipo').textContent = C.tipo;
             document.getElementById('s-nombre').textContent = C.nombre;
             document.getElementById('h-nombre').textContent = C.nombre;
@@ -476,22 +477,25 @@
             // 3. Personalized URL Params Logic
             const hInvitado = document.getElementById('h-invitado');
             if (invitado && hInvitado) {
-                hInvitado.innerHTML = `<span style="display:block; font-size: 0.9rem; letter-spacing: 4px; margin-bottom: 8px; opacity: 0.8; color: var(--primary);">HOLA ${invitado.toUpperCase()}</span>` + 
-                                     `<span style="font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-style: italic; color: var(--primary);">Te esperamos en este momento tan especial</span>` + 
-                                     (personasParam ? `<br><small style="font-size: 0.75rem; letter-spacing: 1px; opacity: 0.6; color: var(--primary);">(${personasParam} LUGARES RESERVADOS)</small>` : "");
+                const nombreMayus = invitado.toUpperCase();
+                hInvitado.innerHTML = `
+                    <span style="display:block; font-size: 0.9rem; letter-spacing: 4px; margin-bottom: 8px; opacity: 0.8; color: var(--primary);">HOLA ${nombreMayus}</span>
+                    <span style="font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-style: italic; color: var(--primary);">Te esperamos en este momento tan especial</span>
+                    ${personasParam ? `<br><small style="font-size: 0.75rem; letter-spacing: 1px; opacity: 0.6; color: var(--primary);">(${personasParam} LUGARES RESERVADOS)</small>` : ""}
+                `;
                 
                 // Pre-cargar formulario
-                const nameParts = invitado.trim().split(' ');
-                if (nameParts.length > 0) {
-                    document.getElementById('f-nombre').value = nameParts[0];
-                    if (nameParts.length > 1) {
-                        document.getElementById('f-apellido').value = nameParts.slice(1).join(' ');
-                    }
+                const fNombre = document.getElementById('f-nombre');
+                const fApellido = document.getElementById('f-apellido');
+                if (fNombre && fApellido) {
+                    const nameParts = invitado.trim().split(' ');
+                    fNombre.value = nameParts[0] || '';
+                    fApellido.value = nameParts.slice(1).join(' ') || '';
                 }
-            } else {
+            } else if (hInvitado) {
                 hInvitado.innerHTML = `<span style="opacity: 0.6; font-size: 0.8rem; color: var(--primary);">Estás invitado a celebrar conmigo</span>`;
             }
-            
+
             if (personasParam && !isNaN(personasParam)) {
                 maxPersonas = parseInt(personasParam);
             }
