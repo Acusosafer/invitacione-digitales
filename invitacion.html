@@ -5,8 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta id="og-title" property="og:title" content="💌 Quiero que seas parte de este momento especial">
-  <meta id="og-desc" property="og:description"
-    content="Abre este enlace para descubrir todos los detalles del evento y confirmar tu asistencia.">
+  <meta id="og-desc" property="og:description" content="Si te llegó este enlace sos importante para mi">
   <meta id="og-img" property="og:image" content="logo.png">
   <meta id="og-url" property="og:url" content="">
   <title id="pg-title">Invitación Oficial</title>
@@ -734,7 +733,13 @@
       font-weight: 600;
     }
 
-    .opts-row,
+    .opts-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
     .opts-tags {
       display: flex;
       flex-wrap: wrap;
@@ -742,11 +747,24 @@
       margin-top: 8px;
     }
 
-    .opt-btn,
-    .tag-btn {
+    .opt-btn {
       flex: 1;
       min-width: 80px;
       padding: 10px;
+      border: 1px solid var(--gray-dark);
+      border-radius: 8px;
+      background: var(--white);
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .tag-btn {
+      flex: 1 1 auto;
+      min-width: 90px;
+      white-space: nowrap;
+      padding: 10px 12px;
       border: 1px solid var(--gray-dark);
       border-radius: 8px;
       background: var(--white);
@@ -771,11 +789,42 @@
     }
 
     .btn-confirmar {
-      background: linear-gradient(135deg, var(--black), #333);
-      color: var(--white);
+      background: var(--secondary);
+      color: var(--black);
+      border-radius: 50px;
+      padding: 16px 36px;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+      border: none;
       width: 100%;
-      padding: 14px;
       margin-top: 10px;
+    }
+
+    .btn-confirmar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6), transparent);
+      transform: skewX(-20deg);
+      transition: all 0.6s ease;
+    }
+
+    .btn-confirmar:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-confirmar:hover::after {
+      left: 150%;
     }
 
     /* FOOTER */
@@ -1195,8 +1244,8 @@
           <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
       </div>
-      <h2>Confirma tu asistencia</h2>
-      <p style="max-width:600px;margin:0 auto 20px;color:#666">Por favor, antes de <strong id="txt-rsvp-lim"></strong>
+      <h2 id="rsvp-title">Confirma tu asistencia</h2>
+      <p id="rsvp-lim-p" style="max-width:600px;margin:0 auto 20px;color:#666">Por favor, antes de <strong id="txt-rsvp-lim"></strong>
       </p>
 
       <div class="rsvp-form">
@@ -1458,6 +1507,31 @@
       if (C.layout?.show_rsvp !== false) {
         document.getElementById('sec-rsvp').style.display = 'flex';
         document.getElementById('txt-rsvp-lim').textContent = C.rsvp_limite || '31 de diciembre';
+
+        // Check if already confirmed
+        if (invitado) {
+          try {
+            const { data: extConfirm } = await sb.from('confirmaciones')
+              .select('*')
+              .eq('evento_id', eventoId)
+              .eq('invitado_url', invitado)
+              .limit(1);
+
+            if (extConfirm && extConfirm.length > 0) {
+              document.getElementById('rsvp-title').style.display = 'none';
+              const limP = document.getElementById('rsvp-lim-p');
+              if (limP) limP.style.display = 'none';
+              document.querySelector('.rsvp-form').innerHTML = `
+                <div style="text-align:center;font-weight:600;padding:50px 30px;font-size:1.4rem;color:#1a1a1a;background:var(--white);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.05);margin-top:20px;border:2px solid var(--secondary);">
+                  ✨ ¡Tu asistencia ya fue registrada!<br>
+                  <span style="font-size:1.1rem;font-weight:normal;color:#666;margin-top:10px;display:block;">¡Te esperamos para celebrar juntos! 🎉</span>
+                </div>
+              `;
+            }
+          } catch(e) {
+            console.error("Error checking existing confirmation", e);
+          }
+        }
       }
 
       if (C.musica_url) document.getElementById('audio').src = C.musica_url;
@@ -1641,7 +1715,15 @@
 
       toast('✅ ¡Asistencia confirmada!');
       setTimeout(() => {
-        document.querySelector('.rsvp-form').innerHTML = '<p style="text-align:center;font-weight:600;padding:30px;color:#666">Asistencia registrada correctamente. ¡Te esperamos!</p>';
+        document.getElementById('rsvp-title').style.display = 'none';
+        const limP = document.getElementById('rsvp-lim-p');
+        if (limP) limP.style.display = 'none';
+        document.querySelector('.rsvp-form').innerHTML = `
+          <div style="text-align:center;font-weight:600;padding:50px 30px;font-size:1.4rem;color:#1a1a1a;background:var(--white);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.05);margin-top:20px;border:2px solid var(--secondary);">
+            ✨ ¡Asistencia registrada correctamente!<br>
+            <span style="font-size:1.1rem;font-weight:normal;color:#666;margin-top:10px;display:block;">¡Te esperamos para celebrar juntos! 🎉</span>
+          </div>
+        `;
       }, 1500);
     }
 
