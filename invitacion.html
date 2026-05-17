@@ -481,8 +481,10 @@ footer{
 </section>
 
 <!-- COUNTDOWN -->
-<section class="section dark rev" id="sec-countdown" style="display:none">
-  <div class="section-icon shake" id="icon-countdown">⏰</div>
+<section class="section rev" id="sec-countdown" style="display:none">
+  <div class="section-icon shake" id="icon-countdown">
+    <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+  </div>
   <h2>Faltan solo...</h2>
   <div class="countdown" id="countdown">
     <div class="count-item"><span class="count-num" id="days">00</span><span class="count-label">Días</span></div>
@@ -556,7 +558,9 @@ footer{
 
 <!-- HASHTAG -->
 <section class="section hashtag-section rev" id="sec-hashtag" style="display:none">
-  <div class="section-icon">📱</div>
+  <div class="section-icon shake" id="icon-hashtag">
+    <svg class="icon-svg" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+  </div>
   <img id="txt-hashtag-foto" class="hashtag-photo" src="" alt="" onerror="this.style.display='none'">
   <p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">Comparte tus fotos con</p>
   <h2 class="hashtag-tag" id="txt-hash"></h2>
@@ -565,7 +569,9 @@ footer{
 
 <!-- RSVP -->
 <section class="section rsvp-section rev" id="sec-rsvp" style="display:none">
-  <div class="section-icon">✅</div>
+  <div class="section-icon pulse" id="icon-rsvp">
+    <svg class="icon-svg" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  </div>
   <h2>Confirma tu asistencia</h2>
   <p style="max-width:600px;margin:0 auto 20px;color:#666">Por favor, antes de <strong id="txt-rsvp-lim"></strong></p>
   
@@ -717,6 +723,19 @@ async function initApp() {
     }
   }
 
+  // Set Countdown Style
+  if (C.countdown_style === 'grid') {
+    document.getElementById('countdown').classList.add('grid-style');
+  }
+
+  // Set Pax Options Dynamically
+  const maxPax = parseInt(personas_param) || 5;
+  const optsContainer = document.getElementById('opts-personas');
+  optsContainer.innerHTML = '';
+  for (let i = 1; i <= maxPax; i++) {
+    optsContainer.innerHTML += `<div class="opt-btn ${i===maxPax ? 'sel' : ''}" data-val="${i}">${i}</div>`;
+  }
+
   // Dynamic Icons
   if (C.icono_mensaje) document.getElementById('icon-mensaje').innerHTML = C.icono_mensaje;
   if (C.icono_countdown) document.getElementById('icon-countdown').innerHTML = C.icono_countdown;
@@ -742,7 +761,6 @@ async function initApp() {
     document.getElementById('sec-galeria').style.display = 'flex';
     const fotos = [C.foto_galeria_1, C.foto_galeria_2, C.foto_galeria_3, C.foto_galeria_4].filter(Boolean);
     if (fotos.length > 0) {
-      // Mobile carousel
       document.getElementById('carousel-mobile').style.display = 'block';
       const track = document.getElementById('carousel-track');
       fotos.forEach(foto => {
@@ -751,19 +769,18 @@ async function initApp() {
         slide.style.backgroundImage = `url('${foto}')`;
         track.appendChild(slide);
       });
-      if (fotos.length === 1) {
-        document.getElementById('btn-prev').style.display = 'none';
-        document.getElementById('btn-next').style.display = 'none';
-      } else {
+      if (fotos.length > 1) {
         document.getElementById('btn-prev').onclick = () => { carouselIndex = (carouselIndex - 1 + fotos.length) % fotos.length; updateCarousel(fotos.length); };
         document.getElementById('btn-next').onclick = () => { carouselIndex = (carouselIndex + 1) % fotos.length; updateCarousel(fotos.length); };
         setInterval(() => {
           carouselIndex = (carouselIndex + 1) % fotos.length;
           updateCarousel(fotos.length);
         }, 2000);
+      } else {
+        document.getElementById('btn-prev').style.display = 'none';
+        document.getElementById('btn-next').style.display = 'none';
       }
 
-      // Desktop grid
       const grid = document.getElementById('gallery-grid');
       fotos.forEach(foto => {
         const item = document.createElement('div');
@@ -811,27 +828,9 @@ async function initApp() {
   if (C.layout?.show_rsvp !== false) {
     document.getElementById('sec-rsvp').style.display = 'flex';
     document.getElementById('txt-rsvp-lim').textContent = C.rsvp_limite || '31 de diciembre';
-    
-    // Personas buttons
-    const maxPersonas = 5;
-    const personasContainer = document.getElementById('opts-personas');
-    for (let i = 1; i <= maxPersonas; i++) {
-      const btn = document.createElement('button');
-      btn.className = `opt-btn${i == personas_param ? ' sel' : ''}`;
-      btn.textContent = i;
-      btn.onclick = () => {
-        document.querySelectorAll('#opts-personas .opt-btn').forEach(b => b.classList.remove('sel'));
-        btn.classList.add('sel');
-      };
-      personasContainer.appendChild(btn);
-    }
   }
 
-  // Music
-  if (C.musica_url) {
-    document.getElementById('audio').src = C.musica_url;
-  }
-
+  if (C.musica_url) document.getElementById('audio').src = C.musica_url;
   document.getElementById('floating-music-btn').onclick = toggleMusic;
   document.getElementById('btn-enter').onclick = () => {
     document.getElementById('splash').classList.add('hidden');
@@ -854,11 +853,15 @@ async function initApp() {
     btn.onclick = () => {
       document.querySelectorAll('#opts-asiste .opt-btn').forEach(b => b.classList.remove('sel'));
       btn.classList.add('sel');
-      const details = document.getElementById('rsvp-details');
-      details.style.display = btn.dataset.val === 'si' ? 'block' : 'none';
+      document.getElementById('rsvp-details').style.display = btn.dataset.val === 'si' ? 'block' : 'none';
     };
   });
-
+  document.querySelectorAll('#opts-personas .opt-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#opts-personas .opt-btn').forEach(b => b.classList.remove('sel'));
+      btn.classList.add('sel');
+    };
+  });
   document.querySelectorAll('.tag-btn').forEach(btn => {
     btn.onclick = () => btn.classList.toggle('sel');
   });
@@ -981,15 +984,35 @@ async function confirmar() {
   const { error } = await sb.from('confirmaciones').insert([data]);
 
   if (error) {
-    toast('❌ Error al enviar');
-    btn.textContent = '✓ Confirmar asistencia';
-    btn.disabled = false;
-  } else {
-    toast('✅ ¡Asistencia confirmada!');
-    setTimeout(() => {
-      document.querySelector('.rsvp-form').innerHTML = '<p style="text-align:center;font-weight:600;padding:30px;color:#666">Asistencia registrada correctamente. ¡Te esperamos!</p>';
-    }, 1500);
+    if (error.code === 'PGRST204' || error.message.includes('column') || error.code === '42703') {
+      const safeData = {
+        evento_id: eventoId,
+        nombre: nombre,
+        apellido: document.getElementById('f-apellido').value.trim(),
+        asiste: asiste,
+        personas: parseInt(personas) || 0,
+        dieta: dieta,
+        mensaje: document.getElementById('f-msg').value.trim()
+      };
+      const retry = await sb.from('confirmaciones').insert([safeData]);
+      if (retry.error) {
+        toast('❌ Error al enviar (Código 2): ' + retry.error.message);
+        btn.textContent = '✓ Confirmar asistencia';
+        btn.disabled = false;
+        return;
+      }
+    } else {
+      toast('❌ Error: ' + error.message);
+      btn.textContent = '✓ Confirmar asistencia';
+      btn.disabled = false;
+      return;
+    }
   }
+
+  toast('✅ ¡Asistencia confirmada!');
+  setTimeout(() => {
+    document.querySelector('.rsvp-form').innerHTML = '<p style="text-align:center;font-weight:600;padding:30px;color:#666">Asistencia registrada correctamente. ¡Te esperamos!</p>';
+  }, 1500);
 }
 
 function toast(msg) {

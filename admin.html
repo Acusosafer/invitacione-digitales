@@ -799,6 +799,7 @@ const SECTIONS = [
     toggle:'show_countdown', required:false,
     fields:[
       {type:'text',key:'icono_countdown',label:'Icono (Emoji)',ph:'ej: ⏰',hint:'Opcional'},
+      {type:'select',key:'countdown_style',label:'Estilo visual',opts:[['flex','Horizontal (En línea)'],['grid','Cuadrícula (2x2)']]},
       {type:'text',key:'fecha_texto',label:'Fecha visual',ph:'ej: Sábado 14 de junio, 2025'},
       {type:'text',key:'hora_texto',label:'Hora del evento',ph:'ej: 21:00 hs'},
       {type:'datetime',key:'fecha_iso',label:'Fecha y hora exacta (para el contador)'},
