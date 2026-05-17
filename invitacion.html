@@ -80,40 +80,16 @@ h3,h4{font-family:'Montserrat',sans-serif;font-weight:600}
   letter-spacing:1px;
 }
 
-.splash-music{
-  background:rgba(0,0,0,0.15);padding:20px;border-radius:16px;
-  width:100%;max-width:320px;margin:20px 0;
-  text-align:center;border:2px solid var(--secondary);
-  backdrop-filter:blur(10px);
+.floating-music {
+  position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+  width: 50px; height: 50px; border-radius: 50%;
+  background: var(--secondary); border: 2px solid var(--black);
+  cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s;
 }
-.splash-music p{font-size:0.85rem;color:var(--black);margin-bottom:12px;font-weight:600;letter-spacing:1px}
-
-.btn-music{
-  background:linear-gradient(135deg,var(--secondary),#c4e8a8);
-  color:var(--black);
-  width:100%;max-width:320px;
-  font-size:1rem;font-weight:700;
-  letter-spacing:2px;
-  padding:16px 24px;
-  box-shadow:0 6px 20px rgba(214,236,192,0.4);
-  position:relative;
-  overflow:hidden;
-}
-.btn-music::before{
-  content:'';position:absolute;top:50%;left:50%;
-  width:0;height:0;background:rgba(255,255,255,0.3);
-  border-radius:50%;transform:translate(-50%,-50%);
-  transition:width 0.5s,height 0.5s;
-}
-.btn-music:active::before{width:300px;height:300px}
-.btn-music:hover{
-  transform:translateY(-3px);
-  box-shadow:0 10px 30px rgba(214,236,192,0.6);
-  background:linear-gradient(135deg,#d6ecc0,#cfe8b0);
-}
-.btn-music:disabled{opacity:0.6}
-
-.btn-music-icon{display:inline-block;margin-right:8px;font-size:1.1rem}
+.floating-music:hover { transform: scale(1.1); }
+.floating-music svg { width: 24px; height: 24px; fill: var(--black); }
 
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
@@ -129,12 +105,7 @@ h3,h4{font-family:'Montserrat',sans-serif;font-weight:600}
 }
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,0.2)}
 
-.btn-music{
-  background:var(--secondary);color:var(--black);
-  width:100%;max-width:320px;
-  margin-bottom:10px;
-}
-.btn-music:hover{background:darken(#d6ecc0,5%);transform:translateY(-2px)}
+
 
 .darken-func{filter:darken(5%)}
 
@@ -151,6 +122,8 @@ audio{display:none}
   position:absolute;top:0;left:0;width:100%;height:100%;
   background:linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),center/cover no-repeat;
   z-index:0;
+  transition: transform 0.2s ease-out;
+  transform: scale(1);
 }
 .hero-content{position:relative;z-index:1;padding:20px;max-width:90%}
 .hero-tipo{
@@ -182,8 +155,10 @@ audio{display:none}
 .section-icon{
   width:50px;height:50px;
   display:flex;align-items:center;justify-content:center;
-  font-size:1.8rem;margin-bottom:16px;
+  font-size:2.5rem;margin-bottom:16px;
 }
+.icon-svg { width: 50px; height: 50px; fill: none; stroke: var(--black); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; display: block; }
+.icon-heart { fill: var(--secondary); stroke: var(--secondary); }
 
 .section h2{
   font-size:clamp(1.8rem,6vw,2.8rem);
@@ -260,7 +235,8 @@ audio{display:none}
   box-shadow:0 4px 12px rgba(0,0,0,0.1);
   background:#eee;
 }
-.gallery-item img{width:100%;height:100%;object-fit:cover}
+.gallery-item img{width:100%;height:100%;object-fit:cover; transition: transform 0.3s ease-out;}
+.zoom-scroll { transform: scale(1.1); }
 
 @media(max-width:768px){
   .gallery-grid{display:none}
@@ -469,18 +445,22 @@ footer{
   <div class="splash-mesa" id="splash-mesa" style="display:none">
     🎫 Mesa <span id="mesa-num"></span>
   </div>
-  <div class="splash-music">
-    <p>🎵 Acompañá con música</p>
-    <button id="btn-music" class="btn btn-music"><span class="btn-music-icon">▶</span>Activar música</button>
-  </div>
-  <button id="btn-enter" class="btn btn-primary" style="margin-top:10px">Ingresar a la invitación</button>
+  <button id="btn-enter" class="btn btn-primary" style="margin-top:20px">Ingresar a la invitación</button>
 </div>
+
+<!-- FLOATING MUSIC BTN -->
+<button id="floating-music-btn" class="floating-music" style="display:none;">
+  <svg id="music-icon-svg" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+</button>
 
 <!-- AUDIO -->
 <audio id="audio" loop></audio>
 
+<!-- MAIN WRAPPER FOR REORDERING -->
+<main id="invitation-container">
+
 <!-- HERO -->
-<section class="hero">
+<section class="hero" id="sec-hero">
   <div class="hero-bg" id="hero-bg"></div>
   <div class="hero-content">
     <div class="hero-tipo" id="h-tipo"></div>
@@ -491,6 +471,9 @@ footer{
 
 <!-- MENSAJE -->
 <section class="section rev" id="sec-mensaje" style="display:none">
+  <div class="section-icon heartbeat" id="icon-mensaje">
+    <svg class="icon-svg icon-heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+  </div>
   <div class="msg-box">
     <p id="txt-mensaje"></p>
     <div class="msg-firma" id="txt-firma"></div>
@@ -499,7 +482,7 @@ footer{
 
 <!-- COUNTDOWN -->
 <section class="section dark rev" id="sec-countdown" style="display:none">
-  <div class="section-icon">⏰</div>
+  <div class="section-icon shake" id="icon-countdown">⏰</div>
   <h2>Faltan solo...</h2>
   <div class="countdown" id="countdown">
     <div class="count-item"><span class="count-num" id="days">00</span><span class="count-label">Días</span></div>
@@ -511,7 +494,9 @@ footer{
 
 <!-- GALERÍA -->
 <section class="section rev" id="sec-galeria" style="display:none">
-  <div class="section-icon">📸</div>
+  <div class="section-icon bounce" id="icon-galeria">
+    <svg class="icon-svg" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+  </div>
   <h2>Mis Fotos Favoritas</h2>
   
   <!-- Mobile: Carousel -->
@@ -527,7 +512,9 @@ footer{
 
 <!-- UBICACIÓN -->
 <section class="section alt rev" id="sec-ubicacion" style="display:none">
-  <div class="section-icon">📍</div>
+  <div class="section-icon bounce" id="icon-ubicacion">
+    <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+  </div>
   <h2>Cuándo y Dónde</h2>
   <div class="location-box">
     <div class="location-name" id="txt-salon"></div>
@@ -539,7 +526,14 @@ footer{
 
 <!-- DRESSCODE -->
 <section class="section rev" id="sec-dresscode" style="display:none">
-  <div class="section-icon">👗</div>
+  <div class="section-icon swing" id="icon-dresscode" style="width:auto">
+    <svg viewBox="0 0 64 64" style="height: 50px; fill: var(--black);">
+        <path d="M4,10 L14,10 L16,14 L18,10 L28,10 L26,50 L6,50 Z" />
+        <path d="M12,10 L20,10 L16,50 Z" style="fill:white;" />
+        <path d="M14,12 L18,12 L16,14 Z" style="fill:var(--black);" />
+        <path d="M38,10 L44,18 L50,10 L46,30 L52,50 L36,50 L42,30 Z" />
+    </svg>
+  </div>
   <div class="dresscode-box">
     <div class="dresscode-title" id="txt-dress-t"></div>
     <p class="dresscode-desc" id="txt-dress-p"></p>
@@ -548,7 +542,9 @@ footer{
 
 <!-- REGALOS -->
 <section class="section dark rev" id="sec-regalos" style="display:none">
-  <div class="section-icon">🎁</div>
+  <div class="section-icon shake" id="icon-regalos">
+    <svg class="icon-svg" viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+  </div>
   <h2>Regalos</h2>
   <p class="gift-msg" id="txt-regalo"></p>
   <div class="alias-box">
@@ -619,6 +615,8 @@ footer{
     <button id="btn-confirmar" class="btn btn-confirmar">✓ Confirmar asistencia</button>
   </div>
 </section>
+
+</main>
 
 <!-- FOOTER -->
 <footer>
@@ -719,6 +717,15 @@ async function initApp() {
     }
   }
 
+  // Dynamic Icons
+  if (C.icono_mensaje) document.getElementById('icon-mensaje').innerHTML = C.icono_mensaje;
+  if (C.icono_countdown) document.getElementById('icon-countdown').innerHTML = C.icono_countdown;
+  if (C.icono_galeria) document.getElementById('icon-galeria').innerHTML = C.icono_galeria;
+  if (C.icono_ubicacion) document.getElementById('icon-ubicacion').innerHTML = C.icono_ubicacion;
+  if (C.icono_dresscode) document.getElementById('icon-dresscode').innerHTML = C.icono_dresscode;
+  if (C.icono_regalos) document.getElementById('icon-regalos').innerHTML = C.icono_regalos;
+  if (C.icono_hashtag) document.getElementById('icon-hashtag').innerHTML = C.icono_hashtag;
+
   // Populate sections
   if (C.mensaje && C.layout?.show_mensaje !== false) {
     document.getElementById('sec-mensaje').style.display = 'flex';
@@ -736,6 +743,7 @@ async function initApp() {
     const fotos = [C.foto_galeria_1, C.foto_galeria_2, C.foto_galeria_3, C.foto_galeria_4].filter(Boolean);
     if (fotos.length > 0) {
       // Mobile carousel
+      document.getElementById('carousel-mobile').style.display = 'block';
       const track = document.getElementById('carousel-track');
       fotos.forEach(foto => {
         const slide = document.createElement('div');
@@ -749,6 +757,10 @@ async function initApp() {
       } else {
         document.getElementById('btn-prev').onclick = () => { carouselIndex = (carouselIndex - 1 + fotos.length) % fotos.length; updateCarousel(fotos.length); };
         document.getElementById('btn-next').onclick = () => { carouselIndex = (carouselIndex + 1) % fotos.length; updateCarousel(fotos.length); };
+        setInterval(() => {
+          carouselIndex = (carouselIndex + 1) % fotos.length;
+          updateCarousel(fotos.length);
+        }, 2000);
       }
 
       // Desktop grid
@@ -820,12 +832,22 @@ async function initApp() {
     document.getElementById('audio').src = C.musica_url;
   }
 
-  document.getElementById('btn-music').onclick = toggleMusic;
+  document.getElementById('floating-music-btn').onclick = toggleMusic;
   document.getElementById('btn-enter').onclick = () => {
     document.getElementById('splash').classList.add('hidden');
+    document.getElementById('floating-music-btn').style.display = 'flex';
     autoPlayMusic();
     revealSections();
   };
+
+  // Reorder Sections
+  if (C.layout?.order && Array.isArray(C.layout.order)) {
+    const container = document.getElementById('invitation-container');
+    C.layout.order.forEach(id => {
+      const sec = document.getElementById('sec-' + id);
+      if (sec) container.appendChild(sec);
+    });
+  }
 
   // RSVP
   document.querySelectorAll('#opts-asiste .opt-btn').forEach(btn => {
@@ -848,39 +870,53 @@ async function initApp() {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); });
   }, { threshold: 0.1 });
   document.querySelectorAll('.rev').forEach(r => observer.observe(r));
+
+  // Parallax / Scroll Zoom effect for images
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    // Hero zoom
+    const heroBg = document.getElementById('hero-bg');
+    if(heroBg) {
+      const zoom = 1 + (scrollY * 0.0005);
+      heroBg.style.transform = `scale(${Math.max(1, zoom)})`;
+    }
+    // Gallery zoom based on intersection
+    document.querySelectorAll('.gallery-item img').forEach(img => {
+      const rect = img.getBoundingClientRect();
+      if(rect.top < window.innerHeight && rect.bottom > 0) {
+        const factor = (window.innerHeight - rect.top) / window.innerHeight;
+        img.style.transform = `scale(${1 + factor * 0.1})`;
+      }
+    });
+  });
 }
 
 function toggleMusic() {
   const audio = document.getElementById('audio');
-  const btn = document.getElementById('btn-music');
-  const icon = btn.querySelector('.btn-music-icon');
+  const btn = document.getElementById('floating-music-btn');
+  const svg = document.getElementById('music-icon-svg');
   
   if (audio.paused) {
     audio.play().then(() => { 
-      icon.textContent = '⏸';
-      btn.textContent = '⏸ Pausar música';
-      btn.appendChild(icon);
+      // Changed to pause icon
+      svg.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
     }).catch(() => {
       toast('🔊 Nota: Habilita el sonido para escuchar la música');
     });
   } else {
     audio.pause();
-    icon.textContent = '▶';
-    btn.textContent = '▶ Activar música';
-    btn.appendChild(icon);
+    // Changed to play icon
+    svg.innerHTML = '<path d="M8 5v14l11-7z"/>';
   }
 }
 
 function autoPlayMusic() {
   const audio = document.getElementById('audio');
-  const btn = document.getElementById('btn-music');
-  const icon = btn.querySelector('.btn-music-icon');
+  const svg = document.getElementById('music-icon-svg');
   
   if (C.musica_url && audio.paused) {
     audio.play().then(() => {
-      icon.textContent = '⏸';
-      btn.textContent = '⏸ Pausar música';
-      btn.appendChild(icon);
+      svg.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
     }).catch(() => {
       // Silenciosamente fallar si no hay permisos
     });
@@ -936,7 +972,7 @@ async function confirmar() {
     nombre: nombre,
     apellido: document.getElementById('f-apellido').value.trim(),
     asiste: asiste,
-    personas: personas,
+    personas: parseInt(personas) || 0,
     dieta: dieta,
     mensaje: document.getElementById('f-msg').value.trim(),
     mesa: mesa,

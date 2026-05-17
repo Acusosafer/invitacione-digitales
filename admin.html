@@ -788,6 +788,7 @@ const SECTIONS = [
     desc:'Texto personal e íntimo para los invitados',
     toggle:'show_mensaje', required:false,
     fields:[
+      {type:'text',key:'icono_mensaje',label:'Icono (Emoji)',ph:'ej: 💌',hint:'Opcional. Reemplaza el icono animado por defecto.'},
       {type:'textarea',key:'mensaje',label:'Mensaje personal',ph:'Escribí algo especial para tus invitados...'},
       {type:'text',key:'mensaje_firma',label:'Firma / Cierre',ph:'ej: Con amor, Valentina ♡'},
     ]
@@ -797,6 +798,7 @@ const SECTIONS = [
     desc:'Contador en tiempo real: días, horas, minutos y segundos',
     toggle:'show_countdown', required:false,
     fields:[
+      {type:'text',key:'icono_countdown',label:'Icono (Emoji)',ph:'ej: ⏰',hint:'Opcional'},
       {type:'text',key:'fecha_texto',label:'Fecha visual',ph:'ej: Sábado 14 de junio, 2025'},
       {type:'text',key:'hora_texto',label:'Hora del evento',ph:'ej: 21:00 hs'},
       {type:'datetime',key:'fecha_iso',label:'Fecha y hora exacta (para el contador)'},
@@ -807,6 +809,7 @@ const SECTIONS = [
     desc:'Carrusel automático con hasta 4 imágenes',
     toggle:'show_gallery', required:false,
     fields:[
+      {type:'text',key:'icono_galeria',label:'Icono (Emoji)',ph:'ej: 📸',hint:'Opcional'},
       {type:'image',key:'foto_galeria_1',label:'Foto 1',hint:'Recomendado: 1000×1000 px'},
       {type:'image',key:'foto_galeria_2',label:'Foto 2'},
       {type:'image',key:'foto_galeria_3',label:'Foto 3'},
@@ -818,6 +821,7 @@ const SECTIONS = [
     desc:'Salón, dirección y botón de cómo llegar',
     toggle:'show_ubicacion', required:false,
     fields:[
+      {type:'text',key:'icono_ubicacion',label:'Icono (Emoji)',ph:'ej: 📍',hint:'Opcional'},
       {type:'text',key:'salon',label:'Nombre del salón',ph:'ej: Salón Magnolia'},
       {type:'text',key:'direccion',label:'Dirección completa',ph:'ej: Av. San Martín 1250, CABA'},
       {type:'url',key:'maps_url',label:'Link Google Maps',ph:'https://maps.google.com/?q=...'},
@@ -828,6 +832,7 @@ const SECTIONS = [
     desc:'Código de vestimenta del evento',
     toggle:'show_dresscode', required:false,
     fields:[
+      {type:'text',key:'icono_dresscode',label:'Icono (Emoji)',ph:'ej: 👗',hint:'Opcional'},
       {type:'text',key:'dresscode_titulo',label:'Título',ph:'ej: ELEGANTE'},
       {type:'text',key:'dresscode_texto',label:'Descripción',ph:'ej: Traje y vestido de fiesta'},
     ]
@@ -837,6 +842,7 @@ const SECTIONS = [
     desc:'Alias de pago y mensaje sobre regalos',
     toggle:'show_gift', required:false,
     fields:[
+      {type:'text',key:'icono_regalos',label:'Icono (Emoji)',ph:'ej: 🎁',hint:'Opcional'},
       {type:'textarea',key:'regalo_texto',label:'Mensaje de regalos',ph:'ej: Si querés hacerme un regalo, lo más lindo es contribuir para mi viaje...'},
       {type:'text',key:'alias_pago',label:'Alias CBU / MercadoPago',ph:'ej: valentina.15.mp'},
     ]
@@ -846,6 +852,7 @@ const SECTIONS = [
     desc:'Sección para compartir fotos en redes sociales',
     toggle:'show_hashtag', required:false,
     fields:[
+      {type:'text',key:'icono_hashtag',label:'Icono (Emoji)',ph:'ej: 📱',hint:'Opcional'},
       {type:'text',key:'hashtag',label:'Hashtag',ph:'ej: #ValentinaXV'},
       {type:'text',key:'hashtag_texto',label:'Instrucción para invitados',ph:'ej: Subí tus fotos con este hashtag'},
       {type:'image',key:'foto_hashtag',label:'Foto Instagram (circular)',hint:'Recomendado: 600×600 px cuadrada'},
@@ -978,14 +985,69 @@ function buildSectionsList() {
   body.innerHTML = '';
   document.getElementById('sl-count').textContent = `${SECTIONS.length} secciones`;
 
-  SECTIONS.forEach(sec => {
+  let sortedSections = [...SECTIONS];
+  if (currentConfig.layout?.order && Array.isArray(currentConfig.layout.order)) {
+    const orderMap = {};
+    currentConfig.layout.order.forEach((id, i) => { orderMap[id] = i; });
+    sortedSections.sort((a, b) => {
+      const idxA = orderMap[a.id] !== undefined ? orderMap[a.id] : 999;
+      const idxB = orderMap[b.id] !== undefined ? orderMap[b.id] : 999;
+      return idxA - idxB;
+    });
+  }
+
+  let dragSrcEl = null;
+
+  sortedSections.forEach(sec => {
     const layout = currentConfig.layout || {};
     const isOn = sec.toggle ? layout[sec.toggle] !== false : true;
 
     const item = document.createElement('div');
     item.className = `section-item${isOn ? '' : ' disabled-section'}`;
     item.dataset.id = sec.id;
+    item.draggable = true;
     item.onclick = () => selectSection(sec.id);
+
+    item.addEventListener('dragstart', function(e) {
+      dragSrcEl = this;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', sec.id);
+      this.style.opacity = '0.5';
+    });
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const bounding = this.getBoundingClientRect();
+      const offset = bounding.y + (bounding.height / 2);
+      if (e.clientY - offset > 0) {
+        this.style.borderBottom = '2px solid var(--pk)';
+        this.style.borderTop = '';
+      } else {
+        this.style.borderTop = '2px solid var(--pk)';
+        this.style.borderBottom = '';
+      }
+    });
+    item.addEventListener('dragleave', function(e) {
+      this.style.borderTop = '';
+      this.style.borderBottom = '';
+    });
+    item.addEventListener('dragend', function() {
+      this.style.opacity = '1';
+      document.querySelectorAll('.section-item').forEach(el => { el.style.borderTop = ''; el.style.borderBottom = ''; });
+    });
+    item.addEventListener('drop', function(e) {
+      e.stopPropagation();
+      this.style.borderTop = '';
+      this.style.borderBottom = '';
+      const draggedId = e.dataTransfer.getData('text/plain');
+      if (dragSrcEl !== this) {
+        const bounding = this.getBoundingClientRect();
+        const offset = bounding.y + (bounding.height / 2);
+        const insertAfter = (e.clientY - offset > 0);
+        reorderSections(draggedId, sec.id, insertAfter);
+      }
+      return false;
+    });
 
     const filled = sec.fields.filter(f => currentConfig[f.key]).length;
     const metaStr = filled > 0 ? `${filled}/${sec.fields.length} campos` : 'Sin configurar';
@@ -1010,6 +1072,26 @@ function buildSectionsList() {
     `;
     body.appendChild(item);
   });
+}
+
+function reorderSections(draggedId, targetId, insertAfter) {
+  let order = currentConfig.layout?.order || SECTIONS.map(s => s.id);
+  SECTIONS.forEach(s => { if(!order.includes(s.id)) order.push(s.id); });
+  
+  const fromIdx = order.indexOf(draggedId);
+  let toIdx = order.indexOf(targetId);
+  
+  if(fromIdx > -1 && toIdx > -1) {
+    order.splice(fromIdx, 1);
+    toIdx = order.indexOf(targetId);
+    if(insertAfter) toIdx++;
+    order.splice(toIdx, 0, draggedId);
+    
+    if(!currentConfig.layout) currentConfig.layout = {};
+    currentConfig.layout.order = order;
+    buildSectionsList();
+    toast('🔃 Orden actualizado (No olvides guardar)');
+  }
 }
 
 function toggleSec(secId, isOn) {
