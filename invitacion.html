@@ -1691,6 +1691,7 @@
         if (error.code === 'PGRST204' || error.message.includes('column') || error.code === '42703') {
           const safeData = {
             evento_id: eventoId,
+            invitado_url: invitado || 'general',
             nombre: nombre,
             apellido: document.getElementById('f-apellido').value.trim(),
             asiste: asiste,
