@@ -1,1061 +1,1662 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta id="og-title" property="og:title" content="💌 Tienes una nueva invitación">
-<meta id="og-desc" property="og:description" content="Abre este enlace para descubrir todos los detalles del evento y confirmar tu asistencia.">
-<meta id="og-img" property="og:image" content="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1200&auto=format&fit=crop">
-<meta id="og-url" property="og:url" content="">
-<title id="pg-title">Invitación Oficial</title>
-<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;600&family=Cormorant+Garamond:wght@400;600&family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-<style>
-:root {
-  --primary: #1a1a1a;
-  --secondary: #d6ecc0;
-  --bg: #ffffff;
-  --black: #1a1a1a;
-  --white: #ffffff;
-  --gray: #f5f5f5;
-  --gray-dark: #e0e0e0;
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta id="og-title" property="og:title" content="💌 Quiero que seas parte de este momento especial">
+  <meta id="og-desc" property="og:description"
+    content="Abre este enlace para descubrir todos los detalles del evento y confirmar tu asistencia.">
+  <meta id="og-img" property="og:image" content="logo.png">
+  <meta id="og-url" property="og:url" content="">
+  <title id="pg-title">Invitación Oficial</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;600&family=Cormorant+Garamond:wght@400;600&family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1a1a1a;
+      --secondary: #d6ecc0;
+      --bg: #ffffff;
+      --black: #1a1a1a;
+      --white: #ffffff;
+      --gray: #f5f5f5;
+      --gray-dark: #e0e0e0;
+    }
 
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  font-family:'Jost',sans-serif;
-  background:var(--bg);
-  color:var(--black);
-  overflow-x:hidden;
-  line-height:1.65;
-  max-width:100vw;
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
 
-h1,h2,.serif{font-family:'Cormorant Garamond',serif;font-weight:600}
-h3,h4{font-family:'Montserrat',sans-serif;font-weight:600}
+    html {
+      scroll-behavior: smooth
+    }
 
-/* SPLASH SCREEN */
-#splash{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  background:var(--bg);z-index:1000;display:flex;
-  flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:20px;
-  transition:opacity 0.8s ease,visibility 0.8s;
-  opacity:1;visibility:visible;
-}
-#splash.hidden{opacity:0;visibility:hidden;pointer-events:none}
+    body {
+      font-family: 'Jost', sans-serif;
+      background: var(--bg);
+      color: var(--black);
+      overflow-x: hidden;
+      line-height: 1.65;
+      max-width: 100vw;
+    }
 
-.splash-img{
-  width:min(280px,80vw);height:min(280px,80vw);
-  border-radius:50%;object-fit:cover;
-  border:6px solid var(--secondary);
-  animation:float 3s ease-in-out infinite;
-  margin-bottom:24px;background:var(--white);
-  box-shadow:0 20px 60px rgba(0,0,0,0.1);
-}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    h1,
+    h2,
+    .serif {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600
+    }
 
-.splash-txt{margin-bottom:24px}
-.splash-tipo{
-  font-family:'Montserrat';font-size:0.85rem;
-  letter-spacing:3px;text-transform:uppercase;
-  color:var(--secondary);margin-bottom:8px;font-weight:600;
-}
-.splash-nombre{
-  font-family:'Cormorant Garamond';
-  font-size:clamp(2rem,8vw,3.5rem);
-  font-weight:700;margin-bottom:8px;color:var(--black);
-  line-height:1.1;
-}
-.splash-sub{
-  font-size:0.95rem;color:#666;max-width:280px;
-  margin:0 auto;font-style:italic;
-}
+    h3,
+    h4 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600
+    }
 
-.splash-mesa{
-  background:var(--secondary);color:var(--black);
-  padding:12px 24px;border-radius:50px;
-  font-weight:600;font-size:0.9rem;
-  margin:16px 0;display:inline-block;
-  letter-spacing:1px;
-}
+    /* SPLASH SCREEN */
+    #splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      transition: opacity 0.8s ease, visibility 0.8s;
+      opacity: 1;
+      visibility: visible;
+    }
 
-.floating-music {
-  position: fixed; bottom: 20px; right: 20px; z-index: 9999;
-  width: 50px; height: 50px; border-radius: 50%;
-  background: var(--secondary); border: 2px solid var(--black);
-  cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.3s;
-}
-.floating-music:hover { transform: scale(1.1); }
-.floating-music svg { width: 24px; height: 24px; fill: var(--black); }
+    #splash.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none
+    }
 
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:14px 32px;border-radius:12px;border:none;
-  font-family:'Jost',sans-serif;font-size:0.95rem;font-weight:600;
-  cursor:pointer;transition:all 0.3s;text-transform:uppercase;
-  letter-spacing:2px;box-shadow:0 4px 15px rgba(0,0,0,0.1);
-}
-.btn-primary{
-  background:var(--secondary);
-  color:var(--black);
-  border-radius:50px;
-  padding:16px 36px;
-  font-size:1.1rem;
-  letter-spacing:1px;
-  text-transform:uppercase;
-  font-weight:600;
-  box-shadow:0 8px 20px rgba(0,0,0,0.15);
-  transition:all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
-  position:relative;
-  overflow:hidden;
-  border:none;
-}
-.btn-primary::after {
-  content:''; position:absolute; top:0; left:-100%; width:50%; height:100%;
-  background:linear-gradient(to right, transparent, rgba(255,255,255,0.6), transparent);
-  transform:skewX(-20deg);
-  transition:all 0.6s ease;
-}
-.btn-primary:hover{
-  transform:translateY(-4px) scale(1.02);
-  box-shadow:0 12px 25px rgba(0,0,0,0.25);
-}
-.btn-primary:hover::after {
-  left:150%;
-}
+    .splash-img {
+      width: min(280px, 80vw);
+      height: min(280px, 80vw);
+      border-radius: 50%;
+      object-fit: cover;
+      border: 6px solid var(--secondary);
+      animation: float 3s ease-in-out infinite;
+      margin-bottom: 24px;
+      background: var(--white);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-12px)
+      }
+    }
+
+    .splash-txt {
+      margin-bottom: 24px
+    }
+
+    .splash-tipo {
+      font-family: 'Montserrat';
+      font-size: 0.85rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--secondary);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .splash-nombre {
+      font-family: 'Cormorant Garamond';
+      font-size: clamp(2rem, 8vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--black);
+      line-height: 1.1;
+    }
+
+    .splash-sub {
+      font-size: 0.95rem;
+      color: #666;
+      max-width: 280px;
+      margin: 0 auto;
+      font-style: italic;
+    }
+
+    .splash-mesa {
+      background: var(--secondary);
+      color: var(--black);
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin: 16px 0;
+      display: inline-block;
+      letter-spacing: 1px;
+    }
+
+    .floating-music {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--secondary);
+      border: 2px solid var(--black);
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .floating-music:hover {
+      transform: scale(1.1);
+    }
+
+    .floating-music svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--black);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 32px;
+      border-radius: 12px;
+      border: none;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+      background: var(--secondary);
+      color: var(--black);
+      border-radius: 50px;
+      padding: 16px 36px;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+      border: none;
+    }
+
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6), transparent);
+      transform: skewX(-20deg);
+      transition: all 0.6s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-primary:hover::after {
+      left: 150%;
+    }
 
 
 
-.darken-func{filter:darken(5%)}
+    .darken-func {
+      filter: darken(5%)
+    }
 
-audio{display:none}
+    audio {
+      display: none
+    }
 
-/* MAIN CONTENT */
-.hero{
-  position:relative;width:100%;height:100vh;
-  display:flex;align-items:center;justify-content:center;
-  text-align:center;color:var(--white);
-  background:var(--black);overflow:hidden;
-}
-.hero-bg{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  background:linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),center/cover no-repeat;
-  z-index:0;
-  transition: transform 0.2s ease-out;
-  transform: scale(1);
-}
-.hero-content{position:relative;z-index:1;padding:20px;max-width:90%}
-.hero-tipo{
-  font-family:'Montserrat';font-size:0.9rem;
-  letter-spacing:3px;text-transform:uppercase;
-  margin-bottom:12px;opacity:0.9;
-}
-.hero-nombre{
-  font-family:'Cormorant Garamond';
-  font-size:clamp(2.5rem,10vw,4.5rem);
-  font-weight:700;line-height:1.1;margin-bottom:12px;
-}
-.hero-sub{
-  font-size:1.1rem;font-style:italic;
-  max-width:500px;margin:0 auto;opacity:0.95;
-  line-height:1.6;
-}
+    /* MAIN CONTENT */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--white);
+      background: var(--black);
+      overflow: hidden;
+    }
 
-.section{
-  padding:clamp(60px,12vw,100px) 20px;
-  display:flex;flex-direction:column;align-items:center;
-  background:var(--bg);position:relative;z-index:1;
-}
+    .hero-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), center/cover no-repeat;
+      z-index: 0;
+      transition: transform 0.2s ease-out;
+      transform: scale(1);
+    }
 
-/* FRANJAS ALTERNAS */
-.section.dark{background:#f9f9f9}
-.section.alt{background:#f5f5f5}
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      padding: 20px;
+      max-width: 90%
+    }
 
-.section-icon{
-  width:50px;height:50px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:2.5rem;margin-bottom:16px;
-}
-.icon-svg { width: 50px; height: 50px; fill: none; stroke: var(--black); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; display: block; }
-.icon-heart { fill: var(--black); stroke: var(--black); }
+    .hero-tipo {
+      font-family: 'Montserrat';
+      font-size: 0.9rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      opacity: 0.9;
+    }
 
-.section h2{
-  font-size:clamp(1.8rem,6vw,2.8rem);
-  margin-bottom:16px;text-align:center;
-}
+    .hero-nombre {
+      font-family: 'Cormorant Garamond';
+      font-size: clamp(2.5rem, 10vw, 4.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
 
-.section p{
-  font-size:1rem;line-height:1.7;
-  max-width:600px;margin:0 auto;text-align:center;
-}
+    .hero-sub {
+      font-size: 1.1rem;
+      font-style: italic;
+      max-width: 500px;
+      margin: 0 auto;
+      opacity: 0.95;
+      line-height: 1.6;
+    }
 
-/* MENSAJE */
-.msg-box{
-  background:var(--gray);border-left:4px solid var(--secondary);
-  padding:30px;border-radius:8px;max-width:700px;
-  margin:20px auto;font-size:1.05rem;font-style:italic;
-  line-height:1.8;color:var(--black);
-}
-.msg-firma{font-weight:600;margin-top:16px;text-align:right;font-style:normal}
+    .section {
+      padding: clamp(60px, 12vw, 100px) 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--bg);
+      position: relative;
+      z-index: 1;
+    }
 
-/* COUNTDOWN */
-.countdown{
-  display:flex; flex-wrap:nowrap; justify-content:center; gap:10px;
-  margin:30px auto; max-width:100%;
-}
-.countdown.grid-style{
-  display:grid; grid-template-columns:repeat(2,1fr); gap:12px;
-}
-.count-item{
-  background:var(--secondary);color:var(--black);
-  padding:15px 8px;border-radius:12px;text-align:center;
-  box-shadow:0 4px 15px rgba(0,0,0,0.1);
-  min-width:65px; flex-shrink:0;
-}
-.count-num{
-  font-family:'Montserrat';font-size:1.6rem;font-weight:800;
-  line-height:1;display:block;
-}
-.count-label{
-  font-size:0.65rem;text-transform:uppercase;
-  letter-spacing:1px;opacity:0.8;margin-top:6px; font-weight:600;
-}
+    /* FRANJAS ALTERNAS */
+    .section.dark {
+      background: #f9f9f9
+    }
 
-/* GALERÍA */
-.carousel{
-  position:relative;width:100%;max-width:600px;
-  height:350px;margin:30px auto;overflow:hidden;
-  border-radius:16px;background:#000;
-  box-shadow:0 10px 40px rgba(0,0,0,0.15);
-}
-.carousel-track{
-  display:flex;width:100%;height:100%;
-  transition:transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
-}
-.carousel-slide{
-  min-width:100%;height:100%;
-  background-position:center;background-size:cover;
-}
-.carousel-btn{
-  position:absolute;top:50%;transform:translateY(-50%);
-  background:rgba(0,0,0,0.5);color:var(--white);
-  border:none;border-radius:50%;width:45px;height:45px;
-  font-size:1.3rem;cursor:pointer;z-index:10;
-  transition:all 0.3s;
-}
-.carousel-btn:hover{background:rgba(0,0,0,0.8)}
-.carousel-btn.prev{left:15px}
-.carousel-btn.next{right:15px}
+    .section.alt {
+      background: #f5f5f5
+    }
 
-/* GRID DE FOTOS (desktop) */
-.gallery-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:16px;max-width:900px;margin:30px auto;
-  width:100%;padding:0 20px;
-}
-.gallery-item{
-  aspect-ratio:1;border-radius:12px;overflow:hidden;
-  box-shadow:0 4px 12px rgba(0,0,0,0.1);
-  background:#eee;
-}
-.gallery-item img{width:100%;height:100%;object-fit:cover; transition: transform 0.3s ease-out;}
-.zoom-scroll { transform: scale(1.1); }
+    .section-icon {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+    }
 
-@media(max-width:768px){
-  .gallery-grid{display:none}
-}
+    .icon-svg {
+      width: 50px;
+      height: 50px;
+      fill: none;
+      stroke: var(--black);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      display: block;
+    }
 
-/* UBICACIÓN */
-.location-box{
-  background:var(--gray);padding:30px;border-radius:12px;
-  max-width:600px;margin:20px auto;text-align:center;
-}
-.location-name{font-family:'Montserrat';font-weight:600;font-size:1.2rem;margin-bottom:12px}
-.location-addr{font-size:0.95rem;color:#666;margin-bottom:6px;line-height:1.6}
-.location-hora{font-family:'Montserrat';font-weight:600;color:var(--secondary);margin-top:12px}
+    .icon-heart {
+      fill: var(--black);
+      stroke: var(--black);
+    }
 
-.btn-maps{
-  background:var(--black);color:var(--white);
-  padding:11px 24px;font-size:0.85rem;margin-top:16px;
-}
-.btn-maps:hover{background:#333}
+    .section h2 {
+      font-size: clamp(1.8rem, 6vw, 2.8rem);
+      margin-bottom: 16px;
+      text-align: center;
+    }
 
-/* DRESSCODE */
-.dresscode-box{
-  text-align:center;background:var(--gray);
-  padding:40px 20px;border-radius:12px;max-width:600px;margin:20px auto;
-}
-.dresscode-title{
-  font-family:'Montserrat';font-size:1.8rem;
-  text-transform:uppercase;letter-spacing:3px;
-  color:var(--secondary);margin-bottom:12px;font-weight:700;
-}
-.dresscode-desc{font-size:1rem;color:#666;max-width:400px;margin:0 auto}
+    .section p {
+      font-size: 1rem;
+      line-height: 1.7;
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
 
-/* REGALOS */
-.gift-msg{font-size:1.05rem;max-width:600px;margin:20px auto;line-height:1.7;font-style:italic}
-.alias-box{
-  border:2px dashed var(--secondary);padding:20px;
-  border-radius:12px;margin:20px auto;max-width:500px;
-  background:var(--gray);text-align:center;
-}
-.alias-label{
-  font-size:0.75rem;text-transform:uppercase;
-  letter-spacing:2px;color:#666;margin-bottom:8px;
-}
-.alias-text{
-  font-family:'Montserrat';font-size:1.4rem;
-  font-weight:700;color:var(--black);word-break:break-all;
-}
-.btn-copiar{
-  background:var(--secondary);color:var(--black);
-  padding:10px 20px;font-size:0.8rem;margin-top:12px;
-}
+    /* MENSAJE */
+    .msg-box {
+      background: var(--gray);
+      border-left: 4px solid var(--secondary);
+      padding: 30px;
+      border-radius: 8px;
+      max-width: 700px;
+      margin: 20px auto;
+      font-size: 1.05rem;
+      font-style: italic;
+      line-height: 1.8;
+      color: var(--black);
+    }
 
-/* HASHTAG */
-.hashtag-section{background:var(--secondary);padding:60px 20px;color:var(--black)}
-.hashtag-section h2,.hashtag-section p{color:var(--black)}
-.hashtag-photo{
-  width:200px;height:200px;border-radius:50%;
-  object-fit:cover;border:4px solid var(--black);
-  margin:20px auto;display:block;background:var(--white);
-  box-shadow:0 8px 25px rgba(0,0,0,0.2);
-}
-.hashtag-tag{
-  font-family:'Montserrat';font-size:2rem;
-  font-weight:800;text-transform:uppercase;
-  letter-spacing:2px;margin:16px 0;
-}
-.hashtag-instr{font-size:0.95rem;max-width:500px;margin:0 auto}
+    .msg-firma {
+      font-weight: 600;
+      margin-top: 16px;
+      text-align: right;
+      font-style: normal
+    }
 
-/* RSVP FORM */
-.rsvp-section{background:var(--bg)}
-.rsvp-form{
-  background:var(--gray);padding:30px 20px;
-  border-radius:12px;max-width:600px;margin:20px auto;
-  text-align:left;
-}
-.form-group{margin-bottom:16px}
-.form-label{
-  display:block;font-weight:600;margin-bottom:6px;
-  font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;
-  color:#555;
-}
-.form-input,.form-select,.form-textarea{
-  width:100%;padding:12px;border:1px solid var(--gray-dark);
-  border-radius:8px;font-family:'Jost';font-size:0.95rem;
-  background:var(--white);color:var(--black);
-  transition:border-color 0.2s;
-}
-.form-input:focus,.form-select:focus,.form-textarea:focus{
-  outline:none;border-color:var(--secondary);
-  background:#fafafa;
-}
-.form-textarea{min-height:100px;resize:vertical;line-height:1.6}
+    /* COUNTDOWN */
+    .countdown {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 30px auto;
+      max-width: 100%;
+    }
 
-.rsvp-mesa{
-  background:var(--secondary);padding:16px;
-  border-radius:8px;margin:16px 0;text-align:center;
-  border:2px solid var(--black);
-  font-weight:600;
-}
+    .countdown.grid-style {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
 
-.opts-row,.opts-tags{
-  display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;
-}
-.opt-btn,.tag-btn{
-  flex:1;min-width:80px;padding:10px;
-  border:1px solid var(--gray-dark);border-radius:8px;
-  background:var(--white);cursor:pointer;
-  text-align:center;font-size:0.85rem;
-  transition:all 0.2s;
-}
-.opt-btn:hover,.tag-btn:hover{border-color:var(--secondary);background:#fafafa}
-.opt-btn.sel,.tag-btn.sel{
-  background:var(--secondary);color:var(--black);
-  border-color:var(--secondary);font-weight:600;
-}
+    .count-item {
+      background: var(--secondary);
+      color: var(--black);
+      padding: 15px 8px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      min-width: 65px;
+      flex-shrink: 0;
+    }
 
-.btn-confirmar{
-  background:linear-gradient(135deg,var(--black),#333);
-  color:var(--white);width:100%;padding:14px;
-  margin-top:10px;
-}
+    .count-num {
+      font-family: 'Montserrat';
+      font-size: 1.6rem;
+      font-weight: 800;
+      line-height: 1;
+      display: block;
+    }
 
-/* FOOTER */
-footer{
-  background:var(--black);color:var(--white);
-  padding:40px 20px;text-align:center;
-}
-.social-icons{
-  display:flex;justify-content:center;gap:16px;margin-bottom:20px;
-}
-.social-btn{
-  width:45px;height:45px;border-radius:50%;
-  background:rgba(255,255,255,0.15);display:flex;
-  align-items:center;justify-content:center;
-  transition:all 0.3s;text-decoration:none;
-}
-.social-btn:hover{background:rgba(255,255,255,0.3);transform:translateY(-3px)}
-.social-btn svg{width:22px;height:22px;fill:var(--white)}
+    .count-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.8;
+      margin-top: 6px;
+      font-weight: 600;
+    }
 
-.footer-credits{
-  margin-top:20px;padding-top:20px;
-  border-top:1px solid rgba(255,255,255,0.1);
-  font-size:0.8rem;color:rgba(255,255,255,0.6);
-}
+    /* GALERÍA */
+    .carousel {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      height: 350px;
+      margin: 30px auto;
+      overflow: hidden;
+      border-radius: 16px;
+      background: #000;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
 
-/* ANIMACIONES */
-.rev{opacity:0;transform:translateY(30px);transition:all 0.8s ease-out}
-.rev.active{opacity:1;transform:translateY(0)}
+    .carousel-track {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
 
-.bounce{animation:bounce 2s infinite}
-.shake{animation:shake 2s infinite}
-.heartbeat{animation:heartbeat 1.3s infinite}
+    .carousel-slide {
+      min-width: 100%;
+      height: 100%;
+      background-position: center;
+      background-size: cover;
+    }
 
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-@keyframes shake{0%,100%{transform:rotate(0)}10%,30%,50%,70%,90%{transform:rotate(-5deg)}20%,40%,60%,80%{transform:rotate(5deg)}}
-@keyframes heartbeat{0%,100%{transform:scale(1)}14%{transform:scale(1.15)}28%{transform:scale(1)}}
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      color: var(--white);
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.3s;
+    }
 
-/* RESPONSIVE */
-@media(max-width:768px){
-  .section{padding:clamp(40px,10vw,60px) 16px}
-  .carousel{height:300px}
-  .gallery-grid{display:none}
-  .countdown.grid-style{grid-template-columns:repeat(2,1fr);gap:10px}
-  .count-item{padding:12px 6px; min-width:60px;}
-  .count-num{font-size:1.3rem;}
-  .hashtag-photo{width:160px;height:160px}
-  .hero-nome{font-size:clamp(2rem,7vw,3rem)}
-  .splash-nome{font-size:clamp(1.5rem,6vw,2.5rem)}
-}
+    .carousel-btn:hover {
+      background: rgba(0, 0, 0, 0.8)
+    }
 
-@media(min-width:1024px){
-  .section{padding:100px 40px}
-  .carousel{display:none}
-  .carousel-mobile{display:none}
-  .countdown{gap:20px}
-  .countdown.grid-style{grid-template-columns:repeat(4,1fr);gap:16px}
-  .countdown .count-item{padding:28px 20px; min-width:90px;}
-  .count-num{font-size:2.2rem;}
-  .carousel{height:500px}
-}
+    .carousel-btn.prev {
+      left: 15px
+    }
 
-@media(min-width:1440px){
-  .section{padding:120px 60px}
-  body{font-size:16px}
-  h1,h2,.serif{font-size:1.1em}
-}
+    .carousel-btn.next {
+      right: 15px
+    }
 
-/* TOAST */
-#toast{
-  position:fixed;bottom:20px;right:20px;
-  background:var(--black);color:var(--white);
-  padding:12px 20px;border-radius:8px;
-  font-size:0.9rem;z-index:999;
-  display:none;box-shadow:0 4px 15px rgba(0,0,0,0.2);
-}
-.toast-show{animation:toastSlide 0.3s ease-out}
-@keyframes toastSlide{from{transform:translateY(100px);opacity:0}to{transform:translateY(0);opacity:1}}
-</style>
+    /* GRID DE FOTOS (desktop) */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      max-width: 900px;
+      margin: 30px auto;
+      width: 100%;
+      padding: 0 20px;
+    }
+
+    .gallery-item {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      background: #eee;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease-out;
+    }
+
+    .zoom-scroll {
+      transform: scale(1.1);
+    }
+
+    @media(max-width:768px) {
+      .gallery-grid {
+        display: none
+      }
+    }
+
+    /* UBICACIÓN */
+    .location-box {
+      background: var(--gray);
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 600px;
+      margin: 20px auto;
+      text-align: center;
+    }
+
+    .location-name {
+      font-family: 'Montserrat';
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin-bottom: 12px
+    }
+
+    .location-addr {
+      font-size: 0.95rem;
+      color: #666;
+      margin-bottom: 6px;
+      line-height: 1.6
+    }
+
+    .location-hora {
+      font-family: 'Montserrat';
+      font-weight: 600;
+      color: var(--secondary);
+      margin-top: 12px
+    }
+
+    .btn-maps {
+      background: var(--black);
+      color: var(--white);
+      padding: 11px 24px;
+      font-size: 0.85rem;
+      margin-top: 16px;
+    }
+
+    .btn-maps:hover {
+      background: #333
+    }
+
+    /* DRESSCODE */
+    .dresscode-box {
+      text-align: center;
+      background: var(--gray);
+      padding: 40px 20px;
+      border-radius: 12px;
+      max-width: 600px;
+      margin: 20px auto;
+    }
+
+    .dresscode-title {
+      font-family: 'Montserrat';
+      font-size: 1.8rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--secondary);
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .dresscode-desc {
+      font-size: 1rem;
+      color: #666;
+      max-width: 400px;
+      margin: 0 auto
+    }
+
+    /* REGALOS */
+    .gift-msg {
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin: 20px auto;
+      line-height: 1.7;
+      font-style: italic
+    }
+
+    .alias-box {
+      border: 2px dashed var(--secondary);
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px auto;
+      max-width: 500px;
+      background: var(--gray);
+      text-align: center;
+    }
+
+    .alias-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .alias-text {
+      font-family: 'Montserrat';
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--black);
+      word-break: break-all;
+    }
+
+    .btn-copiar {
+      background: var(--secondary);
+      color: var(--black);
+      padding: 10px 20px;
+      font-size: 0.8rem;
+      margin-top: 12px;
+    }
+
+    /* HASHTAG */
+    .hashtag-section {
+      background: var(--secondary);
+      padding: 60px 20px;
+      color: var(--black)
+    }
+
+    .hashtag-section h2,
+    .hashtag-section p {
+      color: var(--black)
+    }
+
+    .hashtag-photo {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid var(--black);
+      margin: 20px auto;
+      display: block;
+      background: var(--white);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .hashtag-tag {
+      font-family: 'Montserrat';
+      font-size: 2rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin: 16px 0;
+    }
+
+    .hashtag-instr {
+      font-size: 0.95rem;
+      max-width: 500px;
+      margin: 0 auto
+    }
+
+    /* RSVP FORM */
+    .rsvp-section {
+      background: var(--bg)
+    }
+
+    .rsvp-form {
+      background: var(--gray);
+      padding: 30px 20px;
+      border-radius: 12px;
+      max-width: 600px;
+      margin: 20px auto;
+      text-align: left;
+    }
+
+    .form-group {
+      margin-bottom: 16px
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #555;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--gray-dark);
+      border-radius: 8px;
+      font-family: 'Jost';
+      font-size: 0.95rem;
+      background: var(--white);
+      color: var(--black);
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--secondary);
+      background: #fafafa;
+    }
+
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.6
+    }
+
+    .rsvp-mesa {
+      background: var(--secondary);
+      padding: 16px;
+      border-radius: 8px;
+      margin: 16px 0;
+      text-align: center;
+      border: 2px solid var(--black);
+      font-weight: 600;
+    }
+
+    .opts-row,
+    .opts-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .opt-btn,
+    .tag-btn {
+      flex: 1;
+      min-width: 80px;
+      padding: 10px;
+      border: 1px solid var(--gray-dark);
+      border-radius: 8px;
+      background: var(--white);
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .opt-btn:hover,
+    .tag-btn:hover {
+      border-color: var(--secondary);
+      background: #fafafa
+    }
+
+    .opt-btn.sel,
+    .tag-btn.sel {
+      background: var(--secondary);
+      color: var(--black);
+      border-color: var(--secondary);
+      font-weight: 600;
+    }
+
+    .btn-confirmar {
+      background: linear-gradient(135deg, var(--black), #333);
+      color: var(--white);
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--black);
+      color: var(--white);
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .social-btn {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+
+    .social-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-3px)
+    }
+
+    .social-btn svg {
+      width: 22px;
+      height: 22px;
+      fill: var(--white)
+    }
+
+    .footer-credits {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* ANIMACIONES */
+    .rev {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s ease-out
+    }
+
+    .rev.active {
+      opacity: 1;
+      transform: translateY(0)
+    }
+
+    .bounce {
+      animation: bounce 2s infinite
+    }
+
+    .shake {
+      animation: shake 2s infinite
+    }
+
+    .heartbeat {
+      animation: heartbeat 1.3s infinite
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-10px)
+      }
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: rotate(0)
+      }
+
+      10%,
+      30%,
+      50%,
+      70%,
+      90% {
+        transform: rotate(-5deg)
+      }
+
+      20%,
+      40%,
+      60%,
+      80% {
+        transform: rotate(5deg)
+      }
+    }
+
+    @keyframes heartbeat {
+
+      0%,
+      100% {
+        transform: scale(1)
+      }
+
+      14% {
+        transform: scale(1.15)
+      }
+
+      28% {
+        transform: scale(1)
+      }
+    }
+
+    /* RESPONSIVE */
+    @media(max-width:768px) {
+      .section {
+        padding: clamp(40px, 10vw, 60px) 16px
+      }
+
+      .carousel {
+        height: 300px
+      }
+
+      .gallery-grid {
+        display: none
+      }
+
+      .countdown.grid-style {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px
+      }
+
+      .count-item {
+        padding: 12px 6px;
+        min-width: 60px;
+      }
+
+      .count-num {
+        font-size: 1.3rem;
+      }
+
+      .hashtag-photo {
+        width: 160px;
+        height: 160px
+      }
+
+      .hero-nome {
+        font-size: clamp(2rem, 7vw, 3rem)
+      }
+
+      .splash-nome {
+        font-size: clamp(1.5rem, 6vw, 2.5rem)
+      }
+    }
+
+    @media(min-width:1024px) {
+      .section {
+        padding: 100px 40px
+      }
+
+      .carousel {
+        display: none
+      }
+
+      .carousel-mobile {
+        display: none
+      }
+
+      .countdown {
+        gap: 20px
+      }
+
+      .countdown.grid-style {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px
+      }
+
+      .countdown .count-item {
+        padding: 28px 20px;
+        min-width: 90px;
+      }
+
+      .count-num {
+        font-size: 2.2rem;
+      }
+
+      .carousel {
+        height: 500px
+      }
+    }
+
+    @media(min-width:1440px) {
+      .section {
+        padding: 120px 60px
+      }
+
+      body {
+        font-size: 16px
+      }
+
+      h1,
+      h2,
+      .serif {
+        font-size: 1.1em
+      }
+    }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--black);
+      color: var(--white);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      z-index: 999;
+      display: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .toast-show {
+      animation: toastSlide 0.3s ease-out
+    }
+
+    @keyframes toastSlide {
+      from {
+        transform: translateY(100px);
+        opacity: 0
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- SPLASH -->
-<div id="splash">
-  <img id="splash-img" class="splash-img" src="" alt="" onerror="this.src='https://via.placeholder.com/280'">
-  <div class="splash-txt">
-    <div class="splash-tipo" id="splash-tipo"></div>
-    <h1 class="splash-nombre" id="splash-nombre"></h1>
-    <p class="splash-sub" id="splash-sub"></p>
+  <!-- SPLASH -->
+  <div id="splash">
+    <img id="splash-img" class="splash-img" src="" alt="" onerror="this.src='https://via.placeholder.com/280'">
+    <div class="splash-txt">
+      <div class="splash-tipo" id="splash-tipo"></div>
+      <h1 class="splash-nombre" id="splash-nombre"></h1>
+      <p class="splash-sub" id="splash-sub"></p>
+    </div>
+    <div class="splash-mesa" id="splash-mesa" style="display:none">
+      🎫 Mesa <span id="mesa-num"></span>
+    </div>
+    <button id="btn-enter" class="btn btn-primary" style="margin-top:20px">Ingresar a la invitación</button>
   </div>
-  <div class="splash-mesa" id="splash-mesa" style="display:none">
-    🎫 Mesa <span id="mesa-num"></span>
-  </div>
-  <button id="btn-enter" class="btn btn-primary" style="margin-top:20px">Ingresar a la invitación</button>
-</div>
 
-<!-- FLOATING MUSIC BTN -->
-<button id="floating-music-btn" class="floating-music" style="display:none;">
-  <svg id="music-icon-svg" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-</button>
-
-<!-- AUDIO -->
-<audio id="audio" loop></audio>
-
-<!-- MAIN WRAPPER FOR REORDERING -->
-<main id="invitation-container">
-
-<!-- HERO -->
-<section class="hero" id="sec-hero">
-  <div class="hero-bg" id="hero-bg"></div>
-  <div class="hero-content">
-    <div class="hero-tipo" id="h-tipo"></div>
-    <h1 class="hero-nombre" id="h-nombre"></h1>
-    <p class="hero-sub" id="h-invitado"></p>
-  </div>
-</section>
-
-<!-- MENSAJE -->
-<section class="section rev" id="sec-mensaje" style="display:none">
-  <div class="section-icon heartbeat" id="icon-mensaje">
-    <svg class="icon-svg icon-heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-  </div>
-  <div class="msg-box">
-    <p id="txt-mensaje"></p>
-    <div class="msg-firma" id="txt-firma"></div>
-  </div>
-</section>
-
-<!-- COUNTDOWN -->
-<section class="section rev" id="sec-countdown" style="display:none">
-  <div class="section-icon shake" id="icon-countdown">
-    <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
-  </div>
-  <h2>Faltan solo...</h2>
-  <div class="countdown" id="countdown">
-    <div class="count-item"><span class="count-num" id="days">00</span><span class="count-label">Días</span></div>
-    <div class="count-item"><span class="count-num" id="hours">00</span><span class="count-label">Horas</span></div>
-    <div class="count-item"><span class="count-num" id="mins">00</span><span class="count-label">Minutos</span></div>
-    <div class="count-item"><span class="count-num" id="secs">00</span><span class="count-label">Segundos</span></div>
-  </div>
-</section>
-
-<!-- GALERÍA -->
-<section class="section rev" id="sec-galeria" style="display:none">
-  <div class="section-icon bounce" id="icon-galeria">
-    <svg class="icon-svg" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-  </div>
-  <h2>Mis Fotos Favoritas</h2>
-  
-  <!-- Mobile: Carousel -->
-  <div class="carousel" id="carousel-mobile" style="display:none">
-    <div class="carousel-track" id="carousel-track"></div>
-    <button class="carousel-btn prev" id="btn-prev">❮</button>
-    <button class="carousel-btn next" id="btn-next">❯</button>
-  </div>
-  
-  <!-- Desktop: Grid -->
-  <div class="gallery-grid" id="gallery-grid"></div>
-</section>
-
-<!-- UBICACIÓN -->
-<section class="section alt rev" id="sec-ubicacion" style="display:none">
-  <div class="section-icon bounce" id="icon-ubicacion">
-    <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-  </div>
-  <h2>Cuándo y Dónde</h2>
-  <div class="location-box">
-    <div class="location-name" id="txt-salon"></div>
-    <div class="location-addr" id="txt-dir"></div>
-    <div class="location-hora"><span id="txt-fecha"></span> — <span id="txt-hora"></span> hs</div>
-    <button id="btn-maps" class="btn btn-maps">Cómo llegar</button>
-  </div>
-</section>
-
-<!-- DRESSCODE -->
-<section class="section rev" id="sec-dresscode" style="display:none">
-  <div class="section-icon swing" id="icon-dresscode" style="width:auto">
-    <svg viewBox="0 0 64 64" style="height: 50px; fill: var(--black);">
-        <path d="M4,10 L14,10 L16,14 L18,10 L28,10 L26,50 L6,50 Z" />
-        <path d="M12,10 L20,10 L16,50 Z" style="fill:white;" />
-        <path d="M14,12 L18,12 L16,14 Z" style="fill:var(--black);" />
-        <path d="M38,10 L44,18 L50,10 L46,30 L52,50 L36,50 L42,30 Z" />
+  <!-- FLOATING MUSIC BTN -->
+  <button id="floating-music-btn" class="floating-music" style="display:none;">
+    <svg id="music-icon-svg" viewBox="0 0 24 24">
+      <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
     </svg>
-  </div>
-  <div class="dresscode-box">
-    <div class="dresscode-title" id="txt-dress-t"></div>
-    <p class="dresscode-desc" id="txt-dress-p"></p>
-  </div>
-</section>
+  </button>
 
-<!-- REGALOS -->
-<section class="section dark rev" id="sec-regalos" style="display:none">
-  <div class="section-icon shake" id="icon-regalos">
-    <svg class="icon-svg" viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-  </div>
-  <h2>Regalos</h2>
-  <p class="gift-msg" id="txt-regalo"></p>
-  <div class="alias-box">
-    <div class="alias-label">Transferencia</div>
-    <div class="alias-text" id="txt-alias"></div>
-    <button id="btn-copiar" class="btn btn-copiar">Copiar Alias</button>
-  </div>
-</section>
+  <!-- AUDIO -->
+  <audio id="audio" loop></audio>
 
-<!-- HASHTAG -->
-<section class="section hashtag-section rev" id="sec-hashtag" style="display:none">
-  <div class="section-icon shake" id="icon-hashtag">
-    <svg class="icon-svg" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-  </div>
-  <img id="txt-hashtag-foto" class="hashtag-photo" src="" alt="" onerror="this.style.display='none'">
-  <p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">Comparte tus fotos con</p>
-  <h2 class="hashtag-tag" id="txt-hash"></h2>
-  <p class="hashtag-instr" id="txt-hash-p"></p>
-</section>
+  <!-- MAIN WRAPPER FOR REORDERING -->
+  <main id="invitation-container">
 
-<!-- RSVP -->
-<section class="section rsvp-section rev" id="sec-rsvp" style="display:none">
-  <div class="section-icon pulse" id="icon-rsvp">
-    <svg class="icon-svg" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-  </div>
-  <h2>Confirma tu asistencia</h2>
-  <p style="max-width:600px;margin:0 auto 20px;color:#666">Por favor, antes de <strong id="txt-rsvp-lim"></strong></p>
-  
-  <div class="rsvp-form">
-    <div class="form-group">
-      <label class="form-label">Nombre</label>
-      <input type="text" id="f-nombre" class="form-input" placeholder="Tu nombre">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Apellido</label>
-      <input type="text" id="f-apellido" class="form-input" placeholder="Tu apellido">
-    </div>
-    <div class="form-group">
-      <label class="form-label">¿Asistís?</label>
-      <div class="opts-row" id="opts-asiste">
-        <button class="opt-btn sel" data-val="si">Sí, ahí estaré</button>
-        <button class="opt-btn" data-val="no">No puedo ir</button>
+    <!-- HERO -->
+    <section class="hero" id="sec-hero">
+      <div class="hero-bg" id="hero-bg"></div>
+      <div class="hero-content">
+        <div class="hero-tipo" id="h-tipo"></div>
+        <h1 class="hero-nombre" id="h-nombre"></h1>
+        <p class="hero-sub" id="h-invitado"></p>
       </div>
-    </div>
-    
-    <div id="rsvp-details">
-      <div class="form-group">
-        <label class="form-label">Cantidad de personas</label>
-        <div class="opts-row" id="opts-personas"></div>
+    </section>
+
+    <!-- MENSAJE -->
+    <section class="section rev" id="sec-mensaje" style="display:none">
+      <div class="section-icon heartbeat" id="icon-mensaje">
+        <svg class="icon-svg icon-heart" viewBox="0 0 24 24">
+          <path
+            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        </svg>
       </div>
-      <div class="form-group">
-        <label class="form-label">Requerimientos alimenticios</label>
-        <div class="opts-tags">
-          <button class="tag-btn" data-diet="Celíaco">Celíaco</button>
-          <button class="tag-btn" data-diet="Vegetariano">Vegetariano</button>
-          <button class="tag-btn" data-diet="Vegano">Vegano</button>
-          <button class="tag-btn" data-diet="Diabético">Diabético</button>
-          <button class="tag-btn" data-diet="Ninguno">Ninguno</button>
+      <div class="msg-box">
+        <p id="txt-mensaje"></p>
+        <div class="msg-firma" id="txt-firma"></div>
+      </div>
+    </section>
+
+    <!-- COUNTDOWN -->
+    <section class="section rev" id="sec-countdown" style="display:none">
+      <div class="section-icon shake" id="icon-countdown">
+        <svg class="icon-svg" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <polyline points="12 7 12 12 15 15" />
+        </svg>
+      </div>
+      <h2>Faltan solo...</h2>
+      <div class="countdown" id="countdown">
+        <div class="count-item"><span class="count-num" id="days">00</span><span class="count-label">Días</span></div>
+        <div class="count-item"><span class="count-num" id="hours">00</span><span class="count-label">Horas</span></div>
+        <div class="count-item"><span class="count-num" id="mins">00</span><span class="count-label">Minutos</span>
+        </div>
+        <div class="count-item"><span class="count-num" id="secs">00</span><span class="count-label">Segundos</span>
         </div>
       </div>
+    </section>
+
+    <!-- GALERÍA -->
+    <section class="section rev" id="sec-galeria" style="display:none">
+      <div class="section-icon bounce" id="icon-galeria">
+        <svg class="icon-svg" viewBox="0 0 24 24">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+          <circle cx="12" cy="13" r="4" />
+        </svg>
+      </div>
+      <h2>Mis Fotos Favoritas</h2>
+
+      <!-- Mobile: Carousel -->
+      <div class="carousel" id="carousel-mobile" style="display:none">
+        <div class="carousel-track" id="carousel-track"></div>
+        <button class="carousel-btn prev" id="btn-prev">❮</button>
+        <button class="carousel-btn next" id="btn-next">❯</button>
+      </div>
+
+      <!-- Desktop: Grid -->
+      <div class="gallery-grid" id="gallery-grid"></div>
+    </section>
+
+    <!-- UBICACIÓN -->
+    <section class="section alt rev" id="sec-ubicacion" style="display:none">
+      <div class="section-icon bounce" id="icon-ubicacion">
+        <svg class="icon-svg" viewBox="0 0 24 24">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+          <circle cx="12" cy="10" r="3" />
+        </svg>
+      </div>
+      <h2>Cuándo y Dónde</h2>
+      <div class="location-box">
+        <div class="location-name" id="txt-salon"></div>
+        <div class="location-addr" id="txt-dir"></div>
+        <div class="location-hora"><span id="txt-fecha"></span> — <span id="txt-hora"></span> hs</div>
+        <button id="btn-maps" class="btn btn-maps">Cómo llegar</button>
+      </div>
+    </section>
+
+    <!-- DRESSCODE -->
+    <section class="section rev" id="sec-dresscode" style="display:none">
+      <div class="section-icon swing" id="icon-dresscode" style="width:auto">
+        <svg viewBox="0 0 64 64" style="height: 50px; fill: var(--black);">
+          <path d="M4,10 L14,10 L16,14 L18,10 L28,10 L26,50 L6,50 Z" />
+          <path d="M12,10 L20,10 L16,50 Z" style="fill:white;" />
+          <path d="M14,12 L18,12 L16,14 Z" style="fill:var(--black);" />
+          <path d="M38,10 L44,18 L50,10 L46,30 L52,50 L36,50 L42,30 Z" />
+        </svg>
+      </div>
+      <div class="dresscode-box">
+        <div class="dresscode-title" id="txt-dress-t"></div>
+        <p class="dresscode-desc" id="txt-dress-p"></p>
+      </div>
+    </section>
+
+    <!-- REGALOS -->
+    <section class="section dark rev" id="sec-regalos" style="display:none">
+      <div class="section-icon shake" id="icon-regalos">
+        <svg class="icon-svg" viewBox="0 0 24 24">
+          <polyline points="20 12 20 22 4 22 4 12" />
+          <rect x="2" y="7" width="20" height="5" />
+          <line x1="12" y1="22" x2="12" y2="7" />
+          <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+          <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+        </svg>
+      </div>
+      <h2>Regalos</h2>
+      <p class="gift-msg" id="txt-regalo"></p>
+      <div class="alias-box">
+        <div class="alias-label">Transferencia</div>
+        <div class="alias-text" id="txt-alias"></div>
+        <button id="btn-copiar" class="btn btn-copiar">Copiar Alias</button>
+      </div>
+    </section>
+
+    <!-- HASHTAG -->
+    <section class="section hashtag-section rev" id="sec-hashtag" style="display:none">
+      <div class="section-icon shake" id="icon-hashtag">
+        <svg class="icon-svg" viewBox="0 0 24 24">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+          <line x1="12" y1="18" x2="12.01" y2="18" />
+        </svg>
+      </div>
+      <img id="txt-hashtag-foto" class="hashtag-photo" src="" alt="" onerror="this.style.display='none'">
+      <p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">Comparte tus fotos con
+      </p>
+      <h2 class="hashtag-tag" id="txt-hash"></h2>
+      <p class="hashtag-instr" id="txt-hash-p"></p>
+    </section>
+
+    <!-- RSVP -->
+    <section class="section rsvp-section rev" id="sec-rsvp" style="display:none">
+      <div class="section-icon pulse" id="icon-rsvp">
+        <svg class="icon-svg" viewBox="0 0 24 24">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+      </div>
+      <h2>Confirma tu asistencia</h2>
+      <p style="max-width:600px;margin:0 auto 20px;color:#666">Por favor, antes de <strong id="txt-rsvp-lim"></strong>
+      </p>
+
+      <div class="rsvp-form">
+        <div class="form-group">
+          <label class="form-label">Nombre</label>
+          <input type="text" id="f-nombre" class="form-input" placeholder="Tu nombre">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Apellido</label>
+          <input type="text" id="f-apellido" class="form-input" placeholder="Tu apellido">
+        </div>
+        <div class="form-group">
+          <label class="form-label">¿Asistís?</label>
+          <div class="opts-row" id="opts-asiste">
+            <button class="opt-btn sel" data-val="si">Sí, ahí estaré</button>
+            <button class="opt-btn" data-val="no">No puedo ir</button>
+          </div>
+        </div>
+
+        <div id="rsvp-details">
+          <div class="form-group">
+            <label class="form-label">Cantidad de personas</label>
+            <div class="opts-row" id="opts-personas"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Requerimientos alimenticios</label>
+            <div class="opts-tags">
+              <button class="tag-btn" data-diet="Celíaco">Celíaco</button>
+              <button class="tag-btn" data-diet="Vegetariano">Vegetariano</button>
+              <button class="tag-btn" data-diet="Vegano">Vegano</button>
+              <button class="tag-btn" data-diet="Diabético">Diabético</button>
+              <button class="tag-btn" data-diet="Ninguno">Ninguno</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="rsvp-mesa-display" class="rsvp-mesa" style="display:none">
+          Mesa <span id="rsvp-mesa-num"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Una canción que no pueda faltar</label>
+          <textarea id="f-msg" class="form-textarea" placeholder="Nombre de la canción"></textarea>
+        </div>
+
+        <button id="btn-confirmar" class="btn btn-confirmar">✓ Confirmar asistencia</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="social-icons">
+      <a id="link-ig" href="#" target="_blank" class="social-btn">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+        </svg>
+      </a>
+      <a id="link-tt" href="#" target="_blank" class="social-btn">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1 .05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z" />
+        </svg>
+      </a>
     </div>
-    
-    <div id="rsvp-mesa-display" class="rsvp-mesa" style="display:none">
-      Mesa <span id="rsvp-mesa-num"></span>
+    <div class="footer-credits">
+      <p>Invitación digital creada por<br><strong>Invitaciones Digitales OFICIAL</strong></p>
     </div>
-    
-    <div class="form-group">
-      <label class="form-label">Una canción que no pueda faltar</label>
-      <textarea id="f-msg" class="form-textarea" placeholder="Nombre de la canción"></textarea>
-    </div>
-    
-    <button id="btn-confirmar" class="btn btn-confirmar">✓ Confirmar asistencia</button>
-  </div>
-</section>
+  </footer>
 
-</main>
+  <div id="toast"></div>
 
-<!-- FOOTER -->
-<footer>
-  <div class="social-icons">
-    <a id="link-ig" href="#" target="_blank" class="social-btn">
-      <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-    </a>
-    <a id="link-tt" href="#" target="_blank" class="social-btn">
-      <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1 .05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z"/></svg>
-    </a>
-  </div>
-  <div class="footer-credits">
-    <p>Invitación digital creada por<br><strong>Invitaciones Digitales OFICIAL</strong></p>
-  </div>
-</footer>
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPA_URL = 'https://fybwovlewphtdmjmwyjn.supabase.co';
+    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Yndvdmxld3BodGRtam13eWpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTUyNTMsImV4cCI6MjA5NDI3MTI1M30.ApWQREk0OnNZ6oZI_0cU_f8A8dLETZHxqXPZvid3QiU';
+    const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-<div id="toast"></div>
+    const params = new URLSearchParams(window.location.search);
+    const eventoId = params.get('evento') || 'valentina15';
+    const invitado = params.get('invitado');
+    const personas_param = params.get('personas') || '1';
+    const mesa_param = params.get('mesa') || '';
 
-<!-- SCRIPTS -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPA_URL = 'https://fybwovlewphtdmjmwyjn.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Yndvdmxld3BodGRtam13eWpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTUyNTMsImV4cCI6MjA5NDI3MTI1M30.ApWQREk0OnNZ6oZI_0cU_f8A8dLETZHxqXPZvid3QiU';
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+    let C = {};
+    let selectedDiets = [];
+    let carouselIndex = 0;
 
-const params = new URLSearchParams(window.location.search);
-const eventoId = params.get('evento') || 'valentina15';
-const invitado = params.get('invitado');
-const personas_param = params.get('personas') || '1';
-const mesa_param = params.get('mesa') || '';
+    async function initApp() {
+      const { data } = await sb.from('eventos').select('config').eq('id', eventoId).single();
+      C = data?.config || {};
 
-let C = {};
-let selectedDiets = [];
-let carouselIndex = 0;
+      // Fallback values
+      C.nombre = C.nombre || 'Evento';
+      C.tipo = C.tipo || 'MIS 15';
+      C.subtitulo = C.subtitulo || 'Quiero que seas parte de este momento especial';
+      C.fuente = C.fuente || 'Jost';
+      C.color_1 = C.color_1 || '#1a1a1a';
+      C.color_2 = C.color_2 || '#d6ecc0';
+      C.color_bg = C.color_bg || '#ffffff';
 
-async function initApp() {
-  const { data } = await sb.from('eventos').select('config').eq('id', eventoId).single();
-  C = data?.config || {};
+      // Apply colors & fonts
+      document.documentElement.style.setProperty('--primary', C.color_1);
+      document.documentElement.style.setProperty('--secondary', C.color_2);
+      document.documentElement.style.setProperty('--bg', C.color_bg);
 
-  // Fallback values
-  C.nombre = C.nombre || 'Evento';
-  C.tipo = C.tipo || 'MIS 15';
-  C.subtitulo = C.subtitulo || 'Quiero que seas parte de este momento especial';
-  C.fuente = C.fuente || 'Jost';
-  C.color_1 = C.color_1 || '#1a1a1a';
-  C.color_2 = C.color_2 || '#d6ecc0';
-  C.color_bg = C.color_bg || '#ffffff';
+      const fontUrl = `https://fonts.googleapis.com/css2?family=${C.fuente.replace(/ /g, '+')}:wght@300;400;600&display=swap`;
+      const link = document.getElementById('dynamic-font') || document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = fontUrl;
+      if (!document.getElementById('dynamic-font')) {
+        link.id = 'dynamic-font';
+        document.head.appendChild(link);
+      }
 
-  // Apply colors & fonts
-  document.documentElement.style.setProperty('--primary', C.color_1);
-  document.documentElement.style.setProperty('--secondary', C.color_2);
-  document.documentElement.style.setProperty('--bg', C.color_bg);
-  
-  const fontUrl = `https://fonts.googleapis.com/css2?family=${C.fuente.replace(/ /g,'+')}:wght@300;400;600&display=swap`;
-  const link = document.getElementById('dynamic-font') || document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = fontUrl;
-  if (!document.getElementById('dynamic-font')) {
-    link.id = 'dynamic-font';
-    document.head.appendChild(link);
-  }
+      // OG tags
+      const ogTitle = `${C.nombre} — ${C.tipo}`;
+      const ogDesc = C.subtitulo || 'Estás invitado a mi evento especial';
+      const ogImg = C.foto_hero || C.foto_splash || '';
+      document.getElementById('og-title').content = ogTitle;
+      document.getElementById('og-desc').content = ogDesc;
+      if (ogImg) document.getElementById('og-img').content = ogImg;
+      document.getElementById('og-url').content = window.location.href;
+      document.getElementById('pg-title').textContent = ogTitle;
 
-  // OG tags
-  const ogTitle = `${C.nombre} — ${C.tipo}`;
-  const ogDesc = C.subtitulo || 'Estás invitado a mi evento especial';
-  const ogImg = C.foto_hero || C.foto_splash || '';
-  document.getElementById('og-title').content = ogTitle;
-  document.getElementById('og-desc').content = ogDesc;
-  if (ogImg) document.getElementById('og-img').content = ogImg;
-  document.getElementById('og-url').content = window.location.href;
-  document.getElementById('pg-title').textContent = ogTitle;
+      // Splash
+      document.getElementById('splash-tipo').textContent = C.tipo;
+      document.getElementById('splash-nombre').textContent = C.nombre;
+      document.getElementById('splash-sub').textContent = C.subtitulo;
+      if (C.foto_splash) document.getElementById('splash-img').src = C.foto_splash;
 
-  // Splash
-  document.getElementById('splash-tipo').textContent = C.tipo;
-  document.getElementById('splash-nombre').textContent = C.nombre;
-  document.getElementById('splash-sub').textContent = C.subtitulo;
-  if (C.foto_splash) document.getElementById('splash-img').src = C.foto_splash;
+      // Hero
+      document.getElementById('h-tipo').textContent = C.tipo;
+      document.getElementById('h-nombre').textContent = C.nombre;
+      if (C.foto_hero) {
+        document.getElementById('hero-bg').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url('${C.foto_hero}')`;
+      }
 
-  // Hero
-  document.getElementById('h-tipo').textContent = C.tipo;
-  document.getElementById('h-nombre').textContent = C.nombre;
-  if (C.foto_hero) {
-    document.getElementById('hero-bg').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url('${C.foto_hero}')`;
-  }
+      // Guest info
+      if (invitado) {
+        const parts = invitado.split(' ');
+        document.getElementById('f-nombre').value = parts[0] || '';
+        document.getElementById('f-apellido').value = parts.slice(1).join(' ') || '';
+        const n = invitado.toUpperCase();
+        document.getElementById('h-invitado').innerHTML = `Hola <strong>${n}</strong><br>Te espero en este momento tan especial`;
+        if (mesa_param) {
+          document.getElementById('splash-mesa').style.display = 'inline-block';
+          document.getElementById('mesa-num').textContent = mesa_param;
+          document.getElementById('rsvp-mesa-display').style.display = 'block';
+          document.getElementById('rsvp-mesa-num').textContent = mesa_param;
+        }
+      }
 
-  // Guest info
-  if (invitado) {
-    const parts = invitado.split(' ');
-    document.getElementById('f-nombre').value = parts[0] || '';
-    document.getElementById('f-apellido').value = parts.slice(1).join(' ') || '';
-    const n = invitado.toUpperCase();
-    document.getElementById('h-invitado').innerHTML = `Hola <strong>${n}</strong><br>Te esperamos en este momento tan especial`;
-    if (mesa_param) {
-      document.getElementById('splash-mesa').style.display = 'inline-block';
-      document.getElementById('mesa-num').textContent = mesa_param;
-      document.getElementById('rsvp-mesa-display').style.display = 'block';
-      document.getElementById('rsvp-mesa-num').textContent = mesa_param;
-    }
-  }
+      // Set Countdown Style
+      if (C.countdown_style === 'grid') {
+        document.getElementById('countdown').classList.add('grid-style');
+      }
 
-  // Set Countdown Style
-  if (C.countdown_style === 'grid') {
-    document.getElementById('countdown').classList.add('grid-style');
-  }
+      // Set Pax Options Dynamically
+      const maxPax = parseInt(personas_param) || 5;
+      const optsContainer = document.getElementById('opts-personas');
+      optsContainer.innerHTML = '';
+      for (let i = 1; i <= maxPax; i++) {
+        optsContainer.innerHTML += `<div class="opt-btn ${i === maxPax ? 'sel' : ''}" data-val="${i}">${i}</div>`;
+      }
 
-  // Set Pax Options Dynamically
-  const maxPax = parseInt(personas_param) || 5;
-  const optsContainer = document.getElementById('opts-personas');
-  optsContainer.innerHTML = '';
-  for (let i = 1; i <= maxPax; i++) {
-    optsContainer.innerHTML += `<div class="opt-btn ${i===maxPax ? 'sel' : ''}" data-val="${i}">${i}</div>`;
-  }
+      // Dynamic Icons
+      if (C.icono_mensaje) document.getElementById('icon-mensaje').innerHTML = C.icono_mensaje;
+      if (C.icono_countdown) document.getElementById('icon-countdown').innerHTML = C.icono_countdown;
+      if (C.icono_galeria) document.getElementById('icon-galeria').innerHTML = C.icono_galeria;
+      if (C.icono_ubicacion) document.getElementById('icon-ubicacion').innerHTML = C.icono_ubicacion;
+      if (C.icono_dresscode) document.getElementById('icon-dresscode').innerHTML = C.icono_dresscode;
+      if (C.icono_regalos) document.getElementById('icon-regalos').innerHTML = C.icono_regalos;
+      if (C.icono_hashtag) document.getElementById('icon-hashtag').innerHTML = C.icono_hashtag;
 
-  // Dynamic Icons
-  if (C.icono_mensaje) document.getElementById('icon-mensaje').innerHTML = C.icono_mensaje;
-  if (C.icono_countdown) document.getElementById('icon-countdown').innerHTML = C.icono_countdown;
-  if (C.icono_galeria) document.getElementById('icon-galeria').innerHTML = C.icono_galeria;
-  if (C.icono_ubicacion) document.getElementById('icon-ubicacion').innerHTML = C.icono_ubicacion;
-  if (C.icono_dresscode) document.getElementById('icon-dresscode').innerHTML = C.icono_dresscode;
-  if (C.icono_regalos) document.getElementById('icon-regalos').innerHTML = C.icono_regalos;
-  if (C.icono_hashtag) document.getElementById('icon-hashtag').innerHTML = C.icono_hashtag;
+      // Populate sections
+      if (C.mensaje && C.layout?.show_mensaje !== false) {
+        document.getElementById('sec-mensaje').style.display = 'flex';
+        document.getElementById('txt-mensaje').textContent = C.mensaje;
+        document.getElementById('txt-firma').textContent = C.mensaje_firma || '';
+      }
 
-  // Populate sections
-  if (C.mensaje && C.layout?.show_mensaje !== false) {
-    document.getElementById('sec-mensaje').style.display = 'flex';
-    document.getElementById('txt-mensaje').textContent = C.mensaje;
-    document.getElementById('txt-firma').textContent = C.mensaje_firma || '';
-  }
+      if (C.fecha_iso && C.layout?.show_countdown !== false) {
+        document.getElementById('sec-countdown').style.display = 'flex';
+        startCountdown();
+      }
 
-  if (C.fecha_iso && C.layout?.show_countdown !== false) {
-    document.getElementById('sec-countdown').style.display = 'flex';
-    startCountdown();
-  }
+      if (C.foto_galeria_1 && C.layout?.show_gallery !== false) {
+        document.getElementById('sec-galeria').style.display = 'flex';
+        const fotos = [C.foto_galeria_1, C.foto_galeria_2, C.foto_galeria_3, C.foto_galeria_4].filter(Boolean);
+        if (fotos.length > 0) {
+          document.getElementById('carousel-mobile').style.display = 'block';
+          const track = document.getElementById('carousel-track');
+          fotos.forEach(foto => {
+            const slide = document.createElement('div');
+            slide.className = 'carousel-slide';
+            slide.style.backgroundImage = `url('${foto}')`;
+            track.appendChild(slide);
+          });
+          if (fotos.length > 1) {
+            document.getElementById('btn-prev').onclick = () => { carouselIndex = (carouselIndex - 1 + fotos.length) % fotos.length; updateCarousel(fotos.length); };
+            document.getElementById('btn-next').onclick = () => { carouselIndex = (carouselIndex + 1) % fotos.length; updateCarousel(fotos.length); };
+            setInterval(() => {
+              carouselIndex = (carouselIndex + 1) % fotos.length;
+              updateCarousel(fotos.length);
+            }, 2000);
+          } else {
+            document.getElementById('btn-prev').style.display = 'none';
+            document.getElementById('btn-next').style.display = 'none';
+          }
 
-  if (C.foto_galeria_1 && C.layout?.show_gallery !== false) {
-    document.getElementById('sec-galeria').style.display = 'flex';
-    const fotos = [C.foto_galeria_1, C.foto_galeria_2, C.foto_galeria_3, C.foto_galeria_4].filter(Boolean);
-    if (fotos.length > 0) {
-      document.getElementById('carousel-mobile').style.display = 'block';
-      const track = document.getElementById('carousel-track');
-      fotos.forEach(foto => {
-        const slide = document.createElement('div');
-        slide.className = 'carousel-slide';
-        slide.style.backgroundImage = `url('${foto}')`;
-        track.appendChild(slide);
+          const grid = document.getElementById('gallery-grid');
+          fotos.forEach(foto => {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.innerHTML = `<img src="${foto}" alt="">`;
+            grid.appendChild(item);
+          });
+        }
+      }
+
+      if (C.salon && C.layout?.show_ubicacion !== false) {
+        document.getElementById('sec-ubicacion').style.display = 'flex';
+        document.getElementById('txt-salon').textContent = C.salon;
+        document.getElementById('txt-dir').textContent = C.direccion || '';
+        document.getElementById('txt-fecha').textContent = C.fecha_texto || '';
+        document.getElementById('txt-hora').textContent = C.hora_texto || '';
+        if (C.maps_url) document.getElementById('btn-maps').onclick = () => window.open(C.maps_url);
+      }
+
+      if (C.dresscode_titulo && C.layout?.show_dresscode !== false) {
+        document.getElementById('sec-dresscode').style.display = 'flex';
+        document.getElementById('txt-dress-t').textContent = C.dresscode_titulo;
+        document.getElementById('txt-dress-p').textContent = C.dresscode_texto;
+      }
+
+      if (C.alias_pago && C.layout?.show_gift !== false) {
+        document.getElementById('sec-regalos').style.display = 'flex';
+        document.getElementById('txt-regalo').textContent = C.regalo_texto || '';
+        document.getElementById('txt-alias').textContent = C.alias_pago;
+        document.getElementById('btn-copiar').onclick = () => {
+          navigator.clipboard.writeText(C.alias_pago);
+          toast('📋 Alias copiado');
+        };
+      }
+
+      if (C.hashtag && C.layout?.show_hashtag !== false) {
+        document.getElementById('sec-hashtag').style.display = 'flex';
+        document.getElementById('txt-hash').textContent = C.hashtag;
+        document.getElementById('txt-hash-p').textContent = C.hashtag_texto || '';
+        if (C.foto_hashtag) document.getElementById('txt-hashtag-foto').src = C.foto_hashtag;
+        if (C.instagram_url) document.getElementById('link-ig').href = C.instagram_url;
+        if (C.tiktok_url) document.getElementById('link-tt').href = C.tiktok_url;
+      }
+
+      if (C.layout?.show_rsvp !== false) {
+        document.getElementById('sec-rsvp').style.display = 'flex';
+        document.getElementById('txt-rsvp-lim').textContent = C.rsvp_limite || '31 de diciembre';
+      }
+
+      if (C.musica_url) document.getElementById('audio').src = C.musica_url;
+      document.getElementById('floating-music-btn').onclick = toggleMusic;
+      document.getElementById('btn-enter').onclick = () => {
+        document.getElementById('splash').classList.add('hidden');
+        document.getElementById('floating-music-btn').style.display = 'flex';
+        autoPlayMusic();
+        revealSections();
+      };
+
+      // Reorder Sections
+      if (C.layout?.order && Array.isArray(C.layout.order)) {
+        const container = document.getElementById('invitation-container');
+        C.layout.order.forEach(id => {
+          const sec = document.getElementById('sec-' + id);
+          if (sec) container.appendChild(sec);
+        });
+      }
+
+      // RSVP
+      document.querySelectorAll('#opts-asiste .opt-btn').forEach(btn => {
+        btn.onclick = () => {
+          document.querySelectorAll('#opts-asiste .opt-btn').forEach(b => b.classList.remove('sel'));
+          btn.classList.add('sel');
+          document.getElementById('rsvp-details').style.display = btn.dataset.val === 'si' ? 'block' : 'none';
+        };
       });
-      if (fotos.length > 1) {
-        document.getElementById('btn-prev').onclick = () => { carouselIndex = (carouselIndex - 1 + fotos.length) % fotos.length; updateCarousel(fotos.length); };
-        document.getElementById('btn-next').onclick = () => { carouselIndex = (carouselIndex + 1) % fotos.length; updateCarousel(fotos.length); };
-        setInterval(() => {
-          carouselIndex = (carouselIndex + 1) % fotos.length;
-          updateCarousel(fotos.length);
-        }, 2000);
+      document.querySelectorAll('#opts-personas .opt-btn').forEach(btn => {
+        btn.onclick = () => {
+          document.querySelectorAll('#opts-personas .opt-btn').forEach(b => b.classList.remove('sel'));
+          btn.classList.add('sel');
+        };
+      });
+      document.querySelectorAll('.tag-btn').forEach(btn => {
+        btn.onclick = () => btn.classList.toggle('sel');
+      });
+
+      document.getElementById('btn-confirmar').onclick = confirmar;
+
+      // Reveal
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.rev').forEach(r => observer.observe(r));
+
+      // Parallax / Scroll Zoom effect for images
+      window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        // Hero zoom
+        const heroBg = document.getElementById('hero-bg');
+        if (heroBg) {
+          const zoom = 1 + (scrollY * 0.0005);
+          heroBg.style.transform = `scale(${Math.max(1, zoom)})`;
+        }
+        // Gallery zoom based on intersection
+        document.querySelectorAll('.gallery-item img').forEach(img => {
+          const rect = img.getBoundingClientRect();
+          if (rect.top < window.innerHeight && rect.bottom > 0) {
+            const factor = (window.innerHeight - rect.top) / window.innerHeight;
+            img.style.transform = `scale(${1 + factor * 0.1})`;
+          }
+        });
+      });
+    }
+
+    function toggleMusic() {
+      const audio = document.getElementById('audio');
+      const btn = document.getElementById('floating-music-btn');
+      const svg = document.getElementById('music-icon-svg');
+
+      if (audio.paused) {
+        audio.play().then(() => {
+          // Changed to pause icon
+          svg.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+        }).catch(() => {
+          toast('🔊 Nota: Habilita el sonido para escuchar la música');
+        });
       } else {
-        document.getElementById('btn-prev').style.display = 'none';
-        document.getElementById('btn-next').style.display = 'none';
+        audio.pause();
+        // Changed to play icon
+        svg.innerHTML = '<path d="M8 5v14l11-7z"/>';
       }
-
-      const grid = document.getElementById('gallery-grid');
-      fotos.forEach(foto => {
-        const item = document.createElement('div');
-        item.className = 'gallery-item';
-        item.innerHTML = `<img src="${foto}" alt="">`;
-        grid.appendChild(item);
-      });
     }
-  }
 
-  if (C.salon && C.layout?.show_ubicacion !== false) {
-    document.getElementById('sec-ubicacion').style.display = 'flex';
-    document.getElementById('txt-salon').textContent = C.salon;
-    document.getElementById('txt-dir').textContent = C.direccion || '';
-    document.getElementById('txt-fecha').textContent = C.fecha_texto || '';
-    document.getElementById('txt-hora').textContent = C.hora_texto || '';
-    if (C.maps_url) document.getElementById('btn-maps').onclick = () => window.open(C.maps_url);
-  }
+    function autoPlayMusic() {
+      const audio = document.getElementById('audio');
+      const svg = document.getElementById('music-icon-svg');
 
-  if (C.dresscode_titulo && C.layout?.show_dresscode !== false) {
-    document.getElementById('sec-dresscode').style.display = 'flex';
-    document.getElementById('txt-dress-t').textContent = C.dresscode_titulo;
-    document.getElementById('txt-dress-p').textContent = C.dresscode_texto;
-  }
-
-  if (C.alias_pago && C.layout?.show_gift !== false) {
-    document.getElementById('sec-regalos').style.display = 'flex';
-    document.getElementById('txt-regalo').textContent = C.regalo_texto || '';
-    document.getElementById('txt-alias').textContent = C.alias_pago;
-    document.getElementById('btn-copiar').onclick = () => {
-      navigator.clipboard.writeText(C.alias_pago);
-      toast('📋 Alias copiado');
-    };
-  }
-
-  if (C.hashtag && C.layout?.show_hashtag !== false) {
-    document.getElementById('sec-hashtag').style.display = 'flex';
-    document.getElementById('txt-hash').textContent = C.hashtag;
-    document.getElementById('txt-hash-p').textContent = C.hashtag_texto || '';
-    if (C.foto_hashtag) document.getElementById('txt-hashtag-foto').src = C.foto_hashtag;
-    if (C.instagram_url) document.getElementById('link-ig').href = C.instagram_url;
-    if (C.tiktok_url) document.getElementById('link-tt').href = C.tiktok_url;
-  }
-
-  if (C.layout?.show_rsvp !== false) {
-    document.getElementById('sec-rsvp').style.display = 'flex';
-    document.getElementById('txt-rsvp-lim').textContent = C.rsvp_limite || '31 de diciembre';
-  }
-
-  if (C.musica_url) document.getElementById('audio').src = C.musica_url;
-  document.getElementById('floating-music-btn').onclick = toggleMusic;
-  document.getElementById('btn-enter').onclick = () => {
-    document.getElementById('splash').classList.add('hidden');
-    document.getElementById('floating-music-btn').style.display = 'flex';
-    autoPlayMusic();
-    revealSections();
-  };
-
-  // Reorder Sections
-  if (C.layout?.order && Array.isArray(C.layout.order)) {
-    const container = document.getElementById('invitation-container');
-    C.layout.order.forEach(id => {
-      const sec = document.getElementById('sec-' + id);
-      if (sec) container.appendChild(sec);
-    });
-  }
-
-  // RSVP
-  document.querySelectorAll('#opts-asiste .opt-btn').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('#opts-asiste .opt-btn').forEach(b => b.classList.remove('sel'));
-      btn.classList.add('sel');
-      document.getElementById('rsvp-details').style.display = btn.dataset.val === 'si' ? 'block' : 'none';
-    };
-  });
-  document.querySelectorAll('#opts-personas .opt-btn').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('#opts-personas .opt-btn').forEach(b => b.classList.remove('sel'));
-      btn.classList.add('sel');
-    };
-  });
-  document.querySelectorAll('.tag-btn').forEach(btn => {
-    btn.onclick = () => btn.classList.toggle('sel');
-  });
-
-  document.getElementById('btn-confirmar').onclick = confirmar;
-
-  // Reveal
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.rev').forEach(r => observer.observe(r));
-
-  // Parallax / Scroll Zoom effect for images
-  window.addEventListener('scroll', () => {
-    const scrollY = window.scrollY;
-    // Hero zoom
-    const heroBg = document.getElementById('hero-bg');
-    if(heroBg) {
-      const zoom = 1 + (scrollY * 0.0005);
-      heroBg.style.transform = `scale(${Math.max(1, zoom)})`;
-    }
-    // Gallery zoom based on intersection
-    document.querySelectorAll('.gallery-item img').forEach(img => {
-      const rect = img.getBoundingClientRect();
-      if(rect.top < window.innerHeight && rect.bottom > 0) {
-        const factor = (window.innerHeight - rect.top) / window.innerHeight;
-        img.style.transform = `scale(${1 + factor * 0.1})`;
+      if (C.musica_url && audio.paused) {
+        audio.play().then(() => {
+          svg.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+        }).catch(() => {
+          // Silenciosamente fallar si no hay permisos
+        });
       }
-    });
-  });
-}
-
-function toggleMusic() {
-  const audio = document.getElementById('audio');
-  const btn = document.getElementById('floating-music-btn');
-  const svg = document.getElementById('music-icon-svg');
-  
-  if (audio.paused) {
-    audio.play().then(() => { 
-      // Changed to pause icon
-      svg.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-    }).catch(() => {
-      toast('🔊 Nota: Habilita el sonido para escuchar la música');
-    });
-  } else {
-    audio.pause();
-    // Changed to play icon
-    svg.innerHTML = '<path d="M8 5v14l11-7z"/>';
-  }
-}
-
-function autoPlayMusic() {
-  const audio = document.getElementById('audio');
-  const svg = document.getElementById('music-icon-svg');
-  
-  if (C.musica_url && audio.paused) {
-    audio.play().then(() => {
-      svg.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-    }).catch(() => {
-      // Silenciosamente fallar si no hay permisos
-    });
-  }
-}
-
-function revealSections() {
-  document.querySelectorAll('.rev').forEach(el => el.classList.add('active'));
-}
-
-function updateCarousel(len) {
-  const track = document.getElementById('carousel-track');
-  track.style.transform = `translateX(-${carouselIndex * 100}%)`;
-}
-
-function startCountdown() {
-  const target = new Date(C.fecha_iso).getTime();
-  function update() {
-    const now = new Date().getTime();
-    const dist = target - now;
-    if (dist < 0) {
-      document.getElementById('days').textContent = '00';
-      document.getElementById('hours').textContent = '00';
-      document.getElementById('mins').textContent = '00';
-      document.getElementById('secs').textContent = '00';
-      return;
     }
-    document.getElementById('days').textContent = String(Math.floor(dist / (1000 * 60 * 60 * 24))).padStart(2, '0');
-    document.getElementById('hours').textContent = String(Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
-    document.getElementById('mins').textContent = String(Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-    document.getElementById('secs').textContent = String(Math.floor((dist % (1000 * 60)) / 1000)).padStart(2, '0');
-  }
-  update();
-  setInterval(update, 1000);
-}
 
-async function confirmar() {
-  const nombre = document.getElementById('f-nombre').value.trim();
-  if (!nombre) { toast('⚠️ Ingresá tu nombre'); return; }
+    function revealSections() {
+      document.querySelectorAll('.rev').forEach(el => el.classList.add('active'));
+    }
 
-  const btn = document.getElementById('btn-confirmar');
-  btn.textContent = '⏳ Enviando...';
-  btn.disabled = true;
+    function updateCarousel(len) {
+      const track = document.getElementById('carousel-track');
+      track.style.transform = `translateX(-${carouselIndex * 100}%)`;
+    }
 
-  const asiste = document.querySelector('#opts-asiste .opt-btn.sel').dataset.val;
-  const personas = asiste === 'si' ? document.querySelector('#opts-personas .opt-btn.sel')?.textContent || '1' : '0';
-  const dieta = asiste === 'si' ? [...document.querySelectorAll('.tag-btn.sel')].map(t => t.dataset.diet).join(', ') : '';
-  const mesa = mesa_param || '';
+    function startCountdown() {
+      const target = new Date(C.fecha_iso).getTime();
+      function update() {
+        const now = new Date().getTime();
+        const dist = target - now;
+        if (dist < 0) {
+          document.getElementById('days').textContent = '00';
+          document.getElementById('hours').textContent = '00';
+          document.getElementById('mins').textContent = '00';
+          document.getElementById('secs').textContent = '00';
+          return;
+        }
+        document.getElementById('days').textContent = String(Math.floor(dist / (1000 * 60 * 60 * 24))).padStart(2, '0');
+        document.getElementById('hours').textContent = String(Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+        document.getElementById('mins').textContent = String(Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+        document.getElementById('secs').textContent = String(Math.floor((dist % (1000 * 60)) / 1000)).padStart(2, '0');
+      }
+      update();
+      setInterval(update, 1000);
+    }
 
-  const data = {
-    evento_id: eventoId,
-    invitado_url: invitado || 'general',
-    nombre: nombre,
-    apellido: document.getElementById('f-apellido').value.trim(),
-    asiste: asiste,
-    personas: parseInt(personas) || 0,
-    dieta: dieta,
-    mensaje: document.getElementById('f-msg').value.trim(),
-    mesa: mesa,
-  };
+    async function confirmar() {
+      const nombre = document.getElementById('f-nombre').value.trim();
+      if (!nombre) { toast('⚠️ Ingresá tu nombre'); return; }
 
-  const { error } = await sb.from('confirmaciones').insert([data]);
+      const btn = document.getElementById('btn-confirmar');
+      btn.textContent = '⏳ Enviando...';
+      btn.disabled = true;
 
-  if (error) {
-    if (error.code === 'PGRST204' || error.message.includes('column') || error.code === '42703') {
-      const safeData = {
+      const asiste = document.querySelector('#opts-asiste .opt-btn.sel').dataset.val;
+      const personas = asiste === 'si' ? document.querySelector('#opts-personas .opt-btn.sel')?.textContent || '1' : '0';
+      const dieta = asiste === 'si' ? [...document.querySelectorAll('.tag-btn.sel')].map(t => t.dataset.diet).join(', ') : '';
+      const mesa = mesa_param || '';
+
+      const data = {
         evento_id: eventoId,
+        invitado_url: invitado || 'general',
         nombre: nombre,
         apellido: document.getElementById('f-apellido').value.trim(),
         asiste: asiste,
         personas: parseInt(personas) || 0,
         dieta: dieta,
-        mensaje: document.getElementById('f-msg').value.trim()
+        mensaje: document.getElementById('f-msg').value.trim(),
+        mesa: mesa,
       };
-      const retry = await sb.from('confirmaciones').insert([safeData]);
-      if (retry.error) {
-        toast('❌ Error al enviar (Código 2): ' + retry.error.message);
-        btn.textContent = '✓ Confirmar asistencia';
-        btn.disabled = false;
-        return;
+
+      const { error } = await sb.from('confirmaciones').insert([data]);
+
+      if (error) {
+        if (error.code === 'PGRST204' || error.message.includes('column') || error.code === '42703') {
+          const safeData = {
+            evento_id: eventoId,
+            nombre: nombre,
+            apellido: document.getElementById('f-apellido').value.trim(),
+            asiste: asiste,
+            personas: parseInt(personas) || 0,
+            dieta: dieta,
+            mensaje: document.getElementById('f-msg').value.trim()
+          };
+          const retry = await sb.from('confirmaciones').insert([safeData]);
+          if (retry.error) {
+            toast('❌ Error al enviar (Código 2): ' + retry.error.message);
+            btn.textContent = '✓ Confirmar asistencia';
+            btn.disabled = false;
+            return;
+          }
+        } else {
+          toast('❌ Error: ' + error.message);
+          btn.textContent = '✓ Confirmar asistencia';
+          btn.disabled = false;
+          return;
+        }
       }
-    } else {
-      toast('❌ Error: ' + error.message);
-      btn.textContent = '✓ Confirmar asistencia';
-      btn.disabled = false;
-      return;
+
+      toast('✅ ¡Asistencia confirmada!');
+      setTimeout(() => {
+        document.querySelector('.rsvp-form').innerHTML = '<p style="text-align:center;font-weight:600;padding:30px;color:#666">Asistencia registrada correctamente. ¡Te esperamos!</p>';
+      }, 1500);
     }
-  }
 
-  toast('✅ ¡Asistencia confirmada!');
-  setTimeout(() => {
-    document.querySelector('.rsvp-form').innerHTML = '<p style="text-align:center;font-weight:600;padding:30px;color:#666">Asistencia registrada correctamente. ¡Te esperamos!</p>';
-  }, 1500);
-}
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.display = 'block';
+      t.className = 'toast-show';
+      clearTimeout(t._t);
+      t._t = setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
 
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.display = 'block';
-  t.className = 'toast-show';
-  clearTimeout(t._t);
-  t._t = setTimeout(() => { t.style.display = 'none'; }, 3000);
-}
-
-// Init
-initApp();
-</script>
+    // Init
+    initApp();
+  </script>
 </body>
+
 </html>
