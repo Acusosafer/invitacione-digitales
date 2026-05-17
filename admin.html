@@ -1359,8 +1359,8 @@ function generarLink() {
   
   document.getElementById('lk-url').textContent = url;
   
-  // Mensaje atractivo para WhatsApp
-  const msgText = `🎉 ¡Te espero en mi ${currentConfig.tipo || 'evento'}! ✨\n\n${currentConfig.nombre || 'Mi evento'}\n${currentConfig.fecha_texto || 'Próximamente'}\n\n👇 Abrí tu invitación aquí:\n${url}`;
+  // Mensaje elegante y directo para WhatsApp
+  const msgText = `${currentConfig.nombre || ''} - ${currentConfig.tipo || ''}\n\n${url}`;
   
   document.getElementById('lk-wa').href = `https://wa.me/?text=${encodeURIComponent(msgText)}`;
   document.getElementById('lk-res').style.display = 'block';
