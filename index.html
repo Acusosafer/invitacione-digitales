@@ -238,59 +238,102 @@
             width: 100%;
             height: 100%;
         }
-        /* LED screen: full-width band at horizon */
-        .venue-screen {
+        /* ======================== LED 3D PANELS ======================== */
+        .led-3d-scene {
             position: absolute;
             top: 44%;
             left: 0; right: 0;
             transform: translateY(-50%);
-            height: clamp(48px, 7vh, 78px);
             z-index: 3;
-            overflow: hidden;
-            background: rgba(5,8,20,0.8);
-            border-top: 1px solid rgba(140,185,255,0.4);
-            border-bottom: 1px solid rgba(140,185,255,0.4);
-            box-shadow:
-                0 0 45px rgba(100,155,255,0.4),
-                0 0 110px rgba(100,155,255,0.18),
-                inset 0 0 45px rgba(100,155,255,0.1);
+        }
+        .led-3d-inner {
             display: flex;
             align-items: center;
-        }
-        .venue-screen-inner {
+            justify-content: center;
             width: 100%;
-            position: relative;
-            overflow: hidden;
+            perspective: 1000px;
+            perspective-origin: 50% 50%;
         }
-        .venue-screen-inner::before,
-        .venue-screen-inner::after {
+        .led-panel {
+            height: clamp(52px, 7.5vh, 86px);
+            overflow: hidden;
+            background: rgba(2,4,16,0.96);
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            position: relative;
+        }
+        /* scan-line overlay */
+        .led-panel::after {
             content: '';
             position: absolute;
-            top: 0; bottom: 0;
-            width: 120px;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 3px,
+                rgba(0,0,0,0.14) 3px,
+                rgba(0,0,0,0.14) 4px
+            );
             z-index: 2;
             pointer-events: none;
         }
-        .venue-screen-inner::before {
-            left: 0;
-            background: linear-gradient(to right, rgba(6,8,15,1), transparent);
+        .led-panel-center {
+            width: 38%;
+            border-top: 2px solid rgba(160,215,255,0.85);
+            border-bottom: 2px solid rgba(160,215,255,0.85);
+            box-shadow:
+                0 0 90px rgba(80,150,255,0.65),
+                0 0 240px rgba(80,150,255,0.28),
+                inset 0 0 55px rgba(80,150,255,0.22);
+            z-index: 2;
         }
-        .venue-screen-inner::after {
-            right: 0;
-            background: linear-gradient(to left, rgba(6,8,15,1), transparent);
+        .led-panel-left {
+            width: 28%;
+            transform-origin: 100% 50%;
+            transform: rotateY(-68deg);
+            border-top: 2px solid rgba(120,180,255,0.55);
+            border-bottom: 2px solid rgba(120,180,255,0.55);
+            box-shadow: 0 0 55px rgba(80,150,255,0.35), inset 0 0 30px rgba(80,150,255,0.12);
         }
-        .venue-screen-text {
+        .led-panel-right {
+            width: 28%;
+            transform-origin: 0% 50%;
+            transform: rotateY(68deg);
+            border-top: 2px solid rgba(120,180,255,0.55);
+            border-bottom: 2px solid rgba(120,180,255,0.55);
+            box-shadow: 0 0 55px rgba(80,150,255,0.35), inset 0 0 30px rgba(80,150,255,0.12);
+        }
+        .led-text {
             white-space: nowrap;
             font-family: 'Syne', sans-serif;
             font-weight: 700;
-            font-size: clamp(22px, 3vw, 40px);
-            letter-spacing: 0.08em;
+            font-size: clamp(20px, 2.8vw, 40px);
+            letter-spacing: 0.07em;
             text-transform: uppercase;
-            color: rgba(235,245,255,0.92);
-            animation: venueScroll 42s linear infinite;
-            will-change: transform;
+            color: rgba(235,245,255,0.93);
             display: inline-block;
-            padding: 0 30px;
+            padding: 0 24px;
+            will-change: transform;
+            animation: venueScroll 36s linear infinite;
+            position: relative;
+            z-index: 1;
+        }
+        .led-text-right  { animation-delay:   0s; }
+        .led-text-center { animation-delay:  -9s; }
+        .led-text-left   { animation-delay: -20s; }
+        /* floor glow reflection under LED */
+        .led-floor-glow {
+            position: absolute;
+            top: 47%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 55%;
+            height: 220px;
+            background: radial-gradient(ellipse at top, rgba(70,140,255,0.28) 0%, transparent 68%);
+            z-index: 2;
+            pointer-events: none;
+            filter: blur(18px);
         }
         /* Couple silhouettes */
         .venue-couple-svg {
@@ -420,8 +463,10 @@
             <!-- Fondo base -->
             <rect width="1000" height="560" fill="#06080f"/>
 
-            <!-- Glow del punto de fuga (horizonte) -->
-            <ellipse cx="500" cy="280" rx="380" ry="130" fill="url(#vpG)" opacity="0.7"/>
+            <!-- Glow del punto de fuga (horizonte) — más intenso -->
+            <ellipse cx="500" cy="280" rx="500" ry="180" fill="url(#vpG)" opacity="0.55"/>
+            <ellipse cx="500" cy="280" rx="220" ry="80"  fill="url(#vpG)" opacity="0.7"/>
+            <ellipse cx="500" cy="280" rx="80"  ry="35"  fill="rgba(140,190,255,0.35)"/>
 
             <!-- Paredes laterales -->
             <polygon points="0,0 250,280 0,560" fill="url(#wL)"/>
@@ -448,6 +493,21 @@
             <!-- Marco 1 — más lejano, más pequeño -->
             <polygon points="375,80  625,80  654,52  346,52"  fill="none" stroke="#90beff" stroke-width="1.5" opacity="0.55" filter="url(#nGlow)"/>
 
+            <!-- ══ GRID DEL PISO (perspectiva convergiendo al VP) ══ -->
+            <!-- Líneas longitudinales (de frente hacia atrás) -->
+            <line x1="100"  y1="560" x2="500" y2="280" stroke="#3a5888" stroke-width="1"   opacity="0.35"/>
+            <line x1="250"  y1="560" x2="500" y2="280" stroke="#3a5888" stroke-width="1"   opacity="0.35"/>
+            <line x1="400"  y1="560" x2="500" y2="280" stroke="#3a5888" stroke-width="1"   opacity="0.35"/>
+            <line x1="500"  y1="560" x2="500" y2="280" stroke="#4a68a0" stroke-width="1.2" opacity="0.4"/>
+            <line x1="600"  y1="560" x2="500" y2="280" stroke="#3a5888" stroke-width="1"   opacity="0.35"/>
+            <line x1="750"  y1="560" x2="500" y2="280" stroke="#3a5888" stroke-width="1"   opacity="0.35"/>
+            <line x1="900"  y1="560" x2="500" y2="280" stroke="#3a5888" stroke-width="1"   opacity="0.35"/>
+            <!-- Líneas transversales (horizontales en perspectiva) -->
+            <line x1="130"  y1="380" x2="870"  y2="380" stroke="#3a5888" stroke-width="0.8" opacity="0.25"/>
+            <line x1="80"   y1="430" x2="920"  y2="430" stroke="#3a5888" stroke-width="0.8" opacity="0.22"/>
+            <line x1="30"   y1="480" x2="970"  y2="480" stroke="#3a5888" stroke-width="0.8" opacity="0.18"/>
+            <line x1="0"    y1="530" x2="1000" y2="530" stroke="#3a5888" stroke-width="0.8" opacity="0.14"/>
+
             <!-- ══ REFLEJO EN EL PISO (marcos espejados, más tenues) ══ -->
             <polygon points="40,304 960,304 920,336 80,336"   fill="none" stroke="#5878a8" stroke-width="1.8" opacity="0.28"/>
             <polygon points="100,338 900,338 860,370 140,370" fill="none" stroke="#5878a8" stroke-width="1.5" opacity="0.2"/>
@@ -461,12 +521,21 @@
             <rect x="0" y="280" width="1000" height="280" fill="url(#fFade)"/>
         </svg>
 
-        <!-- Pantalla LED (banda full-width al nivel del horizonte) -->
-        <div class="venue-screen">
-            <div class="venue-screen-inner">
-                <div class="venue-screen-text" id="screenText"></div>
+        <!-- Pantalla LED 3D: back wall + side walls en perspectiva -->
+        <div class="led-3d-scene">
+            <div class="led-3d-inner">
+                <div class="led-panel led-panel-left">
+                    <div class="led-text led-text-left" id="textLeft"></div>
+                </div>
+                <div class="led-panel led-panel-center">
+                    <div class="led-text led-text-center" id="textCenter"></div>
+                </div>
+                <div class="led-panel led-panel-right">
+                    <div class="led-text led-text-right" id="textRight"></div>
+                </div>
             </div>
         </div>
+        <div class="led-floor-glow"></div>
 
         <!-- Siluetas de la pareja (SVG, de espaldas) -->
         <svg class="venue-couple-svg" viewBox="0 0 520 720" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
@@ -655,12 +724,13 @@
 
     <script>
     (function() {
-        var el = document.getElementById('screenText');
-        if (!el) return;
-        // Texto con palabras clave en color para imitar la pantalla LED
-        var unit = 'TU EVENTO <span style="color:#ff4d80">SOÑADO</span> · CON <span style="color:#c471ff">INVITACIONES DIGITALES</span> · ';
-        var rep = unit.repeat(25);
-        el.innerHTML = rep + rep; // duplicado para loop sin salto visible
+        var unit = 'TU EVENTO&nbsp;<span style="color:#ff4d80">SOÑADO</span>&nbsp;&nbsp;·&nbsp;&nbsp;CON&nbsp;<span style="color:#c471ff">INVITACIONES DIGITALES</span>&nbsp;&nbsp;·&nbsp;&nbsp;';
+        var full = unit.repeat(18);
+        full = full + full;
+        ['textLeft','textCenter','textRight'].forEach(function(id){
+            var el = document.getElementById(id);
+            if (el) el.innerHTML = full;
+        });
     })();
     </script>
 
