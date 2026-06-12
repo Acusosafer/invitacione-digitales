@@ -216,170 +216,105 @@
             .shimmer-text { letter-spacing: -2px; }
         }
 
-        /* ======================== HERO CINEMA ======================== */
-        @keyframes hcScroll {
+        /* ======================== HERO VENUE ======================== */
+        @keyframes venueScroll {
             from { transform: translateX(0); }
             to   { transform: translateX(-50%); }
         }
-        @keyframes hcScrollRev {
-            from { transform: translateX(-50%); }
-            to   { transform: translateX(0); }
-        }
-        @keyframes hcLine {
+        @keyframes vScrollLine {
             0%,100% { transform: scaleY(1); opacity:.4; }
-            50%      { transform: scaleY(1.3); opacity:1; }
-        }
-        @keyframes hcAtmo {
-            0%,100% { opacity:.7; }
-            50%      { opacity:1; }
+            50%      { transform: scaleY(1.4); opacity:1; }
         }
 
-        .hero-cinema {
+        .venue-hero {
             height: 100vh;
             position: relative;
             overflow: hidden;
-            background: #000;
+            background: #06080f;
         }
-
-        /* Base gradient */
-        .hc-bg {
+        .venue-scene-svg {
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse at 50% -5%, #2e0a50 0%, #120020 40%, #000 75%);
+            width: 100%;
+            height: 100%;
         }
-
-        /* Ceiling grid — perspective lines converging upward */
-        .hc-grid-ceil {
+        /* LED screen: full-width band at horizon */
+        .venue-screen {
             position: absolute;
-            left: -40%; right: -40%;
-            top: -80%; bottom: 48%;
-            background-image:
-                linear-gradient(rgba(196,113,255,0.3) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(196,113,255,0.15) 1px, transparent 1px);
-            background-size: 90px 70px;
-            transform: perspective(320px) rotateX(68deg);
-            transform-origin: 50% 100%;
-            z-index: 1;
+            top: 44%;
+            left: 0; right: 0;
+            transform: translateY(-50%);
+            height: clamp(48px, 7vh, 78px);
+            z-index: 3;
+            overflow: hidden;
+            background: rgba(5,8,20,0.8);
+            border-top: 1px solid rgba(140,185,255,0.4);
+            border-bottom: 1px solid rgba(140,185,255,0.4);
+            box-shadow:
+                0 0 45px rgba(100,155,255,0.4),
+                0 0 110px rgba(100,155,255,0.18),
+                inset 0 0 45px rgba(100,155,255,0.1);
+            display: flex;
+            align-items: center;
         }
-
-        /* Floor grid — mirror reflection */
-        .hc-grid-floor {
-            position: absolute;
-            left: -40%; right: -40%;
-            top: 52%; bottom: -80%;
-            background-image:
-                linear-gradient(rgba(255,59,111,0.2) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,59,111,0.1) 1px, transparent 1px);
-            background-size: 90px 70px;
-            transform: perspective(320px) rotateX(-68deg);
-            transform-origin: 50% 0%;
-            z-index: 1;
+        .venue-screen-inner {
+            width: 100%;
+            position: relative;
+            overflow: hidden;
         }
-
-        /* Purple atmosphere glow at top center */
-        .hc-atmo {
+        .venue-screen-inner::before,
+        .venue-screen-inner::after {
+            content: '';
             position: absolute;
-            inset: 0;
+            top: 0; bottom: 0;
+            width: 120px;
             z-index: 2;
             pointer-events: none;
-            background:
-                radial-gradient(ellipse at 50% -5%, rgba(196,113,255,0.5) 0%, transparent 50%),
-                radial-gradient(ellipse at 15% 85%, rgba(255,59,111,0.1) 0%, transparent 38%),
-                radial-gradient(ellipse at 85% 85%, rgba(196,113,255,0.1) 0%, transparent 38%);
-            animation: hcAtmo 8s ease-in-out infinite;
         }
-
-        /* Edge vignette */
-        .hc-vignette {
-            position: absolute;
-            inset: 0;
-            z-index: 3;
-            pointer-events: none;
-            background: radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.65) 100%);
+        .venue-screen-inner::before {
+            left: 0;
+            background: linear-gradient(to right, rgba(6,8,15,1), transparent);
         }
-
-        /* === Text bands === */
-        .hc-bands {
-            position: absolute;
-            inset: 0;
-            z-index: 4;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            pointer-events: none;
+        .venue-screen-inner::after {
+            right: 0;
+            background: linear-gradient(to left, rgba(6,8,15,1), transparent);
         }
-
-        .hc-band { overflow: hidden; }
-
-        .hc-band-track {
-            display: inline-flex;
-            align-items: center;
+        .venue-screen-text {
             white-space: nowrap;
             font-family: 'Syne', sans-serif;
-            font-weight: 800;
-            text-transform: uppercase;
-            color: transparent;
-            will-change: transform;
-        }
-
-        /* Large center band */
-        .hc-band-track.sz-lg {
-            font-size: clamp(56px, 8vw, 106px);
-            letter-spacing: -0.02em;
-            line-height: 1;
-            -webkit-text-stroke: 1.5px rgba(255,255,255,0.6);
-            padding: 8px 0;
-            animation: hcScroll 20s linear infinite;
-        }
-
-        /* Medium band above */
-        .hc-band-track.sz-md {
-            font-size: clamp(36px, 5.2vw, 68px);
-            letter-spacing: 0.04em;
-            line-height: 1;
-            -webkit-text-stroke: 1px rgba(255,255,255,0.28);
-            padding: 6px 0;
-            animation: hcScrollRev 28s linear infinite;
-        }
-
-        /* Small band below */
-        .hc-band-track.sz-sm {
-            font-size: clamp(24px, 3.5vw, 46px);
+            font-weight: 700;
+            font-size: clamp(22px, 3vw, 40px);
             letter-spacing: 0.08em;
-            line-height: 1;
-            -webkit-text-stroke: 1px rgba(196,113,255,0.4);
-            padding: 5px 0;
-            animation: hcScroll 36s linear infinite;
+            text-transform: uppercase;
+            color: rgba(235,245,255,0.92);
+            animation: venueScroll 42s linear infinite;
+            will-change: transform;
+            display: inline-block;
+            padding: 0 30px;
         }
-
-        /* === Couple image slot === */
-        .hc-couple {
+        /* Couple silhouettes */
+        .venue-couple-svg {
             position: absolute;
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            height: 90%;
-            z-index: 6;
-            object-fit: contain;
-            object-position: bottom center;
-            filter: drop-shadow(0 0 80px rgba(196,113,255,0.5))
-                    drop-shadow(0 0 30px rgba(255,59,111,0.3));
+            height: 80%;
+            width: auto;
+            z-index: 5;
         }
-
-        /* Bottom fade so couple blends into ground */
-        .hc-floor-fade {
+        /* Floor bottom fade */
+        .venue-bottom-fade {
             position: absolute;
             bottom: 0; left: 0; right: 0;
-            height: 30%;
-            background: linear-gradient(to top, #000 0%, transparent 100%);
-            z-index: 5;
+            height: 26%;
+            background: linear-gradient(to top, #06080f 0%, transparent 100%);
+            z-index: 4;
             pointer-events: none;
         }
-
-        /* === CTA bottom === */
-        .hc-cta {
+        /* CTA bottom */
+        .venue-cta {
             position: absolute;
-            bottom: 36px;
+            bottom: 30px;
             left: 0; right: 0;
             display: flex;
             justify-content: center;
@@ -388,23 +323,21 @@
             flex-wrap: wrap;
             padding: 0 20px;
         }
-        .hc-cta .btn-primary  { font-size: .82rem; padding: 14px 32px; }
-        .hc-cta .btn-secondary { font-size: .82rem; padding: 14px 32px; }
-
-        /* Badge top-center */
-        .hc-badge {
+        .venue-cta .btn-primary,
+        .venue-cta .btn-secondary { font-size: .82rem; padding: 14px 32px; }
+        /* Badge */
+        .venue-badge {
             position: absolute;
-            top: 88px;
+            top: 86px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
             white-space: nowrap;
         }
-
-        /* Scroll line indicator */
-        .hc-scroll {
+        /* Scroll cue */
+        .venue-scroll {
             position: absolute;
-            bottom: 108px;
+            bottom: 102px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
@@ -419,11 +352,11 @@
             text-transform: uppercase;
             transition: color .3s;
         }
-        .hc-scroll:hover { color: rgba(255,255,255,.65); }
-        .hc-scroll-line {
-            width: 1px; height: 36px;
+        .venue-scroll:hover { color: rgba(255,255,255,.65); }
+        .venue-scroll-line {
+            width: 1px; height: 30px;
             background: linear-gradient(to bottom, rgba(255,255,255,0.5), transparent);
-            animation: hcLine 1.8s ease-in-out infinite;
+            animation: vScrollLine 1.8s ease-in-out infinite;
         }
     </style>
 </head>
@@ -441,46 +374,164 @@
         <a href="admin.html" style="color:#fff;text-decoration:none;font-size:0.75rem;letter-spacing:1px;opacity:0.4;transition:0.3s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.4">PANEL ADMIN</a>
     </nav>
 
-    <!-- HERO CINEMA -->
-    <section class="hero-cinema" id="hero">
-        <div class="hc-bg"></div>
-        <div class="hc-grid-ceil"></div>
-        <div class="hc-grid-floor"></div>
-        <div class="hc-atmo"></div>
-        <div class="hc-vignette"></div>
+    <!-- HERO VENUE -->
+    <section class="venue-hero" id="hero">
 
-        <!-- Badge -->
-        <div class="hc-badge">
+        <!-- SVG: sala de eventos en perspectiva (techo + paredes + piso) -->
+        <svg class="venue-scene-svg" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <!-- Glow neon para marcos del techo -->
+                <filter id="nGlow" x="-25%" y="-25%" width="150%" height="150%">
+                    <feGaussianBlur stdDeviation="3" result="b"/>
+                    <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <!-- Glow suave para líneas laterales -->
+                <filter id="sGlow" x="-40%" y="-40%" width="180%" height="180%">
+                    <feGaussianBlur stdDeviation="7" result="b"/>
+                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <!-- Glow del punto de fuga -->
+                <radialGradient id="vpG" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="rgba(120,170,255,0.55)"/>
+                    <stop offset="100%" stop-color="rgba(120,170,255,0)"/>
+                </radialGradient>
+                <!-- Paredes laterales -->
+                <linearGradient id="wL" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#1c2a4a" stop-opacity="0.7"/>
+                    <stop offset="100%" stop-color="#06080f" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="wR" x1="100%" y1="0%" x2="0%" y2="0%">
+                    <stop offset="0%" stop-color="#1c2a4a" stop-opacity="0.7"/>
+                    <stop offset="100%" stop-color="#06080f" stop-opacity="0"/>
+                </linearGradient>
+                <!-- Fade superior del techo -->
+                <linearGradient id="cFade" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#06080f" stop-opacity="0.75"/>
+                    <stop offset="100%" stop-color="#06080f" stop-opacity="0"/>
+                </linearGradient>
+                <!-- Fade inferior del piso -->
+                <linearGradient id="fFade" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#06080f" stop-opacity="0"/>
+                    <stop offset="70%" stop-color="#06080f" stop-opacity="0.7"/>
+                    <stop offset="100%" stop-color="#06080f" stop-opacity="1"/>
+                </linearGradient>
+            </defs>
+
+            <!-- Fondo base -->
+            <rect width="1000" height="560" fill="#06080f"/>
+
+            <!-- Glow del punto de fuga (horizonte) -->
+            <ellipse cx="500" cy="280" rx="380" ry="130" fill="url(#vpG)" opacity="0.7"/>
+
+            <!-- Paredes laterales -->
+            <polygon points="0,0 250,280 0,560" fill="url(#wL)"/>
+            <polygon points="1000,0 750,280 1000,560" fill="url(#wR)"/>
+
+            <!-- Líneas neon de las paredes (aristas del corredor) -->
+            <line x1="0" y1="0"   x2="250" y2="280" stroke="#90b8ff" stroke-width="1.5" opacity="0.55" filter="url(#sGlow)"/>
+            <line x1="0" y1="560" x2="250" y2="280" stroke="#90b8ff" stroke-width="1.5" opacity="0.35" filter="url(#sGlow)"/>
+            <line x1="1000" y1="0"   x2="750" y2="280" stroke="#90b8ff" stroke-width="1.5" opacity="0.55" filter="url(#sGlow)"/>
+            <line x1="1000" y1="560" x2="750" y2="280" stroke="#90b8ff" stroke-width="1.5" opacity="0.35" filter="url(#sGlow)"/>
+
+            <!-- ══ MARCOS LED DEL TECHO (convergen al punto de fuga en 500,280) ══ -->
+            <!-- Fórmula: ancho decrece hacia arriba (más lejos = más pequeño) -->
+            <!-- Marco 6 — más cercano, más grande (junto al horizonte) -->
+            <polygon points="80,256 920,256 960,224 40,224" fill="none" stroke="#b8d8ff" stroke-width="3"   opacity="0.95" filter="url(#nGlow)"/>
+            <!-- Marco 5 -->
+            <polygon points="140,222 860,222 900,188 100,188" fill="none" stroke="#b0d2ff" stroke-width="2.7" opacity="0.9"  filter="url(#nGlow)"/>
+            <!-- Marco 4 -->
+            <polygon points="200,186 800,186 838,152 162,152" fill="none" stroke="#a8ceff" stroke-width="2.4" opacity="0.85" filter="url(#nGlow)"/>
+            <!-- Marco 3 -->
+            <polygon points="262,150 738,150 774,116 226,116" fill="none" stroke="#a0caff" stroke-width="2.1" opacity="0.78" filter="url(#nGlow)"/>
+            <!-- Marco 2 -->
+            <polygon points="322,114 678,114 712,82  288,82"  fill="none" stroke="#98c4ff" stroke-width="1.8" opacity="0.68" filter="url(#nGlow)"/>
+            <!-- Marco 1 — más lejano, más pequeño -->
+            <polygon points="375,80  625,80  654,52  346,52"  fill="none" stroke="#90beff" stroke-width="1.5" opacity="0.55" filter="url(#nGlow)"/>
+
+            <!-- ══ REFLEJO EN EL PISO (marcos espejados, más tenues) ══ -->
+            <polygon points="40,304 960,304 920,336 80,336"   fill="none" stroke="#5878a8" stroke-width="1.8" opacity="0.28"/>
+            <polygon points="100,338 900,338 860,370 140,370" fill="none" stroke="#5878a8" stroke-width="1.5" opacity="0.2"/>
+            <polygon points="162,372 838,372 800,404 200,404" fill="none" stroke="#5878a8" stroke-width="1.2" opacity="0.13"/>
+            <polygon points="226,406 774,406 738,438 262,438" fill="none" stroke="#5878a8" stroke-width="1"   opacity="0.08"/>
+            <polygon points="288,440 712,440 678,470 322,470" fill="none" stroke="#5878a8" stroke-width="0.8" opacity="0.05"/>
+
+            <!-- Fade techo (top) -->
+            <rect x="0" y="0" width="1000" height="90" fill="url(#cFade)"/>
+            <!-- Fade piso (bottom) -->
+            <rect x="0" y="280" width="1000" height="280" fill="url(#fFade)"/>
+        </svg>
+
+        <!-- Pantalla LED (banda full-width al nivel del horizonte) -->
+        <div class="venue-screen">
+            <div class="venue-screen-inner">
+                <div class="venue-screen-text" id="screenText"></div>
+            </div>
+        </div>
+
+        <!-- Siluetas de la pareja (SVG, de espaldas) -->
+        <svg class="venue-couple-svg" viewBox="0 0 520 720" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <filter id="cGlow" x="-15%" y="-5%" width="130%" height="110%">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="12" result="b"/>
+                    <feFlood flood-color="#4060c8" flood-opacity="0.35" result="c"/>
+                    <feComposite in="c" in2="b" operator="in" result="g"/>
+                    <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+            </defs>
+
+            <!-- MUJER (izquierda) — vestido largo, de espaldas -->
+            <g fill="#05070d" filter="url(#cGlow)">
+                <!-- Cabeza -->
+                <ellipse cx="158" cy="118" rx="31" ry="35"/>
+                <!-- Pelo largo cayendo -->
+                <path d="M127 128 Q113 172 120 252 L134 240 Q145 226 158 222 Q171 226 182 240 L196 252 Q203 172 189 128"/>
+                <!-- Cuello -->
+                <rect x="149" y="151" width="18" height="22" rx="5"/>
+                <!-- Hombros y torso -->
+                <path d="M107 172 Q86 187 80 208 L88 205 Q118 200 158 202 Q198 200 228 205 L236 208 Q230 187 209 172 L196 163 L120 163 Z"/>
+                <!-- Cuerpo vestido (parte de arriba) -->
+                <path d="M80 206 Q70 246 66 302 Q108 296 158 299 Q208 296 250 302 Q246 246 236 206"/>
+                <!-- Pollera tipo campana -->
+                <path d="M66 300 Q38 398 14 530 L70 525 Q112 519 158 521 Q204 519 246 525 L302 530 Q278 398 250 300"/>
+            </g>
+
+            <!-- HOMBRE (derecha) — traje y sombrero, de espaldas, inclinado levemente -->
+            <g fill="#05070d" filter="url(#cGlow)">
+                <!-- Cabeza -->
+                <ellipse cx="358" cy="122" rx="29" ry="32"/>
+                <!-- Sombrero (ala) -->
+                <ellipse cx="358" cy="91" rx="47" ry="11"/>
+                <!-- Sombrero (copa) -->
+                <path d="M322 91 Q320 44 358 42 Q396 44 394 91 Z"/>
+                <!-- Cuello -->
+                <rect x="349" y="152" width="17" height="20" rx="4"/>
+                <!-- Hombros anchos / saco -->
+                <path d="M320 168 Q296 183 285 205 L293 202 Q322 197 358 199 Q394 197 423 202 L431 205 Q420 183 396 168 L382 160 L334 160 Z"/>
+                <!-- Cuerpo saco -->
+                <path d="M285 203 Q273 254 270 334 Q308 329 358 332 Q408 329 446 334 Q443 254 431 203"/>
+                <!-- Pierna izquierda -->
+                <rect x="278" y="330" width="32" height="208" rx="9"/>
+                <!-- Pierna derecha -->
+                <rect x="396" y="330" width="32" height="208" rx="9"/>
+                <!-- Brazo izquierdo (extendido hacia la mujer) -->
+                <path d="M285 203 Q264 258 260 328 L274 332 Q278 262 296 210"/>
+                <!-- Brazo derecho -->
+                <path d="M431 203 Q452 258 456 328 L442 332 Q438 262 420 210"/>
+            </g>
+        </svg>
+
+        <div class="venue-bottom-fade"></div>
+
+        <div class="venue-badge">
             <div class="eyebrow"><span class="dot-live"></span> Confirmaciones en tiempo real</div>
         </div>
 
-        <!-- Texto que corre — 3 bandas -->
-        <div class="hc-bands">
-            <div class="hc-band">
-                <div class="hc-band-track sz-md" id="bandMd"></div>
-            </div>
-            <div class="hc-band">
-                <div class="hc-band-track sz-lg" id="bandLg"></div>
-            </div>
-            <div class="hc-band">
-                <div class="hc-band-track sz-sm" id="bandSm"></div>
-            </div>
-        </div>
-
-        <div class="hc-floor-fade"></div>
-
-        <!--
-            FOTO DE NOVIOS — descomentá esta línea y poné tu URL.
-            Ideal: PNG con fondo transparente, recortado a los pies.
-            <img class="hc-couple" src="URL_NOVIOS.png" alt="Novios">
-        -->
-
-        <a href="#demo" class="hc-scroll">
+        <a href="#demo" class="venue-scroll">
             <span>Ver más</span>
-            <div class="hc-scroll-line"></div>
+            <div class="venue-scroll-line"></div>
         </a>
 
-        <div class="hc-cta">
+        <div class="venue-cta">
             <a href="https://wa.me/5491124576536" target="_blank" class="btn-primary">PEDIR MI INVITACIÓN</a>
             <a href="#demo" class="btn-secondary">VER DEMO ↓</a>
         </div>
@@ -604,19 +655,12 @@
 
     <script>
     (function() {
-        var T1 = 'TU EVENTO SOÑADO · CON INVITACIONES DIGITALES · ';
-        var T2 = 'BODAS · XV AÑOS · CUMPLEAÑOS · EVENTOS ESPECIALES · ';
-
-        function fill(id, text, reps) {
-            var el = document.getElementById(id);
-            if (!el) return;
-            var s = text.repeat(reps || 50);
-            el.textContent = s + s; // doble para loop sin salto visible
-        }
-
-        fill('bandLg', T1, 40);
-        fill('bandMd', T2, 50);
-        fill('bandSm', T1, 60);
+        var el = document.getElementById('screenText');
+        if (!el) return;
+        // Texto con palabras clave en color para imitar la pantalla LED
+        var unit = 'TU EVENTO <span style="color:#ff4d80">SOÑADO</span> · CON <span style="color:#c471ff">INVITACIONES DIGITALES</span> · ';
+        var rep = unit.repeat(25);
+        el.innerHTML = rep + rep; // duplicado para loop sin salto visible
     })();
     </script>
 
