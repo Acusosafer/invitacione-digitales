@@ -216,195 +216,195 @@
             .shimmer-text { letter-spacing: -2px; }
         }
 
-        /* ======================== HERO 3D ======================== */
-        @keyframes filter-animation {
-            0%,100% { filter: hue-rotate(0deg); }
-            50%      { filter: hue-rotate(100deg); }
-        }
-        @keyframes h3dSpin {
-            from { transform: rotateX(-8deg) rotateY(0deg); }
-            to   { transform: rotateX(-8deg) rotateY(-360deg); }
-        }
-        @keyframes h3dSpinRef {
-            from { transform: rotateX(8deg) rotateY(0deg); }
-            to   { transform: rotateX(8deg) rotateY(-360deg); }
-        }
-        @keyframes h3dScroll {
+        /* ======================== HERO CINEMA ======================== */
+        @keyframes hcScroll {
             from { transform: translateX(0); }
             to   { transform: translateX(-50%); }
         }
-        @keyframes h3dArrow {
-            0%,100% { transform: rotate(45deg) translate(-3px,-3px); opacity:.3; }
-            50%      { transform: rotate(45deg) translate(3px,3px);  opacity:1; }
+        @keyframes hcScrollRev {
+            from { transform: translateX(-50%); }
+            to   { transform: translateX(0); }
         }
-        .hero-3d {
+        @keyframes hcLine {
+            0%,100% { transform: scaleY(1); opacity:.4; }
+            50%      { transform: scaleY(1.3); opacity:1; }
+        }
+        @keyframes hcAtmo {
+            0%,100% { opacity:.7; }
+            50%      { opacity:1; }
+        }
+
+        .hero-cinema {
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: relative;
             overflow: hidden;
             background: #000;
-            position: relative;
         }
-        .h3d-wrap {
-            width: 1000px;
-            height: 562px;
-            position: relative;
-            transform-origin: center center;
-            flex-shrink: 0;
-        }
-        .h3d-bg {
+
+        /* Base gradient */
+        .hc-bg {
             position: absolute;
             inset: 0;
-            overflow: hidden;
-            background: linear-gradient(135deg, #12082a 0%, #0a0f2e 55%, #050510 100%);
+            background: radial-gradient(ellipse at 50% -5%, #2e0a50 0%, #120020 40%, #000 75%);
         }
-        .h3d-bg::after {
-            content: '';
+
+        /* Ceiling grid — perspective lines converging upward */
+        .hc-grid-ceil {
             position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(ellipse at 15% 50%, rgba(255,59,111,0.2) 0%, transparent 50%),
-                radial-gradient(ellipse at 78% 60%, rgba(196,113,255,0.2) 0%, transparent 50%);
-            animation: h3dOrbs 15s ease-in-out infinite alternate;
-        }
-        @keyframes h3dOrbs {
-            from { opacity:.7; transform:scale(1); }
-            to   { opacity:1;  transform:scale(1.1); }
-        }
-        .h3d-bg::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0,0,0,0.05) 3px, rgba(0,0,0,0.05) 4px);
+            left: -40%; right: -40%;
+            top: -80%; bottom: 48%;
+            background-image:
+                linear-gradient(rgba(196,113,255,0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(196,113,255,0.15) 1px, transparent 1px);
+            background-size: 90px 70px;
+            transform: perspective(320px) rotateX(68deg);
+            transform-origin: 50% 100%;
             z-index: 1;
-            pointer-events: none;
         }
-        .h3d-hue {
+
+        /* Floor grid — mirror reflection */
+        .hc-grid-floor {
+            position: absolute;
+            left: -40%; right: -40%;
+            top: 52%; bottom: -80%;
+            background-image:
+                linear-gradient(rgba(255,59,111,0.2) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,59,111,0.1) 1px, transparent 1px);
+            background-size: 90px 70px;
+            transform: perspective(320px) rotateX(-68deg);
+            transform-origin: 50% 0%;
+            z-index: 1;
+        }
+
+        /* Purple atmosphere glow at top center */
+        .hc-atmo {
             position: absolute;
             inset: 0;
             z-index: 2;
             pointer-events: none;
-            background: radial-gradient(ellipse at 50% 50%, rgba(196,113,255,0.12) 0%, transparent 65%);
-            animation: filter-animation 14s ease-in-out infinite;
+            background:
+                radial-gradient(ellipse at 50% -5%, rgba(196,113,255,0.5) 0%, transparent 50%),
+                radial-gradient(ellipse at 15% 85%, rgba(255,59,111,0.1) 0%, transparent 38%),
+                radial-gradient(ellipse at 85% 85%, rgba(196,113,255,0.1) 0%, transparent 38%);
+            animation: hcAtmo 8s ease-in-out infinite;
         }
-        /* Couple image — ponés tu foto acá */
-        .h3d-couple {
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            height: 108%;
-            z-index: 4;
-            object-fit: contain;
-            object-position: bottom right;
-            filter: drop-shadow(-20px 0 50px rgba(196,113,255,0.4));
-        }
-        /* CTA left */
-        .h3d-cta {
-            position: absolute;
-            top: 50%;
-            left: 5.5%;
-            transform: translateY(-50%);
-            z-index: 10;
-            max-width: 265px;
-        }
-        .h3d-cta .eyebrow { margin-bottom: 16px; font-size: .68rem; }
-        .h3d-cta-title {
-            font-family: 'Syne', sans-serif;
-            font-weight: 800;
-            font-size: 2.1rem;
-            line-height: 1;
-            letter-spacing: -1px;
-            color: #fff;
-            margin-bottom: 16px;
-        }
-        .h3d-cta-title span {
-            background: linear-gradient(125deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .h3d-cta > p { color: #666; font-size: .8rem; line-height: 1.65; margin-bottom: 22px; }
-        .h3d-cta-btns { display: flex; flex-direction: column; gap: 9px; }
-        .h3d-cta-btns .btn-primary,
-        .h3d-cta-btns .btn-secondary { text-align:center; font-size:.73rem; padding:12px 20px; }
-        /* 3D perspective stage */
-        .h3d-stage {
+
+        /* Edge vignette */
+        .hc-vignette {
             position: absolute;
             inset: 0;
+            z-index: 3;
             pointer-events: none;
-            z-index: 6;
+            background: radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.65) 100%);
         }
-        /* Cube wrapper — positioned right-center */
-        .h3d-cube-pos {
+
+        /* === Text bands === */
+        .hc-bands {
             position: absolute;
-            top: 47%;
-            left: 60%;
-            transform: translate(-50%, -50%);
-            perspective: 1400px;
-        }
-        .h3d-cube {
-            width: 300px;
-            height: 155px;
-            transform-style: preserve-3d;
-            animation: h3dSpin 24s linear infinite;
-        }
-        .h3d-face {
-            position: absolute;
-            width: 300px;
-            height: 155px;
-            backface-visibility: hidden;
-            overflow: hidden;
-        }
-        .h3d-face.front  { transform: translateZ(150px);                 background: rgba(255,59,111,0.05);  border: 1px solid rgba(255,59,111,0.22); }
-        .h3d-face.back   { transform: rotateY(180deg) translateZ(150px); background: rgba(196,113,255,0.05); border: 1px solid rgba(196,113,255,0.22); }
-        .h3d-face.left   { transform: rotateY(-90deg) translateZ(150px); background: rgba(255,59,111,0.05);  border: 1px solid rgba(255,59,111,0.22); }
-        .h3d-face.right  { transform: rotateY(90deg)  translateZ(150px); background: rgba(196,113,255,0.05); border: 1px solid rgba(196,113,255,0.22); }
-        .h3d-face.top    { transform: rotateX(90deg)  translateZ(77px);  background: linear-gradient(180deg, rgba(255,59,111,0.45) 0%, rgba(255,59,111,0.04) 100%);  border: 1px solid rgba(255,59,111,0.35); }
-        .h3d-face.bottom { transform: rotateX(-90deg) translateZ(78px);  background: linear-gradient(0deg,   rgba(196,113,255,0.45) 0%, rgba(196,113,255,0.04) 100%); border: 1px solid rgba(196,113,255,0.35); }
-        .h3d-face.text {
+            inset: 0;
+            z-index: 4;
             display: flex;
-            align-items: center;
-            background: rgba(4,2,18,0.88) !important;
-            border-color: rgba(255,255,255,0.07) !important;
+            flex-direction: column;
+            justify-content: center;
+            pointer-events: none;
         }
-        .h3d-track {
-            display: flex;
+
+        .hc-band { overflow: hidden; }
+
+        .hc-band-track {
+            display: inline-flex;
             align-items: center;
             white-space: nowrap;
             font-family: 'Syne', sans-serif;
             font-weight: 800;
-            font-size: 12px;
-            letter-spacing: 3.5px;
             text-transform: uppercase;
             color: transparent;
-            -webkit-text-stroke: 1px rgba(255,255,255,0.5);
-            padding: 0 12px;
+            will-change: transform;
         }
-        .h3d-track.a1 { animation: h3dScroll 22s linear infinite; }
-        .h3d-track.a2 { animation: h3dScroll 19s linear infinite reverse; }
-        .h3d-track.a3 { animation: h3dScroll 26s linear infinite; }
-        /* Reflection */
-        .h3d-reflect-pos {
+
+        /* Large center band */
+        .hc-band-track.sz-lg {
+            font-size: clamp(56px, 8vw, 106px);
+            letter-spacing: -0.02em;
+            line-height: 1;
+            -webkit-text-stroke: 1.5px rgba(255,255,255,0.6);
+            padding: 8px 0;
+            animation: hcScroll 20s linear infinite;
+        }
+
+        /* Medium band above */
+        .hc-band-track.sz-md {
+            font-size: clamp(36px, 5.2vw, 68px);
+            letter-spacing: 0.04em;
+            line-height: 1;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.28);
+            padding: 6px 0;
+            animation: hcScrollRev 28s linear infinite;
+        }
+
+        /* Small band below */
+        .hc-band-track.sz-sm {
+            font-size: clamp(24px, 3.5vw, 46px);
+            letter-spacing: 0.08em;
+            line-height: 1;
+            -webkit-text-stroke: 1px rgba(196,113,255,0.4);
+            padding: 5px 0;
+            animation: hcScroll 36s linear infinite;
+        }
+
+        /* === Couple image slot === */
+        .hc-couple {
             position: absolute;
-            top: 47%;
-            left: 60%;
-            margin-top: 77px;
-            transform: translate(-50%, 0);
-            perspective: 1400px;
-            opacity: 0.2;
-            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 65%);
-            mask-image: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 65%);
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 90%;
+            z-index: 6;
+            object-fit: contain;
+            object-position: bottom center;
+            filter: drop-shadow(0 0 80px rgba(196,113,255,0.5))
+                    drop-shadow(0 0 30px rgba(255,59,111,0.3));
         }
-        .h3d-cube-ref {
-            width: 300px;
-            height: 155px;
-            transform-style: preserve-3d;
-            animation: h3dSpinRef 24s linear infinite;
-        }
-        /* Scroll cue */
-        .h3d-scroll-cue {
+
+        /* Bottom fade so couple blends into ground */
+        .hc-floor-fade {
             position: absolute;
-            bottom: 18px;
+            bottom: 0; left: 0; right: 0;
+            height: 30%;
+            background: linear-gradient(to top, #000 0%, transparent 100%);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* === CTA bottom === */
+        .hc-cta {
+            position: absolute;
+            bottom: 36px;
+            left: 0; right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            z-index: 10;
+            flex-wrap: wrap;
+            padding: 0 20px;
+        }
+        .hc-cta .btn-primary  { font-size: .82rem; padding: 14px 32px; }
+        .hc-cta .btn-secondary { font-size: .82rem; padding: 14px 32px; }
+
+        /* Badge top-center */
+        .hc-badge {
+            position: absolute;
+            top: 88px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        /* Scroll line indicator */
+        .hc-scroll {
+            position: absolute;
+            bottom: 108px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
@@ -412,23 +412,18 @@
             flex-direction: column;
             align-items: center;
             gap: 5px;
+            text-decoration: none;
             color: rgba(255,255,255,0.3);
-            font-size: .58rem;
+            font-size: .6rem;
             letter-spacing: 2.5px;
             text-transform: uppercase;
-            text-decoration: none;
             transition: color .3s;
         }
-        .h3d-scroll-cue:hover { color: rgba(255,255,255,.65); }
-        .h3d-down-arrow {
-            width: 15px; height: 15px;
-            border-right: 1.5px solid currentColor;
-            border-bottom: 1.5px solid currentColor;
-            transform: rotate(45deg);
-            animation: h3dArrow 1.5s ease-in-out infinite;
-        }
-        @media (max-width: 860px) {
-            .h3d-cta { display: none; }
+        .hc-scroll:hover { color: rgba(255,255,255,.65); }
+        .hc-scroll-line {
+            width: 1px; height: 36px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.5), transparent);
+            animation: hcLine 1.8s ease-in-out infinite;
         }
     </style>
 </head>
@@ -446,60 +441,48 @@
         <a href="admin.html" style="color:#fff;text-decoration:none;font-size:0.75rem;letter-spacing:1px;opacity:0.4;transition:0.3s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.4">PANEL ADMIN</a>
     </nav>
 
-    <!-- HERO 3D -->
-    <section class="hero-3d" id="hero">
-        <div class="h3d-wrap" id="h3dWrap">
-            <div class="h3d-bg"></div>
-            <div class="h3d-hue"></div>
+    <!-- HERO CINEMA -->
+    <section class="hero-cinema" id="hero">
+        <div class="hc-bg"></div>
+        <div class="hc-grid-ceil"></div>
+        <div class="hc-grid-floor"></div>
+        <div class="hc-atmo"></div>
+        <div class="hc-vignette"></div>
 
-            <!--
-                FOTO DE NOVIOS: descomentá la línea de abajo y reemplazá src con
-                la URL de tu imagen (PNG con fondo transparente ideal).
-                Ejemplo: src="https://i.ibb.co/tu-imagen.png"
-            -->
-            <!-- <img class="h3d-couple" src="" alt="Novios"> -->
+        <!-- Badge -->
+        <div class="hc-badge">
+            <div class="eyebrow"><span class="dot-live"></span> Confirmaciones en tiempo real</div>
+        </div>
 
-            <!-- CTA izquierdo -->
-            <div class="h3d-cta">
-                <div class="eyebrow"><span class="dot-live"></span> Confirmaciones en tiempo real</div>
-                <div class="h3d-cta-title">Tu evento<br><span>soñado.</span></div>
-                <p>Elegancia digital para cada momento especial. Links personalizados, RSVP y mucho más.</p>
-                <div class="h3d-cta-btns">
-                    <a href="https://wa.me/5491124576536" target="_blank" class="btn-primary">💬 PEDIR MI INVITACIÓN</a>
-                    <a href="#demo" class="btn-secondary">VER DEMO ↓</a>
-                </div>
+        <!-- Texto que corre — 3 bandas -->
+        <div class="hc-bands">
+            <div class="hc-band">
+                <div class="hc-band-track sz-md" id="bandMd"></div>
             </div>
-
-            <!-- Stage 3D -->
-            <div class="h3d-stage">
-                <!-- Cubo principal -->
-                <div class="h3d-cube-pos">
-                    <div class="h3d-cube">
-                        <div class="h3d-face top"></div>
-                        <div class="h3d-face bottom"></div>
-                        <div class="h3d-face left text"><div class="h3d-track a1" id="trL"></div></div>
-                        <div class="h3d-face right text"><div class="h3d-track a2" id="trR"></div></div>
-                        <div class="h3d-face front"></div>
-                        <div class="h3d-face back text"><div class="h3d-track a3" id="trB"></div></div>
-                    </div>
-                </div>
-                <!-- Reflejo -->
-                <div class="h3d-reflect-pos">
-                    <div class="h3d-cube-ref">
-                        <div class="h3d-face top"></div>
-                        <div class="h3d-face bottom"></div>
-                        <div class="h3d-face left text"><div class="h3d-track a1" id="trLr"></div></div>
-                        <div class="h3d-face right text"><div class="h3d-track a2" id="trRr"></div></div>
-                        <div class="h3d-face front"></div>
-                        <div class="h3d-face back text"><div class="h3d-track a3" id="trBr"></div></div>
-                    </div>
-                </div>
+            <div class="hc-band">
+                <div class="hc-band-track sz-lg" id="bandLg"></div>
             </div>
+            <div class="hc-band">
+                <div class="hc-band-track sz-sm" id="bandSm"></div>
+            </div>
+        </div>
 
-            <a href="#demo" class="h3d-scroll-cue">
-                <div class="h3d-down-arrow"></div>
-                <span>Ver más</span>
-            </a>
+        <div class="hc-floor-fade"></div>
+
+        <!--
+            FOTO DE NOVIOS — descomentá esta línea y poné tu URL.
+            Ideal: PNG con fondo transparente, recortado a los pies.
+            <img class="hc-couple" src="URL_NOVIOS.png" alt="Novios">
+        -->
+
+        <a href="#demo" class="hc-scroll">
+            <span>Ver más</span>
+            <div class="hc-scroll-line"></div>
+        </a>
+
+        <div class="hc-cta">
+            <a href="https://wa.me/5491124576536" target="_blank" class="btn-primary">PEDIR MI INVITACIÓN</a>
+            <a href="#demo" class="btn-secondary">VER DEMO ↓</a>
         </div>
     </section>
 
@@ -621,27 +604,19 @@
 
     <script>
     (function() {
-        // Texto que corre en las caras del cubo
-        const UNIT = 'TU EVENTO SOÑADO · CON INVITACIONES DIGITALES · ';
-        const long = UNIT.repeat(100); // ~100 repeticiones = ~40000px
-        const doubled = long + long;   // duplicado para loop sin saltos
+        var T1 = 'TU EVENTO SOÑADO · CON INVITACIONES DIGITALES · ';
+        var T2 = 'BODAS · XV AÑOS · CUMPLEAÑOS · EVENTOS ESPECIALES · ';
 
-        ['trL','trR','trB','trLr','trRr','trBr'].forEach(function(id) {
+        function fill(id, text, reps) {
             var el = document.getElementById(id);
-            if (el) el.textContent = doubled;
-        });
-
-        // Escala responsive: el wrap interno siempre cabe en el viewport
-        function scaleHero() {
-            var wrap = document.getElementById('h3dWrap');
-            if (!wrap) return;
-            var scaleX = window.innerWidth  / 1000;
-            var scaleY = window.innerHeight / 562;
-            var s = Math.min(scaleX, scaleY, 1);
-            wrap.style.transform = 'scale(' + s + ')';
+            if (!el) return;
+            var s = text.repeat(reps || 50);
+            el.textContent = s + s; // doble para loop sin salto visible
         }
-        scaleHero();
-        window.addEventListener('resize', scaleHero);
+
+        fill('bandLg', T1, 40);
+        fill('bandMd', T2, 50);
+        fill('bandSm', T1, 60);
     })();
     </script>
 
