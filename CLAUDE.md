@@ -147,8 +147,61 @@ Al generar un link, el admin **pre-inserta filas en `confirmaciones`** con `asis
 5. Al confirmar: borra las filas pre-cargadas e inserta todas las filas nuevas (titular + acompañantes)
 6. Maneja error de columna `mesa` ausente con retry sin ese campo
 
+## Fotos — especificaciones para generación
+
+Cada evento puede tener hasta 7 fotos. Todas se suben desde el admin (superadmin → Editor de Secciones) y se guardan en Supabase Storage bucket `invitaciones`.
+
+| Campo config | Dónde aparece | Crop visual | Tamaño ideal a generar |
+|---|---|---|---|
+| `foto_splash` | Pantalla de bienvenida — círculo flotante con borde color | Circular (`border-radius: 50%`) | **600×600 px cuadrada** |
+| `foto_hero` | Hero full-screen — fondo con overlay oscuro 40% | Horizontal, `object-fit: cover` | **1920×1080 px** |
+| `foto_galeria_1..4` | Carrusel en mobile / Grid en desktop | Cuadrada, `object-fit: cover` | **800×800 px** (hasta 4) |
+| `foto_hashtag` | Sección Instagram — segundo círculo | Circular (`border-radius: 50%`) | **400×400 px cuadrada** |
+
+**Tips para generar con IA (Gemini/Midjourney):**
+- `foto_splash` y `foto_hashtag`: composición centrada — cara o detalle en el centro (se recortan las esquinas).
+- `foto_hero`: asegurar que no sea muy clara/saturada (el overlay 40% negro mejora la legibilidad del texto blanco encima).
+- `foto_galeria_*`: pueden ser de ambiente, detalles, o retratos. Se muestran en carrusel en mobile.
+
+## Eventos demo en Supabase
+
+Creados para la landing page (`index.html` → sección "Explorá nuestros diseños").
+
+**15 años** (6 eventos):
+| ID | Nombre | Paleta | Música |
+|---|---|---|---|
+| `valentina15` | Valentina | Dark/Verde acento (original) | — |
+| `zaira15` | Zaira | Dark Silver `#0d0d1a / #b8b8cc` | Slow ♪ |
+| `martina15` | Martina | Blanco Mármol `#fafaf8 / #c8b89a` | Slow ♪ |
+| `luna15` | Luna | Verde Botánica `#f5f8f2 / #7ab87a` | Slow ♪ |
+| `sofia15` | Sofía | Rosa Chicle `#fff0f7 / #ff6ba8` | Upbeat ♫ |
+| `isabella15` | Isabella | Lila Aesthetic `#f8f5ff / #b8a0d6` | Upbeat ♫ |
+| `catalina15` | Catalina | Dorado Glam `#0d0d06 / #d4af37` | Upbeat ♫ |
+
+**Casamientos** (6 eventos):
+| ID | Nombres | Paleta | Música |
+|---|---|---|---|
+| `boda-ana` | Ana & José | Clásico Dorado `#fffef9 / #c9a96e` | Slow ♪ |
+| `boda-elena` | Elena & Pablo | Negro & Dorado `#0d0d0d / #d4af37` | Slow ♪ |
+| `boda-maria` | María & Ramiro | Verde Rústico `#f5f5ee / #a0b880` | Slow ♪ |
+| `boda-carolina` | Carolina & Martín | Terracotta `#faf6f0 / #d4845a` | Upbeat ♫ |
+| `boda-valentina` | Valentina & Nicolás | Blush Pink `#fdf5f7 / #e8b4c0` | Upbeat ♫ |
+| `boda-julieta` | Julieta & Tomás | Azul Noche `#080f1a / #7090c0` | Upbeat ♫ |
+
+Todos con `admin_password: admin123`. Las fotos son placeholders de picsum — reemplazar desde el admin con fotos reales generadas por IA o del cliente.
+
+## index.html — estructura de la landing
+
+1. **Hero** — venue 3D SVG con pantalla LED (3 paneles CSS perspective) + siluetas de pareja
+2. **Demos Gallery** — toggle 15 AÑOS / CASAMIENTOS + grid 3×2 de iPhones con iframes de invitaciones reales
+3. **Demo Section** — iPhone con `valentina15` + lista de features del servicio
+4. **Álbum QR section** — descripción del álbum compartido
+5. **Preview Cards** — 6 features (countdown, ubicación, música, etc.)
+6. **CTA final** — botón WhatsApp
+
 ## Errores conocidos / workarounds
 
 - **Columna `mesa` ausente:** El código en `invitacion.html` y `admin.html` detecta error `42703` o `PGRST204` y reintenta sin el campo `mesa`, o usa localStorage como fallback.
 - **Autoplay de audio bloqueado:** El botón de la invitación solo intenta `play()` después de interacción del usuario.
 - **`filter: darken(5%)`** en `.darken-func` — CSS inválido, no tiene efecto (es una función de SASS/PostCSS, no CSS nativo).
+- **Supabase free tier pausa** tras 1 semana sin actividad — usar MCP `restore_project(fybwovlewphtdmjmwyjn)` para reactivar.
