@@ -1229,7 +1229,7 @@
           <line x1="12" y1="18" x2="12.01" y2="18" />
         </svg>
       </div>
-      <img id="txt-hashtag-foto" class="hashtag-photo" src="" alt="" onerror="this.style.display='none'">
+      <img id="txt-hashtag-foto" class="hashtag-photo" alt="" onerror="this.style.display='none'">
       <p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">Comparte tus fotos con
       </p>
       <h2 class="hashtag-tag" id="txt-hash"></h2>
@@ -1277,7 +1277,7 @@
               <button class="tag-btn" data-diet="Vegetariano">Vegetariano</button>
               <button class="tag-btn" data-diet="Vegano">Vegano</button>
               <button class="tag-btn" data-diet="Diabético">Diabético</button>
-              <button class="tag-btn" data-diet="Ninguno">Ninguno</button>
+              <button class="tag-btn sel" data-diet="Ninguno">Ninguno</button>
             </div>
           </div>
         </div>
@@ -1517,7 +1517,7 @@
               .eq('invitado_url', invitado)
               .limit(1);
 
-            if (extConfirm && extConfirm.length > 0) {
+            if (extConfirm && extConfirm.length > 0 && extConfirm[0].asiste !== 'pendiente') {
               document.getElementById('rsvp-title').style.display = 'none';
               const limP = document.getElementById('rsvp-lim-p');
               if (limP) limP.style.display = 'none';
@@ -1550,6 +1550,10 @@
           const sec = document.getElementById('sec-' + id);
           if (sec) container.appendChild(sec);
         });
+        // Sections missing from order array go to end (not left floating at DOM top)
+        container.querySelectorAll('.section[id^="sec-"]').forEach(sec => {
+          if (!C.layout.order.includes(sec.id.replace('sec-', ''))) container.appendChild(sec);
+        });
       }
 
       // RSVP
@@ -1557,17 +1561,40 @@
         btn.onclick = () => {
           document.querySelectorAll('#opts-asiste .opt-btn').forEach(b => b.classList.remove('sel'));
           btn.classList.add('sel');
-          document.getElementById('rsvp-details').style.display = btn.dataset.val === 'si' ? 'block' : 'none';
+          const isSi = btn.dataset.val === 'si';
+          document.getElementById('rsvp-details').style.display = isSi ? 'block' : 'none';
+          const companionContainer = document.getElementById('companion-inputs-container');
+          if (companionContainer) {
+            companionContainer.style.display = isSi ? 'flex' : 'none';
+          }
         };
       });
+      // Inicializar con la cantidad máxima predeterminada
+      updateCompanionInputs(maxPax);
+
       document.querySelectorAll('#opts-personas .opt-btn').forEach(btn => {
         btn.onclick = () => {
           document.querySelectorAll('#opts-personas .opt-btn').forEach(b => b.classList.remove('sel'));
           btn.classList.add('sel');
+          const count = parseInt(btn.dataset.val) || 1;
+          updateCompanionInputs(count);
         };
       });
-      document.querySelectorAll('.tag-btn').forEach(btn => {
-        btn.onclick = () => btn.classList.toggle('sel');
+      document.querySelectorAll('.tag-btn:not(.comp-tag-btn)').forEach(btn => {
+        btn.onclick = () => {
+          const diet = btn.dataset.diet;
+          if (diet === 'Ninguno') {
+            document.querySelectorAll('.tag-btn:not(.comp-tag-btn)').forEach(b => {
+              if (b.dataset.diet !== 'Ninguno') b.classList.remove('sel');
+            });
+            btn.classList.add('sel');
+          } else {
+            document.querySelectorAll('.tag-btn:not(.comp-tag-btn)').forEach(b => {
+              if (b.dataset.diet === 'Ninguno') b.classList.remove('sel');
+            });
+            btn.classList.toggle('sel');
+          }
+        };
       });
 
       document.getElementById('btn-confirmar').onclick = confirmar;
@@ -1596,6 +1623,110 @@
           }
         });
       });
+    }
+
+    window.toggleCompAsiste = (el, val, index) => {
+      const parent = el.parentNode;
+      parent.querySelectorAll('.comp-asiste-btn').forEach(btn => btn.classList.remove('sel'));
+      el.classList.add('sel');
+      const details = document.getElementById(`comp-details-${index}`);
+      if (details) {
+        details.style.display = val === 'si' ? 'flex' : 'none';
+      }
+    };
+
+    window.toggleCompDiet = (el) => {
+      const parent = el.parentNode;
+      const diet = el.dataset.diet;
+      if (diet === 'Ninguno') {
+        parent.querySelectorAll('.comp-tag-btn').forEach(b => {
+          if (b.dataset.diet !== 'Ninguno') b.classList.remove('sel');
+        });
+        el.classList.add('sel');
+      } else {
+        parent.querySelectorAll('.comp-tag-btn').forEach(b => {
+          if (b.dataset.diet === 'Ninguno') b.classList.remove('sel');
+        });
+        el.classList.toggle('sel');
+      }
+    };
+
+    function updateCompanionInputs(count) {
+      let container = document.getElementById('companion-inputs-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'companion-inputs-container';
+        container.style.marginTop = '16px';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.gap = '12px';
+        
+        // Insert it right before the confirm button!
+        const btnConfirmar = document.getElementById('btn-confirmar');
+        if (btnConfirmar) {
+          btnConfirmar.parentNode.insertBefore(container, btnConfirmar);
+        }
+      }
+      container.innerHTML = '';
+      if (count > 1) {
+        const title = document.createElement('label');
+        title.className = 'form-label';
+        title.style.marginTop = '10px';
+        title.style.fontSize = '0.85rem';
+        title.textContent = 'Información de los acompañantes:';
+        container.appendChild(title);
+        
+        for (let i = 2; i <= count; i++) {
+          const card = document.createElement('div');
+          card.className = 'companion-card';
+          card.style.background = '#fafafa';
+          card.style.border = '1px solid rgba(0,0,0,0.06)';
+          card.style.borderRadius = '16px';
+          card.style.padding = '16px';
+          card.style.marginBottom = '12px';
+          card.style.display = 'flex';
+          card.style.flexDirection = 'column';
+          card.style.gap = '12px';
+          
+          card.innerHTML = `
+            <div style="font-family:var(--font); font-weight:600; font-size:0.9rem; color:var(--primary); display:flex; justify-content:space-between; align-items:center;">
+              <span>Acompañante ${i}</span>
+            </div>
+            
+            <div style="display:flex; gap:8px;">
+              <input type="text" class="form-input comp-nombre" placeholder="Nombre" style="flex:1; padding:8px 12px; font-size:0.85rem;" required>
+              <input type="text" class="form-input comp-apellido" placeholder="Apellido" style="flex:1; padding:8px 12px; font-size:0.85rem;" required>
+            </div>
+            
+            <div class="form-group" style="margin-bottom:4px;">
+              <label class="form-label" style="font-size:0.72rem; color:rgba(0,0,0,0.5); text-transform:none; letter-spacing:0;">¿Asiste a la fiesta?</label>
+              <div class="opts-row" style="display:flex; gap:8px;">
+                <div class="opt-btn comp-asiste-btn sel" data-val="si" style="flex:1; text-align:center; padding:8px; border-radius:8px; border:1px solid rgba(0,0,0,0.1); cursor:pointer; font-size:0.8rem; font-weight:600;" onclick="toggleCompAsiste(this, 'si', ${i})">Sí</div>
+                <div class="opt-btn comp-asiste-btn" data-val="no" style="flex:1; text-align:center; padding:8px; border-radius:8px; border:1px solid rgba(0,0,0,0.1); cursor:pointer; font-size:0.8rem; font-weight:600;" onclick="toggleCompAsiste(this, 'no', ${i})">No</div>
+              </div>
+            </div>
+            
+            <div id="comp-details-${i}" class="comp-details-panel" style="display:flex; flex-direction:column; gap:12px;">
+              <div class="form-group">
+                <label class="form-label" style="font-size:0.72rem; color:rgba(0,0,0,0.5); text-transform:none; letter-spacing:0;">¿Alguna restricción alimentaria?</label>
+                <div class="opts-tags" style="display:flex; flex-wrap:wrap; gap:6px;">
+                  <div class="tag-btn comp-tag-btn" data-diet="Vegetariano" onclick="toggleCompDiet(this)" style="flex:1 1 auto; white-space:nowrap; padding:5px 10px; font-size:0.75rem;">Vegetariano</div>
+                  <div class="tag-btn comp-tag-btn" data-diet="Vegano" onclick="toggleCompDiet(this)" style="flex:1 1 auto; white-space:nowrap; padding:5px 10px; font-size:0.75rem;">Vegano</div>
+                  <div class="tag-btn comp-tag-btn" data-diet="Celíaco" onclick="toggleCompDiet(this)" style="flex:1 1 auto; white-space:nowrap; padding:5px 10px; font-size:0.75rem;">Celíaco</div>
+                  <div class="tag-btn comp-tag-btn" data-diet="Hipertenso" onclick="toggleCompDiet(this)" style="flex:1 1 auto; white-space:nowrap; padding:5px 10px; font-size:0.75rem;">Hipertenso</div>
+                  <div class="tag-btn comp-tag-btn sel" data-diet="Ninguno" onclick="toggleCompDiet(this)" style="flex:1 1 auto; white-space:nowrap; padding:5px 10px; font-size:0.75rem;">Ninguno</div>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" style="font-size:0.72rem; color:rgba(0,0,0,0.5); text-transform:none; letter-spacing:0;">Canción sugerida</label>
+                <input type="text" class="form-input comp-cancion" placeholder="Ej: La Bachata - Manuel Turizo" style="padding:8px 12px; font-size:0.85rem;">
+              </div>
+            </div>
+          `;
+          container.appendChild(card);
+        }
+      }
     }
 
     function toggleMusic() {
@@ -1670,36 +1801,87 @@
 
       const asiste = document.querySelector('#opts-asiste .opt-btn.sel').dataset.val;
       const personas = asiste === 'si' ? document.querySelector('#opts-personas .opt-btn.sel')?.textContent || '1' : '0';
-      const dieta = asiste === 'si' ? [...document.querySelectorAll('.tag-btn.sel')].map(t => t.dataset.diet).join(', ') : '';
+      const dieta = asiste === 'si' ? [...document.querySelectorAll('.tag-btn.sel:not(.comp-tag-btn)')].map(t => t.dataset.diet).join(', ') : '';
       const mesa = mesa_param || '';
 
-      const data = {
+      const primaryGuest = {
         evento_id: eventoId,
         invitado_url: invitado || 'general',
         nombre: nombre,
         apellido: document.getElementById('f-apellido').value.trim(),
         asiste: asiste,
-        personas: parseInt(personas) || 0,
+        personas: 1,
         dieta: dieta,
         mensaje: document.getElementById('f-msg').value.trim(),
         mesa: mesa,
       };
 
-      const { error } = await sb.from('confirmaciones').insert([data]);
+      // Gather companions with advanced details (attendance, diet, song)
+      const companions = [];
+      if (asiste === 'si') {
+        const cards = document.querySelectorAll('.companion-card');
+        cards.forEach((card, idx) => {
+          const cNombre = card.querySelector('.comp-nombre').value.trim();
+          const cApellido = card.querySelector('.comp-apellido').value.trim() || '';
+          const cAsiste = card.querySelector('.comp-asiste-btn.sel').dataset.val;
+          const cDieta = cAsiste === 'si' 
+            ? [...card.querySelectorAll('.comp-tag-btn.sel')].map(t => t.dataset.diet).join(', ') 
+            : '';
+          const cCancion = cAsiste === 'si'
+            ? card.querySelector('.comp-cancion').value.trim()
+            : '';
+
+          if (cNombre) {
+            companions.push({
+              evento_id: eventoId,
+              invitado_url: invitado || 'general',
+              nombre: cNombre,
+              apellido: cApellido,
+              asiste: cAsiste,
+              personas: 1,
+              dieta: cDieta,
+              mensaje: cCancion || `Acompañante de ${nombre}`,
+              mesa: mesa
+            });
+          }
+        });
+      }
+
+      // Clean up preloaded pending guest rows to ensure clean bulk insert!
+      if (invitado) {
+        try {
+          await sb.from('confirmaciones').delete().eq('evento_id', eventoId).eq('invitado_url', invitado);
+        } catch (err) {
+          console.warn("Clean preloaded delete failed:", err);
+        }
+      }
+
+      const allRows = [primaryGuest, ...companions];
+      const { error } = await sb.from('confirmaciones').insert(allRows);
 
       if (error) {
         if (error.code === 'PGRST204' || error.message.includes('column') || error.code === '42703') {
-          const safeData = {
+          const safePrimary = {
             evento_id: eventoId,
             invitado_url: invitado || 'general',
             nombre: nombre,
             apellido: document.getElementById('f-apellido').value.trim(),
             asiste: asiste,
-            personas: parseInt(personas) || 0,
+            personas: 1,
             dieta: dieta,
             mensaje: document.getElementById('f-msg').value.trim()
           };
-          const retry = await sb.from('confirmaciones').insert([safeData]);
+          const safeCompanions = companions.map(c => ({
+            evento_id: eventoId,
+            invitado_url: invitado || 'general',
+            nombre: c.nombre,
+            apellido: c.apellido,
+            asiste: c.asiste,
+            personas: 1,
+            dieta: c.dieta,
+            mensaje: c.mensaje
+          }));
+          const retry = await sb.from('confirmaciones').insert([safePrimary, ...safeCompanions]);
           if (retry.error) {
             toast('❌ Error al enviar (Código 2): ' + retry.error.message);
             btn.textContent = '✓ Confirmar asistencia';
