@@ -55,7 +55,9 @@
     .cta-btn-outline:hover { background: rgba(255,255,255,0.13) !important; border-color: rgba(255,255,255,0.4) !important; }
 
     /* ── DEMO GRID TABS ── */
-    .demos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: clamp(28px,4vw,46px); max-width: 880px; margin: 0 auto; justify-items: center; }
+    .demos-grid { display: grid; grid-template-columns: repeat(3, 194px); gap: clamp(24px,3.5vw,42px); max-width: 760px; margin: 0 auto; justify-items: center; }
+    @media (max-width: 680px) { .demos-grid { grid-template-columns: repeat(2, 194px); } }
+    @media (max-width: 440px) { .demos-grid { grid-template-columns: 194px; } }
     .demos-grid.hidden { display: none; }
 
     /* ── SCROLL REVEAL ── */
@@ -333,117 +335,70 @@
       <button id="tab-boda" class="demo-tab-btn" onclick="switchTab('boda')">Casamientos</button>
     </div>
 
+    <!-- helper macro: phone shell + iframe -->
     <!-- 15 AÑOS GRID -->
     <div id="grid-15" class="demos-grid">
-      <!-- Zaira -->
       <a href="invitacion.html?evento=zaira15" target="_blank" class="demo-card" data-reveal style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:15px;">
         <div class="demo-phone-wrap" style="position:relative; width:194px; height:410px; filter:drop-shadow(0 26px 44px rgba(34,28,23,0.2));">
           <div style="width:100%; height:100%; background:linear-gradient(150deg,#3a342c,#1c1814); border-radius:38px; padding:8px; border:1.5px solid rgba(255,255,255,0.1);">
-            <div style="width:100%; height:100%; border-radius:31px; overflow:hidden; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 16px; text-align:center; background:linear-gradient(168deg,#1d1a17,#15110f); color:#e8e2da;">
-              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; opacity:.8;"></div>
-              <div style="font-size:.5rem; letter-spacing:3px; font-weight:700; color:#c9c4bc; margin-bottom:10px;">MIS 15 AÑOS</div>
-              <div style="font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.7rem; line-height:1.02;">Zaira</div>
-              <div style="width:32px; height:1px; margin:11px auto; background:#c9c4bc;"></div>
-              <div style="font-size:.54rem; letter-spacing:2px; opacity:.72;">05 · JULIO · 2026</div>
-              <div style="display:inline-flex; align-items:center; gap:6px; margin-top:16px; border-radius:100px; padding:5px 12px; background:rgba(255,255,255,0.14); border:1px solid #c9c4bc;">
-                <span style="font-size:.52rem; color:#c9c4bc; font-weight:700;">♪ Slow</span>
-              </div>
-              <div style="margin-top:14px; font-size:.55rem; font-weight:700; letter-spacing:1px; padding:8px 18px; border-radius:100px; border:1px solid #c9c4bc; color:#c9c4bc;">CONFIRMAR</div>
+            <div style="width:178px; height:394px; border-radius:31px; overflow:hidden; position:relative; background:#000;">
+              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; z-index:10;"></div>
+              <iframe src="invitacion.html?evento=zaira15" style="width:356px; height:788px; border:none; position:absolute; top:0; left:0; transform:scale(0.5); transform-origin:top left; pointer-events:none;" loading="eager"></iframe>
             </div>
           </div>
         </div>
         <div><div style="font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:600; color:#221C17;">Zaira</div><div style="font-size:.62rem; letter-spacing:1.5px; text-transform:uppercase; color:#9A9085; margin-top:2px;">Dark Silver</div></div>
       </a>
-      <!-- Martina -->
       <a href="invitacion.html?evento=martina15" target="_blank" class="demo-card" data-reveal style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:15px;">
         <div class="demo-phone-wrap" style="position:relative; width:194px; height:410px; filter:drop-shadow(0 26px 44px rgba(34,28,23,0.2));">
           <div style="width:100%; height:100%; background:linear-gradient(150deg,#3a342c,#1c1814); border-radius:38px; padding:8px; border:1.5px solid rgba(255,255,255,0.1);">
-            <div style="width:100%; height:100%; border-radius:31px; overflow:hidden; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 16px; text-align:center; background:linear-gradient(168deg,#FBF8F2,#EFE7DA); color:#2a2722;">
-              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; opacity:.8;"></div>
-              <div style="font-size:.5rem; letter-spacing:3px; font-weight:700; color:#b9a06f; margin-bottom:10px;">MIS 15 AÑOS</div>
-              <div style="font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.7rem; line-height:1.02;">Martina</div>
-              <div style="width:32px; height:1px; margin:11px auto; background:#b9a06f;"></div>
-              <div style="font-size:.54rem; letter-spacing:2px; opacity:.72;">12 · ABRIL · 2026</div>
-              <div style="display:inline-flex; align-items:center; gap:6px; margin-top:16px; border-radius:100px; padding:5px 12px; background:rgba(255,255,255,0.14); border:1px solid #b9a06f;">
-                <span style="font-size:.52rem; color:#b9a06f; font-weight:700;">♪ Slow</span>
-              </div>
-              <div style="margin-top:14px; font-size:.55rem; font-weight:700; letter-spacing:1px; padding:8px 18px; border-radius:100px; border:1px solid #b9a06f; color:#b9a06f;">CONFIRMAR</div>
+            <div style="width:178px; height:394px; border-radius:31px; overflow:hidden; position:relative; background:#000;">
+              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; z-index:10;"></div>
+              <iframe src="invitacion.html?evento=martina15" style="width:356px; height:788px; border:none; position:absolute; top:0; left:0; transform:scale(0.5); transform-origin:top left; pointer-events:none;" loading="eager"></iframe>
             </div>
           </div>
         </div>
         <div><div style="font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:600; color:#221C17;">Martina</div><div style="font-size:.62rem; letter-spacing:1.5px; text-transform:uppercase; color:#9A9085; margin-top:2px;">Blanco Mármol</div></div>
       </a>
-      <!-- Luna -->
       <a href="invitacion.html?evento=luna15" target="_blank" class="demo-card" data-reveal style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:15px;">
         <div class="demo-phone-wrap" style="position:relative; width:194px; height:410px; filter:drop-shadow(0 26px 44px rgba(34,28,23,0.2));">
           <div style="width:100%; height:100%; background:linear-gradient(150deg,#3a342c,#1c1814); border-radius:38px; padding:8px; border:1.5px solid rgba(255,255,255,0.1);">
-            <div style="width:100%; height:100%; border-radius:31px; overflow:hidden; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 16px; text-align:center; background:linear-gradient(168deg,#1c2a20,#13201a); color:#eaf0e8;">
-              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; opacity:.8;"></div>
-              <div style="font-size:.5rem; letter-spacing:3px; font-weight:700; color:#9bbf9b; margin-bottom:10px;">MIS 15 AÑOS</div>
-              <div style="font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.7rem; line-height:1.02;">Luna</div>
-              <div style="width:32px; height:1px; margin:11px auto; background:#9bbf9b;"></div>
-              <div style="font-size:.54rem; letter-spacing:2px; opacity:.72;">23 · MAYO · 2026</div>
-              <div style="display:inline-flex; align-items:center; gap:6px; margin-top:16px; border-radius:100px; padding:5px 12px; background:rgba(255,255,255,0.14); border:1px solid #9bbf9b;">
-                <span style="font-size:.52rem; color:#9bbf9b; font-weight:700;">♪ Slow</span>
-              </div>
-              <div style="margin-top:14px; font-size:.55rem; font-weight:700; letter-spacing:1px; padding:8px 18px; border-radius:100px; border:1px solid #9bbf9b; color:#9bbf9b;">CONFIRMAR</div>
+            <div style="width:178px; height:394px; border-radius:31px; overflow:hidden; position:relative; background:#000;">
+              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; z-index:10;"></div>
+              <iframe src="invitacion.html?evento=luna15" style="width:356px; height:788px; border:none; position:absolute; top:0; left:0; transform:scale(0.5); transform-origin:top left; pointer-events:none;" loading="eager"></iframe>
             </div>
           </div>
         </div>
         <div><div style="font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:600; color:#221C17;">Luna</div><div style="font-size:.62rem; letter-spacing:1.5px; text-transform:uppercase; color:#9A9085; margin-top:2px;">Verde Botánica</div></div>
       </a>
-      <!-- Sofía -->
       <a href="invitacion.html?evento=sofia15" target="_blank" class="demo-card" data-reveal style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:15px;">
         <div class="demo-phone-wrap" style="position:relative; width:194px; height:410px; filter:drop-shadow(0 26px 44px rgba(34,28,23,0.2));">
           <div style="width:100%; height:100%; background:linear-gradient(150deg,#3a342c,#1c1814); border-radius:38px; padding:8px; border:1.5px solid rgba(255,255,255,0.1);">
-            <div style="width:100%; height:100%; border-radius:31px; overflow:hidden; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 16px; text-align:center; background:linear-gradient(168deg,#FCE4EE,#F7D2E0); color:#5a2740;">
-              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; opacity:.8;"></div>
-              <div style="font-size:.5rem; letter-spacing:3px; font-weight:700; color:#e0568f; margin-bottom:10px;">MIS 15 AÑOS</div>
-              <div style="font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.7rem; line-height:1.02;">Sofía</div>
-              <div style="width:32px; height:1px; margin:11px auto; background:#e0568f;"></div>
-              <div style="font-size:.54rem; letter-spacing:2px; opacity:.72;">30 · AGOSTO · 2026</div>
-              <div style="display:inline-flex; align-items:center; gap:6px; margin-top:16px; border-radius:100px; padding:5px 12px; background:rgba(255,255,255,0.14); border:1px solid #e0568f;">
-                <span style="font-size:.52rem; color:#e0568f; font-weight:700;">♫ Upbeat</span>
-              </div>
-              <div style="margin-top:14px; font-size:.55rem; font-weight:700; letter-spacing:1px; padding:8px 18px; border-radius:100px; border:1px solid #e0568f; color:#e0568f;">CONFIRMAR</div>
+            <div style="width:178px; height:394px; border-radius:31px; overflow:hidden; position:relative; background:#000;">
+              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; z-index:10;"></div>
+              <iframe src="invitacion.html?evento=sofia15" style="width:356px; height:788px; border:none; position:absolute; top:0; left:0; transform:scale(0.5); transform-origin:top left; pointer-events:none;" loading="eager"></iframe>
             </div>
           </div>
         </div>
         <div><div style="font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:600; color:#221C17;">Sofía</div><div style="font-size:.62rem; letter-spacing:1.5px; text-transform:uppercase; color:#9A9085; margin-top:2px;">Rosa Chicle</div></div>
       </a>
-      <!-- Isabella -->
       <a href="invitacion.html?evento=isabella15" target="_blank" class="demo-card" data-reveal style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:15px;">
         <div class="demo-phone-wrap" style="position:relative; width:194px; height:410px; filter:drop-shadow(0 26px 44px rgba(34,28,23,0.2));">
           <div style="width:100%; height:100%; background:linear-gradient(150deg,#3a342c,#1c1814); border-radius:38px; padding:8px; border:1.5px solid rgba(255,255,255,0.1);">
-            <div style="width:100%; height:100%; border-radius:31px; overflow:hidden; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 16px; text-align:center; background:linear-gradient(168deg,#EFE6F7,#E2D2F0); color:#46325e;">
-              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; opacity:.8;"></div>
-              <div style="font-size:.5rem; letter-spacing:3px; font-weight:700; color:#9a78d0; margin-bottom:10px;">MIS 15 AÑOS</div>
-              <div style="font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.7rem; line-height:1.02;">Isabella</div>
-              <div style="width:32px; height:1px; margin:11px auto; background:#9a78d0;"></div>
-              <div style="font-size:.54rem; letter-spacing:2px; opacity:.72;">18 · OCTUBRE · 2026</div>
-              <div style="display:inline-flex; align-items:center; gap:6px; margin-top:16px; border-radius:100px; padding:5px 12px; background:rgba(255,255,255,0.14); border:1px solid #9a78d0;">
-                <span style="font-size:.52rem; color:#9a78d0; font-weight:700;">♫ Upbeat</span>
-              </div>
-              <div style="margin-top:14px; font-size:.55rem; font-weight:700; letter-spacing:1px; padding:8px 18px; border-radius:100px; border:1px solid #9a78d0; color:#9a78d0;">CONFIRMAR</div>
+            <div style="width:178px; height:394px; border-radius:31px; overflow:hidden; position:relative; background:#000;">
+              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; z-index:10;"></div>
+              <iframe src="invitacion.html?evento=isabella15" style="width:356px; height:788px; border:none; position:absolute; top:0; left:0; transform:scale(0.5); transform-origin:top left; pointer-events:none;" loading="eager"></iframe>
             </div>
           </div>
         </div>
         <div><div style="font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:600; color:#221C17;">Isabella</div><div style="font-size:.62rem; letter-spacing:1.5px; text-transform:uppercase; color:#9A9085; margin-top:2px;">Lila Aesthetic</div></div>
       </a>
-      <!-- Catalina -->
       <a href="invitacion.html?evento=catalina15" target="_blank" class="demo-card" data-reveal style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:15px;">
         <div class="demo-phone-wrap" style="position:relative; width:194px; height:410px; filter:drop-shadow(0 26px 44px rgba(34,28,23,0.2));">
           <div style="width:100%; height:100%; background:linear-gradient(150deg,#3a342c,#1c1814); border-radius:38px; padding:8px; border:1.5px solid rgba(255,255,255,0.1);">
-            <div style="width:100%; height:100%; border-radius:31px; overflow:hidden; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 16px; text-align:center; background:linear-gradient(168deg,#1a1510,#15110c); color:#f3e9d4;">
-              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; opacity:.8;"></div>
-              <div style="font-size:.5rem; letter-spacing:3px; font-weight:700; color:#d4af37; margin-bottom:10px;">MIS 15 AÑOS</div>
-              <div style="font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.7rem; line-height:1.02;">Catalina</div>
-              <div style="width:32px; height:1px; margin:11px auto; background:#d4af37;"></div>
-              <div style="font-size:.54rem; letter-spacing:2px; opacity:.72;">20 · JUNIO · 2026</div>
-              <div style="display:inline-flex; align-items:center; gap:6px; margin-top:16px; border-radius:100px; padding:5px 12px; background:rgba(255,255,255,0.14); border:1px solid #d4af37;">
-                <span style="font-size:.52rem; color:#d4af37; font-weight:700;">♫ Upbeat</span>
-              </div>
-              <div style="margin-top:14px; font-size:.55rem; font-weight:700; letter-spacing:1px; padding:8px 18px; border-radius:100px; border:1px solid #d4af37; color:#d4af37;">CONFIRMAR</div>
+            <div style="width:178px; height:394px; border-radius:31px; overflow:hidden; position:relative; background:#000;">
+              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; z-index:10;"></div>
+              <iframe src="invitacion.html?evento=catalina15" style="width:356px; height:788px; border:none; position:absolute; top:0; left:0; transform:scale(0.5); transform-origin:top left; pointer-events:none;" loading="eager"></iframe>
             </div>
           </div>
         </div>
@@ -453,115 +408,67 @@
 
     <!-- CASAMIENTOS GRID -->
     <div id="grid-boda" class="demos-grid hidden">
-      <!-- Ana & José -->
       <a href="invitacion.html?evento=boda-ana" target="_blank" class="demo-card" data-reveal style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:15px;">
         <div class="demo-phone-wrap" style="position:relative; width:194px; height:410px; filter:drop-shadow(0 26px 44px rgba(34,28,23,0.2));">
           <div style="width:100%; height:100%; background:linear-gradient(150deg,#3a342c,#1c1814); border-radius:38px; padding:8px; border:1.5px solid rgba(255,255,255,0.1);">
-            <div style="width:100%; height:100%; border-radius:31px; overflow:hidden; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 16px; text-align:center; background:linear-gradient(168deg,#FBF5EA,#EFE3CF); color:#3a2f20;">
-              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; opacity:.8;"></div>
-              <div style="font-size:.5rem; letter-spacing:3px; font-weight:700; color:#c0a062; margin-bottom:10px;">NOS CASAMOS</div>
-              <div style="font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.4rem; line-height:1.1;">Ana &amp; José</div>
-              <div style="width:32px; height:1px; margin:11px auto; background:#c0a062;"></div>
-              <div style="font-size:.54rem; letter-spacing:2px; opacity:.72;">14 · MARZO · 2026</div>
-              <div style="display:inline-flex; align-items:center; gap:6px; margin-top:16px; border-radius:100px; padding:5px 12px; background:rgba(255,255,255,0.14); border:1px solid #c0a062;">
-                <span style="font-size:.52rem; color:#c0a062; font-weight:700;">♪ Slow</span>
-              </div>
-              <div style="margin-top:14px; font-size:.55rem; font-weight:700; letter-spacing:1px; padding:8px 18px; border-radius:100px; border:1px solid #c0a062; color:#c0a062;">CONFIRMAR</div>
+            <div style="width:178px; height:394px; border-radius:31px; overflow:hidden; position:relative; background:#000;">
+              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; z-index:10;"></div>
+              <iframe src="invitacion.html?evento=boda-ana" style="width:356px; height:788px; border:none; position:absolute; top:0; left:0; transform:scale(0.5); transform-origin:top left; pointer-events:none;" loading="lazy"></iframe>
             </div>
           </div>
         </div>
         <div><div style="font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:600; color:#221C17;">Ana &amp; José</div><div style="font-size:.62rem; letter-spacing:1.5px; text-transform:uppercase; color:#9A9085; margin-top:2px;">Clásico Dorado</div></div>
       </a>
-      <!-- Elena & Pablo -->
       <a href="invitacion.html?evento=boda-elena" target="_blank" class="demo-card" data-reveal style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:15px;">
         <div class="demo-phone-wrap" style="position:relative; width:194px; height:410px; filter:drop-shadow(0 26px 44px rgba(34,28,23,0.2));">
           <div style="width:100%; height:100%; background:linear-gradient(150deg,#3a342c,#1c1814); border-radius:38px; padding:8px; border:1.5px solid rgba(255,255,255,0.1);">
-            <div style="width:100%; height:100%; border-radius:31px; overflow:hidden; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 16px; text-align:center; background:linear-gradient(168deg,#16130e,#100d09); color:#efe3c8;">
-              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; opacity:.8;"></div>
-              <div style="font-size:.5rem; letter-spacing:3px; font-weight:700; color:#d4af37; margin-bottom:10px;">NOS CASAMOS</div>
-              <div style="font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.4rem; line-height:1.1;">Elena &amp; Pablo</div>
-              <div style="width:32px; height:1px; margin:11px auto; background:#d4af37;"></div>
-              <div style="font-size:.54rem; letter-spacing:2px; opacity:.72;">09 · MAYO · 2026</div>
-              <div style="display:inline-flex; align-items:center; gap:6px; margin-top:16px; border-radius:100px; padding:5px 12px; background:rgba(255,255,255,0.14); border:1px solid #d4af37;">
-                <span style="font-size:.52rem; color:#d4af37; font-weight:700;">♪ Slow</span>
-              </div>
-              <div style="margin-top:14px; font-size:.55rem; font-weight:700; letter-spacing:1px; padding:8px 18px; border-radius:100px; border:1px solid #d4af37; color:#d4af37;">CONFIRMAR</div>
+            <div style="width:178px; height:394px; border-radius:31px; overflow:hidden; position:relative; background:#000;">
+              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; z-index:10;"></div>
+              <iframe src="invitacion.html?evento=boda-elena" style="width:356px; height:788px; border:none; position:absolute; top:0; left:0; transform:scale(0.5); transform-origin:top left; pointer-events:none;" loading="lazy"></iframe>
             </div>
           </div>
         </div>
         <div><div style="font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:600; color:#221C17;">Elena &amp; Pablo</div><div style="font-size:.62rem; letter-spacing:1.5px; text-transform:uppercase; color:#9A9085; margin-top:2px;">Negro &amp; Dorado</div></div>
       </a>
-      <!-- María & Ramiro -->
       <a href="invitacion.html?evento=boda-maria" target="_blank" class="demo-card" data-reveal style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:15px;">
         <div class="demo-phone-wrap" style="position:relative; width:194px; height:410px; filter:drop-shadow(0 26px 44px rgba(34,28,23,0.2));">
           <div style="width:100%; height:100%; background:linear-gradient(150deg,#3a342c,#1c1814); border-radius:38px; padding:8px; border:1.5px solid rgba(255,255,255,0.1);">
-            <div style="width:100%; height:100%; border-radius:31px; overflow:hidden; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 16px; text-align:center; background:linear-gradient(168deg,#21281f,#19201a); color:#e8eee0;">
-              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; opacity:.8;"></div>
-              <div style="font-size:.5rem; letter-spacing:3px; font-weight:700; color:#9fb487; margin-bottom:10px;">NOS CASAMOS</div>
-              <div style="font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.4rem; line-height:1.1;">María &amp; Ramiro</div>
-              <div style="width:32px; height:1px; margin:11px auto; background:#9fb487;"></div>
-              <div style="font-size:.54rem; letter-spacing:2px; opacity:.72;">27 · ABRIL · 2026</div>
-              <div style="display:inline-flex; align-items:center; gap:6px; margin-top:16px; border-radius:100px; padding:5px 12px; background:rgba(255,255,255,0.14); border:1px solid #9fb487;">
-                <span style="font-size:.52rem; color:#9fb487; font-weight:700;">♪ Slow</span>
-              </div>
-              <div style="margin-top:14px; font-size:.55rem; font-weight:700; letter-spacing:1px; padding:8px 18px; border-radius:100px; border:1px solid #9fb487; color:#9fb487;">CONFIRMAR</div>
+            <div style="width:178px; height:394px; border-radius:31px; overflow:hidden; position:relative; background:#000;">
+              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; z-index:10;"></div>
+              <iframe src="invitacion.html?evento=boda-maria" style="width:356px; height:788px; border:none; position:absolute; top:0; left:0; transform:scale(0.5); transform-origin:top left; pointer-events:none;" loading="lazy"></iframe>
             </div>
           </div>
         </div>
         <div><div style="font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:600; color:#221C17;">María &amp; Ramiro</div><div style="font-size:.62rem; letter-spacing:1.5px; text-transform:uppercase; color:#9A9085; margin-top:2px;">Verde Rústico</div></div>
       </a>
-      <!-- Carolina & Martín -->
       <a href="invitacion.html?evento=boda-carolina" target="_blank" class="demo-card" data-reveal style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:15px;">
         <div class="demo-phone-wrap" style="position:relative; width:194px; height:410px; filter:drop-shadow(0 26px 44px rgba(34,28,23,0.2));">
           <div style="width:100%; height:100%; background:linear-gradient(150deg,#3a342c,#1c1814); border-radius:38px; padding:8px; border:1.5px solid rgba(255,255,255,0.1);">
-            <div style="width:100%; height:100%; border-radius:31px; overflow:hidden; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 16px; text-align:center; background:linear-gradient(168deg,#FBEEE6,#F3DDD0); color:#6b3a26;">
-              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; opacity:.8;"></div>
-              <div style="font-size:.5rem; letter-spacing:3px; font-weight:700; color:#d2825a; margin-bottom:10px;">NOS CASAMOS</div>
-              <div style="font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.3rem; line-height:1.1;">Carolina &amp; Martín</div>
-              <div style="width:32px; height:1px; margin:11px auto; background:#d2825a;"></div>
-              <div style="font-size:.54rem; letter-spacing:2px; opacity:.72;">15 · NOV · 2026</div>
-              <div style="display:inline-flex; align-items:center; gap:6px; margin-top:16px; border-radius:100px; padding:5px 12px; background:rgba(255,255,255,0.14); border:1px solid #d2825a;">
-                <span style="font-size:.52rem; color:#d2825a; font-weight:700;">♫ Upbeat</span>
-              </div>
-              <div style="margin-top:14px; font-size:.55rem; font-weight:700; letter-spacing:1px; padding:8px 18px; border-radius:100px; border:1px solid #d2825a; color:#d2825a;">CONFIRMAR</div>
+            <div style="width:178px; height:394px; border-radius:31px; overflow:hidden; position:relative; background:#000;">
+              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; z-index:10;"></div>
+              <iframe src="invitacion.html?evento=boda-carolina" style="width:356px; height:788px; border:none; position:absolute; top:0; left:0; transform:scale(0.5); transform-origin:top left; pointer-events:none;" loading="lazy"></iframe>
             </div>
           </div>
         </div>
         <div><div style="font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:600; color:#221C17;">Carolina &amp; Martín</div><div style="font-size:.62rem; letter-spacing:1.5px; text-transform:uppercase; color:#9A9085; margin-top:2px;">Terracotta</div></div>
       </a>
-      <!-- Valentina & Nicolás -->
       <a href="invitacion.html?evento=boda-valentina" target="_blank" class="demo-card" data-reveal style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:15px;">
         <div class="demo-phone-wrap" style="position:relative; width:194px; height:410px; filter:drop-shadow(0 26px 44px rgba(34,28,23,0.2));">
           <div style="width:100%; height:100%; background:linear-gradient(150deg,#3a342c,#1c1814); border-radius:38px; padding:8px; border:1.5px solid rgba(255,255,255,0.1);">
-            <div style="width:100%; height:100%; border-radius:31px; overflow:hidden; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 16px; text-align:center; background:linear-gradient(168deg,#FCE9EE,#F6D6E0); color:#6b2f44;">
-              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; opacity:.8;"></div>
-              <div style="font-size:.5rem; letter-spacing:3px; font-weight:700; color:#dd86a4; margin-bottom:10px;">NOS CASAMOS</div>
-              <div style="font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.25rem; line-height:1.1;">Valentina &amp; Nicolás</div>
-              <div style="width:32px; height:1px; margin:11px auto; background:#dd86a4;"></div>
-              <div style="font-size:.54rem; letter-spacing:2px; opacity:.72;">03 · OCT · 2026</div>
-              <div style="display:inline-flex; align-items:center; gap:6px; margin-top:16px; border-radius:100px; padding:5px 12px; background:rgba(255,255,255,0.14); border:1px solid #dd86a4;">
-                <span style="font-size:.52rem; color:#dd86a4; font-weight:700;">♫ Upbeat</span>
-              </div>
-              <div style="margin-top:14px; font-size:.55rem; font-weight:700; letter-spacing:1px; padding:8px 18px; border-radius:100px; border:1px solid #dd86a4; color:#dd86a4;">CONFIRMAR</div>
+            <div style="width:178px; height:394px; border-radius:31px; overflow:hidden; position:relative; background:#000;">
+              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; z-index:10;"></div>
+              <iframe src="invitacion.html?evento=boda-valentina" style="width:356px; height:788px; border:none; position:absolute; top:0; left:0; transform:scale(0.5); transform-origin:top left; pointer-events:none;" loading="lazy"></iframe>
             </div>
           </div>
         </div>
         <div><div style="font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:600; color:#221C17;">Valentina &amp; Nicolás</div><div style="font-size:.62rem; letter-spacing:1.5px; text-transform:uppercase; color:#9A9085; margin-top:2px;">Blush Pink</div></div>
       </a>
-      <!-- Julieta & Tomás -->
       <a href="invitacion.html?evento=boda-julieta" target="_blank" class="demo-card" data-reveal style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:15px;">
         <div class="demo-phone-wrap" style="position:relative; width:194px; height:410px; filter:drop-shadow(0 26px 44px rgba(34,28,23,0.2));">
           <div style="width:100%; height:100%; background:linear-gradient(150deg,#3a342c,#1c1814); border-radius:38px; padding:8px; border:1.5px solid rgba(255,255,255,0.1);">
-            <div style="width:100%; height:100%; border-radius:31px; overflow:hidden; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 16px; text-align:center; background:linear-gradient(168deg,#0f1726,#0b111d); color:#dfe7f5;">
-              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; opacity:.8;"></div>
-              <div style="font-size:.5rem; letter-spacing:3px; font-weight:700; color:#7fa3d6; margin-bottom:10px;">NOS CASAMOS</div>
-              <div style="font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.4rem; line-height:1.1;">Julieta &amp; Tomás</div>
-              <div style="width:32px; height:1px; margin:11px auto; background:#7fa3d6;"></div>
-              <div style="font-size:.54rem; letter-spacing:2px; opacity:.72;">21 · FEB · 2026</div>
-              <div style="display:inline-flex; align-items:center; gap:6px; margin-top:16px; border-radius:100px; padding:5px 12px; background:rgba(255,255,255,0.14); border:1px solid #7fa3d6;">
-                <span style="font-size:.52rem; color:#7fa3d6; font-weight:700;">♫ Upbeat</span>
-              </div>
-              <div style="margin-top:14px; font-size:.55rem; font-weight:700; letter-spacing:1px; padding:8px 18px; border-radius:100px; border:1px solid #7fa3d6; color:#7fa3d6;">CONFIRMAR</div>
+            <div style="width:178px; height:394px; border-radius:31px; overflow:hidden; position:relative; background:#000;">
+              <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; z-index:10;"></div>
+              <iframe src="invitacion.html?evento=boda-julieta" style="width:356px; height:788px; border:none; position:absolute; top:0; left:0; transform:scale(0.5); transform-origin:top left; pointer-events:none;" loading="lazy"></iframe>
             </div>
           </div>
         </div>
