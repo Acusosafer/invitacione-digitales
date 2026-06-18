@@ -192,12 +192,61 @@ Todos con `admin_password: admin123`. Las fotos son placeholders de picsum — r
 
 ## index.html — estructura de la landing
 
-1. **Hero** — venue 3D SVG con pantalla LED (3 paneles CSS perspective) + siluetas de pareja
-2. **Demos Gallery** — toggle 15 AÑOS / CASAMIENTOS + grid 3×2 de iPhones con iframes de invitaciones reales
-3. **Demo Section** — iPhone con `valentina15` + lista de features del servicio
-4. **Álbum QR section** — descripción del álbum compartido
-5. **Preview Cards** — 6 features (countdown, ubicación, música, etc.)
-6. **CTA final** — botón WhatsApp
+Rediseñada con estética warm ivory/gold. Fuentes: Cormorant Garamond + Manrope. Variables: `--accent: #B0894C`, `--accent-deep: #856534`, `--rose: #CE9A8E`, fondo `#FBF7F1`.
+
+1. **NAV** — logo izquierda, links + botón "Pedir invitación" + "PANEL"
+2. **Hero** — texto izquierda + 3 iPhones flotantes con iframes reales (floatA/B/C animations):
+   - Izquierdo: `catalina15` (198×418px, rotate -7°)
+   - Central: `boda-ana` (232×486px, mayor z-index)
+   - Derecho: `boda-valentina` (198×418px, rotate +7°)
+3. **Marquee** — banda oscura con texto animado
+4. **Trust Strip** — métricas (+200 eventos, 24–48h entrega, etc.)
+5. **Experiencia Premium** — iPhone `martina15` (280×580px) + lista de features
+6. **Demos Gallery** — tabs "MIS 15 AÑOS" / "CASAMIENTOS" + grid **3 columnas fijas (194px)** de iPhones con iframes reales:
+   - 15 años: zaira15, martina15, luna15, sofia15, isabella15, catalina15
+   - Casamientos: boda-ana, boda-elena, boda-maria, boda-carolina, boda-valentina, boda-julieta
+7. **Beneficios** — cards con íconos
+8. **CTA Final** — botón WhatsApp
+9. **Footer**
+
+### iPhone iframe pattern (index.html)
+
+Todos los celulares usan iframes reales en lugar de contenido CSS dibujado:
+```html
+<!-- Carcasa del teléfono -->
+<div style="width:WPX; height:HPX; background:linear-gradient(150deg,#3a342c,#1c1814); border-radius:Rpx; padding:Ppx; border:1.5px solid rgba(255,255,255,0.1);">
+  <!-- Pantalla -->
+  <div style="width:(W-2P)px; height:(H-2P)px; border-radius:(R-7)px; overflow:hidden; position:relative; background:#000;">
+    <!-- Dynamic island -->
+    <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:52px; height:15px; background:#000; border-radius:10px; z-index:10;"></div>
+    <!-- iframe 2× escalado al 50% -->
+    <iframe src="invitacion.html?evento=ID"
+            style="width:(W-2P)*2 px; height:(H-2P)*2 px; border:none; position:absolute; top:0; left:0; transform:scale(0.5); transform-origin:top left; pointer-events:none;"
+            loading="eager|lazy"></iframe>
+  </div>
+</div>
+```
+- `pointer-events:none` en el iframe para que el click pase al `<a>` padre
+- Grid de demos: `loading="eager"` en 15años (visible), `loading="lazy"` en bodas (tab oculto)
+
+## Deploy
+
+El sitio está en Vercel con auto-deploy desde GitHub.
+- Repo: `https://github.com/Acusosafer/invitacione-digitales`
+- Para deployar: `git add`, `git commit`, `git push origin main`
+- URL producción: `https://invitacionesdigitalesoficial.vercel.app`
+
+## Bugs corregidos (historial)
+
+### Orden de secciones incorrecto (invitacion.html)
+- **Causa:** `layout.order` incompleto en Supabase → secciones sin orden quedaban al inicio del DOM
+- **Fix en invitacion.html:** Después de reordenar por `layout.order`, appendear las secciones faltantes al final del contenedor
+- **Fix en admin.html `guardarTodo()`:** Normalizar `layout.order` antes de guardar — agregar todas las secciones de `SECTIONS` que no estén en el array
+- **Fix en Supabase:** SQL UPDATE para forzar el array completo en todos los eventos
+
+### Foto hashtag invisible (invitacion.html)
+- **Causa:** `src=""` en el `<img>` dispara `onerror` → `display:none` → JS no puede mostrarla después
+- **Fix:** Remover el atributo `src=""` del elemento `<img id="txt-hashtag-foto">`
 
 ## Errores conocidos / workarounds
 
