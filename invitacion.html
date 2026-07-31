@@ -21,6 +21,23 @@
       --white: #ffffff;
       --gray: #f5f5f5;
       --gray-dark: #e0e0e0;
+
+      /* ── Tokens por CONTEXTO, no por color ──────────────────────────
+         El bug que arreglan: `--black` era fijo, así que un evento con
+         fondo oscuro quedaba con el nombre negro sobre negro. Estos tres
+         se acomodan solos a la paleta que elija el cliente.             */
+
+      /* Texto sobre el fondo de la página. Sigue a color_1. */
+      --ink: var(--primary);
+
+      /* Texto apagado (subtítulos, direcciones). Se mezcla con el fondo,
+         así que aclara en temas oscuros y oscurece en temas claros.
+         75% y no menos: por debajo de 70% el peor caso baja de 4.5:1. */
+      --ink-soft: color-mix(in srgb, var(--primary) 75%, var(--bg));
+
+      /* Texto sobre el color de acento (botones, chips, countdown).
+         Lo calcula el JS según cuán claro sea el acento. */
+      --on-accent: #1a1a1a;
     }
 
     * {
@@ -36,7 +53,7 @@
     body {
       font-family: 'Jost', sans-serif;
       background: var(--bg);
-      color: var(--black);
+      color: var(--ink);
       overflow-x: hidden;
       line-height: 1.65;
       max-width: 100vw;
@@ -124,13 +141,13 @@
       font-size: clamp(2rem, 8vw, 3.5rem);
       font-weight: 700;
       margin-bottom: 8px;
-      color: var(--black);
+      color: var(--ink);
       line-height: 1.1;
     }
 
     .splash-sub {
       font-size: 0.95rem;
-      color: #666;
+      color: var(--ink-soft);
       max-width: 280px;
       margin: 0 auto;
       font-style: italic;
@@ -138,7 +155,7 @@
 
     .splash-mesa {
       background: var(--secondary);
-      color: var(--black);
+      color: var(--on-accent);
       padding: 12px 24px;
       border-radius: 50px;
       font-weight: 600;
@@ -196,7 +213,7 @@
 
     .btn-primary {
       background: var(--secondary);
-      color: var(--black);
+      color: var(--on-accent);
       border-radius: 50px;
       padding: 16px 36px;
       font-size: 1.1rem;
@@ -398,7 +415,7 @@
 
     .count-item {
       background: var(--secondary);
-      color: var(--black);
+      color: var(--on-accent);
       padding: 15px 8px;
       border-radius: 12px;
       text-align: center;
@@ -534,7 +551,7 @@
 
     .location-addr {
       font-size: 0.95rem;
-      color: #666;
+      color: var(--ink-soft);
       margin-bottom: 6px;
       line-height: 1.6
     }
@@ -580,7 +597,7 @@
 
     .dresscode-desc {
       font-size: 1rem;
-      color: #666;
+      color: var(--ink-soft);
       max-width: 400px;
       margin: 0 auto
     }
@@ -616,13 +633,13 @@
       font-family: 'Montserrat';
       font-size: 1.4rem;
       font-weight: 700;
-      color: var(--black);
+      color: var(--ink);
       word-break: break-all;
     }
 
     .btn-copiar {
       background: var(--secondary);
-      color: var(--black);
+      color: var(--on-accent);
       padding: 10px 20px;
       font-size: 0.8rem;
       margin-top: 12px;
@@ -632,12 +649,12 @@
     .hashtag-section {
       background: var(--secondary);
       padding: 60px 20px;
-      color: var(--black)
+      color: var(--on-accent)
     }
 
     .hashtag-section h2,
     .hashtag-section p {
-      color: var(--black)
+      color: var(--on-accent)
     }
 
     .hashtag-photo {
@@ -692,7 +709,7 @@
       font-size: 0.85rem;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #555;
+      color: var(--ink-soft);
     }
 
     .form-input,
@@ -783,14 +800,14 @@
     .opt-btn.sel,
     .tag-btn.sel {
       background: var(--secondary);
-      color: var(--black);
+      color: var(--on-accent);
       border-color: var(--secondary);
       font-weight: 600;
     }
 
     .btn-confirmar {
       background: var(--secondary);
-      color: var(--black);
+      color: var(--on-accent);
       border-radius: 50px;
       padding: 16px 36px;
       font-size: 1.1rem;
@@ -1338,6 +1355,34 @@
     let selectedDiets = [];
     let carouselIndex = 0;
 
+    /** Luminancia relativa de WCAG. El ojo pesa mucho más el verde que el
+     *  azul, así que un promedio simple de R/G/B se equivoca: daría "claro"
+     *  para un azul que en realidad es oscuro. */
+    function luminancia(hex) {
+      const h = String(hex || '').replace('#', '');
+      const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+      if (full.length !== 6) return null;
+      const lin = [0, 2, 4].map(i => {
+        const v = parseInt(full.slice(i, i + 2), 16) / 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+    }
+
+    /**
+     * Devuelve el texto que mejor contrasta sobre `hex`: negro o blanco.
+     * Compara los dos en vez de usar un umbral fijo de luminancia — un
+     * umbral se equivoca justo en los tonos medios, que es donde caen la
+     * mayoría de los acentos (dorado, verde, rosa).
+     */
+    function contrasteSobre(hex) {
+      const L = luminancia(hex);
+      if (L === null) return '#1a1a1a';
+      const ratio = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+      return ratio(L, luminancia('#1a1a1a')) >= ratio(L, luminancia('#ffffff'))
+        ? '#1a1a1a' : '#ffffff';
+    }
+
     async function initApp() {
       const { data } = await sb.from('eventos').select('config').eq('id', eventoId).single();
       C = data?.config || {};
@@ -1356,6 +1401,12 @@
       document.documentElement.style.setProperty('--secondary', C.color_2);
       document.documentElement.style.setProperty('--bg', C.color_bg);
 
+      // Los botones y chips van sobre el color de acento. Si el cliente
+      // elige un acento oscuro, el texto negro encima desaparece — así que
+      // se decide midiendo la luminancia real del acento, no a ojo.
+      // Fórmula de luminancia relativa de WCAG.
+      document.documentElement.style.setProperty('--on-accent', contrasteSobre(C.color_2));
+
       const fontUrl = `https://fonts.googleapis.com/css2?family=${C.fuente.replace(/ /g, '+')}:wght@300;400;600&display=swap`;
       const link = document.getElementById('dynamic-font') || document.createElement('link');
       link.rel = 'stylesheet';
@@ -1363,6 +1414,17 @@
       if (!document.getElementById('dynamic-font')) {
         link.id = 'dynamic-font';
         document.head.appendChild(link);
+      }
+
+      // Modo preview (?preview=1): salta el splash y esconde la barra de
+      // scroll, para cuando la invitación va embebida en la landing.
+      // Es un contrato explícito: así la landing no tiene que meter mano
+      // en el DOM de acá y romperse cada vez que esto cambie.
+      if (params.get('preview') === '1') {
+        document.getElementById('splash').classList.add('hidden');
+        const s = document.createElement('style');
+        s.textContent = 'html{scrollbar-width:none}::-webkit-scrollbar{display:none}';
+        document.head.appendChild(s);
       }
 
       // OG tags

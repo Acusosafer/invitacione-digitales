@@ -217,6 +217,49 @@ body.on-dark .step-n{color:var(--live)}
 @media(max-width:520px){ .steps{grid-template-columns:1fr} }
 
 /* ══════════════════════════════════════════════════════════════════
+   ANATOMÍA — el teléfono se recorre solo mientras scrolleás.
+   No es una lista de features: es la invitación real funcionando.
+   ══════════════════════════════════════════════════════════════════ */
+.anat{position:relative}
+.anat-track{height:460vh}                    /* la pista que da recorrido */
+.anat-stick{
+  position:sticky; top:0; height:100svh;
+  display:grid; grid-template-columns:1fr auto; align-items:center; gap:60px;
+}
+.anat-list{display:flex; flex-direction:column; gap:4px; max-width:460px}
+.anat-item{
+  padding:15px 0 15px 22px; border-left:2px solid var(--line);
+  transition:border-color 420ms var(--ease-out), opacity 420ms var(--ease-out);
+  opacity:.32;
+}
+.anat-item.now{opacity:1; border-left-color:var(--gold)}
+body.on-dark .anat-item.now{border-left-color:var(--live)}
+.anat-item h3{font-size:1.32rem; letter-spacing:-.015em; line-height:1.2}
+.anat-item p{font-size:.94rem; color:var(--ink-2); margin-top:6px; line-height:1.55}
+
+.anat-phone{display:flex; justify-content:center; position:relative}
+.anat-phone .phone{width:252px}
+.anat-phone .phone-screen{width:238px; height:516px}
+.anat-phone .phone iframe{width:476px; height:1032px; transform:scale(.5)}
+
+@media(max-width:900px){
+  .anat-track{height:400vh}
+  .anat-stick{
+    grid-template-columns:1fr; gap:26px; align-content:center;
+    padding-top:74px;
+  }
+  .anat-phone{order:-1}
+  .anat-phone .phone{width:186px}
+  .anat-phone .phone-screen{width:172px; height:372px}
+  .anat-phone .phone iframe{width:344px; height:744px}
+  .anat-list{max-width:none}
+  /* En mobile no entran los seis: solo se muestra el activo. */
+  .anat-item{display:none; border-left:0; padding:0; text-align:center; opacity:1}
+  .anat-item.now{display:block}
+  .anat-item h3{font-size:1.2rem}
+}
+
+/* ══════════════════════════════════════════════════════════════════
    DEMOS — el corazón. El color de la página sigue a la invitación.
    ══════════════════════════════════════════════════════════════════ */
 .tabs{display:inline-flex; gap:4px; padding:4px; border-radius:999px; border:1px solid var(--line); margin-bottom:52px}
@@ -368,6 +411,31 @@ body.on-dark .tab[aria-selected="true"]{background:#F6F1E8; color:#191410}
   </div>
 </section>
 
+<!-- ═══════════════════════ ANATOMÍA ═══════════════════════ -->
+<section class="section anat" id="anatomia" style="padding-bottom:0">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <h2>Todo lo que hace, sin que nadie baje nada.</h2>
+      <p>Esto de acá abajo no es un video ni una captura: es una invitación de verdad.
+         Seguí scrolleando y recorrela.</p>
+    </div>
+  </div>
+  <div class="anat-track">
+    <div class="anat-stick wrap">
+      <div class="anat-list" id="anat-list"></div>
+      <div class="anat-phone">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="phone-island"></div>
+            <iframe id="anat-frame" data-src="invitacion.html?evento=boda-carolina&preview=1"
+                    title="Recorrido por una invitación"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ═══════════════════════ DEMOS ═══════════════════════ -->
 <section class="section" id="demos">
   <div class="wrap">
@@ -392,8 +460,8 @@ body.on-dark .tab[aria-selected="true"]{background:#F6F1E8; color:#191410}
 <!-- ═══════════════════════ CIERRE ═══════════════════════ -->
 <section class="closing">
   <div class="wrap">
-    <h2 data-reveal>La heladera se llena de papeles.<br>El celular no.</h2>
-    <p data-reveal>Contame cómo es tu fiesta y te armo la tuya.</p>
+    <h2 data-reveal>Falta poco<br>para <em style="font-style:italic;color:var(--gold)">tu noche</em>.</h2>
+    <p data-reveal>Que empiece bien desde el primer mensaje que mandás.</p>
     <div style="margin-top:40px" data-reveal>
       <a class="btn btn-solid" href="https://wa.me/5491124576536?text=Hola!%20Quiero%20una%20invitaci%C3%B3n%20digital">Escribime por WhatsApp</a>
     </div>
@@ -523,7 +591,10 @@ const cargar = new IntersectionObserver(entradas => {
     cargar.unobserve(f);
   });
 }, {rootMargin:'500px'});
-document.querySelectorAll('iframe[data-src]').forEach(f => cargar.observe(f));
+// Acotado a la galería a propósito: el iframe de la anatomía tiene su
+// propio cargador más abajo, y si los dos le tocan `data-src` uno queda
+// asignando `undefined`.
+document.querySelectorAll('.gallery iframe[data-src]').forEach(f => cargar.observe(f));
 
 /* ── tabs ────────────────────────────────────────────────────── */
 document.querySelectorAll('.tab').forEach(t => {
@@ -537,6 +608,85 @@ document.querySelectorAll('.tab').forEach(t => {
     document.querySelectorAll('#g-'+k+' iframe[data-src]').forEach(f => cargar.observe(f));
   });
 });
+
+/* ════════════════════════════════════════════════════════════════
+   ANATOMÍA — el scroll de la página maneja el scroll de la invitación.
+   La invitación es del mismo origen, así que se le puede mover el
+   scroll desde acá. Va con ?preview=1, que es el contrato que expone
+   invitacion.html para saltarse el splash.
+   ════════════════════════════════════════════════════════════════ */
+const PASOS = [
+  {t:'Se abre con su nombre',  d:'Cada invitado recibe un link propio. Al abrirlo lo saluda por su nombre y le dice en qué mesa se sienta.'},
+  {t:'Suena',                  d:'Arranca la música que elijas. Sin apps, sin permisos raros: suena en el navegador.'},
+  {t:'Cuenta los días',        d:'Una cuenta regresiva en vivo hasta la hora exacta de tu fiesta.'},
+  {t:'Muestra tus fotos',      d:'Tu galería, en carrusel. Las mismas fotos que después van a estar en el salón.'},
+  {t:'Los lleva hasta la puerta', d:'La dirección abre Google Maps de un toque. Nadie llama para preguntar cómo llegar.'},
+  {t:'Confirma por vos',       d:'Dice si viene, con cuántos, quién come sin TACC y qué tema quiere escuchar. Todo eso te llega al panel.'},
+];
+
+const anatList  = document.getElementById('anat-list');
+const anatFrame = document.getElementById('anat-frame');
+const anatTrack = document.querySelector('.anat-track');
+
+PASOS.forEach((p,i) => {
+  const d = document.createElement('div');
+  d.className = 'anat-item' + (i === 0 ? ' now' : '');
+  d.innerHTML = `<h3>${p.t}</h3><p>${p.d}</p>`;
+  anatList.appendChild(d);
+});
+const anatItems = [...anatList.children];
+
+const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let anatListo = false, pidiendo = false, pasoActual = 0;
+
+anatFrame.addEventListener('load', () => { anatListo = true; recorrer(); });
+
+function recorrer(){
+  pidiendo = false;
+  if (!anatTrack) return;
+
+  const r = anatTrack.getBoundingClientRect();
+  const recorrido = anatTrack.offsetHeight - window.innerHeight;
+  if (recorrido <= 0) return;
+  const p = Math.min(1, Math.max(0, -r.top / recorrido));
+
+  // Qué paso corresponde a este punto del scroll
+  const i = Math.min(PASOS.length - 1, Math.floor(p * PASOS.length));
+  if (i !== pasoActual){
+    anatItems[pasoActual]?.classList.remove('now');
+    anatItems[i].classList.add('now');
+    pasoActual = i;
+  }
+
+  // Y mover la invitación de adentro. Si el iframe todavía no cargó o
+  // el navegador bloquea el acceso, la sección sigue funcionando como
+  // texto + teléfono quieto: no se rompe nada.
+  if (!anatListo || quieto) return;
+  try{
+    const doc = anatFrame.contentDocument;
+    if (!doc || !doc.scrollingElement) return;
+    const max = doc.scrollingElement.scrollHeight - anatFrame.clientHeight;
+    if (max > 0) doc.scrollingElement.scrollTop = p * max;
+  }catch(e){ /* distinto origen: se queda quieto y listo */ }
+}
+
+// El scroll dispara muchísimo. Se agrupa en un frame para no pasarse
+// del presupuesto de 16ms y que no se sienta pesado.
+function pedirRecorrido(){
+  if (pidiendo) return;
+  pidiendo = true;
+  requestAnimationFrame(recorrer);
+}
+if (anatTrack){
+  addEventListener('scroll', pedirRecorrido, {passive:true});
+  addEventListener('resize', pedirRecorrido);
+  // El iframe se carga recién cuando la sección se acerca.
+  new IntersectionObserver((es,o) => {
+    if (!es[0].isIntersecting || !anatFrame.dataset.src) return;
+    anatFrame.src = anatFrame.dataset.src; delete anatFrame.dataset.src;
+    o.disconnect();
+  }, {rootMargin:'700px'}).observe(anatTrack);
+}
 
 /* ── reveal escalonado ───────────────────────────────────────── */
 const ver = new IntersectionObserver(entradas => {
