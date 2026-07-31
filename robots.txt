@@ -1,0 +1,9 @@
+# El panel es privado: no tiene por qué estar en el índice de Google.
+# Una página de login indexada, en un dominio poco conocido, es lo que
+# dispara el clasificador de phishing.
+User-agent: *
+Disallow: /admin.html
+
+# La invitación de cada invitado lleva su nombre en la URL. Que no se
+# indexe: son datos de gente real y no aportan nada en el buscador.
+Disallow: /invitacion.html

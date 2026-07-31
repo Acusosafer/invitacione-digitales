@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — Invitaciones Digitales</title>
+<title>Panel de clientes — Invitaciones Digitales Oficial</title>
+<!-- Una página de login indexada, en un dominio poco conocido, es lo que
+     dispara el clasificador de phishing de Google. Este panel es privado
+     y no aporta nada en el buscador. -->
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Panel privado de Invitaciones Digitales Oficial. Acceso solo para clientes con evento contratado.">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -571,13 +576,32 @@ tr:hover td{background:rgba(255,255,255,0.01);}
 <body>
 
 <!-- LOGIN -->
+<!-- Este login estaba marcado por Google como posible phishing: un campo de
+     contraseña sin decir de quién es el sitio ni para qué sirve es la firma
+     típica del robo de credenciales. Ahora dice quién es, qué es, y le da
+     salida a quien llegó por error. -->
 <div id="login-overlay">
   <div class="login-card">
-    <div style="font-size:2.5rem;margin-bottom:16px">✦</div>
-    <h2 class="shimmer">Panel de Control</h2>
-    <p>Identifícate para gestionar tus invitaciones</p>
-    <input id="pass" type="password" class="form-input" placeholder="••••••••" autocomplete="current-password">
-    <button class="btn btn-primary btn-full" onclick="checkPass()">Entrar al Panel</button>
+    <h2 class="shimmer">Invitaciones Digitales</h2>
+    <p style="margin-bottom:4px"><strong>Panel de clientes</strong></p>
+    <p style="font-size:.86rem;opacity:.75;margin-bottom:20px">
+      Acceso privado para quienes tienen un evento contratado con nosotros.
+      Acá gestionás tus invitados, tus links y tus mesas.
+    </p>
+    <input id="pass" type="password" class="form-input" placeholder="Tu clave de acceso" autocomplete="current-password">
+    <button class="btn btn-primary btn-full" onclick="checkPass()">Entrar</button>
+    <p style="font-size:.8rem;opacity:.7;margin-top:22px;line-height:1.55">
+      ¿Sos invitado a una fiesta? <strong>Esto no es tu invitación</strong> —
+      la tuya te llega por WhatsApp con tu nombre. Acá no tenés que poner nada.
+    </p>
+    <p style="font-size:.8rem;margin-top:14px">
+      <a href="index.html" style="color:inherit">← Volver a invitacionesdigitalesoficial.vercel.app</a>
+    </p>
+    <p style="font-size:.76rem;opacity:.55;margin-top:18px;line-height:1.5">
+      Invitaciones Digitales Oficial · Buenos Aires, Argentina<br>
+      ¿Dudas? Escribinos por
+      <a href="https://wa.me/5491124576536" style="color:inherit">WhatsApp</a>.
+    </p>
   </div>
 </div>
 

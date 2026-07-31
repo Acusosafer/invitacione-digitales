@@ -1,0 +1,18 @@
+# Archivos que viven en el repo pero NO tienen por qué publicarse.
+# Estaban todos accesibles: HANDOFF.md exponía notas internas del negocio
+# (clientes, límites de cuenta) y los .sql publicaban el esquema completo.
+
+# Notas y documentación interna
+*.md
+
+# Migraciones — no hay motivo para publicar el esquema de la base
+sql/
+
+# Herramienta interna: es una página con un campo de contraseña y sin
+# contexto, o sea justo la firma que Google marca como phishing.
+# Sigue en el repo: se abre desde tu copia local cuando la necesites.
+generar-hash-superadmin.html
+
+# Utilidades de desarrollo
+generate_logo.py
+temp_logo.html
