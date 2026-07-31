@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Placa Agosto · Invitaciones Digitales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   Placa 1080×1080 para Instagram.
+
+   Cómo exportarla:
+   1. Abrí este archivo en Chrome
+   2. F12 → Ctrl+Shift+M (vista dispositivo) → poné 1080 × 1080
+   3. Click derecho sobre la placa → "Capturar captura de pantalla del nodo"
+   Sale el PNG exacto, sin bordes ni barras.
+
+   Misma paleta que la web: si alguien hace clic, llega a un lugar que se
+   siente igual. La placa anterior era azul noche y el sitio marfil.
+   ═══════════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box; margin:0; padding:0}
+body{background:#3a352e; display:grid; place-items:center; min-height:100vh; padding:20px}
+
+.placa{
+  width:1080px; height:1080px; position:relative; overflow:hidden;
+  background:#FAF4EA;
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  color:#191410;
+  display:grid; grid-template-columns:1fr 400px;
+}
+
+/* La luz cálida, igual que en el sitio */
+.placa::before{
+  content:''; position:absolute; inset:0;
+  background:
+    radial-gradient(120% 90% at 88% 6%,  #F7CE8499 0%, transparent 58%),
+    radial-gradient(90% 70% at 4% 98%,   #F7CE8455 0%, transparent 62%);
+}
+
+/* La A gigante de fondo. La de la placa anterior no se veía: era un tono
+   más oscuro sobre oscuro. Esta es dorada sobre marfil y se lee de lejos,
+   que es lo que necesita el concepto para funcionar. */
+.a-fondo{
+  position:absolute; left:-70px; top:-160px;
+  font-family:'Fraunces',serif; font-size:1150px; line-height:1;
+  font-variation-settings:'SOFT' 30,'WONK' 1,'opsz' 144; font-weight:300;
+  color:#B0894C; opacity:.14; user-select:none;
+}
+
+.izq{position:relative; padding:76px 30px 66px 84px; display:flex; flex-direction:column; justify-content:space-between}
+
+.marca{font-size:15px; letter-spacing:.26em; text-transform:uppercase; color:#786B5C}
+
+h1{
+  font-family:'Fraunces',serif; font-weight:400;
+  font-variation-settings:'SOFT' 45,'WONK' 1,'opsz' 144;
+  font-size:112px; line-height:.9; letter-spacing:-.03em; margin:26px 0 0;
+}
+h1 em{font-style:italic; color:#A8761F}
+
+.regla{font-size:27px; line-height:1.45; margin-top:30px; max-width:15ch}
+.regla b{font-weight:600}
+
+.oferta{display:flex; align-items:baseline; gap:14px; margin-top:34px}
+.oferta .num{
+  font-family:'Fraunces',serif; font-size:104px; line-height:1; font-weight:500;
+  font-variation-settings:'SOFT' 40,'WONK' 1; color:#A8761F; letter-spacing:-.03em;
+}
+.oferta .off{font-size:30px; font-weight:600; letter-spacing:.02em; color:#A8761F}
+.oferta .de{font-size:19px; color:#786B5C; margin-left:6px}
+
+.porque{
+  font-size:19px; line-height:1.5; color:#6E6154; margin-top:16px; max-width:34ch;
+  border-left:2px solid #B0894C; padding-left:16px;
+}
+
+.pie{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.cta{
+  display:inline-flex; align-items:center; gap:10px;
+  background:#191410; color:#FAF4EA; font-size:22px; font-weight:500;
+  padding:19px 34px; border-radius:999px;
+}
+.cupo{font-size:17px; color:#786B5C; line-height:1.4}
+.cupo b{color:#191410; font-weight:600}
+
+/* Teléfono con la invitación de verdad. Justo Ana & José: la placa habla
+   de nombres con A y el ejemplo se llama Ana. */
+.der{position:relative; display:grid; place-items:center; padding-right:74px}
+.phone{
+  width:322px; border-radius:44px; padding:8px;
+  background:linear-gradient(155deg,#3a342c,#171310);
+  box-shadow:0 48px 90px -30px rgba(25,20,16,.5), 0 0 0 1px rgba(255,255,255,.08) inset;
+  transform:rotate(3deg);
+}
+.screen{width:306px; height:662px; border-radius:37px; overflow:hidden; position:relative; background:#000}
+.island{position:absolute; top:11px; left:50%; transform:translateX(-50%); width:96px; height:17px; background:#000; border-radius:11px; z-index:2}
+.screen iframe{width:390px; height:844px; border:0; position:absolute; top:0; left:0; transform:scale(.7846); transform-origin:top left}
+</style>
+</head>
+<body>
+
+<div class="placa">
+  <div class="a-fondo">A</div>
+
+  <div class="izq">
+    <div>
+      <div class="marca">Invitaciones Digitales</div>
+      <h1>Agosto es<br>de las <em>A</em>.</h1>
+      <p class="regla">Si tu nombre <b>o</b> tu apellido empieza con A.</p>
+
+      <div class="oferta">
+        <span class="num">40</span><span class="off">% OFF</span>
+        <span class="de">sobre $50.000</span>
+      </div>
+
+      <p class="porque">A cambio te pido mostrar tu invitación<br>como ejemplo en mi galería.</p>
+    </div>
+
+    <div class="pie">
+      <span class="cta">Reservá tu fecha</span>
+      <span class="cupo">Tomo <b>15 este mes</b>.<br>Las hago yo, una por una.</span>
+    </div>
+  </div>
+
+  <div class="der">
+    <div class="phone">
+      <div class="screen">
+        <div class="island"></div>
+        <iframe src="https://invitacionesdigitalesoficial.vercel.app/invitacion.html?evento=boda-ana&preview=1"
+                title="Invitación de ejemplo"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
