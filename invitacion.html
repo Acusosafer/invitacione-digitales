@@ -1116,7 +1116,11 @@
   </button>
 
   <!-- AUDIO -->
-  <audio id="audio" loop></audio>
+  <!-- preload="none": sin esto el navegador se baja el MP3 entero al abrir
+       la invitación, toque play o no. Con datos móviles eso son 3 MB que el
+       invitado paga sin haber pedido nada. Así se baja recién al tocar el
+       botón de música. -->
+  <audio id="audio" loop preload="none"></audio>
 
   <!-- MAIN WRAPPER FOR REORDERING -->
   <main id="invitation-container">
