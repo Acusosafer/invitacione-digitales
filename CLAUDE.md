@@ -6,42 +6,77 @@ Sistema de invitaciones digitales personalizadas para eventos (15 años, casamie
 
 **Stack:** HTML/CSS/JS vanilla — sin framework, sin bundler, sin build step. Todo se sirve estático.
 
-**Backend:** Supabase (proyecto `fybwovlewphtdmjmwyjn`)
+**Backend:** Supabase — proyecto `ldvosdztnhrvrqxnjuco` ("Lo de Inés"), schema `invitaciones`
 
 ## Archivos principales
 
 | Archivo | Función |
 |---|---|
 | `invitacion.html` | Invitación visible al invitado — carga config desde Supabase según `?evento=` |
-| `admin.html` | Panel de control principal — gestión de invitados, mesas, links, diseño |
+| `admin.html` | Panel de control — gestión de invitados, mesas, links, diseño |
 | `index.html` | Landing page del servicio |
-| `preview.html` | Vista previa embebida |
-| `mesas.html` | Prototipo estático (datos hardcodeados, sin Supabase — no es el activo) |
-| `admin_v3.html` | Versión anterior del admin — referencia/legacy |
-| `invitacion_v2.html` | Versión anterior de la invitación — legacy |
-| `generate_logo.py` | Script Python para generar el logo |
+| `generar-hash-superadmin.html` | Genera el hash SHA-256 de la clave de superadmin |
+| `sql/001_schema_invitaciones.sql` | Schema, tablas, funciones y permisos |
+| `sql/002_demos.sql` | Los 12 eventos demo de la landing |
+| `generate_logo.py` + `temp_logo.html` | Generación del logo |
 
 ## Supabase
 
 ```
-URL:  https://fybwovlewphtdmjmwyjn.supabase.co
-KEY:  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... (anon key, está en los scripts)
+URL:    https://ldvosdztnhrvrqxnjuco.supabase.co
+Schema: invitaciones   (NO `public`, que es del almacén "Lo de Inés")
 ```
 
-### Tablas
+**Por qué este proyecto:** el original `fybwovlewphtdmjmwyjn` quedó INACTIVE y no se
+puede despertar — la cuenta `fernandoacusosa10` llegó al límite de 2 proyectos
+activos del plan free. "Lo de Inés" (cuenta `fernando_22_19`) se usa a diario, así
+que nunca se pausa por inactividad. **Es un puente, no el destino:** cuando haya
+clientes pagando, esto merece proyecto propio.
 
-**`eventos`**
-- `id` — slug del evento (ej: `valentina15`)
-- `config` — JSONB con toda la configuración (ver abajo)
-- `admin_password` — clave del cliente
+⚠️ **El conector MCP de Supabase no llega a este proyecto** (apunta a la org de
+`fernandoacusosa10`). El SQL se le pasa a Fer para que lo pegue en el SQL Editor,
+y se verifica desde afuera con `curl` + anon key.
 
-**`confirmaciones`**
-- `id`, `evento_id`, `invitado_url` (nombre del param URL)
-- `nombre`, `apellido`
-- `asiste` — `'si'` | `'no'` | `'pendiente'`
-- `personas` — siempre 1 (cada acompañante es una fila separada)
-- `dieta`, `mensaje` (canción sugerida), `mesa`
-- `created_at`
+### Modelo de seguridad — leer antes de tocar la capa de datos
+
+La app es 100% cliente con la anon key a la vista de cualquier invitado. **RLS no
+alcanza:** filtra por *quién sos*, y acá el admin y un invitado son el mismo rol
+`anon` con la misma key. Cualquier policy que le permita al admin leer los
+invitados de un evento, se los permite a cualquiera.
+
+Por eso:
+- `anon` lee **solo `(id, config)`** de `eventos` — `admin_password` queda afuera por
+  GRANT de columna. Un `select=*` devuelve `42501`.
+- `anon` **no tiene ningún acceso** a `confirmaciones` ni a `ajustes`.
+- Todo lo privilegiado pasa por funciones `SECURITY DEFINER` que verifican la clave
+  dentro de Postgres. Todas con `set search_path = ''` — sin eso se pueden secuestrar.
+- El hash de superadmin vive en `ajustes`, no en el código fuente.
+
+**Nunca** volver a poner `.from('confirmaciones')` ni `select('admin_password')` en
+el cliente. Si hace falta una operación nueva, va como función.
+
+### Tablas (schema `invitaciones`)
+
+**`eventos`** — `id` (slug), `config` (jsonb), `admin_password`, `created_at`, `updated_at`
+
+**`confirmaciones`** — `id`, `evento_id` (FK), `invitado_url`, `nombre`, `apellido`,
+`asiste` (`si`|`no`|`pendiente`, con CHECK), `personas` (siempre 1), `dieta`,
+`mensaje` (canción sugerida), `mesa`, `created_at`
+
+**`ajustes`** — `clave`/`valor`. Hoy solo `superadmin_hash`.
+
+### Funciones (todo el acceso privilegiado)
+
+| Función | Para qué |
+|---|---|
+| `verificar_clave(evento, clave)` | Devuelve `'super'` \| `'cliente'` \| `null` |
+| `ya_confirmo(evento, invitado)` | Booleano — sin datos personales |
+| `rsvp_enviar(evento, invitado, filas)` | Borra pre-cargadas + inserta, en una transacción |
+| `admin_invitados(evento, clave)` | La lista completa, con clave |
+| `admin_guardar_evento(evento, clave, config, nueva_clave)` | Crear o actualizar |
+| `admin_prealta(evento, clave, invitado, cupos)` | Filas `pendiente` del generador de links |
+| `admin_actualizar_fila(evento, clave, id, asiste, mesa)` | Editar desde el panel |
+| `admin_borrar_fila(evento, clave, id)` | Borrar un invitado |
 
 ### Storage
 
@@ -113,8 +148,11 @@ invitacion.html?evento=valentina15&invitado=Juan+Perez&personas=2&mesa=5
 
 Acceso: `admin.html?evento=valentina15`
 
-- **Clave cliente** — Definida en `eventos.admin_password` (default `admin123`). Da acceso a: Resumen, Invitados, Links, Mesas, Vista Previa.
-- **Clave superadmin** — Hardcodeada como `"superadmin"`. Desbloquea además: Editor de Secciones, Diseño Global, Historial.
+- **Clave cliente** — En `eventos.admin_password` (default `admin123`). Da acceso a: Resumen, Invitados, Links, Mesas, Vista Previa.
+- **Clave superadmin** — Su hash SHA-256 está en `invitaciones.ajustes`. Desbloquea además: Editor de Secciones, Diseño Global, Historial. Para cambiarla: `generar-hash-superadmin.html` + `update` sobre esa tabla.
+
+Ambas se verifican con `verificar_clave()` en Postgres. La clave queda en memoria
+(`adminClave`) y se re-valida en **cada** operación: no alcanza con haber entrado una vez.
 
 ### Link generator
 
@@ -122,7 +160,7 @@ Al generar un link, el admin **pre-inserta filas en `confirmaciones`** con `asis
 
 ### Mesas
 
-- La columna `mesa` en `confirmaciones` puede no existir en Supabase (se creó después). El código tiene fallback a `localStorage` (`mesa_fallback_{eventoId}`).
+- La columna `mesa` existe siempre. **Se eliminó el fallback a `localStorage`**: guardaba la mesa solo en ESE navegador, así que el plano del salón salía distinto según desde dónde se abriera.
 - Capacidad dinámica: si se asignan más de 10 a una mesa, la mesa escala.
 - Exporta PDF de distribución de salón ordenado por apellido.
 
@@ -176,7 +214,9 @@ Creados para la landing page (`index.html` → sección "Explorá nuestros dise�
 | `luna15` | Luna | Verde Botánica `#f5f8f2 / #7ab87a` | Slow ♪ |
 | `sofia15` | Sofía | Rosa Chicle `#fff0f7 / #ff6ba8` | Upbeat ♫ |
 | `isabella15` | Isabella | Lila Aesthetic `#f8f5ff / #b8a0d6` | Upbeat ♫ |
-| `catalina15` | Catalina | Dorado Glam `#0d0d06 / #d4af37` | Upbeat ♫ |
+
+`catalina15` **quedó afuera del set**: sus fotos se perdieron y no se regeneraron.
+`valentina15` ocupa su lugar en la galería.
 
 **Casamientos** (6 eventos):
 | ID | Nombres | Paleta | Música |
@@ -188,7 +228,10 @@ Creados para la landing page (`index.html` → sección "Explorá nuestros dise�
 | `boda-valentina` | Valentina & Nicolás | Blush Pink `#fdf5f7 / #e8b4c0` | Upbeat ♫ |
 | `boda-julieta` | Julieta & Tomás | Azul Noche `#080f1a / #7090c0` | Upbeat ♫ |
 
-Todos con `admin_password: admin123`. Las fotos son placeholders de picsum — reemplazar desde el admin con fotos reales generadas por IA o del cliente.
+Todos con `admin_password: admin123`. **Las fotos son reales** y viven en `assets/<id>/`
+con los nombres exactos de las claves del config (`foto_hero.jpg`, `foto_splash.jpg`,
+`foto_galeria_1..4.jpg`, `foto_hashtag.jpg`), ya recortadas a las medidas del admin.
+Para recargar los 12: correr `sql/002_demos.sql`, que es idempotente.
 
 ## index.html — estructura de la landing
 
@@ -196,14 +239,14 @@ Rediseñada con estética warm ivory/gold. Fuentes: Cormorant Garamond + Manrope
 
 1. **NAV** — logo izquierda, links + botón "Pedir invitación" + "PANEL"
 2. **Hero** — texto izquierda + 3 iPhones flotantes con iframes reales (floatA/B/C animations):
-   - Izquierdo: `catalina15` (198×418px, rotate -7°)
+   - Izquierdo: `zaira15` (198×418px, rotate -7°)
    - Central: `boda-ana` (232×486px, mayor z-index)
    - Derecho: `boda-valentina` (198×418px, rotate +7°)
 3. **Marquee** — banda oscura con texto animado
 4. **Trust Strip** — métricas (+200 eventos, 24–48h entrega, etc.)
 5. **Experiencia Premium** — iPhone `martina15` (280×580px) + lista de features
 6. **Demos Gallery** — tabs "MIS 15 AÑOS" / "CASAMIENTOS" + grid **3 columnas fijas (194px)** de iPhones con iframes reales:
-   - 15 años: zaira15, martina15, luna15, sofia15, isabella15, catalina15
+   - 15 años: zaira15, martina15, luna15, sofia15, isabella15, valentina15
    - Casamientos: boda-ana, boda-elena, boda-maria, boda-carolina, boda-valentina, boda-julieta
 7. **Beneficios** — cards con íconos
 8. **CTA Final** — botón WhatsApp
@@ -250,7 +293,8 @@ El sitio está en Vercel con auto-deploy desde GitHub.
 
 ## Errores conocidos / workarounds
 
-- **Columna `mesa` ausente:** El código en `invitacion.html` y `admin.html` detecta error `42703` o `PGRST204` y reintenta sin el campo `mesa`, o usa localStorage como fallback.
 - **Autoplay de audio bloqueado:** El botón de la invitación solo intenta `play()` después de interacción del usuario.
 - **`filter: darken(5%)`** en `.darken-func` — CSS inválido, no tiene efecto (es una función de SASS/PostCSS, no CSS nativo).
-- **Supabase free tier pausa** tras 1 semana sin actividad — usar MCP `restore_project(fybwovlewphtdmjmwyjn)` para reactivar.
+- **Los 12 demos no tienen `musica_url`** — no hay archivos de audio todavía.
+- **`boda-julieta` y el resto usan fotos servidas desde Vercel** (`/assets/<id>/`), no Supabase Storage. Las de clientes reales sí van a Storage.
+- **Riesgos aceptados a propósito** (no son fugas, son spam): crear un evento nuevo no pide clave — hace falta para dar de alta clientes; y confirmar asistencia es libre para quien sepa el slug, con tope de 20 filas por envío.
