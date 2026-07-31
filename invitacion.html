@@ -38,6 +38,22 @@
       /* Texto sobre el color de acento (botones, chips, countdown).
          Lo calcula el JS según cuán claro sea el acento. */
       --on-accent: #1a1a1a;
+
+      /* El acento cuando se usa como TEXTO. No es el mismo color que el
+         acento de relleno: un dorado que queda hermoso como botón da 2:1
+         sobre marfil y desaparece como texto. El JS le baja o le sube la
+         luminosidad hasta llegar a 4.5:1 CONSERVANDO el tono, así el
+         dorado sigue siendo dorado — solo que legible. */
+      --accent-text: var(--secondary);
+
+      /* Superficies (tarjetas, inputs). Antes eran grises fijos, y en un
+         evento de fondo oscuro quedaba una tarjeta clara con texto claro
+         encima: invisible. Ahora se derivan del tema, así que en tema
+         oscuro son un poco más claras que el fondo y en tema claro un
+         poco más oscuras. */
+      --surface:   color-mix(in srgb, var(--primary)  7%, var(--bg));
+      --surface-2: color-mix(in srgb, var(--primary)  3%, var(--bg));
+      --edge:      color-mix(in srgb, var(--primary) 22%, var(--bg));
     }
 
     * {
@@ -106,7 +122,7 @@
       border: 6px solid var(--secondary);
       animation: float 3s ease-in-out infinite;
       margin-bottom: 24px;
-      background: var(--white);
+      background: var(--surface-2);
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
     }
 
@@ -131,7 +147,7 @@
       font-size: 0.85rem;
       letter-spacing: 3px;
       text-transform: uppercase;
-      color: var(--secondary);
+      color: var(--accent-text);
       margin-bottom: 8px;
       font-weight: 600;
     }
@@ -378,7 +394,7 @@
 
     /* MENSAJE */
     .msg-box {
-      background: var(--gray);
+      background: var(--surface);
       border-left: 4px solid var(--secondary);
       padding: 30px;
       border-radius: 8px;
@@ -534,7 +550,7 @@
 
     /* UBICACIÓN */
     .location-box {
-      background: var(--gray);
+      background: var(--surface);
       padding: 30px;
       border-radius: 12px;
       max-width: 600px;
@@ -559,7 +575,7 @@
     .location-hora {
       font-family: 'Montserrat';
       font-weight: 600;
-      color: var(--secondary);
+      color: var(--accent-text);
       margin-top: 12px
     }
 
@@ -578,7 +594,7 @@
     /* DRESSCODE */
     .dresscode-box {
       text-align: center;
-      background: var(--gray);
+      background: var(--surface);
       padding: 40px 20px;
       border-radius: 12px;
       max-width: 600px;
@@ -590,7 +606,7 @@
       font-size: 1.8rem;
       text-transform: uppercase;
       letter-spacing: 3px;
-      color: var(--secondary);
+      color: var(--accent-text);
       margin-bottom: 12px;
       font-weight: 700;
     }
@@ -617,7 +633,7 @@
       border-radius: 12px;
       margin: 20px auto;
       max-width: 500px;
-      background: var(--gray);
+      background: var(--surface);
       text-align: center;
     }
 
@@ -625,7 +641,7 @@
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 2px;
-      color: #666;
+      color: var(--ink-soft);
       margin-bottom: 8px;
     }
 
@@ -665,7 +681,7 @@
       border: 4px solid var(--black);
       margin: 20px auto;
       display: block;
-      background: var(--white);
+      background: var(--surface-2);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
     }
 
@@ -690,7 +706,7 @@
     }
 
     .rsvp-form {
-      background: var(--gray);
+      background: var(--surface);
       padding: 30px 20px;
       border-radius: 12px;
       max-width: 600px;
@@ -717,11 +733,11 @@
     .form-textarea {
       width: 100%;
       padding: 12px;
-      border: 1px solid var(--gray-dark);
+      border: 1px solid var(--edge);
       border-radius: 8px;
       font-family: 'Jost';
       font-size: 0.95rem;
-      background: var(--white);
+      background: var(--surface-2);
       color: var(--black);
       transition: border-color 0.2s;
     }
@@ -730,7 +746,7 @@
     .form-select:focus,
     .form-textarea:focus {
       outline: none;
-      border-color: var(--secondary);
+      border-color: var(--accent-text);
       background: #fafafa;
     }
 
@@ -768,9 +784,9 @@
       flex: 1;
       min-width: 80px;
       padding: 10px;
-      border: 1px solid var(--gray-dark);
+      border: 1px solid var(--edge);
       border-radius: 8px;
-      background: var(--white);
+      background: var(--surface-2);
       cursor: pointer;
       text-align: center;
       font-size: 0.85rem;
@@ -782,9 +798,9 @@
       min-width: 90px;
       white-space: nowrap;
       padding: 10px 12px;
-      border: 1px solid var(--gray-dark);
+      border: 1px solid var(--edge);
       border-radius: 8px;
-      background: var(--white);
+      background: var(--surface-2);
       cursor: pointer;
       text-align: center;
       font-size: 0.85rem;
@@ -793,7 +809,7 @@
 
     .opt-btn:hover,
     .tag-btn:hover {
-      border-color: var(--secondary);
+      border-color: var(--accent-text);
       background: #fafafa
     }
 
@@ -801,7 +817,7 @@
     .tag-btn.sel {
       background: var(--secondary);
       color: var(--on-accent);
-      border-color: var(--secondary);
+      border-color: var(--accent-text);
       font-weight: 600;
     }
 
@@ -1266,7 +1282,7 @@
         </svg>
       </div>
       <h2 id="rsvp-title">Confirma tu asistencia</h2>
-      <p id="rsvp-lim-p" style="max-width:600px;margin:0 auto 20px;color:#666">Por favor, antes de <strong id="txt-rsvp-lim"></strong>
+      <p id="rsvp-lim-p" style="max-width:600px;margin:0 auto 20px;color:var(--ink-soft)">Por favor, antes de <strong id="txt-rsvp-lim"></strong>
       </p>
 
       <div class="rsvp-form">
@@ -1387,6 +1403,66 @@
         ? '#1a1a1a' : '#ffffff';
     }
 
+    function contraste(a, b) {
+      const x = luminancia(a), y = luminancia(b);
+      if (x === null || y === null) return 1;
+      return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+    }
+
+    /** Mezcla dos colores. Réplica en JS de lo que hace color-mix en el CSS,
+     *  para poder calcular contra la tarjeta sin leerla del DOM. */
+    function mezclar(a, b, p) {
+      const g = (h, i) => parseInt(h.replace('#', '').slice(i, i + 2), 16);
+      return '#' + [0, 2, 4]
+        .map(i => Math.round(g(a, i) * p + g(b, i) * (1 - p)).toString(16).padStart(2, '0'))
+        .join('');
+    }
+
+    function aHsl(hex) {
+      const h = hex.replace('#', '');
+      const [r, g, b] = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255);
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2;
+      if (mx === mn) return [0, 0, l];
+      const d = mx - mn;
+      const s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+      const t = mx === r ? ((g - b) / d + (g < b ? 6 : 0))
+              : mx === g ? (b - r) / d + 2
+              :            (r - g) / d + 4;
+      return [t / 6, s, l];
+    }
+
+    function deHsl(t, s, l) {
+      const f = n => {
+        const k = (n + t * 12) % 12;
+        const a = s * Math.min(l, 1 - l);
+        const v = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+        return Math.round(v * 255).toString(16).padStart(2, '0');
+      };
+      return '#' + f(0) + f(8) + f(4);
+    }
+
+    /**
+     * Ajusta la luminosidad de `acento` hasta que contraste 4.5:1 contra
+     * `fondo`, sin tocarle el tono ni la saturación. Un dorado sigue siendo
+     * dorado, un rosa sigue siendo rosa: solo se oscurece o se aclara lo
+     * justo para que se pueda leer.
+     */
+    function acentoLegible(acento, fondo, minimo) {
+      minimo = minimo || 4.5;
+      if (luminancia(acento) === null || luminancia(fondo) === null) return acento;
+      if (contraste(acento, fondo) >= minimo) return acento;
+      const [t, s, l] = aHsl(acento);
+      // Fondo claro → oscurecer el acento. Fondo oscuro → aclararlo.
+      const haciaAbajo = luminancia(fondo) > 0.25;
+      for (let i = 1; i <= 100; i++) {
+        const nl = haciaAbajo ? l - i / 100 : l + i / 100;
+        if (nl < 0 || nl > 1) break;
+        const c = deHsl(t, s, nl);
+        if (contraste(c, fondo) >= minimo) return c;
+      }
+      return haciaAbajo ? '#000000' : '#ffffff';
+    }
+
     async function initApp() {
       const { data } = await sb.from('eventos').select('config').eq('id', eventoId).single();
       C = data?.config || {};
@@ -1410,6 +1486,14 @@
       // se decide midiendo la luminancia real del acento, no a ojo.
       // Fórmula de luminancia relativa de WCAG.
       document.documentElement.style.setProperty('--on-accent', contrasteSobre(C.color_2));
+
+      // Y la variante legible del acento para cuando va como texto. Se mide
+      // contra la TARJETA, no contra el fondo: la tarjeta está un 7% levantada
+      // y ese 7% se come el margen justo donde vive la mayoría de ese texto.
+      // Sirviendo el caso peor, el otro queda cubierto solo.
+      document.documentElement.style.setProperty(
+        '--accent-text',
+        acentoLegible(C.color_2, mezclar(C.color_1, C.color_bg, 0.07)));
 
       const fontUrl = `https://fonts.googleapis.com/css2?family=${C.fuente.replace(/ /g, '+')}:wght@300;400;600&display=swap`;
       const link = document.getElementById('dynamic-font') || document.createElement('link');
@@ -1590,9 +1674,9 @@
               const limP = document.getElementById('rsvp-lim-p');
               if (limP) limP.style.display = 'none';
               document.querySelector('.rsvp-form').innerHTML = `
-                <div style="text-align:center;font-weight:600;padding:50px 30px;font-size:1.4rem;color:#1a1a1a;background:var(--white);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.05);margin-top:20px;border:2px solid var(--secondary);">
+                <div style="text-align:center;font-weight:600;padding:50px 30px;font-size:1.4rem;color:#1a1a1a;background:var(--white);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.05);margin-top:20px;border:2px solid var(--accent-text);">
                   ✨ ¡Tu asistencia ya fue registrada!<br>
-                  <span style="font-size:1.1rem;font-weight:normal;color:#666;margin-top:10px;display:block;">¡Te esperamos para celebrar juntos! 🎉</span>
+                  <span style="font-size:1.1rem;font-weight:normal;color:var(--ink-soft);margin-top:10px;display:block;">¡Te esperamos para celebrar juntos! 🎉</span>
                 </div>
               `;
             }
@@ -1938,9 +2022,9 @@
         const limP = document.getElementById('rsvp-lim-p');
         if (limP) limP.style.display = 'none';
         document.querySelector('.rsvp-form').innerHTML = `
-          <div style="text-align:center;font-weight:600;padding:50px 30px;font-size:1.4rem;color:#1a1a1a;background:var(--white);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.05);margin-top:20px;border:2px solid var(--secondary);">
+          <div style="text-align:center;font-weight:600;padding:50px 30px;font-size:1.4rem;color:#1a1a1a;background:var(--white);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.05);margin-top:20px;border:2px solid var(--accent-text);">
             ✨ ¡Asistencia registrada correctamente!<br>
-            <span style="font-size:1.1rem;font-weight:normal;color:#666;margin-top:10px;display:block;">¡Te esperamos para celebrar juntos! 🎉</span>
+            <span style="font-size:1.1rem;font-weight:normal;color:var(--ink-soft);margin-top:10px;display:block;">¡Te esperamos para celebrar juntos! 🎉</span>
           </div>
         `;
       }, 1500);

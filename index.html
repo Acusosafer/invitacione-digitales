@@ -199,6 +199,10 @@ body.on-dark .btn-solid{background:#F6F1E8; color:#191410}
    ══════════════════════════════════════════════════════════════════ */
 .section{padding:110px 0}
 .section-head{max-width:640px; margin-bottom:64px}
+/* La galería es una grilla centrada: con el título al ras de la izquierda
+   quedaban dos ejes peleándose. */
+.section-head.center{margin-left:auto; margin-right:auto; text-align:center}
+.head-center{text-align:center}
 .section-head h2{font-size:clamp(2.1rem,4.6vw,3.4rem)}
 .section-head p{color:var(--ink-2); margin-top:18px; font-size:1.04rem}
 
@@ -519,15 +523,17 @@ body.on-dark .mesa.full u{background:var(--live)}
 <!-- ═══════════════════════ DEMOS ═══════════════════════ -->
 <section class="section" id="demos">
   <div class="wrap">
-    <div class="section-head" data-reveal>
+    <div class="section-head center" data-reveal>
       <h2>Doce noches. Doce mundos distintos.</h2>
       <p>Mirá lo que le pasa a esta página cuando te parás sobre cada una. Eso mismo siente
          tu invitado cuando abre la suya.</p>
     </div>
 
-    <div class="tabs" role="tablist" data-reveal>
+    <div class="head-center" data-reveal>
+    <div class="tabs" role="tablist">
       <button class="tab" role="tab" aria-selected="true" data-tab="q">Mis 15 años</button>
       <button class="tab" role="tab" aria-selected="false" data-tab="b">Casamientos</button>
+    </div>
     </div>
 
     <div class="gallery" id="g-q" role="tabpanel"></div>
