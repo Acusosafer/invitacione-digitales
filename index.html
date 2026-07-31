@@ -176,9 +176,11 @@ body.on-dark .btn-solid{background:#F6F1E8; color:#191410}
 }
 .phone iframe{ border:0; position:absolute; top:0; left:0; transform-origin:top left; pointer-events:none }
 
+/* Igual que en el recorrido: se renderiza a 390px (ancho de celular real)
+   y se escala. A 516px maquetaba como tablet y la letra salía diminuta. */
 .hero-phone .phone{width:272px}
 .hero-phone .phone-screen{width:258px; height:558px}
-.hero-phone .phone iframe{width:516px; height:1116px; transform:scale(.5)}
+.hero-phone .phone iframe{width:390px; height:844px; transform:scale(.6615)}
 
 .floaty{animation:floaty 7s ease-in-out infinite}
 @keyframes floaty{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-13px)} }
@@ -188,7 +190,7 @@ body.on-dark .btn-solid{background:#F6F1E8; color:#191410}
   .hero-phone{order:-1}
   .hero-phone .phone{width:210px}
   .hero-phone .phone-screen{width:196px; height:424px}
-  .hero-phone .phone iframe{width:392px; height:848px}
+  .hero-phone .phone iframe{width:390px; height:844px; transform:scale(.5026)}
   .hero{min-height:auto; padding:112px 0 60px}
 }
 
@@ -449,7 +451,7 @@ body.on-dark .mesa.full u{background:var(--live)}
       <div class="phone floaty">
         <div class="phone-screen">
           <div class="phone-island"></div>
-          <iframe src="invitacion.html?evento=boda-julieta" title="Invitación de ejemplo" loading="eager"></iframe>
+          <iframe src="invitacion.html?evento=boda-ana" title="Invitación de ejemplo" loading="eager"></iframe>
         </div>
       </div>
     </div>
