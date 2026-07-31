@@ -237,21 +237,32 @@ body.on-dark .anat-item.now{border-left-color:var(--live)}
 .anat-item h3{font-size:1.32rem; letter-spacing:-.015em; line-height:1.2}
 .anat-item p{font-size:.94rem; color:var(--ink-2); margin-top:6px; line-height:1.55}
 
+/* El iframe se renderiza a 390px — el ancho de un celular real — y se
+   escala hasta la pantalla. Antes iba a 476px, o sea que la invitación
+   maquetaba como tablet y después se achicaba: por eso la letra salía
+   diminuta. A 390 la tipografía queda proporcionalmente igual que en un
+   celular de verdad. */
 .anat-phone{display:flex; justify-content:center; position:relative}
-.anat-phone .phone{width:252px}
-.anat-phone .phone-screen{width:238px; height:516px}
-.anat-phone .phone iframe{width:476px; height:1032px; transform:scale(.5)}
+.anat-phone .phone{width:320px}
+.anat-phone .phone-screen{width:306px; height:646px}
+.anat-phone .phone iframe{width:390px; height:823px; transform:scale(.7846)}
+
+@media(max-height:820px) and (min-width:901px){
+  .anat-phone .phone{width:280px}
+  .anat-phone .phone-screen{width:266px; height:562px}
+  .anat-phone .phone iframe{width:390px; height:824px; transform:scale(.6821)}
+}
 
 @media(max-width:900px){
-  .anat-track{height:400vh}
+  .anat-track{height:520vh}
   .anat-stick{
-    grid-template-columns:1fr; gap:26px; align-content:center;
-    padding-top:74px;
+    grid-template-columns:1fr; gap:24px; align-content:center;
+    padding-top:70px;
   }
   .anat-phone{order:-1}
-  .anat-phone .phone{width:186px}
-  .anat-phone .phone-screen{width:172px; height:372px}
-  .anat-phone .phone iframe{width:344px; height:744px}
+  .anat-phone .phone{width:232px}
+  .anat-phone .phone-screen{width:218px; height:460px}
+  .anat-phone .phone iframe{width:390px; height:823px; transform:scale(.5590)}
   .anat-list{max-width:none}
   /* En mobile no entran los seis: solo se muestra el activo. */
   .anat-item{display:none; border-left:0; padding:0; text-align:center; opacity:1}
@@ -302,6 +313,72 @@ body.on-dark .tab[aria-selected="true"]{background:#F6F1E8; color:#191410}
 .hint{
   font-size:.78rem; color:var(--ink-3); margin-top:44px; text-align:center;
   letter-spacing:.02em;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PANEL — lo que ve el cliente. Piezas de interfaz flotando sobre el
+   fondo, no cards: la información respira en vez de vivir en cajitas.
+   ══════════════════════════════════════════════════════════════════ */
+.duo{display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; margin-bottom:106px}
+.duo:last-child{margin-bottom:0}
+.duo.flip > .duo-txt{order:2}
+.duo-txt h3{font-size:clamp(1.6rem,3vw,2.2rem); margin-bottom:14px}
+.duo-txt p{color:var(--ink-2); font-size:1rem; max-width:40ch}
+.duo-vis{display:flex; justify-content:center}
+
+.ui{
+  width:100%; max-width:378px; border-radius:18px; padding:20px;
+  background:rgba(255,255,255,.66); border:1px solid var(--line);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  box-shadow:0 24px 56px -22px rgba(25,20,16,.28);
+  transition:background 600ms var(--ease-out);
+}
+body.on-dark .ui{background:rgba(255,255,255,.1)}
+.ui-lbl{font-size:.63rem; letter-spacing:.19em; text-transform:uppercase; color:var(--ink-3); margin-bottom:13px}
+
+/* 1 — el link */
+.chat{
+  border-radius:15px 15px 15px 4px; padding:12px 15px; font-size:.83rem; line-height:1.5;
+  background:var(--ink); color:var(--ivory);
+}
+body.on-dark .chat{background:rgba(0,0,0,.4)}
+.chat b{font-weight:600}
+.chat-link{display:block; margin-top:7px; color:var(--glow); word-break:break-all; font-size:.76rem}
+.chat-hora{font-size:.62rem; color:var(--ink-3); text-align:right; margin-top:7px}
+
+/* 2 — confirmaciones */
+.conf{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid var(--line)}
+.conf:last-child{border-bottom:0}
+.conf-n{font-size:.9rem; font-weight:500}
+.conf-d{font-size:.72rem; color:var(--ink-3); margin-top:1px}
+.pill{font-size:.66rem; letter-spacing:.08em; text-transform:uppercase; padding:5px 11px; border-radius:999px; white-space:nowrap}
+.pill.si{background:rgba(76,145,90,.16); color:#2F6B3C}
+.pill.no{background:rgba(180,70,70,.14); color:#8E3B3B}
+body.on-dark .pill.si{background:rgba(120,200,140,.2); color:#9FE0B0}
+body.on-dark .pill.no{background:rgba(230,130,130,.18); color:#F0A8A8}
+.conf-nueva{animation:entrar 520ms var(--ease-out)}
+@keyframes entrar{from{opacity:0; transform:translateY(-9px)} to{opacity:1; transform:none}}
+.tot{display:flex; align-items:baseline; gap:9px; margin-top:15px; padding-top:14px; border-top:1px solid var(--line)}
+.tot b{font-family:'Fraunces',serif; font-size:1.9rem; font-weight:500; font-variation-settings:'SOFT' 40}
+.tot span{font-size:.78rem; color:var(--ink-2)}
+
+/* 3 — mesas */
+.salon{display:grid; grid-template-columns:repeat(3,1fr); gap:17px}
+.mesa{aspect-ratio:1; border-radius:50%; border:1.5px dashed var(--line); position:relative; display:grid; place-items:center}
+.mesa.full{border-style:solid; border-color:var(--gold); background:rgba(184,132,43,.09)}
+body.on-dark .mesa.full{border-color:var(--live); background:rgba(255,255,255,.08)}
+.mesa i{font-style:normal; font-size:.72rem; color:var(--ink-2)}
+.mesa u{
+  position:absolute; width:7px; height:7px; border-radius:50%; background:var(--ink-3);
+  top:50%; left:50%; margin:-3.5px;
+}
+.mesa.full u{background:var(--gold)}
+body.on-dark .mesa.full u{background:var(--live)}
+
+@media(max-width:860px){
+  .duo{grid-template-columns:1fr; gap:30px; margin-bottom:76px}
+  .duo.flip > .duo-txt{order:0}
+  .duo-vis{order:1}
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -427,7 +504,8 @@ body.on-dark .tab[aria-selected="true"]{background:#F6F1E8; color:#191410}
         <div class="phone">
           <div class="phone-screen">
             <div class="phone-island"></div>
-            <iframe id="anat-frame" data-src="invitacion.html?evento=boda-carolina&preview=1"
+            <iframe id="anat-frame"
+                    data-src="invitacion.html?evento=boda-carolina&preview=1&invitado=Familia+Gonz%C3%A1lez&personas=2&mesa=7"
                     title="Recorrido por una invitación"></iframe>
           </div>
         </div>
@@ -454,6 +532,64 @@ body.on-dark .tab[aria-selected="true"]{background:#F6F1E8; color:#191410}
     <div class="gallery" id="g-b" role="tabpanel" hidden></div>
 
     <p class="hint">Tocá cualquiera para abrirla completa.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════ PANEL ═══════════════════════ -->
+<section class="section" id="panel">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <h2>Y del otro lado, vos.</h2>
+      <p>Mientras tus invitados abren la suya, vos tenés un panel donde pasa todo lo demás.</p>
+    </div>
+
+    <div class="duo" data-reveal>
+      <div class="duo-txt">
+        <h3>Un link para cada uno</h3>
+        <p>Escribís el nombre y cuántos lugares le das. Sale un link con su nombre ya puesto
+           y su mesa asignada. Lo pegás en WhatsApp y listo.</p>
+      </div>
+      <div class="duo-vis">
+        <div class="ui">
+          <div class="ui-lbl">WhatsApp</div>
+          <div class="chat">
+            ¡Hola <b>Familia González</b>! Están invitados a nuestro casamiento.
+            Confirmen acá 👇
+            <span class="chat-link">invitacionesdigitalesoficial.vercel.app/…?invitado=Familia+González</span>
+          </div>
+          <div class="chat-hora">Entregado · 21:14</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="duo flip" data-reveal>
+      <div class="duo-txt">
+        <h3>Las confirmaciones, en vivo</h3>
+        <p>Cada vez que alguien responde, aparece acá. Con quién viene, quién come sin TACC
+           y qué tema pidió. Sin planillas y sin perseguir a nadie por mensaje.</p>
+      </div>
+      <div class="duo-vis">
+        <div class="ui">
+          <div class="ui-lbl">Confirmaciones</div>
+          <div id="conf-lista"></div>
+          <div class="tot"><b id="conf-tot">0</b><span>personas confirmadas</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="duo" data-reveal>
+      <div class="duo-txt">
+        <h3>Las mesas, sin planilla</h3>
+        <p>Arrastrás a cada invitado a su mesa y el plano se arma solo. Te avisa si una mesa
+           se pasa de gente, y al final lo imprimís ordenado por apellido.</p>
+      </div>
+      <div class="duo-vis">
+        <div class="ui">
+          <div class="ui-lbl">Plano del salón</div>
+          <div class="salon" id="salon"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -615,13 +751,31 @@ document.querySelectorAll('.tab').forEach(t => {
    scroll desde acá. Va con ?preview=1, que es el contrato que expone
    invitacion.html para saltarse el splash.
    ════════════════════════════════════════════════════════════════ */
+/* Cada paso se ancla a una sección REAL de la invitación. Antes el scroll
+   se repartía en partes iguales, pero las secciones no miden lo mismo:
+   por eso el teléfono iba adelantado y mostraba las fotos cuando el texto
+   todavía hablaba de la cuenta regresiva. */
 const PASOS = [
-  {t:'Se abre con su nombre',  d:'Cada invitado recibe un link propio. Al abrirlo lo saluda por su nombre y le dice en qué mesa se sienta.'},
-  {t:'Suena',                  d:'Arranca la música que elijas. Sin apps, sin permisos raros: suena en el navegador.'},
-  {t:'Cuenta los días',        d:'Una cuenta regresiva en vivo hasta la hora exacta de tu fiesta.'},
-  {t:'Muestra tus fotos',      d:'Tu galería, en carrusel. Las mismas fotos que después van a estar en el salón.'},
-  {t:'Los lleva hasta la puerta', d:'La dirección abre Google Maps de un toque. Nadie llama para preguntar cómo llegar.'},
-  {t:'Confirma por vos',       d:'Dice si viene, con cuántos, quién come sin TACC y qué tema quiere escuchar. Todo eso te llega al panel.'},
+  {sec:'sec-hero',      y:0, t:'Se abre con su nombre',
+   d:'Cada invitado recibe un link propio. Al abrirlo lo saluda por su nombre y le dice en qué mesa se sienta.'},
+  {sec:'sec-hero',      y:120, t:'Suena',
+   d:'Arranca la música que elijas. El botón queda flotando para pausarla. Sin apps y sin permisos raros.'},
+  {sec:'sec-mensaje',   t:'Tu mensaje',
+   d:'Unas líneas escritas por vos, no un texto de plantilla. Es lo primero que leen después de tu foto.'},
+  {sec:'sec-countdown', t:'Cuenta los días',
+   d:'Una cuenta regresiva en vivo hasta la hora exacta de tu fiesta.'},
+  {sec:'sec-galeria',   t:'Muestra tus fotos',
+   d:'Tu galería, en carrusel. Las mismas fotos que después van a estar en el salón.'},
+  {sec:'sec-ubicacion', t:'Los lleva hasta la puerta',
+   d:'La dirección abre Google Maps de un toque. Nadie llama para preguntar cómo llegar.'},
+  {sec:'sec-dresscode', t:'Dice cómo vestirse',
+   d:'Desde black tie hasta "vení con zapatillas". Lo escribís vos, según sea tu fiesta.'},
+  {sec:'sec-regalos',   t:'Y si quieren regalarte',
+   d:'Tu alias queda a la vista con un botón para copiarlo. Nadie tiene que preguntarte por dónde.'},
+  {sec:'sec-hashtag',   t:'Junta todas las fotos',
+   d:'Tu hashtag y tu Instagram, para que todo lo que saquen esa noche termine en el mismo lugar.'},
+  {sec:'sec-rsvp',      t:'Confirman ahí mismo',
+   d:'Dicen si vienen, con cuántos, quién come sin TACC y qué tema quieren escuchar. Todo eso te llega al panel.'},
 ];
 
 const anatList  = document.getElementById('anat-list');
@@ -637,9 +791,36 @@ PASOS.forEach((p,i) => {
 const anatItems = [...anatList.children];
 
 const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-let anatListo = false, pidiendo = false, pasoActual = 0;
+let anclas = null, pidiendo = false, pasoActual = 0;
 
-anatFrame.addEventListener('load', () => { anatListo = true; recorrer(); });
+/* Dónde arranca cada sección dentro de la invitación. Se mide después de
+   que cargó, porque depende de las fotos y del alto real del contenido. */
+function medirAnclas(){
+  try{
+    const doc = anatFrame.contentDocument;
+    if (!doc || !doc.scrollingElement) return false;
+    const tope = doc.scrollingElement.scrollHeight - anatFrame.clientHeight;
+    if (tope <= 0) return false;
+    anclas = PASOS.map(p => {
+      const el = doc.getElementById(p.sec);
+      // Se centra la sección en la pantalla, no se la pega arriba de todo.
+      const base = el
+        ? el.getBoundingClientRect().top + doc.scrollingElement.scrollTop
+          - (anatFrame.clientHeight - el.offsetHeight) / 2
+        : 0;
+      return Math.max(0, Math.min(tope, base + (p.y || 0)));
+    });
+    return true;
+  }catch(e){ return false; }
+}
+
+anatFrame.addEventListener('load', () => {
+  // Las fotos siguen cargando y mueven las alturas: se vuelve a medir.
+  medirAnclas(); recorrer();
+  setTimeout(() => { medirAnclas(); recorrer(); }, 700);
+  setTimeout(() => { medirAnclas(); recorrer(); }, 2200);
+});
+addEventListener('resize', () => { anclas = null; });
 
 function recorrer(){
   pidiendo = false;
@@ -650,24 +831,28 @@ function recorrer(){
   if (recorrido <= 0) return;
   const p = Math.min(1, Math.max(0, -r.top / recorrido));
 
-  // Qué paso corresponde a este punto del scroll
-  const i = Math.min(PASOS.length - 1, Math.floor(p * PASOS.length));
+  // p recorre de la primera ancla a la última: f es la posición en pasos.
+  const f = p * (PASOS.length - 1);
+
+  // El paso activo es el ancla MÁS CERCANA, así el texto cambia justo
+  // cuando el teléfono llega a esa sección.
+  const i = Math.max(0, Math.min(PASOS.length - 1, Math.round(f)));
   if (i !== pasoActual){
     anatItems[pasoActual]?.classList.remove('now');
     anatItems[i].classList.add('now');
     pasoActual = i;
   }
 
-  // Y mover la invitación de adentro. Si el iframe todavía no cargó o
-  // el navegador bloquea el acceso, la sección sigue funcionando como
-  // texto + teléfono quieto: no se rompe nada.
-  if (!anatListo || quieto) return;
+  if (quieto) return;
+  if (!anclas && !medirAnclas()) return;
   try{
     const doc = anatFrame.contentDocument;
     if (!doc || !doc.scrollingElement) return;
-    const max = doc.scrollingElement.scrollHeight - anatFrame.clientHeight;
-    if (max > 0) doc.scrollingElement.scrollTop = p * max;
-  }catch(e){ /* distinto origen: se queda quieto y listo */ }
+    // Interpolación entre el ancla de este paso y la del siguiente.
+    const a = Math.max(0, Math.min(PASOS.length - 2, Math.floor(f)));
+    const t = Math.max(0, Math.min(1, f - a));
+    doc.scrollingElement.scrollTop = anclas[a] + (anclas[a + 1] - anclas[a]) * t;
+  }catch(e){ /* si el navegador bloquea el acceso, queda quieto y ya */ }
 }
 
 // El scroll dispara muchísimo. Se agrupa en un frame para no pasarse
@@ -686,6 +871,69 @@ if (anatTrack){
     anatFrame.src = anatFrame.dataset.src; delete anatFrame.dataset.src;
     o.disconnect();
   }, {rootMargin:'700px'}).observe(anatTrack);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PANEL — el "en vivo" se muestra, no se cuenta: van entrando
+   confirmaciones mientras la sección está a la vista. Se detiene al
+   salir, para no gastar batería animando algo que nadie mira.
+   ════════════════════════════════════════════════════════════════ */
+const INVITADOS = [
+  {n:'Familia González', d:'2 personas · 1 sin TACC', e:'si'},
+  {n:'Lucía Fernández',  d:'1 persona · pidió Bresh', e:'si'},
+  {n:'Martín Sosa',      d:'no puede llegar',         e:'no'},
+  {n:'Los Ramírez',      d:'4 personas',              e:'si'},
+  {n:'Agustina Paz',     d:'2 personas · vegetariana',e:'si'},
+];
+const confLista = document.getElementById('conf-lista');
+const confTot   = document.getElementById('conf-tot');
+
+if (confLista){
+  let idx = 0, total = 0, reloj = null;
+
+  function sumar(animado){
+    const g = INVITADOS[idx % INVITADOS.length];
+    const fila = document.createElement('div');
+    fila.className = 'conf' + (animado && !quieto ? ' conf-nueva' : '');
+    fila.innerHTML =
+      `<div><div class="conf-n">${g.n}</div><div class="conf-d">${g.d}</div></div>` +
+      `<span class="pill ${g.e}">${g.e === 'si' ? 'Viene' : 'No puede'}</span>`;
+    confLista.prepend(fila);
+    if (g.e === 'si') total += parseInt(g.d) || 1;
+    confTot.textContent = total;
+    // Se mantiene la lista corta: es una muestra, no un listado real.
+    while (confLista.children.length > 4) confLista.lastChild.remove();
+    idx++;
+  }
+
+  sumar(false); sumar(false);   // arranca con algo, no vacío
+
+  new IntersectionObserver(es => {
+    if (es[0].isIntersecting){
+      if (!reloj && !quieto) reloj = setInterval(() => sumar(true), 2600);
+    } else {
+      clearInterval(reloj); reloj = null;
+    }
+  }, {threshold:.35}).observe(confLista);
+}
+
+/* Plano del salón: 6 mesas, las llenas con sus lugares ocupados. */
+const salon = document.getElementById('salon');
+if (salon){
+  [8,10,6,0,0,0].forEach((ocupados, i) => {
+    const m = document.createElement('div');
+    m.className = 'mesa' + (ocupados ? ' full' : '');
+    m.innerHTML = `<i>${ocupados ? ocupados : '—'}</i>`;
+    // Los asientos se reparten en círculo alrededor de la mesa.
+    for (let s = 0; s < ocupados; s++){
+      const a = (s / ocupados) * Math.PI * 2 - Math.PI / 2;
+      const u = document.createElement('u');
+      u.style.transform = `translate(${Math.cos(a) * 30}px, ${Math.sin(a) * 30}px)`;
+      m.appendChild(u);
+    }
+    m.setAttribute('aria-label', ocupados ? `Mesa ${i+1}, ${ocupados} personas` : `Mesa ${i+1} vacía`);
+    salon.appendChild(m);
+  });
 }
 
 /* ── reveal escalonado ───────────────────────────────────────── */
