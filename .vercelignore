@@ -16,3 +16,6 @@ generar-hash-superadmin.html
 # Utilidades de desarrollo
 generate_logo.py
 temp_logo.html
+
+# Piezas de marketing: no son parte del sitio
+publicidad/
