@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Coquette de Mesas - Edición de Estados y Exportación por Apellido</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.2rem;
+            color: #1e293b;
+        }
+        .subtitulo {
+            color: #475569;
+            margin-bottom: 2rem;
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+        }
+        .two-columns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        .col-tabla {
+            flex: 1.2;
+            min-width: 280px;
+            overflow-x: auto;
+        }
+        .col-mesas {
+            flex: 1.8;
+            min-width: 300px;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        .tabla-invitados {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .tabla-invitados th, .tabla-invitados td {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+        .tabla-invitados th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        select.estado-select, select.mesa-select {
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 40px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px #bfdbfe;
+        }
+        .mesas-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: flex-start;
+        }
+        .mesa-wrapper {
+            background: white;
+            border-radius: 32px;
+            padding: 1rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .mesa-titulo {
+            font-weight: 700;
+            background: #eef2ff;
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            color: #1e40af;
+        }
+        .mesa-circular {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            margin: 0 auto;
+        }
+        .circulo-central {
+            position: absolute;
+            width: 110px;
+            height: 110px;
+            background: #f1f5f9;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #334155;
+            border: 2px solid #cbd5e1;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            background: #ffffff;
+        }
+        .asientos {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .asiento {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            background-color: #e2e8f0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #1e293b;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .asiento.verde { background-color: #22c55e; color: white; box-shadow: 0 2px 8px rgba(34,197,94,0.4); }
+        .asiento.rojo { background-color: #ef4444; color: white; }
+        .asiento.amarillo { background-color: #eab308; color: #422006; }
+        .asiento.gris { background-color: #cbd5e1; color: #475569; }
+        .toast-alert {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 1000;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+            animation: fadein 0.2s, fadeout 0.3s 2.7s;
+            pointer-events: none;
+        }
+        @keyframes fadein { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeout { to { opacity: 0; } }
+        .filtros {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        .filtros input, .filtros select {
+            padding: 8px 12px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            background: white;
+        }
+        button {
+            background: #3b82f6;
+            border: none;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        button.secondary { background: #334155; }
+        @media (max-width: 800px) {
+            .asiento { width: 36px; height: 36px; font-size: 0.6rem; }
+            .mesa-circular { width: 220px; height: 220px; }
+            .circulo-central { width: 90px; height: 90px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <h1>🍽️ Gestión de Mesas & Confirmaciones</h1>
+    <div class="subtitulo">Asigna número de mesa y estado (🟡🟢🔴) → coquette actualizado con alertas automáticas.</div>
+
+    <div class="two-columns">
+        <div class="col-tabla">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                    <h3>📋 Invitados (estado editable)</h3>
+                    <div class="filtros">
+                        <input type="text" id="searchInput" placeholder="Buscar nombre..." style="width: 140px;">
+                        <select id="filtroEstado">
+                            <option value="todos">Todos los estados</option>
+                            <option value="pendiente">🟡 Pendiente</option>
+                            <option value="confirmado">🟢 Confirmado</option>
+                            <option value="rechazado">🔴 Rechazado</option>
+                        </select>
+                        <button id="resetFiltros" class="secondary">Limpiar</button>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="tabla-invitados" id="tablaInvitados">
+                        <thead>
+                            <tr><th>Nombre</th><th>Estado</th><th>Mesa</th><th>Dieta</th><th>Canción</th></tr>
+                        </thead>
+                        <tbody id="tbodyInvitados"></tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 16px; font-size: 0.75rem; color:#475569;">💡 Cambia estado o mesa. El coquette se actualiza.</div>
+            </div>
+            <div class="card">
+                <button id="exportPDFBtn" style="background:#0f172a;">📄 Exportar lista para salón (Apellido, Nombre, Mesa)</button>
+                <p style="font-size:0.7rem; margin-top:8px;">Ordenado por apellido. No incluye estado.</p>
+            </div>
+        </div>
+
+        <div class="col-mesas">
+            <div class="card">
+                <h3>🪑 Coquette de Mesas (10 asientos por mesa)</h3>
+                <div id="mesasContainer" class="mesas-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- DATOS INICIALES ----------
+    let invitados = [
+        { id: 1, nombre: "Juan Sosa", estado: "confirmado", mesa: "1", asiento: null, dieta: "", cancion: "" },
+        { id: 2, nombre: "María Sosa", estado: "pendiente", mesa: "1", asiento: null, dieta: "Sin gluten", cancion: "" },
+        { id: 3, nombre: "Pedro Sosa", estado: "rechazado", mesa: "2", asiento: null, dieta: "", cancion: "Rock" },
+        { id: 4, nombre: "Ana Sosa", estado: "confirmado", mesa: "1", asiento: null, dieta: "", cancion: "" },
+        { id: 5, nombre: "Carlos López", estado: "confirmado", mesa: "2", asiento: null, dieta: "", cancion: "" },
+        { id: 6, nombre: "Laura Fernández", estado: "pendiente", mesa: "3", asiento: null, dieta: "Vegano", cancion: "" },
+        { id: 7, nombre: "Diego Ramírez", estado: "confirmado", mesa: "3", asiento: null, dieta: "", cancion: "Cumbia" },
+        { id: 8, nombre: "Sofía Morales", estado: "rechazado", mesa: "2", asiento: null, dieta: "", cancion: "" },
+        { id: 9, nombre: "Martín Gómez", estado: "confirmado", mesa: "1", asiento: null, dieta: "", cancion: "" },
+        { id: 10, nombre: "Elena Ruiz", estado: "pendiente", mesa: "3", asiento: null, dieta: "", cancion: "Balada" },
+        { id: 11, nombre: "Lucas Torres", estado: "confirmado", mesa: "1", asiento: null, dieta: "", cancion: "" },
+        { id: 12, nombre: "Camila Ortiz", estado: "confirmado", mesa: "2", asiento: null, dieta: "Celíaca", cancion: "" }
+    ];
+
+    let mesasConfig = [
+        { id: 1, numero: 1, capacidad: 10, asientos: Array(10).fill(null) },
+        { id: 2, numero: 2, capacidad: 10, asientos: Array(10).fill(null) },
+        { id: 3, numero: 3, capacidad: 10, asientos: Array(10).fill(null) }
+    ];
+
+    // Reconstruir asientos según mesa de cada invitado (los "no asisten" siguen ocupando)
+    function reconstruirAsientos() {
+        mesasConfig.forEach(mesa => { mesa.asientos = Array(mesa.capacidad).fill(null); });
+        const invitadosConMesa = invitados.filter(inv => inv.mesa !== null && inv.mesa !== "");
+        invitadosConMesa.forEach(inv => {
+            const numMesa = parseInt(inv.mesa);
+            const mesaObj = mesasConfig.find(m => m.numero === numMesa);
+            if (mesaObj) {
+                const indexLibre = mesaObj.asientos.findIndex(as => as === null);
+                if (indexLibre !== -1) {
+                    mesaObj.asientos[indexLibre] = inv.id;
+                    inv.asiento = indexLibre + 1;
+                } else {
+                    inv.asiento = null;
+                }
+            } else {
+                inv.asiento = null;
+            }
+        });
+    }
+
+    // Alertas de capacidad y repetidos
+    function verificarAlertas() {
+        let alertas = [];
+        mesasConfig.forEach(mesa => {
+            const ocupados = mesa.asientos.filter(id => id !== null).length;
+            if (ocupados === mesa.capacidad) alertas.push(`⚠️ Mesa ${mesa.numero} está COMPLETAMENTE LLENA (${mesa.capacidad}/${mesa.capacidad}).`);
+            else if (ocupados === mesa.capacidad - 1) alertas.push(`❗ Mesa ${mesa.numero}: falta 1 asiento para llenar.`);
+        });
+        const asignaciones = invitados.filter(i => i.mesa !== null && i.mesa !== "");
+        const nombresPorMesa = new Map();
+        asignaciones.forEach(inv => {
+            const clave = inv.nombre;
+            const mesaActual = parseInt(inv.mesa);
+            if (nombresPorMesa.has(clave) && nombresPorMesa.get(clave) !== mesaActual) {
+                alertas.push(`❌ INVITADO REPETIDO: "${inv.nombre}" aparece en mesas ${nombresPorMesa.get(clave)} y ${mesaActual}.`);
+            } else {
+                nombresPorMesa.set(clave, mesaActual);
+            }
+        });
+        if (alertas.length > 0) mostrarToast(alertas.join(" • "));
+    }
+
+    let toastTimeout;
+    function mostrarToast(mensaje, duracion = 4000) {
+        const existing = document.querySelector('.toast-alert');
+        if(existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast-alert';
+        toast.innerText = mensaje;
+        document.body.appendChild(toast);
+        if(toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.remove(), duracion);
+    }
+
+    // Renderizar tabla con filtros y selects editables
+    let filtroTexto = '';
+    let filtroEstado = 'todos';
+    function renderizarTabla() {
+        const tbody = document.getElementById('tbodyInvitados');
+        let filtrados = invitados.filter(inv => {
+            const matchTexto = inv.nombre.toLowerCase().includes(filtroTexto.toLowerCase());
+            const matchEstado = filtroEstado === 'todos' || inv.estado === filtroEstado;
+            return matchTexto && matchEstado;
+        });
+        tbody.innerHTML = '';
+        filtrados.forEach(inv => {
+            const tr = document.createElement('tr');
+            // Nombre
+            const tdNombre = document.createElement('td');
+            tdNombre.innerText = inv.nombre;
+            // Estado (select editable)
+            const tdEstado = document.createElement('td');
+            const selectEstado = document.createElement('select');
+            selectEstado.className = 'estado-select';
+            ['pendiente', 'confirmado', 'rechazado'].forEach(est => {
+                const opt = document.createElement('option');
+                opt.value = est;
+                let label = '';
+                if (est === 'pendiente') label = '🟡 Pendiente';
+                else if (est === 'confirmado') label = '🟢 Confirmado';
+                else label = '🔴 No asiste';
+                opt.innerText = label;
+                if (inv.estado === est) opt.selected = true;
+                selectEstado.appendChild(opt);
+            });
+            selectEstado.addEventListener('change', (e) => {
+                inv.estado = e.target.value;
+                renderizarTodo(); // refresca todo (asientos y colores)
+            });
+            tdEstado.appendChild(selectEstado);
+            // Mesa (select)
+            const tdMesa = document.createElement('td');
+            const selectMesa = document.createElement('select');
+            selectMesa.className = 'mesa-select';
+            const opciones = ['', '1', '2', '3'];
+            opciones.forEach(val => {
+                const option = document.createElement('option');
+                option.value = val;
+                option.innerText = val === '' ? 'Sin mesa' : `Mesa ${val}`;
+                if (inv.mesa && inv.mesa.toString() === val) option.selected = true;
+                selectMesa.appendChild(option);
+            });
+            selectMesa.addEventListener('change', (e) => {
+                inv.mesa = e.target.value === '' ? null : e.target.value;
+                renderizarTodo();
+            });
+            tdMesa.appendChild(selectMesa);
+            // Dieta y canción (solo texto)
+            const tdDieta = document.createElement('td');
+            tdDieta.innerText = inv.dieta || '—';
+            const tdCancion = document.createElement('td');
+            tdCancion.innerText = inv.cancion || '—';
+            tr.appendChild(tdNombre);
+            tr.appendChild(tdEstado);
+            tr.appendChild(tdMesa);
+            tr.appendChild(tdDieta);
+            tr.appendChild(tdCancion);
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Generar visual de mesas redondas
+    function renderizarMesasVisuales() {
+        const container = document.getElementById('mesasContainer');
+        container.innerHTML = '';
+        mesasConfig.forEach(mesa => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'mesa-wrapper';
+            wrapper.innerHTML = `<div class="mesa-titulo">Mesa ${mesa.numero}</div>`;
+            const circleDiv = document.createElement('div');
+            circleDiv.className = 'mesa-circular';
+            const asientosDiv = document.createElement('div');
+            asientosDiv.className = 'asientos';
+            const radius = 100, centerX = 130, centerY = 130;
+            for (let i = 0; i < mesa.capacidad; i++) {
+                const angle = (i / mesa.capacidad) * 2 * Math.PI - Math.PI/2;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                const invitadoId = mesa.asientos[i];
+                let estadoColor = 'gris';
+                let inicial = '';
+                if (invitadoId !== null) {
+                    const invitado = invitados.find(inv => inv.id === invitadoId);
+                    if (invitado) {
+                        if (invitado.estado === 'confirmado') estadoColor = 'verde';
+                        else if (invitado.estado === 'pendiente') estadoColor = 'amarillo';
+                        else if (invitado.estado === 'rechazado') estadoColor = 'rojo';
+                        inicial = invitado.nombre.split(' ')[0].substring(0,2);
+                    }
+                }
+                const asientoDiv = document.createElement('div');
+                asientoDiv.className = `asiento ${estadoColor}`;
+                asientoDiv.style.left = `${x - 22}px`;
+                asientoDiv.style.top = `${y - 22}px`;
+                asientoDiv.innerText = estadoColor === 'gris' ? (i+1) : inicial;
+                asientosDiv.appendChild(asientoDiv);
+            }
+            const centro = document.createElement('div');
+            centro.className = 'circulo-central';
+            const ocupados = mesa.asientos.filter(a => a !== null).length;
+            centro.innerText = `${ocupados}/${mesa.capacidad}`;
+            circleDiv.appendChild(asientosDiv);
+            circleDiv.appendChild(centro);
+            wrapper.appendChild(circleDiv);
+            container.appendChild(wrapper);
+        });
+    }
+
+    function renderizarTodo() {
+        reconstruirAsientos();
+        renderizarTabla();
+        renderizarMesasVisuales();
+        verificarAlertas();
+    }
+
+    // Exportar PDF: apellido, nombre, mesa - ordenado por apellido
+    function extraerApellido(nombreCompleto) {
+        const partes = nombreCompleto.trim().split(/\s+/);
+        if (partes.length === 1) return partes[0];
+        // asume que el apellido es la última palabra
+        return partes[partes.length - 1];
+    }
+
+    function exportarPDF() {
+        // Copia de invitados, excluir los que no tienen mesa? mejor incluirlos con mesa vacía
+        const lista = invitados.map(inv => ({
+            nombre: inv.nombre,
+            apellido: extraerApellido(inv.nombre),
+            mesa: inv.mesa ? inv.mesa : ''
+        }));
+        lista.sort((a,b) => a.apellido.localeCompare(b.apellido));
+        let html = `<html><head><title>Lista de invitados por mesa</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h2 { color: #1e293b; }
+            table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+            th, td { border: 1px solid #94a3b8; padding: 8px 12px; text-align: left; }
+            th { background-color: #e2e8f0; }
+        </style>
+        </head><body>
+        <h2>Listado definitivo de invitados</h2>
+        <p>Ordenado por apellido | Mesa asignada</p>
+        <table>
+            <thead><tr><th>Apellido</th><th>Nombre</th><th>Mesa</th></tr></thead>
+            <tbody>`;
+        lista.forEach(item => {
+            html += `<tr><td>${escapeHtml(item.apellido)}</td><td>${escapeHtml(item.nombre)}</td><td>${item.mesa ? item.mesa : '—'}</td></tr>`;
+        });
+        html += `</tbody></table><p>Generado por sistema de gestión de mesas</p></body></html>`;
+        const ventana = window.open();
+        ventana.document.write(html);
+        ventana.document.close();
+        ventana.print();
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Filtros
+    document.getElementById('searchInput').addEventListener('input', (e) => { filtroTexto = e.target.value; renderizarTabla(); });
+    document.getElementById('filtroEstado').addEventListener('change', (e) => { filtroEstado = e.target.value; renderizarTabla(); });
+    document.getElementById('resetFiltros').addEventListener('click', () => {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('filtroEstado').value = 'todos';
+        filtroTexto = '';
+        filtroEstado = 'todos';
+        renderizarTabla();
+    });
+    document.getElementById('exportPDFBtn').addEventListener('click', exportarPDF);
+
+    // Inicializar
+    renderizarTodo();
+</script>
+</body>
+</html>

@@ -824,7 +824,7 @@ tr:hover td{background:rgba(255,255,255,0.01);}
           </div>
           <div class="form-group col-full">
             <label class="form-label">Clave del cliente</label>
-            <input id="gi-pass" type="text" class="form-input" placeholder="ej: admin123">
+            <input id="gi-pass" type="text" class="form-input" placeholder="Dejar vacío para no cambiarla">
           </div>
         </div>
       </div>
@@ -924,12 +924,16 @@ tr:hover td{background:rgba(255,255,255,0.01);}
 <!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPA_URL = 'https://fybwovlewphtdmjmwyjn.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Yndvdmxld3BodGRtam13eWpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTUyNTMsImV4cCI6MjA5NDI3MTI1M30.ApWQREk0OnNZ6oZI_0cU_f8A8dLETZHxqXPZvid3QiU';
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+const SUPA_URL = 'https://ldvosdztnhrvrqxnjuco.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxkdm9zZHp0bmhydnJxeG5qdWNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyOTY1MjAsImV4cCI6MjEwMDg3MjUyMH0.u64wnWOA-Bp0NfOR3tLOAtSkG34P-ApTS00KwTEkGRM';
+// Las tablas viven en el schema `invitaciones`, no en `public`.
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY, { db: { schema: 'invitaciones' } });
 
 const params = new URLSearchParams(window.location.search);
 const eventoId = params.get('evento') || 'valentina15';
+// Clave de esta sesión. Postgres la re-valida en CADA operación privilegiada:
+// no alcanza con haber entrado una vez. Solo en memoria, nunca en localStorage.
+let adminClave = '';
 let isSuperAdmin = false;
 let currentConfig = {};
 let selectedSectionId = null;
@@ -1059,15 +1063,30 @@ function go(tabId, navEl) {
   if (tabId === 'tab-mesas') loadMesasData();
 }
 
+// La clave se verifica DENTRO de Postgres (invitaciones.verificar_clave).
+// Nada sensible viaja al navegador: ni la clave del cliente ni el hash de
+// superadmin, que vive en la tabla `ajustes` — sobre la que `anon` no tiene
+// ni SELECT, así que no se puede leer ni romper por fuerza bruta desde afuera.
+// Para cambiar la de superadmin: generar-hash-superadmin.html y un UPDATE
+// sobre invitaciones.ajustes where clave = 'superadmin_hash'.
 async function checkPass() {
   const p = document.getElementById('pass').value;
-  if (p === 'superadmin') {
-    isSuperAdmin = true;
-    unlockSuperAdmin();
+  const { data: rol, error } = await sb.rpc('verificar_clave', {
+    p_evento: eventoId,
+    p_clave: p
+  });
+
+  if (error) {
+    toast('❌ No se pudo verificar la clave: ' + error.message);
     return;
   }
-  const { data } = await sb.from('eventos').select('admin_password').eq('id', eventoId).single();
-  if (p === (data?.admin_password || 'admin123')) {
+
+  if (rol === 'super') {
+    adminClave = p;
+    isSuperAdmin = true;
+    unlockSuperAdmin();
+  } else if (rol === 'cliente') {
+    adminClave = p;
     unlockClient();
   } else {
     toast('❌ Clave incorrecta');
@@ -1101,13 +1120,14 @@ function refreshUI() {
 }
 
 async function loadConfig() {
-  const { data } = await sb.from('eventos').select('config, admin_password').eq('id', eventoId).single();
+  const { data } = await sb.from('eventos').select('config').eq('id', eventoId).single();
   if (data) {
     currentConfig = data.config || {};
     setV('gi-id', eventoId);
     setV('gi-nombre', currentConfig.nombre);
     setV('gi-tipo', currentConfig.tipo);
-    setV('gi-pass', data.admin_password);
+    // `gi-pass` ya NO se pre-rellena: la clave no baja al navegador.
+    // Campo vacío = dejarla como está. Escribir algo = cambiarla.
     setV('gi-fuente', currentConfig.fuente);
     setColorPicker('gi-c1', 'gi-c1-hex', currentConfig.color_1 || '#1a1a1a');
     setColorPicker('gi-c2', 'gi-c2-hex', currentConfig.color_2 || '#d6ecc0');
@@ -1436,9 +1456,14 @@ async function guardarTodo() {
   SECTIONS.forEach(s => { if (!layout.order.includes(s.id)) layout.order.push(s.id); });
 
   const configToSave = { ...currentConfig, ...globalPatch, layout };
-  const adminPass = val('gi-pass') || 'admin123';
-
-  const { error } = await sb.from('eventos').upsert({ id: newId, config: configToSave, admin_password: adminPass });
+  // Postgres re-valida la clave antes de escribir. Un evento que ya existe no
+  // se puede pisar sin ella, aunque alguien llame a la función a mano.
+  const { error } = await sb.rpc('admin_guardar_evento', {
+    p_evento: newId,
+    p_clave: adminClave,
+    p_config: configToSave,
+    p_nueva_clave: val('gi-pass') || null
+  });
 
   if (error) {
     toast('❌ Error: ' + error.message);
@@ -1474,7 +1499,7 @@ async function uploadFile(input, key, targetId) {
 }
 
 async function loadData() {
-  const { data } = await sb.from('confirmaciones').select('*').eq('evento_id', eventoId).order('created_at', { ascending: false });
+  const { data } = await sb.rpc('admin_invitados', { p_evento: eventoId, p_clave: adminClave });
   let sT=0, sSi=0, sP=0, sNo=0;
 
   const rows = (data||[]).map(r => {
@@ -1531,51 +1556,20 @@ async function generarLink() {
   btn.textContent = '⏳ Cargando invitados...';
   btn.disabled = true;
 
-  // Build rows for primary guest + all planned companions
-  const preRows = [];
-  // Primary Guest
-  preRows.push({
-    evento_id: eventoId,
-    invitado_url: n,
-    nombre: n,
-    apellido: '',
-    asiste: 'pendiente',
-    personas: 1,
-    dieta: '',
-    mensaje: 'Invitación pre-cargada'
+  // Titular + acompañantes en 'pendiente'. Los arma Postgres, que además
+  // borra la pre-alta anterior: regenerar el link de alguien ya no le duplica
+  // las filas, y no pisa las confirmaciones reales que ya haya dado.
+  const { error } = await sb.rpc('admin_prealta', {
+    p_evento: eventoId,
+    p_clave: adminClave,
+    p_invitado: n,
+    p_cupos: c
   });
-  
-  // Planned Companions
-  for (let i = 2; i <= c; i++) {
-    preRows.push({
-      evento_id: eventoId,
-      invitado_url: n,
-      nombre: `Acompañante ${i}`,
-      apellido: `de ${n}`,
-      asiste: 'pendiente',
-      personas: 1,
-      dieta: '',
-      mensaje: 'Acompañante pre-cargado'
-    });
-  }
-
-  const { error } = await sb.from('confirmaciones').insert(preRows);
   if (error) {
-    if (error.code === 'PGRST204' || error.message.includes('column') || error.code === '42703') {
-      const safeRows = preRows.map(r => ({
-        evento_id: r.evento_id,
-        invitado_url: r.invitado_url,
-        nombre: r.nombre,
-        apellido: r.apellido,
-        asiste: r.asiste,
-        personas: r.personas,
-        dieta: r.dieta,
-        mensaje: r.mensaje
-      }));
-      await sb.from('confirmaciones').insert(safeRows);
-    } else {
-      console.warn("Pre-insert error:", error);
-    }
+    toast('❌ No se pudo pre-cargar el invitado: ' + error.message);
+    btn.textContent = '✨ Generar Link Único';
+    btn.disabled = false;
+    return;
   }
 
   if (typeof loadMesasData === 'function') {
@@ -1606,7 +1600,7 @@ function refreshPreview() {
 }
 
 async function exportCSV() {
-  const { data } = await sb.from('confirmaciones').select('*').eq('evento_id', eventoId).order('created_at', { ascending: false });
+  const { data } = await sb.rpc('admin_invitados', { p_evento: eventoId, p_clave: adminClave });
   if (!data?.length) { toast('No hay datos para exportar'); return; }
   let csv = 'Nombre,Apellido,Invitado,Asiste,Personas,Mesa,Dieta,Mensaje,Fecha\n';
   data.forEach(r => csv += `"${r.nombre}","${r.apellido||''}","${r.invitado_url}","${r.asiste}","${r.personas}","${r.mesa||''}","${r.dieta||''}","${r.mensaje||''}","${r.created_at}"\n`);
@@ -1633,24 +1627,20 @@ let mesasFiltroTexto = '';
 let mesasFiltroEstado = 'todos';
 
 async function loadMesasData() {
-  const { data, error } = await sb.from('confirmaciones').select('*').eq('evento_id', eventoId).order('nombre');
+  const { data, error } = await sb.rpc('admin_invitados', { p_evento: eventoId, p_clave: adminClave });
   if (error) {
     console.error("Error cargando invitados para mesas:", error);
     return;
   }
-  mesasInvitados = data || [];
+  // La función devuelve por fecha; acá el orden útil es alfabético.
+  mesasInvitados = (data || []).sort((a, b) =>
+    (a.nombre || '').localeCompare(b.nombre || '', 'es'));
   
-  // LocalStorage fallback for missing database 'mesa' column
-  mesasInvitados.forEach(inv => {
-    if (inv.mesa === undefined || inv.mesa === null || inv.mesa === '') {
-      const localM = getMesaLocal(inv.id);
-      if (localM) {
-        inv.mesa = localM;
-      }
-    }
-  });
-  
-  // Calcular cantidad de mesas dinámicamente basándonos en el número más alto asignado, mínimo 6 mesas
+  // Se quitó el fallback de localStorage: la columna `mesa` ya existe siempre.
+  // Mantenerlo era peligroso — una mesa vieja guardada en ESTE navegador
+  // pisaría el valor real de la base y mostraría un plano de salón equivocado.
+
+// Calcular cantidad de mesas dinámicamente basándonos en el número más alto asignado, mínimo 6 mesas
   let maxMesaNum = 6;
   mesasInvitados.forEach(inv => {
     if (inv.mesa) {
@@ -1764,7 +1754,9 @@ function renderizarMesasTabla() {
     selectEstado.onchange = async () => {
       const newStatus = selectEstado.value;
       inv.asiste = newStatus;
-      const { error } = await sb.from('confirmaciones').update({ asiste: newStatus }).eq('id', inv.id);
+      const { error } = await sb.rpc('admin_actualizar_fila', {
+        p_evento: eventoId, p_clave: adminClave, p_id: inv.id, p_asiste: newStatus
+      });
       if (error) {
         toast('❌ Error al actualizar estado');
       } else {
@@ -1815,15 +1807,12 @@ function renderizarMesasTabla() {
           asientos: Array(10).fill(null)
         });
         inv.mesa = nextMesa;
-        const { error } = await sb.from('confirmaciones').update({ mesa: nextMesa }).eq('id', inv.id);
+        const { error } = await sb.rpc('admin_actualizar_fila', {
+          p_evento: eventoId, p_clave: adminClave, p_id: inv.id, p_mesa: String(nextMesa)
+        });
         if (error) {
-          if (error.message.includes("Could not find the 'mesa' column") || error.code === 'PGRST204' || error.message.includes('column') || error.code === '42703') {
-            setMesaLocal(inv.id, nextMesa);
-            toast(`🟢 Mesa ${nextMesa} creada y asignada localmente`);
-            loadMesasData();
-            return;
-          }
-          await sb.from('confirmaciones').update({ mesa: nextMesa.toString() }).eq('id', inv.id);
+          toast('❌ No se pudo asignar la mesa: ' + error.message);
+          return;
         }
         toast(`🟢 Mesa ${nextMesa} creada y asignada`);
         loadMesasData();
@@ -1849,23 +1838,15 @@ function renderizarMesasTabla() {
       
       inv.mesa = newMesa;
       
-      const { error } = await sb.from('confirmaciones').update({ mesa: newMesa }).eq('id', inv.id);
+      // '' significa "sacar de la mesa". La columna `mesa` ahora existe siempre,
+      // así que se va el fallback a localStorage: guardaba la mesa solo en ESE
+      // navegador, con lo cual el plano del salón dependía de desde dónde lo abrieras.
+      const { error } = await sb.rpc('admin_actualizar_fila', {
+        p_evento: eventoId, p_clave: adminClave, p_id: inv.id,
+        p_mesa: newMesa === null ? '' : String(newMesa)
+      });
       if (error) {
-        if (error.message.includes("Could not find the 'mesa' column") || error.code === 'PGRST204' || error.message.includes('column') || error.code === '42703') {
-          setMesaLocal(inv.id, newMesa);
-          toast('🟢 Mesa asignada localmente (guardado en caché)');
-          reconstruirMesasAsientos();
-          renderizarMesasVisuales();
-          return;
-        }
-        const retry = await sb.from('confirmaciones').update({ mesa: selectMesa.value === '' ? null : selectMesa.value }).eq('id', inv.id);
-        if (retry.error) {
-          toast('❌ Error al asignar mesa: ' + retry.error.message);
-        } else {
-          toast('🟢 Mesa asignada');
-          reconstruirMesasAsientos();
-          renderizarMesasVisuales();
-        }
+        toast('❌ Error al asignar mesa: ' + error.message);
       } else {
         toast('🟢 Mesa asignada');
         reconstruirMesasAsientos();
@@ -2061,25 +2042,10 @@ function exportarMesasPDF() {
   ventana.print();
 }
 
-function getMesaLocal(invId) {
-  const local = localStorage.getItem(`mesa_fallback_${eventoId}`);
-  if (local) {
-    const map = JSON.parse(local);
-    return map[invId] || null;
-  }
-  return null;
-}
-
-function setMesaLocal(invId, mesa) {
-  const local = localStorage.getItem(`mesa_fallback_${eventoId}`) || '{}';
-  const map = JSON.parse(local);
-  if (mesa === null || mesa === '') {
-    delete map[invId];
-  } else {
-    map[invId] = mesa.toString();
-  }
-  localStorage.setItem(`mesa_fallback_${eventoId}`, JSON.stringify(map));
-}
+// getMesaLocal/setMesaLocal eliminadas junto con el fallback de mesas.
+// Limpieza de lo que haya quedado guardado de la etapa anterior, para que no
+// se acumule basura en el navegador de nadie.
+try { localStorage.removeItem(`mesa_fallback_${eventoId}`); } catch (e) {}
 
 refreshUI();
 document.getElementById('pass').addEventListener('keydown', e => { if (e.key === 'Enter') checkPass(); });

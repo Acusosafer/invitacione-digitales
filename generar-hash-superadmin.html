@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Generar hash de superadmin</title>
+<style>
+  body{font-family:system-ui,sans-serif;background:#FBF7F1;color:#2b2620;display:flex;
+       min-height:100vh;align-items:center;justify-content:center;margin:0;padding:24px}
+  .card{background:#fff;border:1px solid #e6ded2;border-radius:14px;padding:32px;max-width:620px;width:100%;
+        box-shadow:0 8px 30px rgba(0,0,0,.06)}
+  h1{margin:0 0 6px;font-size:1.3rem}
+  p{color:#6b6156;font-size:.92rem;line-height:1.6}
+  input{width:100%;padding:13px 15px;border:1px solid #d9cfc0;border-radius:9px;font-size:1rem;margin:14px 0}
+  input:focus{outline:none;border-color:#B0894C}
+  .out{background:#2b2620;color:#8ee6a0;padding:15px;border-radius:9px;font-family:ui-monospace,monospace;
+       font-size:.82rem;word-break:break-all;min-height:22px;user-select:all}
+  button{background:#B0894C;color:#fff;border:0;padding:12px 22px;border-radius:9px;font-weight:600;
+         cursor:pointer;font-size:.95rem;margin-top:14px}
+  button:hover{background:#856534}
+  .warn{background:#fdf6e7;border-left:3px solid #B0894C;padding:12px 15px;border-radius:0 7px 7px 0;
+        font-size:.87rem;margin-top:22px;color:#6b5836}
+  ol{font-size:.9rem;color:#6b6156;line-height:1.9;padding-left:20px}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Clave de superadmin</h1>
+  <p>Escribí la clave que querés usar. Se convierte en un hash acá mismo, en tu navegador — la clave nunca se envía a ningún lado.</p>
+
+  <input id="pass" type="text" placeholder="Escribí tu clave nueva" autocomplete="off">
+  <div class="out" id="out">El hash aparece acá</div>
+  <button id="copiar">Copiar hash</button>
+
+  <div class="warn">
+    <strong>Elegí una clave larga y difícil de adivinar.</strong> El hash queda visible en el código, así que
+    una clave corta o común se puede romper por fuerza bruta. Usá al menos 16 caracteres, o tres o cuatro
+    palabras sueltas que solo vos asocies.
+  </div>
+
+  <ol>
+    <li>Copiá el hash de arriba.</li>
+    <li>Abrí <code>admin.html</code> y buscá <code>SUPERADMIN_HASH</code>.</li>
+    <li>Reemplazá <code>'PEGAR_HASH_ACA'</code> por el hash (entre comillas).</li>
+    <li>Guardá y subí el cambio.</li>
+  </ol>
+</div>
+
+<script>
+  const inp = document.getElementById('pass');
+  const out = document.getElementById('out');
+
+  async function calcular() {
+    if (!inp.value) { out.textContent = 'El hash aparece acá'; return; }
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value));
+    out.textContent = Array.from(new Uint8Array(buf))
+      .map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  inp.addEventListener('input', calcular);
+
+  document.getElementById('copiar').addEventListener('click', async () => {
+    if (!inp.value) return;
+    await navigator.clipboard.writeText(out.textContent);
+    const b = document.getElementById('copiar');
+    b.textContent = '✓ Copiado';
+    setTimeout(() => b.textContent = 'Copiar hash', 1600);
+  });
+</script>
+</body>
+</html>

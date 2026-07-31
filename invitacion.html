@@ -1323,9 +1323,10 @@
   <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const SUPA_URL = 'https://fybwovlewphtdmjmwyjn.supabase.co';
-    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5Yndvdmxld3BodGRtam13eWpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTUyNTMsImV4cCI6MjA5NDI3MTI1M30.ApWQREk0OnNZ6oZI_0cU_f8A8dLETZHxqXPZvid3QiU';
-    const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+    const SUPA_URL = 'https://ldvosdztnhrvrqxnjuco.supabase.co';
+    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxkdm9zZHp0bmhydnJxeG5qdWNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyOTY1MjAsImV4cCI6MjEwMDg3MjUyMH0.u64wnWOA-Bp0NfOR3tLOAtSkG34P-ApTS00KwTEkGRM';
+    // Las tablas viven en el schema `invitaciones`, no en `public`.
+    const sb = supabase.createClient(SUPA_URL, SUPA_KEY, { db: { schema: 'invitaciones' } });
 
     const params = new URLSearchParams(window.location.search);
     const eventoId = params.get('evento') || 'valentina15';
@@ -1511,13 +1512,14 @@
         // Check if already confirmed
         if (invitado) {
           try {
-            const { data: extConfirm } = await sb.from('confirmaciones')
-              .select('*')
-              .eq('evento_id', eventoId)
-              .eq('invitado_url', invitado)
-              .limit(1);
+            // Devuelve un booleano y nada más. Antes esto bajaba al navegador
+            // nombre, apellido, dieta, mensaje y mesa del invitado.
+            const { data: yaConfirmo } = await sb.rpc('ya_confirmo', {
+              p_evento: eventoId,
+              p_invitado: invitado
+            });
 
-            if (extConfirm && extConfirm.length > 0 && extConfirm[0].asiste !== 'pendiente') {
+            if (yaConfirmo === true) {
               document.getElementById('rsvp-title').style.display = 'none';
               const limP = document.getElementById('rsvp-lim-p');
               if (limP) limP.style.display = 'none';
@@ -1847,53 +1849,21 @@
         });
       }
 
-      // Clean up preloaded pending guest rows to ensure clean bulk insert!
-      if (invitado) {
-        try {
-          await sb.from('confirmaciones').delete().eq('evento_id', eventoId).eq('invitado_url', invitado);
-        } catch (err) {
-          console.warn("Clean preloaded delete failed:", err);
-        }
-      }
-
+      // Borra las filas pre-cargadas e inserta las reales en UNA transacción
+      // del lado de Postgres. Antes eran dos llamadas sueltas: si fallaba la
+      // segunda, el invitado quedaba borrado y sin confirmar, sin aviso.
       const allRows = [primaryGuest, ...companions];
-      const { error } = await sb.from('confirmaciones').insert(allRows);
+      const { error } = await sb.rpc('rsvp_enviar', {
+        p_evento: eventoId,
+        p_invitado: invitado || 'general',
+        p_filas: allRows
+      });
 
       if (error) {
-        if (error.code === 'PGRST204' || error.message.includes('column') || error.code === '42703') {
-          const safePrimary = {
-            evento_id: eventoId,
-            invitado_url: invitado || 'general',
-            nombre: nombre,
-            apellido: document.getElementById('f-apellido').value.trim(),
-            asiste: asiste,
-            personas: 1,
-            dieta: dieta,
-            mensaje: document.getElementById('f-msg').value.trim()
-          };
-          const safeCompanions = companions.map(c => ({
-            evento_id: eventoId,
-            invitado_url: invitado || 'general',
-            nombre: c.nombre,
-            apellido: c.apellido,
-            asiste: c.asiste,
-            personas: 1,
-            dieta: c.dieta,
-            mensaje: c.mensaje
-          }));
-          const retry = await sb.from('confirmaciones').insert([safePrimary, ...safeCompanions]);
-          if (retry.error) {
-            toast('❌ Error al enviar (Código 2): ' + retry.error.message);
-            btn.textContent = '✓ Confirmar asistencia';
-            btn.disabled = false;
-            return;
-          }
-        } else {
-          toast('❌ Error: ' + error.message);
-          btn.textContent = '✓ Confirmar asistencia';
-          btn.disabled = false;
-          return;
-        }
+        toast('❌ Error al enviar: ' + error.message);
+        btn.textContent = '✓ Confirmar asistencia';
+        btn.disabled = false;
+        return;
       }
 
       toast('✅ ¡Asistencia confirmada!');
