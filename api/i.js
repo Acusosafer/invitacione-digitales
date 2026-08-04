@@ -27,6 +27,95 @@ function esc(s) {
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   CÓMO SALUDAR AL INVITADO
+
+   "estás invitada" / "estás invitado" / "están invitados".
+
+   Regla de oro: sólo se afirma el género cuando hay certeza. Equivocarse
+   acá no es un detalle — a alguien le llega SU invitación con el género
+   cambiado, y eso queda peor que una frase neutra.
+
+   En castellano el final del nombre es muy confiable: -a es de mujer, -o
+   es de varón. Con lo que termina en consonante no hay regla (Isabel y
+   Nicolás terminan igual de "mal"), así que ahí sólo se decide si el
+   nombre está en las listas; si no, se usa una frase que sirve para
+   cualquiera. El admin puede forzarlo con &t= cuando lo sabe.
+   ════════════════════════════════════════════════════════════════════ */
+
+// Nombres de mujer que la regla del final NO acierta: terminan en
+// consonante o en -o. Pesan mucho los de origen extranjero, que es donde
+// una regla mecánica más se equivoca.
+const NOMBRES_F = new Set(['isabel','raquel','beatriz','ines','mercedes','carmen',
+  'pilar','soledad','abril','esther','ruth','judith','noemi','miriam','karen',
+  'jennifer','jazmin','belen','ailen','aylen','rocio','milagros','dolores',
+  'lourdes','nair','maribel','jaqueline','jacqueline','yanet','janet','nicol',
+  'guadalupe','caridad','trinidad','libertad','anahi','magali','itati','soledad',
+  'consuelo','rosario','socorro','amparo','remedios','mercedes','luz','flor',
+  'estefani','yamila','shirley','jessica','vanesa','ashley','britney']);
+
+// Nombres de varón que la regla tampoco acierta: terminan en -a o en
+// consonante. Los que terminan en consonante son los más comunes del país,
+// y dejarlos sin resolver daba "Juan, te esperamos", que suena a que no
+// sabemos quién es.
+const NOMBRES_M = new Set([
+  // terminan en -a
+  'bautista','luca','nicola','elia',
+  // terminan en -s
+  'lucas','tomas','matias','elias','tobias','jeremias','isaias','zacarias',
+  'jesus','luis','carlos','marcos','andres','alexis','dionisis','nicolas',
+  // terminan en -n
+  'juan','martin','sebastian','julian','adrian','fabian','cristian','christian',
+  'damian','german','hernan','esteban','gaston','agustin','joaquin','benjamin',
+  'fermin','simon','ramon','alan','ivan','kevin','brian','jonathan','jonatan',
+  'dylan','jean','efrain','marlon','milton','nelson','wilson','edison',
+  // terminan en -l
+  'gabriel','daniel','manuel','miguel','rafael','ismael','joel','axel',
+  'ezequiel','nahuel','samuel','emanuel','leonel','lionel','uriel','abel',
+  // otras consonantes
+  'javier','walter','oscar','nestor','hector','victor','edgar','omar','cesar',
+  'salvador','amadeo','josue','ander','alexander','michael','peter']);
+
+// Deliberadamente FUERA de las dos listas, porque en Argentina se usan para
+// ambos: ariel, noel, rene, cruz, yael, robin, alexis(m mayormente pero...).
+// Caen en la frase neutra, que es lo correcto cuando de verdad no se sabe.
+
+function normalizar(s) {
+  return String(s || '').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')   // saca tildes
+    .replace(/[^a-z\s]/g, ' ').trim();
+}
+
+/**
+ * Devuelve cómo dirigirse al invitado.
+ * @param {string} invitado  lo que escribió el admin
+ * @param {string} forzado   'f' | 'm' | 'p' si el admin lo eligió a mano
+ */
+function saludoPara(invitado, forzado) {
+  if (forzado === 'f') return 'estás invitada';
+  if (forzado === 'm') return 'estás invitado';
+  if (forzado === 'p') return 'están invitados';
+
+  const t = normalizar(invitado);
+  if (!t) return 'te esperamos';
+
+  // Grupo: "Familia González", "Los Ramírez", "Ana y José".
+  if (/^(familia|flia|los|las)\b/.test(t) || /\sy\s/.test(t)) return 'están invitados';
+
+  const nombre = t.split(/\s+/)[0];
+  // Las listas van primero: son las excepciones a la regla del final.
+  if (NOMBRES_F.has(nombre)) return 'estás invitada';
+  if (NOMBRES_M.has(nombre)) return 'estás invitado';
+
+  const fin = nombre.slice(-1);
+  if (fin === 'a') return 'estás invitada';
+  if (fin === 'o') return 'estás invitado';
+
+  // Consonante y fuera de las listas: no hay forma de saberlo. Antes de
+  // arriesgar y errarle, se usa algo que le sirve a cualquiera.
+  return 'te esperamos';
+}
+
 /** Las OG exigen URL absoluta: una ruta tipo /assets/... no le sirve al robot. */
 function absoluta(url, base) {
   if (!url) return '';
@@ -43,6 +132,8 @@ module.exports = async function handler(req, res) {
 
   const evento   = (url.searchParams.get('evento') || 'valentina15').trim();
   const invitado = (url.searchParams.get('invitado') || '').trim();
+  // t=f|m|p — lo pone el admin cuando quiere decidirlo a mano.
+  const trato    = (url.searchParams.get('t') || '').toLowerCase();
 
   // ¿Es un robot armando la vista previa, o una persona?
   const ua  = String(req.headers['user-agent'] || '');
@@ -61,7 +152,7 @@ module.exports = async function handler(req, res) {
 
   const nombre = C.nombre || 'Nuestra fiesta';
   const tipo   = C.tipo   || '';
-  const titulo = invitado ? `${invitado}, estás invitado — ${nombre}`
+  const titulo = invitado ? `${invitado}, ${saludoPara(invitado, trato)} — ${nombre}`
                           : [nombre, tipo].filter(Boolean).join(' · ');
   const desc   = [C.subtitulo, C.fecha_texto, C.salon].filter(Boolean).join(' · ')
                  || 'Abrí tu invitación y confirmá tu asistencia.';

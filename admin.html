@@ -779,6 +779,20 @@ tr:hover td{background:rgba(255,255,255,0.01);}
             <label class="form-label">Cupos reservados</label>
             <input id="lk-cupos" type="number" class="form-input" value="1" min="1" max="20">
           </div>
+          <div class="form-group">
+            <label class="form-label">Cómo saludarlo en la vista previa</label>
+            <select id="lk-trato" class="form-select">
+              <option value="">Automático</option>
+              <option value="f">Mujer — "estás invitada"</option>
+              <option value="m">Varón — "estás invitado"</option>
+              <option value="p">Familia o grupo — "están invitados"</option>
+            </select>
+            <div style="font-size:.72rem;color:var(--tx3);margin-top:6px;line-height:1.4">
+              En automático se deduce del nombre. Si no puede saberlo con
+              certeza usa "te esperamos", que sirve para cualquiera — antes
+              que arriesgar y errarle.
+            </div>
+          </div>
           <div class="form-group" style="display:none;">
             <label class="form-label">Número de mesa</label>
             <input id="lk-mesa" type="number" class="form-input" value="1" min="1" max="999" placeholder="Ej: 5">
@@ -1678,7 +1692,9 @@ async function generarLink() {
   // que WhatsApp muestre la foto y el nombre del evento en la vista previa.
   // El invitado ve exactamente la misma página.
   const baseUrl = location.origin + location.pathname.replace('admin.html','i');
-  const url = `${baseUrl}?evento=${eventoId}&invitado=${encodeURIComponent(n)}&personas=${c}`;
+  const trato = document.getElementById('lk-trato')?.value || '';
+  const url = `${baseUrl}?evento=${eventoId}&invitado=${encodeURIComponent(n)}&personas=${c}`
+            + (trato ? `&t=${trato}` : '');
   
   document.getElementById('lk-url').textContent = url;
   
