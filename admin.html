@@ -1458,7 +1458,18 @@ async function guardarTodo() {
         if (f.type === 'image' || f.type === 'audio') {
           const inp = document.getElementById(`cf-${f.key}`);
           if (inp?.files?.length) {
-            const url = await uploadFile(inp, f.key, newId);
+            let url;
+            try {
+              url = await uploadFile(inp, f.key, newId);
+            } catch (e) {
+              // Se corta el guardado entero a propósito: es preferible no
+              // guardar nada a guardar un config que apunta a una imagen
+              // que no existe y que después no se puede distinguir de una
+              // que sí subió.
+              toast('❌ ' + e.message);
+              btns.forEach(b => { b.disabled = false; b.textContent = '💾 Guardar cambios'; });
+              return;
+            }
             if (url) currentConfig[f.key] = url;
           }
         } else {
@@ -1515,9 +1526,21 @@ function val(id) {
 async function uploadFile(input, key, targetId) {
   if (!input.files?.length) return null;
   const file = input.files[0];
-  const ext = file.name.split('.').pop();
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
   const path = `${targetId}/${key}_${Date.now()}.${ext}`;
-  await sb.storage.from('invitaciones').upload(path, file, { upsert: true });
+
+  // El cliente de Supabase NO lanza excepción: devuelve { data, error }.
+  // Antes nadie miraba `error`, así que si la subida fallaba igual se armaba
+  // la URL pública de un archivo inexistente, se guardaba en el config y el
+  // panel decía "guardado con éxito". Silencioso y con datos rotos.
+  const { error } = await sb.storage
+    .from('invitaciones')
+    .upload(path, file, { upsert: false, contentType: file.type || undefined });
+
+  if (error) {
+    throw new Error(`No se pudo subir "${file.name}": ${error.message}`);
+  }
+
   const { data } = sb.storage.from('invitaciones').getPublicUrl(path);
   return data.publicUrl;
 }
