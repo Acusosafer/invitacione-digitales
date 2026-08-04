@@ -1529,9 +1529,50 @@ function val(id) {
   return document.getElementById(id)?.value || null;
 }
 
+/**
+ * Achica y recomprime la imagen ANTES de subirla.
+ *
+ * Sin esto se subía el archivo tal cual salía del celular o de la IA: un PNG
+ * de 2 MB, que es lo que hizo que WhatsApp no mostrara la foto en la vista
+ * previa (descarta las imágenes pesadas). Además hacía que la invitación
+ * tardara en cargar con datos móviles.
+ *
+ * Se hace acá y no del lado del servidor porque el navegador ya tiene la
+ * imagen en memoria: es gratis y no hace falta subir 2 MB para tirar 1,7.
+ */
+async function comprimirImagen(file, maxLado = 1920, calidad = 0.85) {
+  if (!file.type.startsWith('image/')) return file;   // el audio pasa derecho
+
+  const bitmap = await createImageBitmap(file).catch(() => null);
+  if (!bitmap) return file;                            // formato raro: se sube igual
+
+  const escala = Math.min(1, maxLado / Math.max(bitmap.width, bitmap.height));
+  const w = Math.round(bitmap.width * escala);
+  const h = Math.round(bitmap.height * escala);
+
+  const lienzo = document.createElement('canvas');
+  lienzo.width = w; lienzo.height = h;
+  const ctx = lienzo.getContext('2d');
+  // Fondo blanco: si el PNG venía con transparencia, al pasar a JPEG esas
+  // zonas quedarían negras.
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(bitmap, 0, 0, w, h);
+  bitmap.close?.();
+
+  const blob = await new Promise(r => lienzo.toBlob(r, 'image/jpeg', calidad));
+  if (!blob || blob.size >= file.size) return file;    // si no mejora, se deja el original
+
+  return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+}
+
 async function uploadFile(input, key, targetId) {
   if (!input.files?.length) return null;
-  const file = input.files[0];
+  const original = input.files[0];
+  const file = await comprimirImagen(original);
+  if (file !== original) {
+    console.info(`${key}: ${(original.size/1024|0)} KB → ${(file.size/1024|0)} KB`);
+  }
   const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
   const path = `${targetId}/${key}_${Date.now()}.${ext}`;
 
