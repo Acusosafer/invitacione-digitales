@@ -83,7 +83,11 @@ module.exports = async function handler(req, res) {
   // vista previa se resuelve en un par de KB.
   if (bot) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=86400');
+    // Sin caché compartida: esta respuesta CAMBIA según el User-Agent, y el
+    // CDN no distingue por eso. Con s-maxage, el primero que entraba —robot o
+    // persona— dejaba su versión guardada para todos, y un invitado podía
+    // recibir la página mínima del robot en vez de su invitación.
+    res.setHeader('Cache-Control', 'private, no-store');
     res.statusCode = 200;
     return res.end(`<!DOCTYPE html>
 <html lang="es"><head>
@@ -152,7 +156,10 @@ module.exports = async function handler(req, res) {
   // El JS de la página vuelve a escribir las OG en el navegador; da igual,
   // el robot ya leyó las de arriba. Lo que el invitado ve no cambia.
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=300, stale-while-revalidate=86400');
+  // Misma razón: la respuesta depende del User-Agent, así que no puede vivir
+  // en una caché compartida. La función responde en menos de un segundo y el
+  // volumen es bajo, así que no cachear no cuesta nada.
+  res.setHeader('Cache-Control', 'private, no-store');
   res.statusCode = 200;
   res.end(html);
 };
