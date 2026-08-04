@@ -1595,11 +1595,20 @@
       const ogTitle = `${C.nombre} — ${C.tipo}`;
       const ogDesc = C.subtitulo || 'Estás invitado a mi evento especial';
       const ogImg = C.foto_hero || C.foto_splash || '';
-      document.getElementById('og-title').content = ogTitle;
-      document.getElementById('og-desc').content = ogDesc;
-      if (ogImg) document.getElementById('og-img').content = ogImg;
-      document.getElementById('og-url').content = window.location.href;
-      document.getElementById('pg-title').textContent = ogTitle;
+      // Con tolerancia a que el elemento no esté. Estas etiquetas son cosmética
+      // para el navegador —quien las lee de verdad es el robot de WhatsApp, y
+      // ya las recibió escritas del servidor—. No tienen por qué poder cortar
+      // el arranque de la invitación: cuando eso pasó, la página quedó colgada
+      // con el splash vacío porque initApp() moría acá.
+      const ponerMeta = (id, prop, valor) => {
+        const el = document.getElementById(id);
+        if (el && valor) el[prop] = valor;
+      };
+      ponerMeta('og-title', 'content', ogTitle);
+      ponerMeta('og-desc',  'content', ogDesc);
+      ponerMeta('og-img',   'content', ogImg);
+      ponerMeta('og-url',   'content', window.location.href);
+      ponerMeta('pg-title', 'textContent', ogTitle);
 
       // Splash
       document.getElementById('splash-tipo').textContent = C.tipo;

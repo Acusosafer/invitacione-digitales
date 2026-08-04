@@ -75,30 +75,33 @@ module.exports = async function handler(req, res) {
                  || 'Abrí tu invitación y confirmá tu asistencia.';
   const img    = absoluta(C.foto_hero || C.foto_splash || '/logo.png', base);
 
-  const tags = `
-  <title>${esc(titulo)}</title>
+  // Las etiquetas existentes se REESCRIBEN conservando su id. No se borran:
+  // el JS de la invitación hace document.getElementById('og-title').content
+  // y si el elemento no está, tira TypeError y corta initApp() antes de
+  // pintar el splash. La página quedaba colgada con el círculo vacío.
+  const reemplazar = (h, id, etiqueta) =>
+    h.replace(new RegExp(`<meta[^>]*id="${id}"[^>]*>`, 'i'), etiqueta);
+
+  html = reemplazar(html, 'og-title', `<meta id="og-title" property="og:title" content="${esc(titulo)}">`);
+  html = reemplazar(html, 'og-desc',  `<meta id="og-desc" property="og:description" content="${esc(desc)}">`);
+  html = reemplazar(html, 'og-img',   `<meta id="og-img" property="og:image" content="${esc(img)}">`);
+  html = reemplazar(html, 'og-url',   `<meta id="og-url" property="og:url" content="${esc(base + '/i' + qs)}">`);
+  html = html.replace(/<title([^>]*)>[\s\S]*?<\/title>/i, `<title$1>${esc(titulo)}</title>`);
+
+  // Las que no existen en el HTML original se agregan al final del head.
+  const extra = `
   <meta name="description" content="${esc(desc)}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Invitaciones Digitales">
   <meta property="og:locale" content="es_AR">
-  <meta property="og:title" content="${esc(titulo)}">
-  <meta property="og:description" content="${esc(desc)}">
-  <meta property="og:image" content="${esc(img)}">
   <meta property="og:image:width" content="1920">
   <meta property="og:image:height" content="1080">
-  <meta property="og:url" content="${esc(base + '/i' + qs)}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${esc(titulo)}">
   <meta name="twitter:description" content="${esc(desc)}">
   <meta name="twitter:image" content="${esc(img)}">
 `;
-
-  // Se BORRAN las etiquetas viejas antes de poner las nuevas. Dejar las dos
-  // versiones haría que cada robot elija una distinta.
-  html = html
-    .replace(/<meta[^>]*id="og-[^"]*"[^>]*>\s*/gi, '')
-    .replace(/<title[^>]*>[\s\S]*?<\/title>\s*/i, '')
-    .replace('</head>', tags + '</head>');
+  html = html.replace('</head>', extra + '</head>');
 
   // El JS de la página vuelve a escribir las OG en el navegador; da igual,
   // el robot ya leyó las de arriba. Lo que el invitado ve no cambia.
