@@ -51,6 +51,14 @@
          encima: invisible. Ahora se derivan del tema, así que en tema
          oscuro son un poco más claras que el fondo y en tema claro un
          poco más oscuras. */
+      /* ── Tipografía ──────────────────────────────────────────────
+         Antes cada font-family estaba escrito a mano en el CSS, así que
+         el selector del admin bajaba una fuente que después nadie usaba.
+         Ahora son variables y el JS las pisa según la dupla elegida. */
+      --font-titulo: 'Cormorant Garamond', Georgia, serif;   /* nombres y títulos */
+      --font:        'Jost', system-ui, sans-serif;          /* textos corridos  */
+      --font-label:  'Jost', system-ui, sans-serif;          /* etiquetas chicas */
+
       --surface:   color-mix(in srgb, var(--primary)  7%, var(--bg));
       --surface-2: color-mix(in srgb, var(--primary)  3%, var(--bg));
       --edge:      color-mix(in srgb, var(--primary) 22%, var(--bg));
@@ -67,7 +75,7 @@
     }
 
     body {
-      font-family: 'Jost', sans-serif;
+      font-family: var(--font);
       background: var(--bg);
       color: var(--ink);
       overflow-x: hidden;
@@ -78,13 +86,13 @@
     h1,
     h2,
     .serif {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: var(--font-titulo);
       font-weight: 600
     }
 
     h3,
     h4 {
-      font-family: 'Montserrat', sans-serif;
+      font-family: var(--font-label);
       font-weight: 600
     }
 
@@ -143,7 +151,7 @@
     }
 
     .splash-tipo {
-      font-family: 'Montserrat';
+      font-family: var(--font-label);
       font-size: 0.85rem;
       letter-spacing: 3px;
       text-transform: uppercase;
@@ -153,7 +161,7 @@
     }
 
     .splash-nombre {
-      font-family: 'Cormorant Garamond';
+      font-family: var(--font-titulo);
       font-size: clamp(2rem, 8vw, 3.5rem);
       font-weight: 700;
       margin-bottom: 8px;
@@ -217,7 +225,7 @@
       padding: 14px 32px;
       border-radius: 12px;
       border: none;
-      font-family: 'Jost', sans-serif;
+      font-family: var(--font);
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
@@ -308,7 +316,7 @@
     }
 
     .hero-tipo {
-      font-family: 'Montserrat';
+      font-family: var(--font-label);
       font-size: 0.9rem;
       letter-spacing: 3px;
       text-transform: uppercase;
@@ -317,7 +325,7 @@
     }
 
     .hero-nombre {
-      font-family: 'Cormorant Garamond';
+      font-family: var(--font-titulo);
       font-size: clamp(2.5rem, 10vw, 4.5rem);
       font-weight: 700;
       line-height: 1.1;
@@ -441,7 +449,7 @@
     }
 
     .count-num {
-      font-family: 'Montserrat';
+      font-family: var(--font-label);
       font-size: 1.6rem;
       font-weight: 800;
       line-height: 1;
@@ -559,7 +567,7 @@
     }
 
     .location-name {
-      font-family: 'Montserrat';
+      font-family: var(--font-label);
       font-weight: 600;
       font-size: 1.2rem;
       margin-bottom: 12px
@@ -573,7 +581,7 @@
     }
 
     .location-hora {
-      font-family: 'Montserrat';
+      font-family: var(--font-label);
       font-weight: 600;
       color: var(--accent-text);
       margin-top: 12px
@@ -602,7 +610,7 @@
     }
 
     .dresscode-title {
-      font-family: 'Montserrat';
+      font-family: var(--font-label);
       font-size: 1.8rem;
       text-transform: uppercase;
       letter-spacing: 3px;
@@ -646,7 +654,7 @@
     }
 
     .alias-text {
-      font-family: 'Montserrat';
+      font-family: var(--font-label);
       font-size: 1.4rem;
       font-weight: 700;
       color: var(--ink);
@@ -686,7 +694,7 @@
     }
 
     .hashtag-tag {
-      font-family: 'Montserrat';
+      font-family: var(--font-label);
       font-size: 2rem;
       font-weight: 800;
       text-transform: uppercase;
@@ -735,7 +743,7 @@
       padding: 12px;
       border: 1px solid var(--edge);
       border-radius: 8px;
-      font-family: 'Jost';
+      font-family: var(--font);
       font-size: 0.95rem;
       background: var(--surface-2);
       color: var(--black);
@@ -1409,6 +1417,81 @@
       return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
     }
 
+    /* ══════════════════════════════════════════════════════════════════
+       DUPLAS TIPOGRÁFICAS
+
+       El cliente elige una dupla, no una fuente suelta. Igual criterio que
+       con los colores: una fuente linda puesta en el lugar equivocado
+       arruina la invitación, y quien la arma no tiene por qué saber qué
+       combina con qué. Cada dupla ya está probada.
+
+       `w` lleva los pesos EXACTOS que publica cada familia. Si se le pide a
+       Google un peso que la fuente no tiene, falla el pedido entero y no
+       carga ninguna — por eso no hay una lista genérica de pesos.
+       ══════════════════════════════════════════════════════════════════ */
+    const DUPLAS = {
+      clasica:     { nombre:'Clásica delicada',
+                     titulo:"'Cormorant Garamond', Georgia, serif", cuerpo:"'Jost', system-ui, sans-serif",
+                     w:['Cormorant+Garamond:wght@300;400;500;600;700','Jost:wght@300;400;500;600'] },
+      editorial:   { nombre:'Editorial cálida',
+                     titulo:"'Fraunces', Georgia, serif", cuerpo:"'Instrument Sans', system-ui, sans-serif",
+                     w:['Fraunces:opsz,wght@9..144,300..700','Instrument+Sans:wght@400;500;600'] },
+      altacostura: { nombre:'Alta costura',
+                     titulo:"'Playfair Display', Georgia, serif", cuerpo:"'Montserrat', system-ui, sans-serif",
+                     w:['Playfair+Display:wght@400;500;600;700','Montserrat:wght@300;400;500;600'] },
+      moderna:     { nombre:'Moderna minimal',
+                     titulo:"'DM Serif Display', Georgia, serif", cuerpo:"'DM Sans', system-ui, sans-serif",
+                     w:['DM+Serif+Display','DM+Sans:wght@300;400;500;700'] },
+      romana:      { nombre:'Romana elegante',
+                     titulo:"'Marcellus', Georgia, serif", cuerpo:"'Karla', system-ui, sans-serif",
+                     w:['Marcellus','Karla:wght@300;400;500;600'] },
+      fashion:     { nombre:'Revista de moda',
+                     titulo:"'Bodoni Moda', Georgia, serif", cuerpo:"'Inter', system-ui, sans-serif",
+                     w:['Bodoni+Moda:opsz,wght@6..96,400..700','Inter:wght@300;400;500;600'] },
+      geometrica:  { nombre:'Geométrica actual',
+                     titulo:"'Syne', system-ui, sans-serif", cuerpo:"'Inter', system-ui, sans-serif",
+                     w:['Syne:wght@400;600;700;800','Inter:wght@300;400;500;600'] },
+      suave:       { nombre:'Editorial suave',
+                     titulo:"'Instrument Serif', Georgia, serif", cuerpo:"'Inter', system-ui, sans-serif",
+                     w:['Instrument+Serif','Inter:wght@300;400;500;600'] },
+    };
+
+    /**
+     * Aplica la dupla. Acepta también el formato viejo, donde `fuente`
+     * guardaba el nombre suelto de una fuente ("Playfair Display"): en ese
+     * caso la usa de título y la acompaña con una sans segura, para que las
+     * invitaciones ya creadas no se rompan.
+     */
+    function aplicarTipografia(clave) {
+      let d = DUPLAS[clave];
+
+      if (!d && clave) {
+        const familia = String(clave).trim();
+        d = {
+          titulo: `'${familia}', Georgia, serif`,
+          cuerpo: "'Jost', system-ui, sans-serif",
+          w: [familia.replace(/ /g, '+'), 'Jost:wght@300;400;500;600']
+        };
+      }
+      if (!d) d = DUPLAS.clasica;
+
+      const raiz = document.documentElement.style;
+      raiz.setProperty('--font-titulo', d.titulo);
+      raiz.setProperty('--font',        d.cuerpo);
+      raiz.setProperty('--font-label',  d.cuerpo);
+
+      const url = 'https://fonts.googleapis.com/css2?' +
+                  d.w.map(f => 'family=' + f).join('&') + '&display=swap';
+      let link = document.getElementById('dynamic-font');
+      if (!link) {
+        link = document.createElement('link');
+        link.id = 'dynamic-font';
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+      }
+      link.href = url;
+    }
+
     /** Mezcla dos colores. Réplica en JS de lo que hace color-mix en el CSS,
      *  para poder calcular contra la tarjeta sin leerla del DOM. */
     function mezclar(a, b, p) {
@@ -1471,7 +1554,7 @@
       C.nombre = C.nombre || 'Evento';
       C.tipo = C.tipo || 'MIS 15';
       C.subtitulo = C.subtitulo || 'Quiero que seas parte de este momento especial';
-      C.fuente = C.fuente || 'Jost';
+      C.fuente = C.fuente || 'clasica';
       C.color_1 = C.color_1 || '#1a1a1a';
       C.color_2 = C.color_2 || '#d6ecc0';
       C.color_bg = C.color_bg || '#ffffff';
@@ -1495,14 +1578,7 @@
         '--accent-text',
         acentoLegible(C.color_2, mezclar(C.color_1, C.color_bg, 0.07)));
 
-      const fontUrl = `https://fonts.googleapis.com/css2?family=${C.fuente.replace(/ /g, '+')}:wght@300;400;600&display=swap`;
-      const link = document.getElementById('dynamic-font') || document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = fontUrl;
-      if (!document.getElementById('dynamic-font')) {
-        link.id = 'dynamic-font';
-        document.head.appendChild(link);
-      }
+      aplicarTipografia(C.fuente);
 
       // Modo preview (?preview=1): salta el splash y esconde la barra de
       // scroll, para cuando la invitación va embebida en la landing.

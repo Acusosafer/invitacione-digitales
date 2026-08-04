@@ -860,12 +860,18 @@ tr:hover td{background:rgba(255,255,255,0.01);}
         <div class="global-grid">
           <div class="form-group col-full">
             <label class="form-label">Tipografía principal</label>
+            <!-- Se elige una DUPLA, no una fuente suelta: el título y el
+                 cuerpo se combinan solos. Las claves tienen que coincidir
+                 con el objeto DUPLAS de invitacion.html. -->
             <select id="gi-fuente" class="form-select">
-              <option value="Jost">Jost — Moderna y limpia</option>
-              <option value="Montserrat">Montserrat — Clásica</option>
-              <option value="Cormorant Garamond">Cormorant Garamond — Premium Serif</option>
-              <option value="Playfair Display">Playfair Display — Alta costura</option>
-              <option value="DM Sans">DM Sans — Minimalista</option>
+              <option value="clasica">Clásica delicada — Cormorant + Jost</option>
+              <option value="editorial">Editorial cálida — Fraunces + Instrument Sans</option>
+              <option value="altacostura">Alta costura — Playfair + Montserrat</option>
+              <option value="moderna">Moderna minimal — DM Serif + DM Sans</option>
+              <option value="romana">Romana elegante — Marcellus + Karla</option>
+              <option value="fashion">Revista de moda — Bodoni + Inter</option>
+              <option value="geometrica">Geométrica actual — Syne + Inter</option>
+              <option value="suave">Editorial suave — Instrument Serif + Inter</option>
             </select>
           </div>
 
