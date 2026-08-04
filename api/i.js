@@ -44,17 +44,9 @@ module.exports = async function handler(req, res) {
   const evento   = (url.searchParams.get('evento') || 'valentina15').trim();
   const invitado = (url.searchParams.get('invitado') || '').trim();
 
-  // La página real. No se pasa por /i, así que no hay bucle.
-  let html;
-  try {
-    const r = await fetch(`${base}/invitacion.html`);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    html = await r.text();
-  } catch (e) {
-    res.statusCode = 302;
-    res.setHeader('Location', '/invitacion.html' + qs);
-    return res.end();
-  }
+  // ¿Es un robot armando la vista previa, o una persona?
+  const ua  = String(req.headers['user-agent'] || '');
+  const bot = /whatsapp|facebookexternalhit|facebookcatalog|twitterbot|slackbot|discordbot|telegrambot|linkedinbot|pinterest|skypeuripreview|embedly|redditbot|bingbot|googlebot|iframely/i.test(ua);
 
   // El config del evento. Si falla, se sirve la página igual: perder la vista
   // previa es molesto, no poder abrir la invitación sería grave.
@@ -73,7 +65,58 @@ module.exports = async function handler(req, res) {
                           : [nombre, tipo].filter(Boolean).join(' · ');
   const desc   = [C.subtitulo, C.fecha_texto, C.salon].filter(Boolean).join(' · ')
                  || 'Abrí tu invitación y confirmá tu asistencia.';
-  const img    = absoluta(C.foto_hero || C.foto_splash || '/logo.png', base);
+  const original = absoluta(C.foto_hero || C.foto_splash || '/logo.png', base);
+
+  // La foto se sirve por el optimizador de imágenes de Vercel, que la
+  // redimensiona y recomprime al vuelo. Sin esto, si el cliente sube desde el
+  // celular una foto de 2 MB, WhatsApp la descarta y la vista previa sale sin
+  // imagen. El admin ahora comprime al subir, pero eso no arregla lo ya
+  // cargado ni protege de un caso raro: acá el tamaño queda garantizado.
+  const img = `${base}/_vercel/image?url=${encodeURIComponent(original)}&w=1200&q=70`;
+
+  // A los robots se les devuelve una página mínima con SOLO las etiquetas.
+  // La invitación completa pesa 73 KB y no le sirve de nada a un robot: le
+  // da más para leer, más para tardar y más para equivocarse. Con esto la
+  // vista previa se resuelve en un par de KB.
+  if (bot) {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=86400');
+    res.statusCode = 200;
+    return res.end(`<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<title>${esc(titulo)}</title>
+<meta name="description" content="${esc(desc)}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Invitaciones Digitales">
+<meta property="og:locale" content="es_AR">
+<meta property="og:title" content="${esc(titulo)}">
+<meta property="og:description" content="${esc(desc)}">
+<meta property="og:image" content="${esc(img)}">
+<meta property="og:image:secure_url" content="${esc(img)}">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="675">
+<meta property="og:image:alt" content="${esc(nombre)}">
+<meta property="og:url" content="${esc(base + '/i' + qs)}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(titulo)}">
+<meta name="twitter:description" content="${esc(desc)}">
+<meta name="twitter:image" content="${esc(img)}">
+</head><body><a href="/invitacion.html${esc(qs)}">${esc(titulo)}</a></body></html>`);
+  }
+
+  // Para personas: la invitación de verdad. No se pasa por /i, no hay bucle.
+  let html;
+  try {
+    const r = await fetch(`${base}/invitacion.html`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    html = await r.text();
+  } catch (e) {
+    res.statusCode = 302;
+    res.setHeader('Location', '/invitacion.html' + qs);
+    return res.end();
+  }
 
   // Las etiquetas existentes se REESCRIBEN conservando su id. No se borran:
   // el JS de la invitación hace document.getElementById('og-title').content
