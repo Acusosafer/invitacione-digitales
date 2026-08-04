@@ -1632,7 +1632,11 @@ async function generarLink() {
   btn.textContent = '✨ Generar Link Único';
   btn.disabled = false;
 
-  const baseUrl = location.origin + location.pathname.replace('admin.html','invitacion.html');
+  // Se comparte /i, no /invitacion.html: /i pasa por la función que escribe
+  // las etiquetas Open Graph del lado del servidor, y es lo único que hace
+  // que WhatsApp muestre la foto y el nombre del evento en la vista previa.
+  // El invitado ve exactamente la misma página.
+  const baseUrl = location.origin + location.pathname.replace('admin.html','i');
   const url = `${baseUrl}?evento=${eventoId}&invitado=${encodeURIComponent(n)}&personas=${c}`;
   
   document.getElementById('lk-url').textContent = url;
