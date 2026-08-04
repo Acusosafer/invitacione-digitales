@@ -65,14 +65,17 @@ module.exports = async function handler(req, res) {
                           : [nombre, tipo].filter(Boolean).join(' · ');
   const desc   = [C.subtitulo, C.fecha_texto, C.salon].filter(Boolean).join(' · ')
                  || 'Abrí tu invitación y confirmá tu asistencia.';
-  const original = absoluta(C.foto_hero || C.foto_splash || '/logo.png', base);
-
-  // La foto se sirve por el optimizador de imágenes de Vercel, que la
-  // redimensiona y recomprime al vuelo. Sin esto, si el cliente sube desde el
-  // celular una foto de 2 MB, WhatsApp la descarta y la vista previa sale sin
-  // imagen. El admin ahora comprime al subir, pero eso no arregla lo ya
-  // cargado ni protege de un caso raro: acá el tamaño queda garantizado.
-  const img = `${base}/_vercel/image?url=${encodeURIComponent(original)}&w=1200&q=70`;
+  // Se publica la foto tal cual está guardada.
+  //
+  // Se probó pasarla por el optimizador de Vercel (/_vercel/image) para
+  // garantizar el tamaño, pero en un sitio estático sin framework ese
+  // endpoint no existe: devuelve 404. Habría publicado una imagen rota, que
+  // es peor que una pesada.
+  //
+  // El control del peso queda entonces del lado del admin, que desde ahora
+  // comprime a 1920px y JPEG 85% ANTES de subir. Lo que ya estaba cargado hay
+  // que volver a subirlo una vez.
+  const img = absoluta(C.foto_hero || C.foto_splash || '/logo.png', base);
 
   // A los robots se les devuelve una página mínima con SOLO las etiquetas.
   // La invitación completa pesa 73 KB y no le sirve de nada a un robot: le

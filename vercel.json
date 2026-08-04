@@ -1,21 +1,5 @@
 {
   "rewrites": [
     { "source": "/i", "destination": "/api/i" }
-  ],
-  "images": {
-    "sizes": [640, 1200],
-    "formats": ["image/jpeg"],
-    "minimumCacheTTL": 86400,
-    "remotePatterns": [
-      {
-        "protocol": "https",
-        "hostname": "ldvosdztnhrvrqxnjuco.supabase.co",
-        "pathname": "/storage/v1/object/public/**"
-      },
-      {
-        "protocol": "https",
-        "hostname": "invitacionesdigitalesoficial.vercel.app"
-      }
-    ]
-  }
+  ]
 }
