@@ -170,7 +170,7 @@ body{
 .card-body{padding:22px;}
 
 .stats-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:14px;
   margin-bottom:20px;
 }
 .stat-card{
@@ -271,6 +271,7 @@ tr:hover td{background:rgba(255,255,255,0.01);}
 .badge-muted{background:rgba(255,255,255,0.06);color:var(--tx2);}
 .badge-green{background:rgba(52,211,100,0.12);color:#34d364;}
 .badge-red{background:rgba(255,60,60,0.12);color:#ff5555;}
+.badge-amber{background:rgba(245,180,60,0.14);color:#f5b43c;}
 
 #login-overlay{
   position:fixed;inset:0;
@@ -673,6 +674,7 @@ tr:hover td{background:rgba(255,255,255,0.01);}
       <div class="stat-card"><div class="stat-val" id="s-si">0</div><div class="stat-label">Confirmados</div></div>
       <div class="stat-card"><div class="stat-val" id="s-personas">0</div><div class="stat-label">Total personas</div></div>
       <div class="stat-card"><div class="stat-val" id="s-no">0</div><div class="stat-label">No asistirán</div></div>
+      <div class="stat-card"><div class="stat-val" id="s-pend">0</div><div class="stat-label">Sin responder</div></div>
     </div>
 
     <div class="card">
@@ -682,7 +684,7 @@ tr:hover td{background:rgba(255,255,255,0.01);}
       </div>
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Invitado</th><th>Asiste</th><th>Cupos</th><th>Mesa</th><th>Dieta</th><th>Canción</th><th>Fecha</th></tr></thead>
+          <thead><tr><th>Invitado</th><th>Asiste</th><th>Mesa</th><th>Dieta</th><th>Canción</th><th>Fecha</th><th></th></tr></thead>
           <tbody id="stats-rows"></tbody>
         </table>
       </div>
@@ -694,7 +696,7 @@ tr:hover td{background:rgba(255,255,255,0.01);}
     <div class="card" style="padding:0">
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Invitado</th><th>Asiste</th><th>Cupos</th><th>Mesa</th><th>Dieta</th><th>Canción</th><th>Fecha</th></tr></thead>
+          <thead><tr><th>Invitado</th><th>Asiste</th><th>Mesa</th><th>Dieta</th><th>Canción</th><th>Fecha</th><th></th></tr></thead>
           <tbody id="inv-rows"></tbody>
         </table>
       </div>
@@ -1606,24 +1608,38 @@ async function uploadFile(input, key, targetId) {
   return data.publicUrl;
 }
 
+// Escapa lo que escribieron los invitados: sus nombres y canciones entran
+// como HTML en la tabla, y un apóstrofo rompía el onclick del botón.
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+
 async function loadData() {
   const { data } = await sb.rpc('admin_invitados', { p_evento: eventoId, p_clave: adminClave });
-  let sT=0, sSi=0, sP=0, sNo=0;
+  let sSi=0, sNo=0, sPend=0;
 
+  // Cada fila es UNA persona: el titular y cada acompañante van por separado.
+  // Antes había una columna "Cupos" que mostraba 1 en todas y hacía creer que
+  // un grupo de 5 había confirmado 1 solo lugar.
   const rows = (data||[]).map(r => {
-    sT++;
-    if (r.asiste === 'si') { sSi++; sP += parseInt(r.personas||0); } else sNo++;
-    const badge = r.asiste === 'si'
-      ? '<span class="badge badge-green">✓ Sí</span>'
-      : '<span class="badge badge-red">✗ No</span>';
+    let badge;
+    if (r.asiste === 'si')      { sSi++;   badge = '<span class="badge badge-green">✓ Sí</span>'; }
+    else if (r.asiste === 'no') { sNo++;   badge = '<span class="badge badge-red">✗ No</span>'; }
+    // 'pendiente' es la fila que deja el generador de links: todavía no
+    // respondió. Antes se contaba como "No asistirán", que es otra cosa.
+    else                        { sPend++; badge = '<span class="badge badge-amber">⏳ Sin responder</span>'; }
+
+    const quien = `${r.nombre} ${r.apellido||''}`.trim();
     return `<tr>
-      <td><strong>${r.nombre} ${r.apellido||''}</strong><br><small style="color:var(--tx3)">${r.invitado_url}</small></td>
+      <td><strong>${esc(quien)}</strong><br><small style="color:var(--tx3)">${esc(r.invitado_url)}</small></td>
       <td>${badge}</td>
-      <td>${r.personas}</td>
-      <td>${r.mesa || '—'}</td>
-      <td>${r.dieta||'—'}</td>
-      <td>${r.mensaje||'—'}</td>
+      <td>${esc(r.mesa) || '—'}</td>
+      <td>${esc(r.dieta) || '—'}</td>
+      <td>${esc(r.mensaje) || '—'}</td>
       <td>${new Date(r.created_at).toLocaleDateString('es-AR')}</td>
+      <td><button class="btn btn-ghost btn-sm" title="Eliminar de la lista"
+            onclick="borrarInvitado(${r.id}, '${esc(quien).replace(/&#39;/g, "\\'")}')">🗑</button></td>
     </tr>`;
   }).join('');
 
@@ -1632,13 +1648,33 @@ async function loadData() {
     if (el) el.innerHTML = rows || '<tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:30px">Sin respuestas aún</td></tr>';
   });
 
-  document.getElementById('s-total').textContent = sT;
+  document.getElementById('s-total').textContent = sSi + sNo;
   document.getElementById('s-si').textContent = sSi;
-  document.getElementById('s-personas').textContent = sP;
+  document.getElementById('s-personas').textContent = sSi;
   document.getElementById('s-no').textContent = sNo;
+  const elPend = document.getElementById('s-pend');
+  if (elPend) elPend.textContent = sPend;
 
   const dot = document.getElementById('dot-stats');
-  if (dot) dot.className = `nav-dot${sT > 0 ? ' on' : ''}`;
+  if (dot) dot.className = `nav-dot${(sSi + sNo) > 0 ? ' on' : ''}`;
+}
+
+// Borra una fila de la lista. Hace falta, por ejemplo, cuando un grupo
+// confirmó mal: al eliminar su fila el link le vuelve a habilitar el
+// formulario y puede cargar a todos de nuevo.
+async function borrarInvitado(id, quien) {
+  if (!confirm(`¿Eliminar a "${quien}" de la lista?\n\nSi era el titular de un link, va a poder volver a confirmar desde el mismo link.`)) return;
+
+  const { error } = await sb.rpc('admin_borrar_fila', {
+    p_evento: eventoId,
+    p_clave: adminClave,
+    p_id: id
+  });
+  if (error) { toast('❌ No se pudo eliminar: ' + error.message); return; }
+
+  toast('🗑 Eliminado de la lista');
+  await loadData();
+  if (typeof loadMesasData === 'function') loadMesasData();
 }
 
 async function loadHistorial() {
