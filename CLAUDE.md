@@ -4,7 +4,12 @@
 
 Sistema de invitaciones digitales personalizadas para eventos (15 años, casamientos, etc.). Cada evento tiene una URL única, configuración almacenada en Supabase, y se comparten links personalizados por WhatsApp a cada invitado.
 
-**Stack:** HTML/CSS/JS vanilla — sin framework, sin bundler, sin build step. Todo se sirve estático.
+**Stack:** HTML/CSS/JS vanilla — sin framework ni bundler.
+
+⚠️ **Ya no es 100% estático.** Hay **una** función serverless: `api/i.js`, que arma la vista
+previa de WhatsApp del lado del servidor (los robots no ejecutan JavaScript, así que no hay
+otra forma). El rewrite `/i` → `/api/i` está en `vercel.json`. Es la única excepción y conviene
+que siga siéndolo.
 
 **Backend:** Supabase — proyecto `ldvosdztnhrvrqxnjuco` ("Lo de Inés"), schema `invitaciones`
 
@@ -15,10 +20,40 @@ Sistema de invitaciones digitales personalizadas para eventos (15 años, casamie
 | `invitacion.html` | Invitación visible al invitado — carga config desde Supabase según `?evento=` |
 | `admin.html` | Panel de control — gestión de invitados, mesas, links, diseño |
 | `index.html` | Landing page del servicio |
-| `generar-hash-superadmin.html` | Genera el hash SHA-256 de la clave de superadmin |
+| `api/i.js` | **Vista previa de WhatsApp.** Los links se comparten como `/i?evento=...` |
+| `vercel.json` | Rewrite `/i` → `/api/i` |
+| `.vercelignore` | Qué NO se publica: `.md`, `sql/`, `publicidad/`, herramientas internas |
+| `generar-hash-superadmin.html` | Genera el hash SHA-256 de la clave de superadmin (no se deploya) |
 | `sql/001_schema_invitaciones.sql` | Schema, tablas, funciones y permisos |
 | `sql/002_demos.sql` | Los 12 eventos demo de la landing |
+| `sql/003_storage.sql` | Bucket de Storage y sus permisos |
+| `publicidad/agosto-a.html` | Placa de la campaña (1080×1080) |
 | `generate_logo.py` + `temp_logo.html` | Generación del logo |
+
+## Vista previa al compartir (leer antes de tocar el `<head>`)
+
+Los links van como **`/i?evento=...&invitado=...`**, no `/invitacion.html`. Los robots de
+WhatsApp no ejecutan JavaScript, así que las etiquetas Open Graph las arma `api/i.js` del lado
+del servidor.
+
+Tres cosas que **no** hay que hacer:
+1. **No borrar** los `<meta id="og-*">` ni el `<title id="pg-title">` de `invitacion.html`: el JS
+   los busca por id y sin ellos corta el arranque — la invitación queda colgada con el splash vacío.
+2. **No poner `Cache-Control` compartido en `/i`.** La respuesta cambia según el User-Agent y el
+   CDN no distingue: un invitado real recibiría la página mínima del robot.
+3. **`/_vercel/image` no existe** en un deploy estático: devuelve 404.
+
+El saludo concuerda en género (`estás invitada` / `invitado` / `invitados`), con `&t=f|m|p` para
+forzarlo desde el admin. Cuando no hay certeza usa "te esperamos" en vez de arriesgar.
+
+## Fotos: se comprimen solas al subir
+
+`admin.html` achica a 1920px y pasa a JPEG 85% **antes** de subir. Motivo: WhatsApp descarta las
+imágenes de más de ~600 KB y la vista previa sale sin foto. Además la invitación carga mucho más
+rápido con datos móviles.
+
+En Storage, `anon` puede **leer e insertar pero no actualizar ni borrar**: así nadie puede pisar
+las fotos de un cliente en producción. Por eso también `upsert: false`.
 
 ## Supabase
 
@@ -170,7 +205,15 @@ Al generar un link, el admin **pre-inserta filas en `confirmaciones`** con `asis
 - `--primary` / `--secondary` / `--bg` — sobreescritas desde `config.color_1/2/bg`
 - `--secondary` (`#d6ecc0` por defecto) — color de acento, botones, badges
 
-**Fuentes:** Cormorant Garamond (títulos serif), Jost (cuerpo), Montserrat (labels). La fuente principal se puede cambiar desde el admin (genera un `<link>` dinámico a Google Fonts).
+**Fuentes — se elige una DUPLA, no una fuente suelta.** Tres variables: `--font-titulo`,
+`--font`, `--font-label`. El objeto `DUPLAS` de `invitacion.html` tiene las 8 combinaciones y sus
+claves deben coincidir con el `<select id="gi-fuente">` del admin.
+
+⚠️ Cada dupla declara los pesos **exactos** que publica cada familia. Si se le pide a Google un
+peso que la fuente no tiene, falla el pedido entero y no carga ninguna de las dos.
+
+Hasta el 04/08/2026 el selector no hacía nada: bajaba la fuente y todos los `font-family` estaban
+escritos a mano.
 
 **Responsive:** Mobile-first. Galería: carousel en mobile, grid en desktop. Countdown: flex en mobile, grid 2×2 o 4 columnas en desktop.
 
