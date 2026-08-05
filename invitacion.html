@@ -1314,6 +1314,9 @@
           <div class="form-group">
             <label class="form-label">Cantidad de personas</label>
             <div class="opts-row" id="opts-personas"></div>
+            <div style="font-size:0.78rem;color:var(--ink-soft);margin-top:8px;line-height:1.45">
+              Si van menos, elegí el número exacto: solo se reservan los lugares que confirmes.
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label">Requerimientos alimenticios</label>
@@ -1912,7 +1915,12 @@
         title.style.fontSize = '0.85rem';
         title.textContent = 'Información de los acompañantes:';
         container.appendChild(title);
-        
+
+        const ayuda = document.createElement('div');
+        ayuda.style.cssText = 'font-size:0.78rem;color:var(--ink-soft);margin:-4px 0 4px;line-height:1.45';
+        ayuda.textContent = 'Necesitamos el nombre de cada uno para reservarles el lugar.';
+        container.appendChild(ayuda);
+
         for (let i = 2; i <= count; i++) {
           const card = document.createElement('div');
           card.className = 'companion-card';
@@ -2028,15 +2036,56 @@
       setInterval(update, 1000);
     }
 
+    // Pinta de rojo un campo que falta y lo limpia solo cuando el invitado
+    // empieza a escribir. Sin esto el único aviso es un toast que se va solo.
+    function marcarFalta(input, falta) {
+      input.style.borderColor = falta ? '#d4453f' : '';
+      input.style.background  = falta ? 'rgba(212,69,63,0.06)' : '';
+      if (falta && !input._limpiaFalta) {
+        input._limpiaFalta = true;
+        input.addEventListener('input', () => marcarFalta(input, false));
+      }
+    }
+
     async function confirmar() {
-      const nombre = document.getElementById('f-nombre').value.trim();
-      if (!nombre) { toast('⚠️ Ingresá tu nombre'); return; }
+      const campoNombre = document.getElementById('f-nombre');
+      const nombre = campoNombre.value.trim();
+      marcarFalta(campoNombre, !nombre);
+      if (!nombre) {
+        campoNombre.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        toast('⚠️ Ingresá tu nombre');
+        return;
+      }
 
       const btn = document.getElementById('btn-confirmar');
+      const asiste = document.querySelector('#opts-asiste .opt-btn.sel').dataset.val;
+
+      // Los acompañantes sin nombre NO se guardan, y confirmar borra la
+      // pre-alta del generador de links. Sin esta validación, elegir 5 y dejar
+      // los nombres en blanco borraba 4 cupos en silencio: ni el invitado ni
+      // el cliente se enteraban. (El `required` de los inputs no sirve acá:
+      // no hay submit de formulario, es un botón con onclick.)
+      if (asiste === 'si') {
+        const faltantes = [...document.querySelectorAll('.companion-card')]
+          .map(card => card.querySelector('.comp-nombre'))
+          .filter(input => {
+            const vacio = !input.value.trim();
+            marcarFalta(input, vacio);
+            return vacio;
+          });
+
+        if (faltantes.length) {
+          faltantes[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          toast(faltantes.length === 1
+            ? '⚠️ Falta el nombre de un acompañante'
+            : `⚠️ Faltan ${faltantes.length} nombres. Si van menos, cambiá la cantidad de personas.`);
+          return;
+        }
+      }
+
       btn.textContent = '⏳ Enviando...';
       btn.disabled = true;
 
-      const asiste = document.querySelector('#opts-asiste .opt-btn.sel').dataset.val;
       const personas = asiste === 'si' ? document.querySelector('#opts-personas .opt-btn.sel')?.textContent || '1' : '0';
       const dieta = asiste === 'si' ? [...document.querySelectorAll('.tag-btn.sel:not(.comp-tag-btn)')].map(t => t.dataset.diet).join(', ') : '';
       const mesa = mesa_param || '';
