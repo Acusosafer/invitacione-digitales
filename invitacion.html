@@ -720,6 +720,12 @@
       white-space: nowrap;
       transition: background 140ms ease;
     }
+    .agendar-menu button { display: flex; flex-direction: column; gap: 3px; }
+    .agendar-menu button small {
+      font-size: 0.7rem;
+      color: var(--ink-soft);
+      font-weight: 400;
+    }
     .agendar-menu button:active { background: var(--surface); }
     @media (hover: hover) and (pointer: fine) {
       .agendar-menu button:hover { background: var(--surface); }
@@ -1394,9 +1400,15 @@
           <button id="btn-maps" class="btn btn-maps">Cómo llegar</button>
           <div class="agendar-wrap">
             <button id="btn-agendar" class="btn btn-agendar" style="display:none">Agendar</button>
+            <!-- El .ics va primero: es el único que se lleva los avisos.
+                 En Android también lo abre Google Calendar, con avisos y todo. -->
             <div class="agendar-menu" id="agendar-menu">
-              <button type="button" data-donde="google">Google Calendar</button>
-              <button type="button" data-donde="ics">iPhone · Outlook · otro</button>
+              <button type="button" data-donde="ics">
+                Mi calendario<small>Te avisa 10 días antes y la víspera</small>
+              </button>
+              <button type="button" data-donde="google">
+                Google Calendar<small>Se abre en el navegador</small>
+              </button>
             </div>
           </div>
         </div>
@@ -2208,11 +2220,19 @@
         `SUMMARY:${txt(titulo)}`,
         lugar ? `LOCATION:${txt(lugar)}` : null,
         `DESCRIPTION:${txt('¡Te esperamos!')}`,
-        // Aviso el día anterior: el objetivo es que no se olviden.
+        // Dos avisos, sin que el invitado configure nada: a los 10 días para
+        // que llegue a organizarse (regalo, ropa, quién lo lleva) y la
+        // víspera para que no se le pase. Si faltan menos de 10 días cuando
+        // lo agenda, el calendario simplemente ignora el aviso vencido.
+        'BEGIN:VALARM',
+        'TRIGGER:-P10D',
+        'ACTION:DISPLAY',
+        `DESCRIPTION:${txt(`Faltan 10 días para ${titulo}`)}`,
+        'END:VALARM',
         'BEGIN:VALARM',
         'TRIGGER:-P1D',
         'ACTION:DISPLAY',
-        `DESCRIPTION:${txt(titulo)}`,
+        `DESCRIPTION:${txt(`Mañana es ${titulo} 🥂`)}`,
         'END:VALARM',
         'END:VEVENT',
         'END:VCALENDAR'
