@@ -649,12 +649,34 @@
       margin-top: 12px
     }
 
+    .loc-acciones {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
     .btn-maps {
       background: var(--black);
       color: var(--white);
       padding: 11px 24px;
       font-size: 0.85rem;
-      margin-top: 16px;
+    }
+
+    /* Secundario a propósito: "Cómo llegar" es la acción principal. */
+    .btn-agendar {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--edge);
+      padding: 10px 22px;
+      font-size: 0.85rem;
+      transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1),
+                  background 160ms ease;
+    }
+    .btn-agendar:active { transform: scale(0.97); }
+    @media (hover: hover) and (pointer: fine) {
+      .btn-agendar:hover { background: var(--surface-2); }
     }
 
     .btn-maps:hover {
@@ -1292,7 +1314,10 @@
         <div class="location-name" id="txt-salon"></div>
         <div class="location-addr" id="txt-dir"></div>
         <div class="location-hora"><span id="txt-fecha"></span> — <span id="txt-hora"></span> hs</div>
-        <button id="btn-maps" class="btn btn-maps">Cómo llegar</button>
+        <div class="loc-acciones">
+          <button id="btn-maps" class="btn btn-maps">Cómo llegar</button>
+          <button id="btn-agendar" class="btn btn-agendar" style="display:none">Agendar</button>
+        </div>
       </div>
     </section>
 
@@ -1782,6 +1807,7 @@
         document.getElementById('txt-fecha').textContent = C.fecha_texto || '';
         document.getElementById('txt-hora').textContent = C.hora_texto || '';
         if (C.maps_url) document.getElementById('btn-maps').onclick = () => window.open(C.maps_url);
+        prepararAgenda();
       }
 
       if (C.dresscode_titulo && C.layout?.show_dresscode !== false) {
@@ -2055,6 +2081,74 @@
           container.appendChild(card);
         }
       }
+    }
+
+    // ── AGENDAR ──────────────────────────────────────────────────────────
+    // Genera un archivo .ics, que es el formato que entienden el calendario
+    // del iPhone, el de Android y Google Calendar por igual. Se arma en el
+    // navegador: no hace falta servidor ni mandar al invitado a Google.
+    function armarICS() {
+      const inicio = new Date(C.fecha_iso);
+      if (isNaN(inicio.getTime())) return null;
+      // Sin hora de fin declarada asumimos una fiesta de 6 horas.
+      const fin = new Date(inicio.getTime() + 6 * 60 * 60 * 1000);
+
+      // El formato exige UTC con Z. `fecha_iso` no trae zona, así que el
+      // navegador la lee como hora local — que es la que cargó el cliente.
+      const utc = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+      // En iCalendar hay que escapar la barra, la coma, el punto y coma y el salto.
+      const txt = v => String(v || '')
+        .replace(/\\/g, '\\\\').replace(/;/g, '\\;')
+        .replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+
+      const titulo = [C.tipo, C.nombre].filter(Boolean).join(' — ') || 'Nuestra fiesta';
+      const lugar  = [C.salon, C.direccion].filter(Boolean).join(', ');
+
+      return [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Invitaciones Digitales//ES',
+        'CALSCALE:GREGORIAN',
+        'BEGIN:VEVENT',
+        `UID:${eventoId}-${inicio.getTime()}@invitacionesdigitales`,
+        `DTSTAMP:${utc(new Date())}`,
+        `DTSTART:${utc(inicio)}`,
+        `DTEND:${utc(fin)}`,
+        `SUMMARY:${txt(titulo)}`,
+        lugar ? `LOCATION:${txt(lugar)}` : null,
+        `DESCRIPTION:${txt('¡Te esperamos!')}`,
+        // Aviso el día anterior: el objetivo es que no se olviden.
+        'BEGIN:VALARM',
+        'TRIGGER:-P1D',
+        'ACTION:DISPLAY',
+        `DESCRIPTION:${txt(titulo)}`,
+        'END:VALARM',
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].filter(Boolean).join('\r\n');
+    }
+
+    function prepararAgenda() {
+      const btn = document.getElementById('btn-agendar');
+      if (!btn) return;
+      const ics = armarICS();
+      // Sin fecha válida no hay nada que agendar: mejor no mostrar el botón
+      // que mostrarlo y que no haga nada.
+      if (!ics) return;
+
+      btn.style.display = '';
+      btn.onclick = () => {
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${(C.nombre || 'evento').replace(/[^\w\s-]/g, '').trim() || 'evento'}.ics`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        toast('📅 Listo, agregalo a tu calendario');
+      };
     }
 
     function toggleMusic() {

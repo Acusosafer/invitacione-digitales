@@ -492,6 +492,91 @@ tr:hover td{background:rgba(255,255,255,0.01);}
   .stats-grid{grid-template-columns:1fr 1fr;}
 }
 
+/* ════════ CELULAR ════════
+   El panel se diseñó para pantalla grande: en un celular medía 787px de
+   ancho sobre 390px de viewport, así que había que hacer pinza y arrastrar
+   para el costado. Los clientes lo abren del celular, así que esto no es
+   un detalle. */
+.btn-menu{ display:none; }
+.sb-backdrop{ display:none; }
+
+@media(max-width:860px){
+  /* El menú pasa a ser un cajón que se abre con el botón de la barra. */
+  .btn-menu{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:38px;height:38px;flex:0 0 auto;
+    background:var(--s1);border:1px solid var(--bdr);border-radius:10px;
+    color:var(--tx);font-size:1.1rem;cursor:pointer;padding:0;
+  }
+  .btn-menu:active{ transform:scale(0.94); }
+
+  .sidebar{
+    transform:translateX(-100%);
+    transition:transform 320ms cubic-bezier(0.32,0.72,0,1);
+    box-shadow:0 0 40px rgba(0,0,0,0.6);
+    width:min(280px,84vw);
+  }
+  .sidebar.abierto{ transform:translateX(0); }
+
+  .sb-backdrop{
+    display:block;position:fixed;inset:0;z-index:99;
+    background:rgba(0,0,0,0.55);
+    opacity:0;pointer-events:none;
+    transition:opacity 320ms cubic-bezier(0.32,0.72,0,1);
+  }
+  .sb-backdrop.visible{ opacity:1;pointer-events:auto; }
+
+  .main{ margin-left:0;min-width:0; }
+
+  /* La barra superior era la que estiraba TODO el panel: menú + título +
+     "Exportar CSV" + "Ver invitación" suman ~393px y no entran en 390.
+     Como no envolvía, forzaba 535px de ancho de documento y todo lo de
+     abajo se estiraba con ella. Ahora los botones bajan a otra línea. */
+  .topbar{ padding:10px 14px;gap:10px;row-gap:8px;height:auto;flex-wrap:wrap; }
+  .topbar-left{ flex:1 1 auto;min-width:0; }
+  .topbar-title{ font-size:0.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+  .topbar-right{ flex:1 1 100%;justify-content:flex-start;flex-wrap:wrap; }
+  #tb-badge{ display:none; }
+
+  .tab-content{ padding:16px;min-width:0; }
+  .card-head{ flex-wrap:wrap;gap:10px; }
+
+  .stats-grid{ gap:10px; }
+  .stat-card{ padding:16px 12px; }
+  .stat-val{ font-size:1.7rem; }
+  .form-grid{ grid-template-columns:1fr; }
+
+  /* Una tabla de 7 columnas no entra en 390px. Cada fila pasa a ser una
+     ficha, con el nombre de la columna al lado del dato. */
+  .tbl-wrap thead{ display:none; }
+  .tbl-wrap table,.tbl-wrap tbody,.tbl-wrap tr,.tbl-wrap td{ display:block;width:100%; }
+  .tbl-wrap tr{
+    border:1px solid var(--bdr);border-radius:14px;
+    padding:12px 14px;margin-bottom:10px;background:var(--s1);
+  }
+  .tbl-wrap tr:hover td{ background:none; }
+  .tbl-wrap td{
+    border:none;padding:5px 0;font-size:0.85rem;
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    text-align:right;
+    /* una canción larga sin espacios no tiene que estirar la ficha */
+    overflow-wrap:anywhere;word-break:break-word;
+  }
+  .tbl-wrap td[data-col]::before{
+    content:attr(data-col);
+    flex:0 0 auto;text-align:left;
+    color:var(--tx3);font-size:0.6rem;
+    text-transform:uppercase;letter-spacing:1px;
+  }
+  .tbl-wrap td:first-child{ justify-content:flex-start;text-align:left; }
+  .tbl-wrap td:last-child{ justify-content:flex-end; }
+  .tbl-wrap td.vacio{ display:none; }
+
+  /* El croquis entraba a lo ancho pero quedaba encerrado en 550px de alto. */
+  .mesas-grid{ max-height:none;overflow:visible;gap:14px; }
+  .mesa-wrapper{ flex:1 1 100%;min-width:0;max-width:100%; }
+}
+
 /* MESAS COQUETTE */
 .mesas-grid {
   display: flex;
@@ -655,7 +740,8 @@ tr:hover td{background:rgba(255,255,255,0.01);}
 </div>
 
 <!-- SIDEBAR -->
-<aside class="sidebar">
+<div class="sb-backdrop" id="sb-backdrop" onclick="menu(false)"></div>
+<aside class="sidebar" id="sidebar">
   <div class="sb-logo">
     <h1 class="shimmer">Invitaciones<br>Digitales</h1>
     <span class="sub">OFICIAL</span>
@@ -706,6 +792,7 @@ tr:hover td{background:rgba(255,255,255,0.01);}
   <!-- TOPBAR -->
   <div class="topbar">
     <div class="topbar-left">
+      <button class="btn-menu" id="btn-menu" onclick="menu()" aria-label="Abrir menú">☰</button>
       <div class="topbar-title" id="tb-title">Resumen</div>
     </div>
     <div class="topbar-right">
@@ -741,6 +828,20 @@ tr:hover td{background:rgba(255,255,255,0.01);}
 
   <!-- ══ TAB: INVITADOS ══ -->
   <div id="tab-invitados" class="tab-content">
+
+    <!-- Recordatorio: los que todavía no contestaron, agrupados por link -->
+    <div class="card" id="card-pendientes" style="display:none;margin-bottom:18px">
+      <div class="card-head">
+        <span class="card-title">⏳ Todavía no respondieron</span>
+        <span class="badge badge-amber" id="pend-total">0</span>
+      </div>
+      <p style="color:var(--tx3);font-size:0.8rem;margin:-4px 0 14px;line-height:1.5">
+        Cada botón abre WhatsApp con el mensaje listo y el link personal de ese invitado.
+        Elegís el contacto y mandás.
+      </p>
+      <div id="pend-lista" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
     <div class="card" style="padding:0">
       <div class="tbl-wrap">
         <table>
@@ -1146,12 +1247,25 @@ const TB_TITLES = {
   'tab-preview':'Vista Previa','tab-historial':'Historial',
 };
 
+// En el celular el menú es un cajón. Sin argumento alterna; con true/false
+// fuerza el estado (lo usa el fondo oscuro y cada ítem del menú).
+function menu(abrir) {
+  const sb = document.getElementById('sidebar');
+  const fondo = document.getElementById('sb-backdrop');
+  const nuevo = abrir === undefined ? !sb.classList.contains('abierto') : abrir;
+  sb.classList.toggle('abierto', nuevo);
+  fondo.classList.toggle('visible', nuevo);
+  document.body.style.overflow = nuevo ? 'hidden' : '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') menu(false); });
+
 function go(tabId, navEl) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById(tabId).classList.add('active');
   if (navEl) navEl.classList.add('active');
   document.getElementById('tb-title').textContent = TB_TITLES[tabId] || '';
+  menu(false); // elegir una sección cierra el cajón
   if (tabId === 'tab-historial') loadHistorial();
   if (tabId === 'tab-preview') refreshPreview();
   if (tabId === 'tab-mesas') sinRomper(loadMesasData());
@@ -1187,10 +1301,16 @@ async function checkPass() {
   }
 }
 
-function unlockClient() {
+async function unlockClient() {
   document.getElementById('login-overlay').style.display = 'none';
   refreshUI();
-  sinRomper(loadData());
+  // El config va PRIMERO y con await: los mensajes de WhatsApp llevan el
+  // nombre del evento, y si arrancan en paralelo la lista se arma antes de
+  // que llegue. Además antes `loadConfig()` solo corría para superadmin, así
+  // que con la clave de cliente el mensaje salía "  —  \n\n<link>".
+  // Solo lee (id, config), que es lo único que `anon` puede leer igual.
+  await sinRomper(loadConfig());
+  await sinRomper(loadData());
 }
 
 function unlockSuperAdmin() {
@@ -1199,10 +1319,11 @@ function unlockSuperAdmin() {
     document.getElementById(id).style.display = 'flex';
   });
   refreshUI();
-  sinRomper(loadData());
+  // Mismo orden que en unlockClient: el config antes que la lista.
   loadConfig().then(() => {
     buildSectionsList();
     go('tab-editor', document.getElementById('nav-editor'));
+    return sinRomper(loadData());
   });
 }
 
@@ -1689,6 +1810,12 @@ async function refrescar(btn, fn) {
   }
 }
 
+// En la tabla un "—" es una raya; en la ficha del celular es un renglón
+// entero que no dice nada. Se marca vacía y allá se esconde.
+const celda = (col, valor) => valor
+  ? `<td data-col="${col}">${valor}</td>`
+  : `<td data-col="${col}" class="vacio">—</td>`;
+
 async function loadData() {
   const { data, error } = await sb.rpc('admin_invitados', { p_evento: eventoId, p_clave: adminClave });
   // Antes el error se descartaba y la tabla quedaba en "Sin respuestas aún":
@@ -1710,11 +1837,11 @@ async function loadData() {
     const quien = `${r.nombre} ${r.apellido||''}`.trim();
     return `<tr>
       <td><strong>${esc(quien)}</strong><br><small style="color:var(--tx3)">${esc(r.invitado_url)}</small></td>
-      <td>${badge}</td>
-      <td>${esc(r.mesa) || '—'}</td>
-      <td>${esc(r.dieta) || '—'}</td>
-      <td>${esc(r.mensaje) || '—'}</td>
-      <td>${new Date(r.created_at).toLocaleDateString('es-AR')}</td>
+      <td data-col="Asiste">${badge}</td>
+      ${celda('Mesa', esc(r.mesa))}
+      ${celda('Dieta', esc(r.dieta))}
+      ${celda('Canción', esc(r.mensaje))}
+      <td data-col="Fecha">${new Date(r.created_at).toLocaleDateString('es-AR')}</td>
       <td><button class="btn btn-ghost btn-sm" title="Eliminar de la lista"
             onclick="borrarInvitado(${r.id}, '${esc(quien).replace(/&#39;/g, "\\'")}')">🗑</button></td>
     </tr>`;
@@ -1734,6 +1861,77 @@ async function loadData() {
 
   const dot = document.getElementById('dot-stats');
   if (dot) dot.className = `nav-dot${(sSi + sNo) > 0 ? ' on' : ''}`;
+
+  renderPendientes(data || []);
+}
+
+// Los que todavía no contestaron, agrupados por link. Se arma con DOM y no
+// con innerHTML: los nombres los escribe el cliente y terminan dentro de una
+// URL y de un mensaje, así que nada de concatenar HTML.
+function renderPendientes(data) {
+  const card = document.getElementById('card-pendientes');
+  const lista = document.getElementById('pend-lista');
+  if (!card || !lista) return;
+
+  const grupos = new Map();
+  data.filter(r => r.asiste === 'pendiente').forEach(r => {
+    grupos.set(r.invitado_url, (grupos.get(r.invitado_url) || 0) + 1);
+  });
+
+  lista.innerHTML = '';
+  if (!grupos.size) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  let personas = 0;
+  grupos.forEach(n => personas += n);
+  document.getElementById('pend-total').textContent =
+    `${personas} ${personas === 1 ? 'persona' : 'personas'} · ${grupos.size} ${grupos.size === 1 ? 'link' : 'links'}`;
+
+  const base = location.origin + location.pathname.replace('admin.html', 'i');
+  const evento = [currentConfig?.nombre, currentConfig?.tipo].filter(Boolean).join(' — ');
+
+  grupos.forEach((cupos, invitado) => {
+    const fila = document.createElement('div');
+    fila.style.cssText = 'display:flex;align-items:center;justify-content:space-between;'
+      + 'gap:12px;flex-wrap:wrap;padding:10px 14px;border:1px solid var(--bdr);'
+      + 'border-radius:12px;background:var(--s1)';
+
+    const quien = document.createElement('div');
+    quien.style.cssText = 'min-width:0;flex:1 1 auto';
+    const nom = document.createElement('div');
+    nom.style.cssText = 'font-weight:600;font-size:0.88rem;overflow-wrap:anywhere';
+    nom.textContent = invitado;
+    const sub = document.createElement('div');
+    sub.style.cssText = 'color:var(--tx3);font-size:0.72rem;margin-top:2px';
+    sub.textContent = cupos === 1 ? '1 lugar reservado' : `${cupos} lugares reservados`;
+    quien.append(nom, sub);
+
+    const url = `${base}?evento=${encodeURIComponent(eventoId)}`
+              + `&invitado=${encodeURIComponent(invitado)}&personas=${cupos}`;
+    const texto = `Hola! Te recordamos confirmar tu asistencia`
+                + (evento ? ` a ${evento}` : '') + ` 💌\n\n${url}`;
+
+    const wa = document.createElement('a');
+    wa.className = 'btn btn-primary btn-sm';
+    wa.target = '_blank';
+    wa.rel = 'noopener';
+    wa.href = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+    wa.textContent = '💬 Recordar';
+
+    const copiar = document.createElement('button');
+    copiar.className = 'btn btn-ghost btn-sm';
+    copiar.textContent = '📋 Link';
+    copiar.onclick = () => {
+      navigator.clipboard.writeText(url);
+      toast('📋 Link copiado');
+    };
+
+    const acciones = document.createElement('div');
+    acciones.style.cssText = 'display:flex;gap:8px;flex:0 0 auto';
+    acciones.append(wa, copiar);
+    fila.append(quien, acciones);
+    lista.appendChild(fila);
+  });
 }
 
 // Borra una fila de la lista. Hace falta, por ejemplo, cuando un grupo
