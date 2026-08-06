@@ -179,6 +179,21 @@ invitacion.html?evento=valentina15&invitado=Juan+Perez&personas=2&mesa=5
 - `personas` — Cupos asignados (determina cuántas opciones de personas aparecen)
 - `mesa` — Mesa pre-asignada (se muestra en el splash y en el RSVP)
 
+## El celular es el dispositivo principal — de los dos lados
+
+La invitación siempre fue mobile-first. **El panel no**, y eso se arrastró hasta el
+06/08/2026: medía 787px de ancho sobre un viewport de 390. La culpable era la barra
+superior, que no envolvía y estiraba todo lo de abajo con ella.
+
+Regla: **antes de dar por terminada cualquier pantalla del panel, medirla a 390px** y
+confirmar que `document.documentElement.scrollWidth === window.innerWidth`. Un elemento
+que no envuelve estira el documento entero, no solo su fila.
+
+Debajo de 860px: el menú lateral es un cajón, la barra baja a dos líneas, y cada fila de
+tabla se convierte en ficha con el nombre de la columna al lado del dato (`data-col`).
+Las celdas vacías llevan `class="vacio"` y allá se esconden — un "—" en la tabla es una
+raya, en la ficha es un renglón entero que no dice nada.
+
 ## Admin
 
 Acceso: `admin.html?evento=valentina15`
@@ -192,6 +207,26 @@ Ambas se verifican con `verificar_clave()` en Postgres. La clave queda en memori
 ### Link generator
 
 Al generar un link, el admin **pre-inserta filas en `confirmaciones`** con `asiste: 'pendiente'` para el titular y cada acompañante. Cuando el invitado confirma, esas filas se borran y se reinsertan con los datos reales.
+
+⚠️ **Por eso el RSVP exige el nombre de cada acompañante.** Confirmar borra la pre-alta y
+la reemplaza por lo que mandó el invitado; una fila sin nombre no se guarda. Hasta el
+06/08/2026, elegir 5 personas y dejar los campos en blanco borraba 4 cupos en silencio —
+le pasó a cuatro grupos en el evento de una clienta. El `required` de los inputs no sirve
+acá: no hay submit de formulario, es un botón con `onclick`.
+
+### `currentConfig` se carga para los DOS roles
+
+`loadConfig()` solo corría en `unlockSuperAdmin()`, así que con la clave de **cliente**
+—la que usan los clientes— `currentConfig` quedaba vacío y los mensajes de WhatsApp salían
+sin el nombre del evento. Va **primero y con `await`**: en paralelo con `loadData()` no
+llega a tiempo y la lista se arma sin él.
+
+### Recordatorio a pendientes
+
+Tarjeta en la pestaña Invitados con los que no contestaron, agrupados por `invitado_url`.
+Los cupos salen de contar las filas `pendiente` de ese grupo — el `personas` original no
+se guarda en ningún lado. Se arma con DOM, **no con `innerHTML`**: los nombres los escribe
+el cliente y terminan dentro de una URL y de un mensaje.
 
 ### Mesas
 

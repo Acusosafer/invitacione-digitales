@@ -1,4 +1,4 @@
-# HANDOFF — estado al 05/08/2026
+# HANDOFF — estado al 06/08/2026
 
 > Para retomar en otra sesión. Leer junto con `CLAUDE.md`.
 
@@ -37,25 +37,44 @@ Storage. Las tres ya corridas. Las tres son idempotentes.
 
 ---
 
+## Hecho el 05 y 06/08/2026
+
+- **El RSVP ya no puede perder cupos.** Exige el nombre de cada acompañante antes de
+  confirmar. Antes, elegir 5 y dejar los campos vacíos borraba 4 cupos sin avisarle a nadie.
+- **Panel: botón de eliminar invitado** y estado ⏳ "Sin responder" con su propia tarjeta.
+  Antes los pendientes se contaban como "No asistirán" — en el evento de una clienta eso
+  mostraba 9 personas que "no venían" y en realidad no habían contestado.
+- **Panel usable en el celular.** Medía 787px de ancho sobre 390. Ahora entra clavado.
+- **Recordatorio a pendientes** con el mensaje de WhatsApp armado.
+- **Botón "Agendar"** en la invitación (.ics con aviso el día anterior).
+- **Indicador "Deslizá"** en el hero: muchos invitados se quedaban ahí sin saber que seguía.
+- **Los asientos del croquis muestran el nombre**, con el completo al apoyar el mouse.
+
 ## Pendientes, en orden
 
 1. **Google Safe Browsing.** Revisión pedida el 31/07. Hasta que la levanten, Chrome muestra
    "Peligroso" y **no hay que publicar la campaña de agosto**.
 2. **Dominio propio** (~15 USD/año). Es el arreglo de fondo del punto 1: `vercel.app` es
    reputación compartida y la marca puede volver sin que haya nada que corregir.
-3. **Identidad en el footer del sitio público.** Falta que Fer defina cómo firma el negocio,
+3. **Recuperar los cupos perdidos en el evento de Flor** (`florviera`): Flia Sosa,
+   Lu y Marian, Marce y Carlos, Sandra e Ines quedaron con una sola fila. Se arregla
+   borrando la fila con 🗑 y reenviándole el link. Los cupos originales no quedaron
+   registrados: hay que preguntarles.
+4. **Álbum compartido con QR** — lo único relevante que tiene la competencia y no está acá.
+   Acotado: Storage + link público por evento. Fer lo dejó pasar el 06/08, no lo descartó.
+5. **Identidad en el footer del sitio público.** Falta que Fer defina cómo firma el negocio,
    qué contacto va y si tiene Instagram. Hoy el sitio no dice quién es en ninguna parte.
-4. **Cuántas horas lleva una invitación** de punta a punta. Sin ese dato no se sabe si los
+6. **Cuántas horas lleva una invitación** de punta a punta. Sin ese dato no se sabe si los
    $50.000 cierran o si está trabajando barato.
-5. **Terminar `almamia15`**: volver a subir la portada (la vieja pesa 2,26 MB) y cambiar
+7. **Terminar `almamia15`**: volver a subir la portada (la vieja pesa 2,26 MB) y cambiar
    `foto_galeria_2`, que todavía apunta a `/assets/valentina15/...` de cuando se copió ese evento.
-6. **Escuchar dos temas** asignados con dudas: `luna15` (capoeira, se pidió folk de jardín) y
+8. **Escuchar dos temas** asignados con dudas: `luna15` (capoeira, se pidió folk de jardín) y
    `boda-julieta` (se llama "morning" y se pidió ambient nocturno).
-7. **Álbum compartido con QR** — lo único relevante que tiene la competencia y no está acá.
-   Acotado: Storage + link público por evento.
-8. **Dos mejoras de ergonomía del admin**: que `verificar_clave` distinga "falta configurar el
+9. **Dos mejoras de ergonomía del admin**: que `verificar_clave` distinga "falta configurar el
    hash" de "clave incorrecta" (hoy dice lo mismo para las dos cosas), y un formulario para
    cambiar la clave de superadmin sin pasar por SQL.
+10. **Que el invitado pueda corregir su confirmación.** Hoy si se equivoca queda trabado y
+   depende de que el cliente le borre la fila.
 
 ---
 
