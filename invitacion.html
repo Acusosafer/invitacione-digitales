@@ -679,6 +679,57 @@
       .btn-agendar:hover { background: var(--surface-2); }
     }
 
+    /* Un .ics se baja como archivo en la compu ("Flor.ics · 455 B") y el
+       invitado no sabe qué hacer con eso; en el celular abre el calendario
+       sin preguntar. En vez de adivinar el dispositivo —que falla— se
+       muestran las dos opciones y elige el invitado. */
+    .agendar-wrap { position: relative; display: inline-block; }
+
+    .agendar-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) scale(0.96);
+      transform-origin: top center;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      min-width: 210px;
+      padding: 6px;
+      border-radius: 14px;
+      background: var(--bg);
+      border: 1px solid var(--edge);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 170ms cubic-bezier(0.23, 1, 0.32, 1),
+                  transform 170ms cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .agendar-menu.abierto { opacity: 1; transform: translateX(-50%) scale(1); pointer-events: auto; }
+
+    .agendar-menu button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: 0.85rem;
+      color: var(--ink);
+      text-align: left;
+      white-space: nowrap;
+      transition: background 140ms ease;
+    }
+    .agendar-menu button:active { background: var(--surface); }
+    @media (hover: hover) and (pointer: fine) {
+      .agendar-menu button:hover { background: var(--surface); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .agendar-menu { transition: opacity 170ms ease; transform: translateX(-50%); }
+      .agendar-menu.abierto { transform: translateX(-50%); }
+    }
+
     .btn-maps:hover {
       background: #333
     }
@@ -1316,7 +1367,13 @@
         <div class="location-hora"><span id="txt-fecha"></span> — <span id="txt-hora"></span> hs</div>
         <div class="loc-acciones">
           <button id="btn-maps" class="btn btn-maps">Cómo llegar</button>
-          <button id="btn-agendar" class="btn btn-agendar" style="display:none">Agendar</button>
+          <div class="agendar-wrap">
+            <button id="btn-agendar" class="btn btn-agendar" style="display:none">Agendar</button>
+            <div class="agendar-menu" id="agendar-menu">
+              <button type="button" data-donde="google">Google Calendar</button>
+              <button type="button" data-donde="ics">iPhone · Outlook · otro</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -2128,27 +2185,64 @@
       ].filter(Boolean).join('\r\n');
     }
 
+    // Mismo evento, pero como link de Google Calendar: abre una pestaña con
+    // todo cargado y el invitado solo aprieta "Guardar". Sin archivos.
+    function linkGoogle() {
+      const inicio = new Date(C.fecha_iso);
+      if (isNaN(inicio.getTime())) return null;
+      const fin = new Date(inicio.getTime() + 6 * 60 * 60 * 1000);
+      const utc = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+      const p = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: [C.tipo, C.nombre].filter(Boolean).join(' — ') || 'Nuestra fiesta',
+        dates: `${utc(inicio)}/${utc(fin)}`,
+        location: [C.salon, C.direccion].filter(Boolean).join(', '),
+        details: '¡Te esperamos!'
+      });
+      return `https://calendar.google.com/calendar/render?${p}`;
+    }
+
+    function bajarICS(ics) {
+      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${(C.nombre || 'evento').replace(/[^\w\s-]/g, '').trim() || 'evento'}.ics`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
     function prepararAgenda() {
       const btn = document.getElementById('btn-agendar');
-      if (!btn) return;
+      const menu = document.getElementById('agendar-menu');
+      if (!btn || !menu) return;
       const ics = armarICS();
       // Sin fecha válida no hay nada que agendar: mejor no mostrar el botón
       // que mostrarlo y que no haga nada.
       if (!ics) return;
 
       btn.style.display = '';
-      btn.onclick = () => {
-        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${(C.nombre || 'evento').replace(/[^\w\s-]/g, '').trim() || 'evento'}.ics`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        toast('📅 Listo, agregalo a tu calendario');
-      };
+      const cerrar = () => menu.classList.remove('abierto');
+
+      btn.onclick = e => { e.stopPropagation(); menu.classList.toggle('abierto'); };
+      document.addEventListener('click', cerrar);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
+
+      menu.querySelectorAll('button').forEach(op => {
+        op.onclick = e => {
+          e.stopPropagation();
+          cerrar();
+          if (op.dataset.donde === 'google') {
+            const g = linkGoogle();
+            if (g) window.open(g, '_blank', 'noopener');
+          } else {
+            bajarICS(ics);
+            toast('📅 Abrí el archivo para agregarlo a tu calendario');
+          }
+        };
+      });
     }
 
     function toggleMusic() {
