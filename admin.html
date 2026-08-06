@@ -555,18 +555,66 @@ tr:hover td{background:rgba(255,255,255,0.01);}
 .asiento {
   position: absolute;
   width: 38px;
-  height: 38px;
+  height: 30px;
   background-color: var(--s0);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.68rem;
+  font-size: 0.5rem;
   font-weight: 600;
+  letter-spacing: -0.2px;
   color: var(--tx2);
   box-shadow: 0 2px 5px rgba(0,0,0,0.15);
   transition: transform 0.1s;
   border: 1px solid var(--bdr);
+}
+
+/* El recorte lo hace el navegador, que mide los glifos reales: cortar por
+   cantidad de letras fallaba con nombres anchos ("Wanda") y desperdiciaba
+   lugar con los finitos ("Lili"). El overflow va en el span y no en el
+   asiento, porque el asiento tiene que dejar salir el tooltip. */
+.asiento > span {
+  display: block;
+  max-width: 100%;
+  padding: 0 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Con dos letras ("Ma" y "Ma") no se sabía quién era quién. Ahora entra
+   el nombre recortado, y al apoyar el mouse aparece el nombre completo. */
+.asiento[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.96);
+  transform-origin: bottom center;
+  background: var(--s0);
+  color: var(--tx);
+  border: 1px solid var(--bdr);
+  border-radius: 8px;
+  padding: 5px 9px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 20;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  transition: opacity 130ms cubic-bezier(0.23,1,0.32,1),
+              transform 130ms cubic-bezier(0.23,1,0.32,1);
+}
+/* En touch el hover se dispara al tocar y queda pegado: solo con mouse. */
+@media (hover: hover) and (pointer: fine) {
+  .asiento[data-tip]:hover { z-index: 30; }
+  .asiento[data-tip]:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
 }
 .asiento.verde { background-color: #10b981; color: white; box-shadow: 0 2px 8px rgba(16,185,129,0.35); border-color: #059669; }
 .asiento.rojo { background-color: #ef4444; color: white; box-shadow: 0 2px 8px rgba(239,68,68,0.35); border-color: #dc2626; }
@@ -680,7 +728,7 @@ tr:hover td{background:rgba(255,255,255,0.01);}
     <div class="card">
       <div class="card-head">
         <span class="card-title">Últimas respuestas</span>
-        <button class="btn btn-ghost btn-sm" onclick="loadData()">↻ Actualizar</button>
+        <button class="btn btn-ghost btn-sm" onclick="refrescar(this, loadData)">↻ Actualizar</button>
       </div>
       <div class="tbl-wrap">
         <table>
@@ -712,7 +760,7 @@ tr:hover td{background:rgba(255,255,255,0.01);}
       </div>
       <div style="display:flex;gap:10px;">
         <button id="exportPDFBtn" class="btn btn-ghost btn-sm" onclick="exportarMesasPDF()">📄 Listado para Salón (PDF)</button>
-        <button class="btn btn-primary btn-sm" onclick="loadMesasData()">↻ Actualizar</button>
+        <button class="btn btn-primary btn-sm" onclick="refrescar(this, loadMesasData)">↻ Actualizar</button>
       </div>
     </div>
 
@@ -1106,7 +1154,7 @@ function go(tabId, navEl) {
   document.getElementById('tb-title').textContent = TB_TITLES[tabId] || '';
   if (tabId === 'tab-historial') loadHistorial();
   if (tabId === 'tab-preview') refreshPreview();
-  if (tabId === 'tab-mesas') loadMesasData();
+  if (tabId === 'tab-mesas') sinRomper(loadMesasData());
 }
 
 // La clave se verifica DENTRO de Postgres (invitaciones.verificar_clave).
@@ -1142,7 +1190,7 @@ async function checkPass() {
 function unlockClient() {
   document.getElementById('login-overlay').style.display = 'none';
   refreshUI();
-  loadData();
+  sinRomper(loadData());
 }
 
 function unlockSuperAdmin() {
@@ -1151,7 +1199,7 @@ function unlockSuperAdmin() {
     document.getElementById(id).style.display = 'flex';
   });
   refreshUI();
-  loadData();
+  sinRomper(loadData());
   loadConfig().then(() => {
     buildSectionsList();
     go('tab-editor', document.getElementById('nav-editor'));
@@ -1615,8 +1663,37 @@ function esc(v) {
     ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 }
 
+// Los botones "↻ Actualizar" no daban ninguna señal: si andaba, no se
+// notaba, y si fallaba tampoco. Fer terminaba apretando F5, que lo sacaba
+// del panel porque la clave vive solo en memoria.
+// Recarga en segundo plano: si falla, avisa en vez de romper en silencio.
+const sinRomper = p => Promise.resolve(p).catch(e => toast('❌ ' + (e.message || e)));
+
+async function refrescar(btn, fn) {
+  const textoOriginal = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳ Actualizando…';
+  // Piso de 400ms: cuando Supabase contesta en 80ms el cartel aparecía y
+  // desaparecía en un parpadeo, que se lee como que el botón no hizo nada.
+  const piso = new Promise(r => setTimeout(r, 400));
+  try {
+    await fn();
+    await piso;
+    toast('✓ Lista actualizada');
+  } catch (e) {
+    await piso;
+    toast('❌ ' + (e.message || 'No se pudo actualizar'));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = textoOriginal;
+  }
+}
+
 async function loadData() {
-  const { data } = await sb.rpc('admin_invitados', { p_evento: eventoId, p_clave: adminClave });
+  const { data, error } = await sb.rpc('admin_invitados', { p_evento: eventoId, p_clave: adminClave });
+  // Antes el error se descartaba y la tabla quedaba en "Sin respuestas aún":
+  // idéntico a un evento vacío. Parecía que se habían borrado los invitados.
+  if (error) throw new Error('No se pudo leer la lista: ' + error.message);
   let sSi=0, sNo=0, sPend=0;
 
   // Cada fila es UNA persona: el titular y cada acompañante van por separado.
@@ -1673,8 +1750,8 @@ async function borrarInvitado(id, quien) {
   if (error) { toast('❌ No se pudo eliminar: ' + error.message); return; }
 
   toast('🗑 Eliminado de la lista');
-  await loadData();
-  if (typeof loadMesasData === 'function') loadMesasData();
+  await sinRomper(loadData());
+  if (typeof loadMesasData === 'function') sinRomper(loadMesasData());
 }
 
 async function loadHistorial() {
@@ -1717,7 +1794,7 @@ async function generarLink() {
   }
 
   if (typeof loadMesasData === 'function') {
-    loadMesasData();
+    sinRomper(loadMesasData());
   }
 
   btn.textContent = '✨ Generar Link Único';
@@ -1778,10 +1855,7 @@ let mesasFiltroEstado = 'todos';
 
 async function loadMesasData() {
   const { data, error } = await sb.rpc('admin_invitados', { p_evento: eventoId, p_clave: adminClave });
-  if (error) {
-    console.error("Error cargando invitados para mesas:", error);
-    return;
-  }
+  if (error) throw new Error('No se pudieron cargar las mesas: ' + error.message);
   // La función devuelve por fecha; acá el orden útil es alfabético.
   mesasInvitados = (data || []).sort((a, b) =>
     (a.nombre || '').localeCompare(b.nombre || '', 'es'));
@@ -1965,7 +2039,7 @@ function renderizarMesasTabla() {
           return;
         }
         toast(`🟢 Mesa ${nextMesa} creada y asignada`);
-        loadMesasData();
+        sinRomper(loadMesasData());
         return;
       }
       
@@ -2072,22 +2146,30 @@ function renderizarMesasVisuales() {
       
       const invitadoId = mesa.asientos[i];
       let estadoColor = 'gris';
-      let inicial = '';
+      let etiqueta = '', completo = '';
       if (invitadoId !== null) {
         const invitadoObj = mesasInvitados.find(inv => inv.id === invitadoId);
         if (invitadoObj) {
           if (invitadoObj.asiste === 'si') estadoColor = 'verde';
           else if (invitadoObj.asiste === 'pendiente') estadoColor = 'amarillo';
           else if (invitadoObj.asiste === 'no') estadoColor = 'rojo';
-          inicial = invitadoObj.nombre.split(' ')[0].substring(0, 2);
+
+          const nom = (invitadoObj.nombre || '').trim().split(/\s+/)[0] || '';
+          const ape = (invitadoObj.apellido || '').trim();
+          etiqueta = nom;
+          completo = [nom, ape].filter(Boolean).join(' ') || nom;
         }
       }
-      
+
       const asientoDiv = document.createElement('div');
       asientoDiv.className = `asiento ${estadoColor}`;
       asientoDiv.style.left = `${x - 19}px`;
-      asientoDiv.style.top = `${y - 19}px`;
-      asientoDiv.innerText = estadoColor === 'gris' ? (i + 1) : inicial;
+      asientoDiv.style.top = `${y - 15}px`;
+      const span = document.createElement('span');
+      span.textContent = estadoColor === 'gris' ? (i + 1) : etiqueta;
+      asientoDiv.appendChild(span);
+      // El nombre completo va en el tooltip: el asiento solo muestra lo que entra.
+      if (completo) asientoDiv.setAttribute('data-tip', completo);
       asientosDiv.appendChild(asientoDiv);
     }
     
