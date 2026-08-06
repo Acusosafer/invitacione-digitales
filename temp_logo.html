@@ -1,48 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..700&family=Instrument+Sans:wght@500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Dorados de index.html. Antes era rosa #ff3b6f + violeta, que no
+           tenía nada que ver con la web: se leían como dos empresas. */
+        body {
+            margin: 0;
+            padding: 40px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 800px;
+            height: 400px;
+        }
+        .logo-container { text-align: center; }
 
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Inter:wght@800&display=swap" rel="stylesheet">
-        <style>
-            body {
-                margin: 0;
-                padding: 40px;
-                background: transparent;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 800px;
-                height: 400px;
-            }
-            .logo-container {
-                text-align: center;
-            }
-            .shimmer-text {
-                font-family: 'Syne', sans-serif;
-                font-weight: 800;
-                font-size: 52px;
-                background: linear-gradient(125deg, #ff3b6f, #ff8ad4, #c471ff);
-                -webkit-background-clip: text;
-                color: transparent;
-                margin-bottom: 15px;
-                line-height: 1;
-            }
-            .neon-oficial {
-                font-family: 'Inter', sans-serif;
-                font-weight: 800;
-                font-size: 24px;
-                letter-spacing: 12px;
-                text-transform: uppercase;
-                color: #ffffff;
-                text-shadow: 0 0 5px #ff3b6f, 0 0 10px #ff3b6f, 0 0 20px #c471ff, 0 0 40px #c471ff;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="logo-container" id="logo">
-            <div class="shimmer-text">Invitaciones Digitales</div>
-            <div class="neon-oficial">OFICIAL</div>
-        </div>
-    </body>
-    </html>
-    
+        .shimmer-text {
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 700;
+            font-size: 58px;
+            line-height: 1.02;
+            letter-spacing: -0.5px;
+            background: linear-gradient(125deg, #A8761F, #F7CE84 45%, #FFF0D0 60%, #E0AE55);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 18px;
+        }
+
+        /* Sin neón: el resplandor rosa era lo más "plantilla" del logo.
+           Una línea fina a cada lado lee más caro y no depende del color
+           de fondo donde se pegue. */
+        .oficial {
+            font-family: 'Instrument Sans', system-ui, sans-serif;
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 11px;
+            text-indent: 11px;
+            text-transform: uppercase;
+            color: #E0AE55;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+        .oficial::before,
+        .oficial::after {
+            content: '';
+            display: block;
+            width: 46px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #A8761F, transparent);
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container" id="logo">
+        <div class="shimmer-text">Invitaciones<br>Digitales</div>
+        <div class="oficial">Oficial</div>
+    </div>
+</body>
+</html>

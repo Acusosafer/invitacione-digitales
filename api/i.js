@@ -166,7 +166,10 @@ module.exports = async function handler(req, res) {
   // El control del peso queda entonces del lado del admin, que desde ahora
   // comprime a 1920px y JPEG 85% ANTES de subir. Lo que ya estaba cargado hay
   // que volver a subirlo una vez.
-  const img = absoluta(C.foto_hero || C.foto_splash || '/logo.png', base);
+  // Sin fotos cargadas cae en la placa de marca: 1200x630 y con fondo
+  // oscuro. `logo.png` es transparente y en WhatsApp, que la muestra
+  // sobre blanco, los dorados claros desaparecían.
+  const img = absoluta(C.foto_hero || C.foto_splash || '/logo-og.png', base);
 
   // A los robots se les devuelve una página mínima con SOLO las etiquetas.
   // La invitación completa pesa 73 KB y no le sirve de nada a un robot: le

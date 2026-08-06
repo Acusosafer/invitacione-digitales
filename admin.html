@@ -9,12 +9,15 @@
      y no aporta nada en el buscador. -->
 <meta name="robots" content="noindex,nofollow">
 <meta name="description" content="Panel privado de Invitaciones Digitales Oficial. Acceso solo para clientes con evento contratado.">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --pk: #ff3b6f;
-  --pk2: #c471ff;
-  --pk3: #ff8ad4;
+  /* Dorados de la web (index.html). Sobre fondo oscuro se usa el claro
+     (--glow de la web); el profundo #A8761F queda para sombras y bordes.
+     Antes esto era rosa #F7CE84: el panel y la web parecían dos empresas. */
+  --oro: #F7CE84;
+  --oro2: #E0AE55;
+  --oro3: #A8761F;
   --bg: #08080a;
   --s0: #0e0e11;
   --s1: #141418;
@@ -35,7 +38,7 @@
 html{scroll-behavior:smooth}
 
 body{
-  font-family:'DM Sans',sans-serif;
+  font-family:'Instrument Sans',system-ui,sans-serif;
   background:var(--bg);
   color:var(--tx);
   display:flex;
@@ -46,8 +49,8 @@ body{
 }
 
 .shimmer{
-  font-family:'Syne',sans-serif;font-weight:800;
-  background:linear-gradient(120deg,#ff3b6f,#ff8ad4,#c471ff,#ff3b6f);
+  font-family:'Fraunces',Georgia,serif;font-weight:800;
+  background:linear-gradient(120deg,#A8761F,#F7CE84,#FFF0D0,#E0AE55,#A8761F);
   background-size:300% auto;
   -webkit-background-clip:text;background-clip:text;color:transparent;
   animation:shine 4s linear infinite;
@@ -67,13 +70,13 @@ body{
   border-bottom:1px solid var(--bdr);
 }
 .sb-logo h1{
-  font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;
+  font-family:'Fraunces',Georgia,serif;font-size:1.05rem;font-weight:800;
   line-height:1.3;
 }
 .sb-logo .sub{
   font-size:0.6rem;letter-spacing:5px;text-transform:uppercase;
   color:var(--tx3);margin-top:4px;display:block;
-  text-shadow:0 0 8px rgba(255,59,111,0.4);
+  text-shadow:0 0 8px rgba(247,206,132,0.4);
 }
 
 .nav-section{padding:16px 12px 8px;font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--tx3);}
@@ -88,31 +91,31 @@ body{
 }
 .nav-item:hover{background:var(--s2);color:var(--tx);}
 .nav-item.active{
-  background:rgba(255,59,111,0.1);
-  color:var(--pk);font-weight:600;
+  background:rgba(247,206,132,0.1);
+  color:var(--oro);font-weight:600;
 }
 .nav-item.active::before{
   content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);
-  width:3px;height:60%;background:var(--pk);border-radius:2px;
+  width:3px;height:60%;background:var(--oro);border-radius:2px;
 }
 .nav-dot{
   width:6px;height:6px;border-radius:50%;
   background:rgba(255,255,255,0.2);margin-left:auto;flex-shrink:0;
 }
-.nav-dot.on{background:var(--pk);}
+.nav-dot.on{background:var(--oro);}
 
 .sb-foot{
   margin-top:auto;padding:16px;
   border-top:1px solid var(--bdr);
 }
 .evento-badge{
-  background:rgba(255,59,111,0.08);
-  border:1px solid rgba(255,59,111,0.15);
+  background:rgba(247,206,132,0.08);
+  border:1px solid rgba(247,206,132,0.15);
   border-radius:8px;padding:10px 12px;
   font-size:0.72rem;
 }
 .evento-badge .label{color:var(--tx3);font-size:0.6rem;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
-.evento-badge .slug{color:var(--pk);font-weight:700;font-family:'Syne',sans-serif;font-size:0.85rem;}
+.evento-badge .slug{color:var(--oro);font-weight:700;font-family:'Fraunces',Georgia,serif;font-size:0.85rem;}
 
 .main{
   flex:1;margin-left:var(--sidebar);
@@ -129,22 +132,24 @@ body{
   height:64px;
 }
 .topbar-left{display:flex;align-items:center;gap:12px;}
-.topbar-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;}
+.topbar-title{font-family:'Fraunces',Georgia,serif;font-size:1.1rem;font-weight:700;}
 .topbar-right{display:flex;align-items:center;gap:8px;}
 
 .btn{
   display:inline-flex;align-items:center;gap:7px;
   padding:9px 18px;border-radius:10px;border:none;
-  font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:600;
+  font-family:'Instrument Sans',system-ui,sans-serif;font-size:0.82rem;font-weight:600;
   cursor:pointer;transition:all 0.18s;white-space:nowrap;
   text-decoration:none;
 }
 .btn-primary{
-  background:linear-gradient(135deg,var(--pk),var(--pk2));
-  color:#fff;
-  box-shadow:0 4px 18px rgba(255,59,111,0.25);
+  background:linear-gradient(135deg,var(--oro),var(--oro2));
+  /* Texto OSCURO sobre el dorado. En rosa iba blanco y daba 4,1:1; sobre
+     este dorado claro el blanco cae a 1,6:1 — ilegible. Así da 12:1. */
+  color:#191410;
+  box-shadow:0 4px 18px rgba(247,206,132,0.18);
 }
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(255,59,111,0.38);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(247,206,132,0.38);}
 .btn-ghost{
   background:var(--s2);border:1px solid var(--bdr2);color:var(--tx);
 }
@@ -166,7 +171,7 @@ body{
   display:flex;justify-content:space-between;align-items:center;
   padding:18px 22px;border-bottom:1px solid var(--bdr);
 }
-.card-title{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;}
+.card-title{font-family:'Fraunces',Georgia,serif;font-size:0.9rem;font-weight:700;}
 .card-body{padding:22px;}
 
 .stats-grid{
@@ -181,11 +186,11 @@ body{
 .stat-card::after{
   content:'';position:absolute;top:-30px;right:-30px;
   width:80px;height:80px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,59,111,0.06),transparent);
+  background:radial-gradient(circle,rgba(247,206,132,0.06),transparent);
 }
 .stat-val{
-  font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;
-  color:var(--pk);line-height:1;
+  font-family:'Fraunces',Georgia,serif;font-size:2.4rem;font-weight:800;
+  color:var(--oro);line-height:1;
 }
 .stat-label{
   font-size:0.62rem;text-transform:uppercase;
@@ -203,13 +208,13 @@ body{
   background:rgba(255,255,255,0.04);
   border:1px solid var(--bdr);
   border-radius:10px;color:var(--tx);
-  font-family:'DM Sans',sans-serif;font-size:0.85rem;
+  font-family:'Instrument Sans',system-ui,sans-serif;font-size:0.85rem;
   padding:10px 14px;transition:border-color 0.2s,background 0.2s;width:100%;
 }
 .form-input:focus,.form-select:focus,.form-textarea:focus{
   outline:none;
-  border-color:rgba(255,59,111,0.5);
-  background:rgba(255,59,111,0.03);
+  border-color:rgba(247,206,132,0.5);
+  background:rgba(247,206,132,0.03);
 }
 .form-select option {
   background-color: var(--s1) !important;
@@ -230,7 +235,7 @@ body{
   content:'';position:absolute;left:3px;top:3px;
   width:15px;height:15px;background:#fff;border-radius:50%;transition:0.3s;
 }
-.toggle input:checked + .toggle-slider{background:var(--pk);border-color:var(--pk);}
+.toggle input:checked + .toggle-slider{background:var(--oro);border-color:var(--oro);}
 .toggle input:checked + .toggle-slider:before{transform:translateX(19px);}
 
 .tbl-wrap{overflow-x:auto;}
@@ -267,11 +272,22 @@ tr:hover td{background:rgba(255,255,255,0.01);}
   padding:3px 9px;border-radius:20px;
   font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;
 }
-.badge-pk{background:rgba(255,59,111,0.12);color:var(--pk);}
+.badge-pk{background:rgba(247,206,132,0.12);color:var(--oro);}
 .badge-muted{background:rgba(255,255,255,0.06);color:var(--tx2);}
 .badge-green{background:rgba(52,211,100,0.12);color:#34d364;}
 .badge-red{background:rgba(255,60,60,0.12);color:#ff5555;}
 .badge-amber{background:rgba(245,180,60,0.14);color:#f5b43c;}
+
+/* ── Mensajes de venta ── */
+.ventas-ayuda{color:var(--tx2);font-size:0.82rem;line-height:1.55;margin:-4px 0 14px;}
+.ventas-texto{
+  background:var(--s0);border:1px solid var(--bdr);border-radius:var(--r);
+  padding:18px 20px;font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:0.84rem;line-height:1.65;color:var(--tx);
+  white-space:pre-wrap;word-break:break-word;
+  max-height:420px;overflow-y:auto;
+}
+.ventas-acciones{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
 
 #login-overlay{
   position:fixed;inset:0;
@@ -307,7 +323,7 @@ tr:hover td{background:rgba(255,255,255,0.01);}
   display:flex;justify-content:space-between;align-items:center;
   background:var(--s0);
 }
-.sl-header-title{font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;}
+.sl-header-title{font-family:'Fraunces',Georgia,serif;font-size:0.85rem;font-weight:700;}
 
 .section-item{
   display:flex;align-items:center;gap:12px;
@@ -317,10 +333,10 @@ tr:hover td{background:rgba(255,255,255,0.01);}
 }
 .section-item:last-child{border-bottom:none;}
 .section-item:hover{background:rgba(255,255,255,0.02);}
-.section-item.selected{background:rgba(255,59,111,0.06);}
+.section-item.selected{background:rgba(247,206,132,0.06);}
 .section-item.selected::before{
   content:'';position:absolute;left:0;top:0;bottom:0;
-  width:3px;background:var(--pk);
+  width:3px;background:var(--oro);
 }
 .section-item.disabled-section{opacity:0.45;}
 
@@ -337,19 +353,19 @@ tr:hover td{background:rgba(255,255,255,0.01);}
   transition:all 0.2s;
 }
 .section-item.selected .si-icon{
-  background:rgba(255,59,111,0.1);
-  border-color:rgba(255,59,111,0.25);
+  background:rgba(247,206,132,0.1);
+  border-color:rgba(247,206,132,0.25);
 }
 .si-info{flex:1;min-width:0;}
 .si-name{font-size:0.83rem;font-weight:600;color:var(--tx);}
 .si-desc{font-size:0.7rem;color:var(--tx3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.si-meta{font-size:0.65rem;color:var(--pk);margin-top:2px;font-weight:500;}
+.si-meta{font-size:0.65rem;color:var(--oro);margin-top:2px;font-weight:500;}
 
 .si-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;}
 
 .pill-required{
-  background:rgba(255,59,111,0.08);border:1px solid rgba(255,59,111,0.18);
-  color:var(--pk);font-size:0.6rem;font-weight:700;
+  background:rgba(247,206,132,0.08);border:1px solid rgba(247,206,132,0.18);
+  color:var(--oro);font-size:0.6rem;font-weight:700;
   letter-spacing:0.5px;text-transform:uppercase;
   padding:3px 8px;border-radius:20px;flex-shrink:0;
 }
@@ -367,11 +383,11 @@ tr:hover td{background:rgba(255,255,255,0.01);}
 }
 .cp-icon{
   width:38px;height:38px;
-  background:rgba(255,59,111,0.1);border:1px solid rgba(255,59,111,0.2);
+  background:rgba(247,206,132,0.1);border:1px solid rgba(247,206,132,0.2);
   border-radius:10px;display:flex;align-items:center;justify-content:center;
   font-size:1.1rem;flex-shrink:0;
 }
-.cp-title{font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;}
+.cp-title{font-family:'Fraunces',Georgia,serif;font-size:0.85rem;font-weight:700;}
 .cp-subtitle{font-size:0.7rem;color:var(--tx3);margin-top:2px;}
 .cp-body{flex:1;overflow-y:auto;padding:18px;}
 .cp-body::-webkit-scrollbar{width:3px;}
@@ -399,13 +415,13 @@ tr:hover td{background:rgba(255,255,255,0.01);}
   transition:all 0.2s;position:relative;overflow:hidden;
   background:rgba(255,255,255,0.01);
 }
-.file-zone:hover{border-color:rgba(255,59,111,0.4);background:rgba(255,59,111,0.02);}
+.file-zone:hover{border-color:rgba(247,206,132,0.4);background:rgba(247,206,132,0.02);}
 .file-zone input[type="file"]{
   position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
 }
 .file-zone-icon{font-size:1.5rem;margin-bottom:6px;display:block;}
 .file-zone-text{font-size:0.75rem;color:var(--tx3);}
-.file-zone-status{font-size:0.72rem;color:var(--pk);margin-top:6px;font-weight:600;}
+.file-zone-status{font-size:0.72rem;color:var(--oro);margin-top:6px;font-weight:600;}
 .file-zone-preview{
   width:100%;max-height:100px;object-fit:cover;
   border-radius:7px;margin-bottom:8px;display:none;
@@ -462,8 +478,8 @@ tr:hover td{background:rgba(255,255,255,0.01);}
 }
 
 .link-result{
-  background:rgba(255,59,111,0.05);
-  border:1px solid rgba(255,59,111,0.15);
+  background:rgba(247,206,132,0.05);
+  border:1px solid rgba(247,206,132,0.15);
   border-radius:10px;padding:14px;
   margin-top:14px;
 }
@@ -473,7 +489,7 @@ tr:hover td{background:rgba(255,255,255,0.01);}
 }
 .link-url{
   font-family:monospace;font-size:0.78rem;
-  color:var(--pk);word-break:break-all;line-height:1.5;
+  color:var(--oro);word-break:break-all;line-height:1.5;
 }
 
 #toast{
@@ -599,14 +615,14 @@ tr:hover td{background:rgba(255,255,255,0.01);}
 }
 .mesa-titulo {
   font-weight: 700;
-  background: rgba(255,59,111,0.08);
+  background: rgba(247,206,132,0.08);
   display: inline-block;
   padding: 4px 16px;
   border-radius: 40px;
   font-size: 0.85rem;
   margin-bottom: 1rem;
-  color: var(--pk);
-  border: 1px solid rgba(255,59,111,0.15);
+  color: var(--oro);
+  border: 1px solid rgba(247,206,132,0.15);
 }
 .mesa-circular {
   position: relative;
@@ -770,6 +786,11 @@ tr:hover td{background:rgba(255,255,255,0.01);}
     <span>⚙️</span> Diseño Global
   </div>
 
+  <div class="nav-section">Tu negocio</div>
+  <div class="nav-item" id="nav-ventas" onclick="go('tab-ventas',this)" style="display:none">
+    <span>💬</span> Mensajes y entrega
+  </div>
+
   <div class="nav-section">Herramientas</div>
   <div class="nav-item" id="nav-preview" onclick="go('tab-preview',this)">
     <span>👁️</span> Vista Previa
@@ -852,11 +873,54 @@ tr:hover td{background:rgba(255,255,255,0.01);}
     </div>
   </div>
 
+  <!-- ══ TAB: VENTAS (solo superadmin) ══ -->
+  <div id="tab-ventas" class="tab-content">
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-head"><span class="card-title">💬 Te escribe alguien preguntando</span></div>
+      <p class="ventas-ayuda">Contesta qué incluye, cuánto sale y qué necesitás para arrancar. Es el primer mensaje.</p>
+      <pre class="ventas-texto" id="msg-consulta"></pre>
+      <div class="ventas-acciones">
+        <button class="btn btn-primary btn-sm" onclick="mandarWA('msg-consulta')">💬 Mandar por WhatsApp</button>
+        <button class="btn btn-ghost btn-sm" onclick="copiarTexto('msg-consulta')">📋 Copiar</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-head"><span class="card-title">📋 Te dijo que sí — qué le pedís</span></div>
+      <p class="ventas-ayuda">La lista completa de lo que necesitás para armarla. Sin tecnicismos: nada de píxeles ni formatos, el panel achica las fotos solo.</p>
+      <pre class="ventas-texto" id="msg-pedido"></pre>
+      <div class="ventas-acciones">
+        <button class="btn btn-primary btn-sm" onclick="mandarWA('msg-pedido')">💬 Mandar por WhatsApp</button>
+        <button class="btn btn-ghost btn-sm" onclick="copiarTexto('msg-pedido')">📋 Copiar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">🎁 Entregar la invitación terminada</span>
+        <span class="badge badge-pk" id="ventas-evento">—</span>
+      </div>
+      <p class="ventas-ayuda">
+        Le manda su invitación y su panel. Al pegarlo en WhatsApp, la vista previa muestra la foto de <em>su</em> fiesta —
+        que es lo que querés que vea.
+      </p>
+      <div class="form-group" style="max-width:320px">
+        <label class="form-label">Clave que le pusiste al cliente</label>
+        <input type="text" class="form-input" id="ventas-clave" placeholder="ej: valen2026" oninput="pintarMensajes()">
+      </div>
+      <pre class="ventas-texto" id="msg-entrega"></pre>
+      <div class="ventas-acciones">
+        <button class="btn btn-primary btn-sm" onclick="mandarWA('msg-entrega')">💬 Mandar por WhatsApp</button>
+        <button class="btn btn-ghost btn-sm" onclick="copiarTexto('msg-entrega')">📋 Copiar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ══ TAB: MESAS ══ -->
   <div id="tab-mesas" class="tab-content">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
       <div>
-        <h2 style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--tx);">🍽️ Distribución de Mesas & Coquette</h2>
+        <h2 style="font-family:'Fraunces',Georgia,serif;font-size:1.4rem;font-weight:800;color:var(--tx);">🍽️ Distribución de Mesas & Coquette</h2>
         <p style="font-size:0.8rem;color:var(--tx3)">Asigna a tus invitados a sus respectivas mesas y observa la distribución en tiempo real.</p>
       </div>
       <div style="display:flex;gap:10px;">
@@ -998,8 +1062,8 @@ tr:hover td{background:rgba(255,255,255,0.01);}
       <div class="card-head"><span class="card-title">Identidad del Evento</span></div>
       <div class="card-body">
         <div class="global-grid">
-          <div class="form-group col-full" style="background:rgba(255,59,111,0.04);border:1px solid rgba(255,59,111,0.1);border-radius:10px;padding:14px;">
-            <label class="form-label" style="color:var(--pk)">URL / Identificador</label>
+          <div class="form-group col-full" style="background:rgba(247,206,132,0.04);border:1px solid rgba(247,206,132,0.1);border-radius:10px;padding:14px;">
+            <label class="form-label" style="color:var(--oro)">URL / Identificador</label>
             <input id="gi-id" type="text" class="form-input" placeholder="ej: valentina15">
             <div class="form-hint">⚠️ Cambiar esto genera una invitación nueva</div>
           </div>
@@ -1245,6 +1309,7 @@ const TB_TITLES = {
   'tab-stats':'Resumen','tab-invitados':'Invitados','tab-links':'Links','tab-mesas':'Distribución de Mesas',
   'tab-editor':'Editor de Franjas','tab-global':'Diseño Global',
   'tab-preview':'Vista Previa','tab-historial':'Historial',
+  'tab-ventas':'Mensajes y entrega',
 };
 
 // En el celular el menú es un cajón. Sin argumento alterna; con true/false
@@ -1266,6 +1331,7 @@ function go(tabId, navEl) {
   if (navEl) navEl.classList.add('active');
   document.getElementById('tb-title').textContent = TB_TITLES[tabId] || '';
   menu(false); // elegir una sección cierra el cajón
+  if (tabId === 'tab-ventas') pintarMensajes();
   if (tabId === 'tab-historial') loadHistorial();
   if (tabId === 'tab-preview') refreshPreview();
   if (tabId === 'tab-mesas') sinRomper(loadMesasData());
@@ -1304,6 +1370,7 @@ async function checkPass() {
 async function unlockClient() {
   document.getElementById('login-overlay').style.display = 'none';
   refreshUI();
+  ajustarSecciones();
   // El config va PRIMERO y con await: los mensajes de WhatsApp llevan el
   // nombre del evento, y si arrancan en paralelo la lista se arma antes de
   // que llegue. Además antes `loadConfig()` solo corría para superadmin, así
@@ -1315,15 +1382,32 @@ async function unlockClient() {
 
 function unlockSuperAdmin() {
   document.getElementById('login-overlay').style.display = 'none';
-  ['nav-editor','nav-global','nav-historial'].forEach(id => {
+  ['nav-editor','nav-global','nav-historial','nav-ventas'].forEach(id => {
     document.getElementById(id).style.display = 'flex';
   });
   refreshUI();
+  ajustarSecciones();
   // Mismo orden que en unlockClient: el config antes que la lista.
   loadConfig().then(() => {
     buildSectionsList();
     go('tab-editor', document.getElementById('nav-editor'));
     return sinRomper(loadData());
+  });
+}
+
+// Los títulos del menú ("Edición", "Tu negocio") quedaban colgados cuando
+// sus ítems estaban ocultos: el cliente veía dos secciones vacías.
+function ajustarSecciones() {
+  const hijos = [...document.querySelectorAll('.sidebar > *')];
+  hijos.forEach((el, i) => {
+    if (!el.classList.contains('nav-section')) return;
+    let hayAlguno = false;
+    for (let j = i + 1; j < hijos.length; j++) {
+      const sig = hijos[j];
+      if (sig.classList.contains('nav-section')) break;
+      if (sig.classList.contains('nav-item') && sig.style.display !== 'none') { hayAlguno = true; break; }
+    }
+    el.style.display = hayAlguno ? '' : 'none';
   });
 }
 
@@ -1428,10 +1512,10 @@ function buildSectionsList() {
       const bounding = this.getBoundingClientRect();
       const offset = bounding.y + (bounding.height / 2);
       if (e.clientY - offset > 0) {
-        this.style.borderBottom = '2px solid var(--pk)';
+        this.style.borderBottom = '2px solid var(--oro)';
         this.style.borderTop = '';
       } else {
-        this.style.borderTop = '2px solid var(--pk)';
+        this.style.borderTop = '2px solid var(--oro)';
         this.style.borderBottom = '';
       }
     });
@@ -1810,6 +1894,133 @@ async function refrescar(btn, fn) {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// MENSAJES DE VENTA
+// ⚠️ Esto viaja al navegador como cualquier otro texto de la página: quien
+// abra el código fuente de admin.html lo lee. No poner acá precios
+// especiales para un cliente puntual ni nada que no puedas mostrar.
+// ═══════════════════════════════════════════════════════════════════════
+const PRECIO = '$50.000';
+const WEB    = 'https://invitacionesdigitalesoficial.vercel.app';
+
+const MSG_CONSULTA = `¡Hola! Gracias por escribirme 💛
+
+Te cuento cómo es: no es una plantilla con tu nombre encima. Diseño la invitación entera con tus colores, tus fotos y tu música.
+
+*QUÉ INCLUYE*
+· Tu invitación web, se abre en el celular sin bajar ninguna app
+· Cuenta regresiva hasta tu fiesta
+· Galería con tus fotos y música de fondo
+· Ubicación con "Cómo llegar" y botón para agendar la fecha
+· Dress code, datos para el regalo y tu hashtag
+· Un link distinto para cada invitado, con su nombre y sus lugares ya puestos
+· Confirmaciones en vivo: quién viene, quién come sin TACC y qué tema pidió
+· Armado de mesas y plano del salón listo para imprimir
+· Tu propio panel para ver todo cuando quieras
+
+*${PRECIO}* — todo incluido. Sin costo por invitado y sin mensualidad.
+Lista en 24 a 48 horas.
+
+Los cambios los hago yo, así que no tenés que pelearte con nada. Y si algo no te gusta, lo cambiamos hasta que quede.
+
+*PARA ARRANCAR NECESITO*
+1. Nombre y tipo de evento
+2. Fecha, hora, salón y dirección
+3. Tus fotos (te digo cuáles cuando arranquemos)
+4. Dress code, alias del regalo y hashtag, si tenés
+5. La lista de invitados con cuántos lugares le das a cada uno
+
+Podés ver ejemplos reales acá 👇
+${WEB}
+
+¿Arrancamos?`;
+
+const MSG_PEDIDO = `¡Buenísimo! 🎉 Para armarla necesito esto.
+
+Mandámelo cuando lo tengas, no hace falta que sea todo junto.
+
+*LA FIESTA*
+· Nombre de quien festeja (o los dos nombres)
+· Fecha y hora exactas
+· Salón y dirección completa
+· El link de Google Maps del salón
+
+*LAS FOTOS* — mandámelas por acá como archivo, no comprimidas
+· 1 de portada: la más linda, se ve grande y de fondo
+· 1 de bienvenida: que la cara quede en el centro (se muestra redonda)
+· Hasta 4 para la galería
+· 1 para la sección del hashtag (también redonda)
+
+No te preocupes por el tamaño ni el formato: yo las acomodo.
+
+*TEXTOS*
+· Un mensajito tuyo para tus invitados, 2 o 3 líneas
+· Dress code: cómo se llama y una línea explicándolo
+· Hasta cuándo pueden confirmar
+
+*SI QUERÉS (opcional)*
+· Alias o CBU para el regalo
+· Tu hashtag
+· Instagram y TikTok
+· Una canción para que suene de fondo
+
+*LOS INVITADOS*
+La lista con el nombre y cuántos lugares le das a cada uno:
+  Familia González — 4
+  Tía Marta — 2
+  Lu y Marian — 2
+
+Con eso arranco. En 24 a 48 horas te mando la primera versión para que la veas.`;
+
+function msgEntrega() {
+  const nombre = currentConfig?.nombre || '';
+  const tipo   = (currentConfig?.tipo || '').toLowerCase();
+  const clave  = (document.getElementById('ventas-clave')?.value || '').trim();
+  const base   = location.origin + location.pathname.replace('admin.html', '');
+  const suya   = `${base}i?evento=${encodeURIComponent(eventoId)}`;
+  const panel  = `${base}admin.html?evento=${encodeURIComponent(eventoId)}`;
+
+  return `¡Ya está lista! 🎉${nombre ? `\n\nTu invitación de ${tipo ? tipo + ' — ' : ''}${nombre}:` : '\n\nTu invitación:'}
+${suya}
+
+Abrila, recorrela hasta abajo y decime si querés cambiar algo. Los ajustes los hago yo, no toques nada vos.
+
+*TU PANEL*
+${panel}
+Clave: ${clave || '(poné acá la clave que le diste)'}
+
+Desde ahí vas a poder:
+· Generar el link de cada invitado, con su nombre y sus lugares ya cargados
+· Ver quién confirma en vivo, quién come sin TACC y qué tema pidió
+· Armar las mesas y bajarte el plano del salón para imprimir
+· Recordarle por WhatsApp a quien todavía no contestó
+
+Entrá desde el celular tranquila, se ve bien.
+
+Cualquier cosa me escribís 💛
+*Invitaciones Digitales OFICIAL*
+${WEB}`;
+}
+
+function pintarMensajes() {
+  const poner = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  poner('msg-consulta', MSG_CONSULTA);
+  poner('msg-pedido', MSG_PEDIDO);
+  poner('msg-entrega', msgEntrega());
+  const et = document.getElementById('ventas-evento');
+  if (et) et.textContent = currentConfig?.nombre || eventoId;
+}
+
+function copiarTexto(id) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent);
+  toast('📋 Copiado, pegalo en WhatsApp');
+}
+
+function mandarWA(id) {
+  const txt = document.getElementById(id).textContent;
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank', 'noopener');
+}
+
 // En la tabla un "—" es una raya; en la ficha del celular es un renglón
 // entero que no dice nada. Se marca vacía y allá se esconde.
 const celda = (col, valor) => valor
@@ -1956,7 +2167,7 @@ async function loadHistorial() {
   const { data } = await sb.from('eventos').select('id, config').order('id');
   document.getElementById('hist-rows').innerHTML = (data||[]).map(ev => `
     <tr>
-      <td><code style="color:var(--pk);background:rgba(255,59,111,0.08);padding:3px 8px;border-radius:6px;font-size:0.78rem">${ev.id}</code></td>
+      <td><code style="color:var(--oro);background:rgba(247,206,132,0.08);padding:3px 8px;border-radius:6px;font-size:0.78rem">${ev.id}</code></td>
       <td>${ev.config?.nombre||'—'}</td>
       <td>${ev.config?.tipo||'—'}</td>
       <td>
@@ -2407,35 +2618,35 @@ function exportarMesasPDF() {
   
   lista.sort((a,b) => a.apellido.localeCompare(b.apellido));
   let html = `<html><head><title>Lista de invitados por mesa</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..700&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
   <style>
       @media print {
         body { margin: 0; padding: 20px; }
         .no-print { display: none; }
       }
-      body { font-family: 'Inter', sans-serif; background: #fff; color: #1f2937; margin: 40px; }
+      body { font-family: 'Instrument Sans',system-ui,sans-serif; background: #fff; color: #1f2937; margin: 40px; }
       .header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 40px; border-bottom: 2px solid #f3f4f6; padding-bottom: 30px; }
-      .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 32px; background: linear-gradient(135deg, #ff3b6f, #c471ff); -webkit-background-clip: text; color: transparent; margin-bottom: 5px; }
-      .logo-sub { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 14px; letter-spacing: 6px; text-transform: uppercase; color: #ff3b6f; margin-bottom: 15px; }
-      .title { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: #111827; margin: 10px 0 5px 0; }
+      .logo-text { font-family: 'Fraunces',Georgia,serif; font-weight: 800; font-size: 32px; background: linear-gradient(135deg, #A8761F, #6E4A0E); -webkit-background-clip: text; color: transparent; margin-bottom: 5px; }
+      .logo-sub { font-family: 'Instrument Sans',system-ui,sans-serif; font-weight: 800; font-size: 14px; letter-spacing: 6px; text-transform: uppercase; color: #8A5F17; margin-bottom: 15px; }
+      .title { font-family: 'Fraunces',Georgia,serif; font-size: 24px; font-weight: 800; color: #111827; margin: 10px 0 5px 0; }
       .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 20px; }
       
       .stats-bar { display: flex; justify-content: center; gap: 40px; margin-bottom: 30px; background: #fafafa; border: 1px solid #f3f4f6; padding: 15px 30px; border-radius: 12px; }
       .stat-item { text-align: center; }
-      .stat-val { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: #ff3b6f; }
+      .stat-val { font-family: 'Fraunces',Georgia,serif; font-size: 20px; font-weight: 800; color: #8A5F17; }
       .stat-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; margin-top: 2px; }
 
       table { border-collapse: collapse; width: 100%; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border-radius: 8px; overflow: hidden; }
       th, td { padding: 12px 16px; text-align: left; }
-      th { background-color: #ff3b6f; color: #fff; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+      th { background-color: #8A5F17; color: #fff; font-family: 'Fraunces',Georgia,serif; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
       td { border-bottom: 1px solid #f3f4f6; font-size: 13px; color: #374151; }
       tr:nth-child(even) td { background-color: #fcfcfc; }
       tr:hover td { background-color: #fafafa; }
-      .mesa-badge { background: rgba(255, 59, 111, 0.08); color: #ff3b6f; font-weight: 700; padding: 4px 10px; border-radius: 20px; font-size: 11px; border: 1px solid rgba(255, 59, 111, 0.15); display: inline-block; }
+      .mesa-badge { background: rgba(138,95,23, 0.08); color: #8A5F17; font-weight: 700; padding: 4px 10px; border-radius: 20px; font-size: 11px; border: 1px solid rgba(138,95,23, 0.22); display: inline-block; }
       .no-mesa { color: #9ca3af; font-style: italic; }
       
       .footer { margin-top: 50px; text-align: center; font-size: 11px; color: #9ca3af; border-top: 1px solid #f3f4f6; padding-top: 20px; }
-      .footer a { color: #ff3b6f; text-decoration: none; font-weight: 600; }
+      .footer a { color: #F7CE84; text-decoration: none; font-weight: 600; }
   </style>
   </head><body>
   <div class="header">

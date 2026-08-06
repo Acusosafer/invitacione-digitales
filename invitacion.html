@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta id="og-title" property="og:title" content="💌 Quiero que seas parte de este momento especial">
   <meta id="og-desc" property="og:description" content="Si te llegó este enlace sos importante para mi">
-  <meta id="og-img" property="og:image" content="logo.png">
+  <meta id="og-img" property="og:image" content="logo-og.png">
   <meta id="og-url" property="og:url" content="">
   <title id="pg-title">Invitación Oficial</title>
   <link
@@ -1049,6 +1049,31 @@
       color: rgba(255, 255, 255, 0.6);
     }
 
+    /* Discreto a propósito: es la invitación del cliente, no un aviso.
+       Pero clickeable, porque el invitado que la abre es el próximo cliente. */
+    .footer-marca {
+      color: rgba(255, 255, 255, 0.92);
+      font-weight: 600;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+      transition: border-color 160ms ease, color 160ms ease;
+    }
+    .footer-cta {
+      margin-top: 10px;
+      font-size: 0.74rem;
+    }
+    .footer-cta a {
+      color: rgba(255, 255, 255, 0.55);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+      padding-bottom: 1px;
+      transition: color 160ms ease, border-color 160ms ease;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .footer-marca:hover { border-bottom-color: rgba(255, 255, 255, 0.7); }
+      .footer-cta a:hover { color: rgba(255, 255, 255, 0.85); border-bottom-color: rgba(255, 255, 255, 0.5); }
+    }
+
     /* ANIMACIONES */
     .rev {
       opacity: 0;
@@ -1510,7 +1535,16 @@
       </a>
     </div>
     <div class="footer-credits">
-      <p>Invitación digital creada por<br><strong>Invitaciones Digitales OFICIAL</strong></p>
+      <!-- Cada invitado que abre su invitación es alguien que puede terminar
+           pidiendo la suya. Hasta hoy el crédito estaba pero no era un link. -->
+      <p>Invitación digital creada por<br>
+        <a href="https://invitacionesdigitalesoficial.vercel.app/" target="_blank" rel="noopener" class="footer-marca">
+          Invitaciones Digitales OFICIAL
+        </a>
+      </p>
+      <p class="footer-cta">
+        <a href="https://invitacionesdigitalesoficial.vercel.app/" target="_blank" rel="noopener">¿Querés una así para tu fiesta?</a>
+      </p>
     </div>
   </footer>
 
