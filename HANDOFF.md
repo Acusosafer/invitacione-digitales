@@ -39,6 +39,20 @@ Storage. Las tres ya corridas. Las tres son idempotentes.
 
 ## Hecho el 07/08/2026
 
+- **Google Safe Browsing levantado.** Chrome ya no marca el sitio. Instagram queda liberado.
+- **Medición instalada** en la landing y **solo** en la landing: GTM `GTM-T7QNB7VR` en el HTML,
+  con GA4 `G-G7LL4G253B` y el píxel de Meta `2024768681739346` adentro. Detalle completo y
+  el porqué de cada decisión en la sección "Medición" de `CLAUDE.md`.
+  Verificado en navegador real: la landing dispara los tres; la invitación y el panel no
+  disparan ninguno; y con `?invitado=Juan+Perez` no viajó **ningún** dato hacia Google ni Meta.
+  ⚠️ Al probar el píxel, Meta responde `[Meta pixel] Bot traffic detected and blocked` a un
+  navegador automatizado. **Eso no es una falla**: el evento no sale y parece que no anda.
+  Para verificarlo hay que espiar `img.src`/`sendBeacon` o usar Meta Pixel Helper a mano.
+  La extensión "Meta Pixel Validator" (de un tercero) da falso negativo con píxeles que
+  entran por GTM — la oficial es "Meta Pixel Helper", de Meta Platforms.
+- **GA4 afinado:** retención subida de 2 a 14 meses y filtro de tráfico interno activo para
+  la IP de Fer. ⚠️ Es una IP hogareña: si cambia, el filtro deja de agarrar y sus propias
+  visitas vuelven a contarse como clientes.
 - **Dominio propio: `invitacionesdigitalesoficial.com`** (Namecheap, $11,28 el primer año /
   $14,98 de renovación). A `@` → `216.198.79.1` y CNAME `www` → el host de Vercel. El
   `.vercel.app` sigue vivo y redirige, así que los links ya mandados no se rompen.
@@ -78,10 +92,10 @@ Storage. Las tres ya corridas. Las tres son idempotentes.
 
 ## Pendientes, en orden
 
-1. **Google Safe Browsing.** Revisión pedida el 31/07 sobre el `vercel.app`. Con el dominio
-   propio ya andando, verificar si Chrome sigue mostrando "Peligroso" — y **si el redirect
-   desde el `.vercel.app` arrastra la advertencia**, porque el host viejo es el marcado.
-   Hasta confirmarlo, no publicar la campaña ni abrir Instagram.
+1. **Lanzar Instagram.** Es lo que estuvo trabado dos semanas y hoy dejó de estarlo: hay
+   dominio y Chrome ya no marca el sitio. Todo el material está listo en `publicidad/`:
+   perfil, bio, seis piezas con sus textos, foto de perfil y cuatro portadas de destacadas.
+   Falta actualizar el link de la bio al dominio nuevo y terminar la pieza 4.
 2. **Recuperar los cupos perdidos en el evento de Flor** (`florviera`): Flia Sosa,
    Lu y Marian, Marce y Carlos, Sandra e Ines quedaron con una sola fila. Se arregla
    borrando la fila con 🗑 y reenviándole el link. Los cupos originales no quedaron
