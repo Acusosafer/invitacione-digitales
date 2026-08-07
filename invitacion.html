@@ -1494,14 +1494,21 @@
     </div>
     <div class="footer-credits">
       <!-- Cada invitado que abre su invitación es alguien que puede terminar
-           pidiendo la suya. Hasta hoy el crédito estaba pero no era un link. -->
+           pidiendo la suya. Hasta hoy el crédito estaba pero no era un link.
+
+           Los ?utm_ del final son la ÚNICA medición que toca la invitación, y no
+           mide al invitado: viaja en el link, así que solo deja rastro si la
+           persona efectivamente hace clic y llega a la landing. Ahí GA4 lo cuenta
+           como "vino de una invitación". Acá adentro no hay ni GA4 ni píxel de
+           Meta a propósito: la URL de esta página lleva el nombre y apellido del
+           invitado, y eso no se le manda a Google ni a Facebook. -->
       <p>Invitación digital creada por<br>
-        <a href="https://invitacionesdigitalesoficial.com/" target="_blank" rel="noopener" class="footer-marca">
+        <a href="https://invitacionesdigitalesoficial.com/?utm_source=invitacion&amp;utm_medium=footer&amp;utm_content=marca" target="_blank" rel="noopener" class="footer-marca">
           Invitaciones Digitales OFICIAL
         </a>
       </p>
       <p class="footer-cta">
-        <a href="https://invitacionesdigitalesoficial.com/" target="_blank" rel="noopener">¿Querés una así para tu fiesta?</a>
+        <a href="https://invitacionesdigitalesoficial.com/?utm_source=invitacion&amp;utm_medium=footer&amp;utm_content=cta" target="_blank" rel="noopener">¿Querés una así para tu fiesta?</a>
       </p>
     </div>
   </footer>
