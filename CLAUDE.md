@@ -407,7 +407,16 @@ Todos los celulares usan iframes reales en lugar de contenido CSS dibujado:
 El sitio está en Vercel con auto-deploy desde GitHub.
 - Repo: `https://github.com/Acusosafer/invitacione-digitales`
 - Para deployar: `git add`, `git commit`, `git push origin main`
-- URL producción: `https://invitacionesdigitalesoficial.vercel.app`
+- URL producción: `https://invitacionesdigitalesoficial.com` (dominio propio desde el 07/08/2026,
+  Namecheap). El `.vercel.app` sigue activo y redirige, así que los links que ya se mandaron
+  a invitados no se rompen.
+- ⚠️ **Existe también `invitacionesdigitalesofical.com`** —sin la "i" de "oficial"— comprado
+  por error el mismo día. No es el dominio del sitio. Si sirve para algo es como red para
+  quien escriba mal la dirección.
+- **La URL casi nunca va escrita a mano en el código.** `api/i.js` la toma de
+  `x-forwarded-host`, y el generador de links del panel de `location.origin`: los dos se
+  adaptan al dominio desde el que se abran. Sólo hay literales en el footer de
+  `invitacion.html`, la constante `WEB` de `admin.html` y el mockup de chat de `index.html`.
 
 ## Bugs corregidos (historial)
 

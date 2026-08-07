@@ -39,6 +39,15 @@ Storage. Las tres ya corridas. Las tres son idempotentes.
 
 ## Hecho el 07/08/2026
 
+- **Dominio propio: `invitacionesdigitalesoficial.com`** (Namecheap, $11,28 el primer año /
+  $14,98 de renovación). A `@` → `216.198.79.1` y CNAME `www` → el host de Vercel. El
+  `.vercel.app` sigue vivo y redirige, así que los links ya mandados no se rompen.
+  Se descartaron los cortos porque están todos ocupados (`invitacionesdigitales.com`,
+  `invitaciondigital.com`, `tuinvitacion.com`, `quienviene.com`), y los `.digital`/`.lat`
+  que Namecheap ofrece a $2 porque renuevan a ~$42.
+  ⚠️ En el camino se compró `invitacionesdigitalesofical.com` **mal escrito** —sin la "i" de
+  "oficial"—. No es el dominio del sitio. Se pidió reembolso a Namecheap; si no sale, queda
+  como red para quien tipee mal.
 - **Una sola marca.** El panel y el logo estaban en rosa `#ff3b6f` con Syne y la web en
   marfil y dorado con Fraunces: dos empresas conviviendo. Todo pasó al dorado. El panel
   sigue oscuro a propósito. Dos logos nuevos (`logo.png` transparente y `logo-og.png`
@@ -69,34 +78,32 @@ Storage. Las tres ya corridas. Las tres son idempotentes.
 
 ## Pendientes, en orden
 
-1. **Dominio propio** (~15 USD/año). **Es el cuello de botella de todo lo demás**: sin él no
-   se puede lanzar Instagram (el link de la bio termina en la pantalla roja de Chrome), la
-   pieza 4 no se puede terminar, y la marca de Google puede volver sola porque `vercel.app`
-   es reputación compartida.
-   Cuando esté, hay que cambiar: el footer de `invitacion.html` (tiene la URL escrita), los
-   links de `publicidad/instagram.md`, y la constante `WEB` de `admin.html`. El resto se
-   arma solo desde `location.origin`.
-2. **Google Safe Browsing.** Revisión pedida el 31/07. Hasta que la levanten, Chrome muestra
-   "Peligroso" y **no hay que publicar la campaña ni abrir Instagram**.
-3. **Recuperar los cupos perdidos en el evento de Flor** (`florviera`): Flia Sosa,
+1. **Google Safe Browsing.** Revisión pedida el 31/07 sobre el `vercel.app`. Con el dominio
+   propio ya andando, verificar si Chrome sigue mostrando "Peligroso" — y **si el redirect
+   desde el `.vercel.app` arrastra la advertencia**, porque el host viejo es el marcado.
+   Hasta confirmarlo, no publicar la campaña ni abrir Instagram.
+2. **Recuperar los cupos perdidos en el evento de Flor** (`florviera`): Flia Sosa,
    Lu y Marian, Marce y Carlos, Sandra e Ines quedaron con una sola fila. Se arregla
    borrando la fila con 🗑 y reenviándole el link. Los cupos originales no quedaron
    registrados: hay que preguntarles.
-4. **Álbum compartido con QR** — lo único relevante que tiene la competencia y no está acá.
+3. **Álbum compartido con QR** — lo único relevante que tiene la competencia y no está acá.
    Acotado: Storage + link público por evento. Fer lo dejó pasar el 06/08, no lo descartó.
-5. **Identidad en el footer del sitio público.** Falta que Fer defina cómo firma el negocio,
+4. **Identidad en el footer del sitio público.** Falta que Fer defina cómo firma el negocio,
    qué contacto va y si tiene Instagram. Hoy el sitio no dice quién es en ninguna parte.
-6. **Cuántas horas lleva una invitación** de punta a punta. Sin ese dato no se sabe si los
+5. **Cuántas horas lleva una invitación** de punta a punta. Sin ese dato no se sabe si los
    $50.000 cierran o si está trabajando barato.
-7. **Terminar `almamia15`**: volver a subir la portada (la vieja pesa 2,26 MB) y cambiar
+6. **Terminar `almamia15`**: volver a subir la portada (la vieja pesa 2,26 MB) y cambiar
    `foto_galeria_2`, que todavía apunta a `/assets/valentina15/...` de cuando se copió ese evento.
-8. **Escuchar dos temas** asignados con dudas: `luna15` (capoeira, se pidió folk de jardín) y
+7. **Escuchar dos temas** asignados con dudas: `luna15` (capoeira, se pidió folk de jardín) y
    `boda-julieta` (se llama "morning" y se pidió ambient nocturno).
-9. **Dos mejoras de ergonomía del admin**: que `verificar_clave` distinga "falta configurar el
+8. **Dos mejoras de ergonomía del admin**: que `verificar_clave` distinga "falta configurar el
    hash" de "clave incorrecta" (hoy dice lo mismo para las dos cosas), y un formulario para
    cambiar la clave de superadmin sin pasar por SQL.
-10. **Que el invitado pueda corregir su confirmación.** Hoy si se equivoca queda trabado y
+9. **Que el invitado pueda corregir su confirmación.** Hoy si se equivoca queda trabado y
    depende de que el cliente le borre la fila.
+10. **Mail propio** (`fer@invitacionesdigitalesoficial.com`). Ahora que hay dominio se puede.
+   Zoho Mail free alcanza; hay que cargar SPF, DKIM y MX en el Advanced DNS de Namecheap,
+   **sin tocar** el A `@` ni el CNAME `www` que apuntan a Vercel.
 
 ---
 
