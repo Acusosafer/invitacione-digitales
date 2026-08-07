@@ -241,53 +241,121 @@ y debajo, en gris y más chico todavía:
 
 ## 3 · Textos de los posts
 
-**1 · Presentación**
-> La invitación no es el papel. Es el momento en que alguien se entera de que va a ser
-> parte de algo.
+> **La primera línea es todo.** Instagram corta a los ~125 caracteres y muestra "más". Si el
+> gancho está en el segundo párrafo, no lo lee nadie. Cada texto de acá abajo arranca con una
+> frase que se sostiene sola.
+>
+> **Los hashtags van en el primer comentario**, no en el texto: el pie queda limpio y
+> funcionan igual. No repitas siempre los mismos — Instagram premia la variación.
+
+---
+
+**1 · Presentación** (el post fijado)
+
+> La invitación no es el papel. Es el momento en que alguien se entera de que va a ser parte
+> de algo.
 >
 > Hago invitaciones digitales para 15 años y casamientos. Se abren en el celular, suenan,
 > cuentan los días que faltan y te van diciendo quién viene.
 >
 > Una para cada fiesta. Ninguna igual a otra.
+>
+> 📍 Buenos Aires · Escribime y te cuento cómo sería la tuya.
+
+`#invitacionesdigitales #15años #casamiento #fiestade15 #eventosbuenosaires`
+
+---
 
 **2 · El problema**
-> Si estás organizando, esto lo viviste: mandás la invitación al grupo y empiezan a llegar
-> los mensajes sueltos. "¿Dónde era?" "¿A qué hora?" "¿Puedo llevar a mi novio?"
+
+> Mandás la invitación al grupo y empiezan a llegar los mensajes sueltos.
+>
+> "¿Dónde era?" "¿A qué hora?" "¿Puedo llevar a mi novio?" "Perdón, ¿me lo reenviás?"
 >
 > Y vos anotando en una libreta quién va y quién no.
 >
 > Con una invitación digital eso no pasa: cada uno confirma en su link y a vos te llega
 > ordenado. Sin planillas y sin perseguir a nadie.
+>
+> ¿Te pasó? Contámelo en los comentarios 👇
+
+`#organizaciondeeventos #quinceañera #novia2026 #casamientoargentina #fiesta15años`
+
+---
 
 **3 · Cómo funciona**
-> Cuatro pasos y ya la estás mandando. Sin apps que bajar y sin que nadie se cree una
-> cuenta.
+
+> Cuatro pasos y ya la estás mandando.
 >
-> Nos contás la fiesta, la diseño entera con tus colores y tus fotos, y en 24 a 48 horas
-> la tenés. Después mandás un link por WhatsApp y listo.
+> Sin apps que bajar y sin que nadie se cree una cuenta. Nos contás la fiesta, la diseño
+> entera con tus colores y tus fotos, y en 24 a 48 horas la tenés lista.
+>
+> Después mandás un link por WhatsApp. Nada más.
+>
+> Guardalo para cuando te toque organizar 🔖
+
+`#invitaciones15años #invitacionboda #tarjetasdigitales #eventos #buenosaires`
+
+---
 
 **4 · El link personalizado**
+
 > Este es el detalle que más sorprende.
 >
-> No mandás el mismo link a todos: cada invitado recibe el suyo, con su nombre ya escrito
-> y los lugares que vos le diste. Abre y lee "Hola Familia González, están invitados".
+> No mandás el mismo link a todos: cada invitado recibe el suyo, con su nombre ya escrito y
+> los lugares que vos le diste. Abre y lee "Hola Familia González, están invitados".
 >
-> Los armás vos, desde tu panel, a medida que vas invitando.
+> Los armás vos, desde tu panel, a medida que vas invitando. A tu ritmo.
+>
+> ¿Se te ocurre a quién le mandarías el primero?
+
+`#invitacionesdigitales #15años #casamiento #detalles #organizadoradeeventos`
+
+---
 
 **5 · El panel**
+
 > Mientras tus invitados abren la suya, vos tenés un panel donde pasa todo lo demás.
 >
 > Quién confirmó, quién come sin TACC, qué tema pidió. Las mesas se arman arrastrando y al
 > final imprimís el plano ordenado por apellido.
 >
 > Sin una sola planilla de Excel.
-
-**6 · Cierre**
-> Tu fiesta se prepara durante meses. La invitación es lo primero que ve tu gente.
 >
-> Escribime y te cuento cómo sería la tuya. Sin compromiso.
+> Y lo abrís del celular, cuando quieras.
+
+`#organizaciondeeventos #weddingplanner #fiestade15 #casamiento #buenosaires`
 
 ---
+
+**6 · Cierre**
+
+> Tu fiesta se prepara durante meses. La invitación es lo primero que ve tu gente.
+>
+> Que empiece bien desde el primer mensaje que mandás.
+>
+> Escribime y te cuento cómo sería la tuya. Sin compromiso y sin vueltas.
+
+`#invitacionesdigitales #15años #casamiento #eventosbuenosaires #fiesta`
+
+---
+
+## 3b · Las portadas de destacadas
+
+Están en `publicidad/destacadas/`: `como-es.png`, `el-panel.png`, `precios.png`,
+`clientas.png`. Son 1080×1920 y se suben como historia, después se eligen como portada.
+
+Se generaron por código (`puppeteer` + Edge) y no con un modelo de imágenes, a propósito:
+tienen que verse como **un juego**, con el mismo trazo, el mismo halo y el mismo aro. Un
+generador de imágenes devuelve cuatro primos, no cuatro hermanos.
+
+⚠️ **Instagram recorta el cuadrado central y lo pasa a círculo**, así que el círculo visible
+mide ~1080px de ancho. La primera versión tenía el ícono a 280px —el 26%— y a 64px no se
+distinguía nada. Van a 620px.
+
+Para regenerar o agregar una: `node publicidad/destacadas/generar.js`. Los íconos son SVG
+sueltos arriba del script — se agrega una entrada al objeto `ICONOS` y sale con el mismo
+tratamiento que el resto.
 
 ## 4 · Lo que va a funcionar mejor que todo esto
 
