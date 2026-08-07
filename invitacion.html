@@ -692,61 +692,6 @@
       .btn-agendar:hover { background: var(--surface-2); }
     }
 
-    /* Un .ics se baja como archivo en la compu ("Flor.ics · 455 B") y el
-       invitado no sabe qué hacer con eso; en el celular abre el calendario
-       sin preguntar. En vez de adivinar el dispositivo —que falla— se
-       muestran las dos opciones y elige el invitado. */
-    .agendar-wrap { position: relative; display: inline-block; }
-
-    .agendar-menu {
-      position: absolute;
-      top: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%) scale(0.96);
-      transform-origin: top center;
-      z-index: 30;
-      display: flex;
-      flex-direction: column;
-      min-width: 210px;
-      padding: 6px;
-      border-radius: 14px;
-      background: var(--bg);
-      border: 1px solid var(--edge);
-      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 170ms cubic-bezier(0.23, 1, 0.32, 1),
-                  transform 170ms cubic-bezier(0.23, 1, 0.32, 1);
-    }
-    .agendar-menu.abierto { opacity: 1; transform: translateX(-50%) scale(1); pointer-events: auto; }
-
-    .agendar-menu button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 11px 14px;
-      border-radius: 10px;
-      font-family: var(--font);
-      font-size: 0.85rem;
-      color: var(--ink);
-      text-align: left;
-      white-space: nowrap;
-      transition: background 140ms ease;
-    }
-    .agendar-menu button { display: flex; flex-direction: column; gap: 3px; }
-    .agendar-menu button small {
-      font-size: 0.7rem;
-      color: var(--ink-soft);
-      font-weight: 400;
-    }
-    .agendar-menu button:active { background: var(--surface); }
-    @media (hover: hover) and (pointer: fine) {
-      .agendar-menu button:hover { background: var(--surface); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .agendar-menu { transition: opacity 170ms ease; transform: translateX(-50%); }
-      .agendar-menu.abierto { transform: translateX(-50%); }
     }
 
     .btn-maps:hover {
@@ -1411,19 +1356,7 @@
         <div class="location-hora"><span id="txt-fecha"></span> — <span id="txt-hora"></span> hs</div>
         <div class="loc-acciones">
           <button id="btn-maps" class="btn btn-maps">Cómo llegar</button>
-          <div class="agendar-wrap">
-            <button id="btn-agendar" class="btn btn-agendar" style="display:none">Agendar</button>
-            <!-- El .ics va primero: es el único que se lleva los avisos.
-                 En Android también lo abre Google Calendar, con avisos y todo. -->
-            <div class="agendar-menu" id="agendar-menu">
-              <button type="button" data-donde="ics">
-                Mi calendario<small>Te avisa 10 días antes y la víspera</small>
-              </button>
-              <button type="button" data-donde="google">
-                Google Calendar<small>Se abre en el navegador</small>
-              </button>
-            </div>
-          </div>
+          <button id="btn-agendar" class="btn btn-agendar" style="display:none">Agendar</button>
         </div>
       </div>
     </section>
@@ -2200,116 +2133,59 @@
     }
 
     // ── AGENDAR ──────────────────────────────────────────────────────────
-    // Genera un archivo .ics, que es el formato que entienden el calendario
-    // del iPhone, el de Android y Google Calendar por igual. Se arma en el
-    // navegador: no hace falta servidor ni mandar al invitado a Google.
-    function armarICS() {
-      const inicio = new Date(C.fecha_iso);
-      if (isNaN(inicio.getTime())) return null;
-      // Sin hora de fin declarada asumimos una fiesta de 6 horas.
-      const fin = new Date(inicio.getTime() + 6 * 60 * 60 * 1000);
+    // Abre Google Calendar con el evento cargado. El invitado solo aprieta
+    // "Guardar": ni archivos ni permisos de descarga.
+    //
+    // ⚠️ El aviso propio ("faltan 10 días") NO se puede: de los 13 parámetros
+    // que acepta la URL de Google (text, dates, ctz, details, location, crm,
+    // trp, sprop, add, src, recur, vcon) ninguno configura recordatorios.
+    // Queda el que cada invitado tenga puesto por defecto. La única forma de
+    // forzarlo sería un archivo .ics, que es justo lo que se quiso evitar.
 
-      // El formato exige UTC con Z. `fecha_iso` no trae zona, así que el
-      // navegador la lee como hora local — que es la que cargó el cliente.
-      const utc = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-      // En iCalendar hay que escapar la barra, la coma, el punto y coma y el salto.
-      const txt = v => String(v || '')
-        .replace(/\\/g, '\\\\').replace(/;/g, '\\;')
-        .replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+    const ZONA = 'America/Argentina/Buenos_Aires';
 
-      const titulo = [C.tipo, C.nombre].filter(Boolean).join(' — ') || 'Nuestra fiesta';
-      const lugar  = [C.salon, C.direccion].filter(Boolean).join(', ');
-
-      return [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'PRODID:-//Invitaciones Digitales//ES',
-        'CALSCALE:GREGORIAN',
-        'BEGIN:VEVENT',
-        `UID:${eventoId}-${inicio.getTime()}@invitacionesdigitales`,
-        `DTSTAMP:${utc(new Date())}`,
-        `DTSTART:${utc(inicio)}`,
-        `DTEND:${utc(fin)}`,
-        `SUMMARY:${txt(titulo)}`,
-        lugar ? `LOCATION:${txt(lugar)}` : null,
-        `DESCRIPTION:${txt('¡Te esperamos!')}`,
-        // Dos avisos, sin que el invitado configure nada: a los 10 días para
-        // que llegue a organizarse (regalo, ropa, quién lo lleva) y la
-        // víspera para que no se le pase. Si faltan menos de 10 días cuando
-        // lo agenda, el calendario simplemente ignora el aviso vencido.
-        'BEGIN:VALARM',
-        'TRIGGER:-P10D',
-        'ACTION:DISPLAY',
-        `DESCRIPTION:${txt(`Faltan 10 días para ${titulo}`)}`,
-        'END:VALARM',
-        'BEGIN:VALARM',
-        'TRIGGER:-P1D',
-        'ACTION:DISPLAY',
-        `DESCRIPTION:${txt(`Mañana es ${titulo} 🥂`)}`,
-        'END:VALARM',
-        'END:VEVENT',
-        'END:VCALENDAR'
-      ].filter(Boolean).join('\r\n');
-    }
-
-    // Mismo evento, pero como link de Google Calendar: abre una pestaña con
-    // todo cargado y el invitado solo aprieta "Guardar". Sin archivos.
     function linkGoogle() {
-      const inicio = new Date(C.fecha_iso);
-      if (isNaN(inicio.getTime())) return null;
-      const fin = new Date(inicio.getTime() + 6 * 60 * 60 * 1000);
-      const utc = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+      // `fecha_iso` viene sin zona ("2026-11-14T21:00"). Si se la pasa a
+      // new Date(), CADA NAVEGADOR la lee en SU zona horaria: un invitado en
+      // España agendaba las 21:00 de Madrid, o sea las 17:00 de acá. Por eso
+      // se parsea a mano y se le declara la zona a Google con `ctz`.
+      const m = String(C.fecha_iso || '').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+      if (!m) return null;
+      const [, Y, Mo, D, H, Mi] = m.map(Number);
+
+      // Se ancla en UTC solo para poder sumar horas sin que intervenga la
+      // zona del que mira; después se vuelve a leer en UTC, así que el
+      // resultado es la hora local tal cual la cargó el cliente.
+      const dosPuntos = n => String(n).padStart(2, '0');
+      const arranque = Date.UTC(Y, Mo - 1, D, H, Mi);
+      const fin = arranque + 6 * 60 * 60 * 1000;   // fiesta de 6 horas
+      const fmt = t => {
+        const d = new Date(t);
+        return `${d.getUTCFullYear()}${dosPuntos(d.getUTCMonth() + 1)}${dosPuntos(d.getUTCDate())}`
+             + `T${dosPuntos(d.getUTCHours())}${dosPuntos(d.getUTCMinutes())}00`;
+      };
+
       const p = new URLSearchParams({
         action: 'TEMPLATE',
         text: [C.tipo, C.nombre].filter(Boolean).join(' — ') || 'Nuestra fiesta',
-        dates: `${utc(inicio)}/${utc(fin)}`,
+        dates: `${fmt(arranque)}/${fmt(fin)}`,
+        ctz: ZONA,
         location: [C.salon, C.direccion].filter(Boolean).join(', '),
         details: '¡Te esperamos!'
       });
       return `https://calendar.google.com/calendar/render?${p}`;
     }
 
-    function bajarICS(ics) {
-      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${(C.nombre || 'evento').replace(/[^\w\s-]/g, '').trim() || 'evento'}.ics`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }
-
     function prepararAgenda() {
       const btn = document.getElementById('btn-agendar');
-      const menu = document.getElementById('agendar-menu');
-      if (!btn || !menu) return;
-      const ics = armarICS();
+      if (!btn) return;
+      const url = linkGoogle();
       // Sin fecha válida no hay nada que agendar: mejor no mostrar el botón
       // que mostrarlo y que no haga nada.
-      if (!ics) return;
+      if (!url) return;
 
       btn.style.display = '';
-      const cerrar = () => menu.classList.remove('abierto');
-
-      btn.onclick = e => { e.stopPropagation(); menu.classList.toggle('abierto'); };
-      document.addEventListener('click', cerrar);
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
-
-      menu.querySelectorAll('button').forEach(op => {
-        op.onclick = e => {
-          e.stopPropagation();
-          cerrar();
-          if (op.dataset.donde === 'google') {
-            const g = linkGoogle();
-            if (g) window.open(g, '_blank', 'noopener');
-          } else {
-            bajarICS(ics);
-            toast('📅 Abrí el archivo para agregarlo a tu calendario');
-          }
-        };
-      });
+      btn.onclick = () => window.open(url, '_blank', 'noopener');
     }
 
     function toggleMusic() {
