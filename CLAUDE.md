@@ -418,6 +418,37 @@ El sitio está en Vercel con auto-deploy desde GitHub.
   adaptan al dominio desde el que se abran. Sólo hay literales en el footer de
   `invitacion.html`, la constante `WEB` de `admin.html` y el mockup de chat de `index.html`.
 
+## Medición (leer antes de agregar cualquier script de terceros)
+
+Instalado el 07/08/2026. Estos tres IDs **no son secretos** —cualquiera los lee en el código
+fuente de cualquier web— así que van escritos en el HTML, no en un `.env`. Con ellos se puede
+*mandar* datos a las cuentas, no *leerlos*.
+
+| Qué | ID | Dónde vive |
+|---|---|---|
+| Google Tag Manager | `GTM-T7QNB7VR` | **En el HTML de `index.html`, y solo ahí** |
+| Google Analytics 4 | `G-G7LL4G253B` | Dentro de GTM, como etiqueta |
+| Píxel de Meta | `2024768681739346` | Dentro de GTM, como HTML personalizado |
+
+**Solo GTM va en el código.** GA4 y el píxel se enchufan adentro de GTM. Si además se pegara
+GA4 en el HTML, cada visita se contaría dos veces y todos los números saldrían al doble. Lo
+que venga después (otro píxel, un mapa de calor, lo que sea) entra por GTM también.
+
+⚠️ **Nada de esto puede ir en `invitacion.html` ni en `admin.html`.** La URL de la invitación
+lleva `?invitado=Nombre+Apellido` y GA4 guarda la URL completa de cada visita: sería mandarle
+a Google y a Meta la lista de invitados de los clientes. Aparte de estar mal, los términos de
+Google prohíben mandarles datos personales y la sanción es la cuenta borrada con el historial
+adentro.
+
+**El boca a boca sí se mide**, pero del lado de la landing: los dos links del footer de la
+invitación llevan `?utm_source=invitacion&utm_medium=footer` y se distinguen entre sí con
+`utm_content=marca|cta`. El UTM viaja en el link, así que solo deja rastro si la persona hace
+clic y llega a la web — el invitado que no hace nada no queda registrado en ningún lado.
+
+`index.html` no tiene ni un `<form>` ni un `<input>` (el contacto es un link a WhatsApp). Por
+eso la *coincidencia avanzada automática* del píxel de Meta no tiene nada personal que leer.
+Si algún día se le agrega un formulario, **ese es el momento de volver a revisar esa opción**.
+
 ## Bugs corregidos (historial)
 
 ### Orden de secciones incorrecto (invitacion.html)
