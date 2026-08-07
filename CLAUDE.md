@@ -27,7 +27,10 @@ que siga siéndolo.
 | `sql/001_schema_invitaciones.sql` | Schema, tablas, funciones y permisos |
 | `sql/002_demos.sql` | Los 12 eventos demo de la landing |
 | `sql/003_storage.sql` | Bucket de Storage y sus permisos |
+| `logo.png` / `logo-og.png` | Marca. El `-og` es el respaldo de vista previa (1200×630, fondo oscuro) |
 | `publicidad/agosto-a.html` | Placa de la campaña (1080×1080) |
+| `publicidad/instagram.md` | Perfil, bio y prompts de las piezas. No se publica |
+| `publicidad/ig-perfil.png` | Foto de perfil de Instagram (1080×1080) |
 | `generate_logo.py` + `temp_logo.html` | Generación del logo |
 
 ## Vista previa al compartir (leer antes de tocar el `<head>`)
@@ -221,6 +224,16 @@ acá: no hay submit de formulario, es un botón con `onclick`.
 sin el nombre del evento. Va **primero y con `await`**: en paralelo con `loadData()` no
 llega a tiempo y la lista se arma sin él.
 
+### Pestaña "Mensajes y entrega" (solo superadmin)
+
+Tres mensajes de venta listos para copiar o mandar por WhatsApp. **El texto viaja al
+navegador**: quien abra el código fuente lo lee, así que ahí no van precios especiales para
+un cliente puntual.
+
+Alcance del servicio, decidido el 06/08/2026: **la música es obligatoria** (sección propia en
+el mensaje) y **la lista de invitados NO se le pide al cliente** — los links los genera él
+desde su panel, a su ritmo.
+
 ### Recordatorio a pendientes
 
 Tarjeta en la pestaña Invitados con los que no contestaron, agrupados por `invitado_url`.
@@ -233,6 +246,45 @@ el cliente y terminan dentro de una URL y de un mensaje.
 - La columna `mesa` existe siempre. **Se eliminó el fallback a `localStorage`**: guardaba la mesa solo en ESE navegador, así que el plano del salón salía distinto según desde dónde se abriera.
 - Capacidad dinámica: si se asignan más de 10 a una mesa, la mesa escala.
 - Exporta PDF de distribución de salón ordenado por apellido.
+
+## Identidad — una sola marca, dos dorados
+
+Hasta el 06/08/2026 el panel y el logo eran rosa `#ff3b6f` y la web marfil y dorada: se
+leían como dos empresas. Todo pasó al dorado de `index.html`.
+
+```
+Fondo oscuro     #08080a     (panel)      Títulos: Fraunces 600-700
+Fondo claro      #FAF4EA     (landing)    Textos:  Instrument Sans 400-500
+Dorado profundo  #A8761F     ← texto sobre fondo CLARO
+Dorado claro     #F7CE84     ← texto sobre fondo OSCURO
+Tinta            #191410
+```
+
+⚠️ **No hay un dorado único.** `#F7CE84` da 12,3:1 sobre el panel oscuro y **1,3:1 sobre
+papel blanco**. Por eso el PDF de mesas usa `#8A5F17`, y el botón primario del panel lleva
+texto oscuro sobre el dorado claro (el blanco cae a 1,6:1). En el panel las variables se
+llaman `--oro/--oro2/--oro3`.
+
+**El panel sigue oscuro a propósito**: es una herramienta de trabajo y las vistas previas de
+invitaciones se ven mejor sobre fondo oscuro. Coherencia de marca no es mismo fondo.
+
+**Tres imágenes de marca**, todas generadas renderizando HTML con puppeteer:
+`logo.png` (transparente) · `logo-og.png` (1200×630 con fondo oscuro, para vistas previas —
+el transparente desaparece sobre el blanco de WhatsApp) · `publicidad/ig-perfil.png`.
+
+## Agendar: Google, no .ics
+
+El botón abre Google Calendar. Se descartó el `.ics` porque se baja como archivo y pide
+permiso, y el menú de dos opciones porque colgaba de un botón descentrado y se salía de
+pantalla en 364px.
+
+⚠️ **La URL de Google no acepta recordatorios.** Trece parámetros (`text`, `dates`, `ctz`,
+`details`, `location`, `crm`, `trp`, `sprop`, `add`, `src`, `recur`, `vcon`, `action`) y
+ninguno es de avisos. Verificado, no supuesto.
+
+⚠️ **`fecha_iso` no tiene zona horaria.** Pasársela a `new Date()` hace que cada navegador la
+lea en la suya: un invitado en Madrid se agendaba las 17:00 de Buenos Aires. Se parsea a
+mano y se declara la zona con `ctz`. Se verifica con `page.emulateTimezone()`.
 
 ## CSS / Design
 

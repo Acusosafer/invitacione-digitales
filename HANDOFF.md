@@ -1,4 +1,4 @@
-# HANDOFF — estado al 06/08/2026
+# HANDOFF — estado al 07/08/2026
 
 > Para retomar en otra sesión. Leer junto con `CLAUDE.md`.
 
@@ -37,6 +37,23 @@ Storage. Las tres ya corridas. Las tres son idempotentes.
 
 ---
 
+## Hecho el 07/08/2026
+
+- **Una sola marca.** El panel y el logo estaban en rosa `#ff3b6f` con Syne y la web en
+  marfil y dorado con Fraunces: dos empresas conviviendo. Todo pasó al dorado. El panel
+  sigue oscuro a propósito. Dos logos nuevos (`logo.png` transparente y `logo-og.png`
+  1200×630 para vistas previas) y `publicidad/ig-perfil.png` para Instagram.
+- **Pestaña "Mensajes y entrega"** (solo superadmin): respuesta a una consulta, qué pedirle
+  al cliente, y entrega con los links armados solos.
+- **Footer de la invitación con link a la web** + "¿Querés una así para tu fiesta?".
+- **Agendar de un toque**, sin descargas: abre Google Calendar. Se sacó el menú de dos
+  opciones y el `.ics`.
+- **Bug de zona horaria arreglado**: la fecha se leía en la zona del navegador, así que un
+  invitado en España se agendaba las 17:00 de acá.
+- **"Deslizá" por encima de la barra del navegador** (`100vh` no la descuenta; `100svh` sí).
+- **Música obligatoria** y **la lista de invitados la carga el cliente**, no se le pide.
+- **`publicidad/instagram.md`**: perfil, bio, y prompts de las seis piezas para Claude Design.
+
 ## Hecho el 05 y 06/08/2026
 
 - **El RSVP ya no puede perder cupos.** Exige el nombre de cada acompañante antes de
@@ -52,10 +69,15 @@ Storage. Las tres ya corridas. Las tres son idempotentes.
 
 ## Pendientes, en orden
 
-1. **Google Safe Browsing.** Revisión pedida el 31/07. Hasta que la levanten, Chrome muestra
-   "Peligroso" y **no hay que publicar la campaña de agosto**.
-2. **Dominio propio** (~15 USD/año). Es el arreglo de fondo del punto 1: `vercel.app` es
-   reputación compartida y la marca puede volver sin que haya nada que corregir.
+1. **Dominio propio** (~15 USD/año). **Es el cuello de botella de todo lo demás**: sin él no
+   se puede lanzar Instagram (el link de la bio termina en la pantalla roja de Chrome), la
+   pieza 4 no se puede terminar, y la marca de Google puede volver sola porque `vercel.app`
+   es reputación compartida.
+   Cuando esté, hay que cambiar: el footer de `invitacion.html` (tiene la URL escrita), los
+   links de `publicidad/instagram.md`, y la constante `WEB` de `admin.html`. El resto se
+   arma solo desde `location.origin`.
+2. **Google Safe Browsing.** Revisión pedida el 31/07. Hasta que la levanten, Chrome muestra
+   "Peligroso" y **no hay que publicar la campaña ni abrir Instagram**.
 3. **Recuperar los cupos perdidos en el evento de Flor** (`florviera`): Flia Sosa,
    Lu y Marian, Marce y Carlos, Sandra e Ines quedaron con una sola fila. Se arregla
    borrando la fila con 🗑 y reenviándole el link. Los cupos originales no quedaron
@@ -95,6 +117,12 @@ Storage. Las tres ya corridas. Las tres son idempotentes.
 - **Riesgos aceptados a propósito** (son de spam, no fugas): crear un evento nuevo no pide clave
   —hace falta para dar de alta clientes— y confirmar asistencia es libre para quien sepa el
   slug, con tope de 20 filas por envío.
+- **`valentina15` ya NO usa `admin123`.** Fer se la cambió en algún momento; el resto de los
+  demos la conserva. Para probar contra la base conviene usar `boda-ana`.
+- **Los textos de venta se leen en el código fuente** de `admin.html`. Es material público
+  igual, pero ahí no van precios especiales para un cliente puntual.
+- **Automatizar seguidores en Instagram no se hace.** Viola los términos y en una cuenta
+  nueva es la forma más rápida de que la bloqueen. Se habló el 07/08 y quedó descartado.
 
 ---
 
