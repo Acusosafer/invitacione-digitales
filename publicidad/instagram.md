@@ -81,15 +81,25 @@ Tipografías:
 · Textos:  Instrument Sans, peso 400-500
 
 Reglas:
-· Formato 1080×1080 px
+· Formato EXACTO 1080×1080 px. Cuadrado perfecto, NO apaisado.
+· La composición tiene que ocupar TODO el alto. Aire repartido,
+  no un bloque arriba y la mitad de abajo vacía.
+· Sin emojis: al lado de una serif elegante quedan como manchones.
+· Al pie, chiquito: INVITACIONES DIGITALES
 · NADA de gradientes azul-violeta, tags de colores, ni cards
   idénticas con ícono+título+descripción
 · Sin fotos de stock de gente sonriendo
 · Si hay un número, que cuente algo — no que decore
+· Nada de datos inventados: ni dominios, ni marcas, ni cifras.
+  Si falta un dato, dejá el lugar marcado.
 · Pregunta de control: ¿esto podría ser de cualquier empresa?
   Si sí, rehacelo.
 · Contraste mínimo 4.5:1 entre texto y fondo
 ```
+
+> Estas cinco reglas salieron de la primera pasada real: devolvió una pieza apaisada, con
+> el 40% inferior vacío, un emoji que peleaba con la tipografía, sin la marca en ningún
+> lado y con un dominio inventado.
 
 ### Las seis piezas
 
@@ -136,18 +146,42 @@ El paso 04 un poco más destacado que el resto.
 
 **4 · El link personalizado**
 
+> La primera versión de este prompt salía con **una sola burbuja**, y el titular dice
+> "cada invitado recibe el suyo": lo visual contradecía al texto. Además dejaba el 40%
+> inferior vacío. Esta versión usa ese espacio justamente para mostrar la idea.
+
 ```
-Pieza 4/6. Fondo marfil.
-Simular una conversación de WhatsApp, pero estilizada — no una captura
-literal ni un mockup de iPhone. Una sola burbuja:
-   "¡Hola Familia González! Están invitados a nuestro casamiento.
-    Confirmen acá 👇"
-   y debajo el link.
-Encima, en Fraunces oscuro:
+Pieza 4/6. Formato EXACTO 1080×1080 px, cuadrado perfecto.
+Fondo marfil #FAF4EA.
+
+Composición en tres bandas que ocupan TODO el alto:
+
+ARRIBA — en Fraunces oscuro #191410, dos líneas, grande:
    "Cada invitado recibe el suyo,
     con su nombre ya puesto"
-La burbuja apenas rotada, como apoyada sobre el marfil.
+
+AL MEDIO — una burbuja de mensaje protagonista: fondo #08080a,
+esquinas muy redondeadas, rotada -2°, sombra suave y difusa.
+   "¡Hola Familia González! Están invitados a nuestro casamiento.
+    Confirmen acá"
+y debajo, en dorado claro #F7CE84 subrayado:
+   "invitacionesdigitales.com/familia-gonzalez"
+Sin emojis: rompen la elegancia de la tipografía.
+
+ABAJO — acá está la clave, y es lo que hoy queda vacío. Tres burbujas
+más, mucho más chicas, apiladas y desvaneciéndose hacia el borde
+inferior, cada una con otro nombre:
+   "¡Hola Tía Marta!..."  "¡Hola Lu y Marian!..."  "¡Hola Los Pérez!..."
+Que se entienda de un vistazo que no es un mensaje: es uno por cada
+invitado.
+
+PIE — centrado, muy chico, en dorado profundo #A8761F:
+   INVITACIONES DIGITALES
 ```
+
+⚠️ **El link tiene que ser tu dominio real.** Claude Design inventó `fiesta.link/gonzalez`
+en la primera pasada. Poner un dominio que no es tuyo en material comercial confunde y no
+suma nada.
 
 **5 · El panel**
 
