@@ -60,6 +60,14 @@ Recomendación: **la A**. Abre con el dolor, no con lo que vendés.
 | `Precios` | Qué incluye y cuánto sale |
 | `Clientas` | Capturas de mensajes reales (con permiso) |
 
+⚠️ **`Clientas` arranca vacía y hay que dejarla para después.** Una destacada que se llama
+así y adentro tiene un diseño de muestra le confirma al visitante que todavía no vendiste
+nada — dice exactamente lo contrario de lo que quiere decir. Va recién con la primera
+captura real. Las otras tres se pueden llenar hoy mismo, y con tres alcanza.
+
+Si más adelante hace falta una cuarta antes de tener clientas, la candidata natural es
+`Los diseños` con los 12 demos, que son reales y ya existen.
+
 ---
 
 ## 2 · Cómo pedirle las piezas a Claude Design
@@ -164,8 +172,9 @@ AL MEDIO — una burbuja de mensaje protagonista: fondo #08080a,
 esquinas muy redondeadas, rotada -2°, sombra suave y difusa.
    "¡Hola Familia González! Están invitados a nuestro casamiento.
     Confirmen acá"
-y debajo, en dorado claro #F7CE84 subrayado:
-   "invitacionesdigitales.com/familia-gonzalez"
+y debajo, en dorado claro #F7CE84 subrayado, en una sola línea y en
+tamaño chico para que entre completo:
+   "invitacionesdigitalesoficial.com/i?...&invitado=Familia+González"
 Sin emojis: rompen la elegancia de la tipografía.
 
 ABAJO — acá está la clave, y es lo que hoy queda vacío. Tres burbujas
@@ -179,9 +188,13 @@ PIE — centrado, muy chico, en dorado profundo #A8761F:
    INVITACIONES DIGITALES
 ```
 
-⚠️ **El link tiene que ser tu dominio real.** Claude Design inventó `fiesta.link/gonzalez`
-en la primera pasada. Poner un dominio que no es tuyo en material comercial confunde y no
-suma nada.
+⚠️ **El link tiene que ser el dominio real: `invitacionesdigitalesoficial.com`.** Claude
+Design inventó `fiesta.link/gonzalez` en la primera pasada. Un dominio que no es tuyo en
+material comercial confunde y no suma nada.
+
+Y se muestra el link **como es de verdad**, con el `?invitado=` y el nombre adentro, no una
+ruta linda inventada tipo `/familia-gonzalez`. No es solo honestidad: el nombre dentro de la
+URL es justamente lo que prueba el titular de la pieza.
 
 **5 · El panel**
 
@@ -343,7 +356,12 @@ y debajo, en gris y más chico todavía:
 ## 3b · Las portadas de destacadas
 
 Están en `publicidad/destacadas/`: `como-es.png`, `el-panel.png`, `precios.png`,
-`clientas.png`. Son 1080×1920 y se suben como historia, después se eligen como portada.
+`clientas.png`. Son 1080×1920.
+
+⚠️ **Las portadas NO se publican como historia.** Se eligen desde la galería del celular:
+mantener apretada la destacada → *Editar destacada* → *Editar portada* → el ícono de fotos.
+Publicarlas como historia sería mandarle a los seguidores cuatro placas con un ícono y nada
+más. Adentro de cada destacada va **contenido de verdad**; la portada es solo el botón.
 
 Se generaron por código (`puppeteer` + Edge) y no con un modelo de imágenes, a propósito:
 tienen que verse como **un juego**, con el mismo trazo, el mismo halo y el mismo aro. Un
