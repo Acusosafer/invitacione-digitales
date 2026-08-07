@@ -3,6 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- ══════════════════════════════════════════════════════════════════
+     GOOGLE TAG MANAGER — el único código de medición del sitio
+     Contenedor GTM-T7QNB7VR · instalado el 07/08/2026
+
+     Acá NO va GA4 suelto, y no es un olvido. GA4 (G-G7LL4G253B) se
+     configura DENTRO de GTM. Si además se pegara acá, cada visita se
+     contaría dos veces y todos los números saldrían al doble.
+     Misma regla para el píxel de Meta y para lo que venga después:
+     entra por GTM, no por el HTML.
+
+     ⚠️ Esto va SOLO en index.html. En invitacion.html no puede ir:
+     la URL de esa página lleva `?invitado=Nombre+Apellido`, y GA4
+     guarda la URL completa de cada visita. Sería mandarle a Google y
+     a Meta la lista de invitados de los clientes — está mal, y además
+     los términos de Google prohíben mandarles datos personales.
+     La medición del boca a boca se hace con los ?utm_ del footer.
+     ══════════════════════════════════════════════════════════════════ -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-T7QNB7VR');</script>
+
 <title>Invitaciones Digitales | Una invitación para una sola noche</title>
 <meta name="description" content="Invitaciones digitales hechas a medida para 15 años y casamientos. Se abren en el celular, suenan, cuentan los días y te dicen quién viene.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -419,6 +443,11 @@ body.on-dark .mesa.full u{background:var(--live)}
 </style>
 </head>
 <body>
+
+<!-- Respaldo de GTM para el que tenga JavaScript desactivado. Es un iframe
+     de 0×0 escondido: no ocupa espacio ni afecta el diseño. -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T7QNB7VR"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <div class="flood" aria-hidden="true">
   <div class="flood-l" id="fl-a"></div>
