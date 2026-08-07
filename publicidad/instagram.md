@@ -185,28 +185,56 @@ suma nada.
 
 **5 · El panel**
 
+> Los números son ILUSTRATIVOS: el panel de una fiesta, no las métricas del negocio. Por
+> eso el prompt exige el encabezado con el nombre del evento — sin él, alguien lee "47"
+> como si fueran tus clientes.
+
 ```
-Pieza 5/6. Fondo oscuro.
-Título en Fraunces marfil: "Y del otro lado, vos"
-Debajo, tres datos sueltos con MUCHO aire entre ellos, sin cajas:
+Pieza 5/6. Fondo oscuro #08080a.
+
+Tiene que leerse como EL PANEL DE UNA FIESTA, no como métricas de la
+empresa. Arriba a la izquierda, chiquito y en gris, como encabezado
+de pantalla:
+   CASAMIENTO DE ANA & JOSÉ · 21 DE NOVIEMBRE
+
+Debajo, el titular en Fraunces marfil, grande:
+   "Y del otro lado, vos"
+
+En la banda media, tres datos alineados a la izquierda, sin cajas ni
+bordes, muy separados entre sí:
    47   confirmados
-   9    sin responder
-   6    mesas armadas
-Los números enormes en dorado claro, las etiquetas chiquitas
-en gris. Alineados a la izquierda, no centrados.
+    9   sin responder
+    6   mesas armadas
+Números enormes en dorado claro #F7CE84, etiquetas chicas en gris.
+
+Cerrando abajo, en Instrument Sans marfil, una sola línea:
+   "Sin una sola planilla de Excel."
 ```
 
 **6 · Cierre**
 
+> La primera versión decía "Nada más, que el vacío haga el trabajo", que se contradice con
+> la regla del bloque base de ocupar todo el alto. Y "Escribime por WhatsApp" no es una
+> acción posible dentro de una imagen: en Instagram se responde por mensaje o por el link
+> de la bio, así que el cierre nombra esas dos.
+
 ```
-Pieza 6/6. Fondo marfil.
-Centrado y con mucho margen:
+Pieza 6/6. Fondo marfil #FAF4EA.
+Composición equilibrada: con aire, pero repartido de arriba a abajo.
+NO dejes la mitad inferior vacía.
+
+ARRIBA, ocupando la mitad superior, en Fraunces oscuro #191410:
    "Que empiece bien
     desde el primer mensaje
     que mandás"
-en Fraunces oscuro. Debajo, una línea fina dorada.
-Abajo: "Escribime por WhatsApp" en dorado profundo.
-Nada más. Que el vacío haga el trabajo.
+
+AL MEDIO, una línea fina dorada #A8761F de unos 200 px, centrada.
+
+ABAJO, anclado cerca del borde inferior, en dorado profundo y más
+chico que el titular:
+   "Escribime por acá"
+y debajo, en gris y más chico todavía:
+   "o tocá el link de la bio"
 ```
 
 ---
