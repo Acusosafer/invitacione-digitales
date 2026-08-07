@@ -346,7 +346,9 @@
        (para no competir con el nombre) y desaparece apenas deslizan. */
     .scroll-hint {
       position: absolute;
-      bottom: 26px;
+      /* Valor de respaldo, alto para que no quede debajo de la barra del
+         navegador en los que no entienden svh. */
+      bottom: 38px;
       left: 50%;
       z-index: 2;
       display: flex;
@@ -376,6 +378,17 @@
       stroke-linecap: round;
       stroke-linejoin: round;
       animation: hint-baja 2.4s 2.6s ease-in-out infinite;
+    }
+
+    /* En el celular `100vh` NO descuenta la barra del navegador: el hero mide
+       toda la pantalla y sus últimos píxeles quedan tapados. `100svh` sí la
+       descuenta, así que `100vh - 100svh` es exactamente lo que tapa la barra.
+       Sumándolo, el indicador queda siempre a 24px del borde VISIBLE.
+       En escritorio las dos medidas son iguales y el cálculo da 24px. */
+    @supports (height: 100svh) {
+      .scroll-hint {
+        bottom: calc(100vh - 100svh + env(safe-area-inset-bottom, 0px) + 24px);
+      }
     }
 
     @keyframes hint-entra {
