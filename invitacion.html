@@ -17,10 +17,28 @@
       --primary: #1a1a1a;
       --secondary: #d6ecc0;
       --bg: #ffffff;
-      --black: #1a1a1a;
-      --white: #ffffff;
-      --gray: #f5f5f5;
-      --gray-dark: #e0e0e0;
+
+      /* `--black` y `--white` NO son negro y blanco: son "la tinta" y "el
+         papel" del evento. Estaban fijos en #1a1a1a y #ffffff, y por eso una
+         invitación de fondo oscuro salía con el mensaje en negro sobre negro
+         (zaira15, boda-elena y boda-julieta estuvieron ilegibles en producción).
+         Los nombres quedan porque los usan ~20 reglas; lo que cambia es a qué
+         apuntan. En un tema claro dan exactamente lo mismo que antes. */
+      --black: var(--primary);
+      --white: var(--bg);
+
+      /* Un velo de tinta sobre el papel. Reemplaza a los #f9f9f9 / #f5f5f5 /
+         #fafafa que estaban escritos a mano: esos son "gris clarito" SOLO si
+         el fondo es blanco. Sobre un fondo #0d0d1a eran bandas casi BLANCAS
+         con texto blanco encima, o sea secciones enteras invisibles.
+         Los porcentajes están elegidos para que en tema claro den los mismos
+         grises de antes, y en tema oscuro aclaren en vez de blanquear. */
+      --velo-1: color-mix(in srgb, var(--primary) 3%, var(--bg));
+      --velo-2: color-mix(in srgb, var(--primary) 5%, var(--bg));
+      --velo-borde: color-mix(in srgb, var(--primary) 12%, transparent);
+
+      --gray: var(--velo-2);
+      --gray-dark: color-mix(in srgb, var(--primary) 14%, var(--bg));
 
       /* ── Tokens por CONTEXTO, no por color ──────────────────────────
          El bug que arreglan: `--black` era fijo, así que un evento con
@@ -291,8 +309,14 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      color: var(--white);
-      background: var(--black);
+      /* Segunda y última excepción a los tokens (la otra es el footer): acá
+         atrás hay una FOTO con un velo negro encima, no el fondo del evento.
+         Sobre esa foto el texto va blanco siempre, elija los colores que elija
+         el cliente. El negro de respaldo es para el instante en que la foto
+         todavía no cargó, o si el evento no tiene foto de portada.
+         De esto cuelga también el "Deslizá", que hereda el color. */
+      color: #ffffff;
+      background: #1a1a1a;
       overflow: hidden;
     }
 
@@ -426,13 +450,14 @@
       z-index: 1;
     }
 
-    /* FRANJAS ALTERNAS */
+    /* FRANJAS ALTERNAS — ver --velo-1/2 arriba. Nunca volver a poner un gris
+       acá: el fondo del evento lo elige el cliente y puede ser negro. */
     .section.dark {
-      background: #f9f9f9
+      background: var(--velo-1)
     }
 
     .section.alt {
-      background: #f5f5f5
+      background: var(--velo-2)
     }
 
     .section-icon {
@@ -535,7 +560,9 @@
       font-size: 0.65rem;
       text-transform: uppercase;
       letter-spacing: 1px;
-      opacity: 0.8;
+      /* Sin opacidad: a 10px el piso de contraste es 4,5:1 y el 0.8 que tenía
+         lo dejaba en 3,98:1. La jerarquía contra el número ya la da el tamaño
+         (2rem contra 0.65rem), no hacía falta apagarlo además. */
       margin-top: 6px;
       font-weight: 600;
     }
@@ -854,7 +881,7 @@
     .form-textarea:focus {
       outline: none;
       border-color: var(--accent-text);
-      background: #fafafa;
+      background: var(--velo-2);
     }
 
     .form-textarea {
@@ -917,7 +944,7 @@
     .opt-btn:hover,
     .tag-btn:hover {
       border-color: var(--accent-text);
-      background: #fafafa
+      background: var(--velo-2)
     }
 
     .opt-btn.sel,
@@ -968,9 +995,16 @@
     }
 
     /* FOOTER */
+    /* El footer es la ÚNICA excepción a los tokens del tema, y va a mano a
+       propósito. Es un bloque oscuro fijo con texto blanco: todos sus textos
+       internos (créditos, marca, CTA) están escritos como rgba(255,255,255,x).
+       Si el fondo siguiera a --black, en una invitación oscura el bloque se
+       volvería casi blanco y esos textos blancos desaparecerían.
+       Si algún día se cambia esto, hay que cambiar TAMBIÉN los seis
+       rgba(255,255,255,...) de .footer-credits / .footer-marca / .footer-cta. */
     footer {
-      background: var(--black);
-      color: var(--white);
+      background: #1a1a1a;
+      color: #ffffff;
       padding: 40px 20px;
       text-align: center;
     }
@@ -1910,7 +1944,7 @@
               const limP = document.getElementById('rsvp-lim-p');
               if (limP) limP.style.display = 'none';
               document.querySelector('.rsvp-form').innerHTML = `
-                <div style="text-align:center;font-weight:600;padding:50px 30px;font-size:1.4rem;color:#1a1a1a;background:var(--white);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.05);margin-top:20px;border:2px solid var(--accent-text);">
+                <div style="text-align:center;font-weight:600;padding:50px 30px;font-size:1.4rem;color:var(--ink);background:var(--white);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.05);margin-top:20px;border:2px solid var(--accent-text);">
                   ✨ ¡Tu asistencia ya fue registrada!<br>
                   <span style="font-size:1.1rem;font-weight:normal;color:var(--ink-soft);margin-top:10px;display:block;">¡Te esperamos para celebrar juntos! 🎉</span>
                 </div>
@@ -2089,8 +2123,10 @@
         for (let i = 2; i <= count; i++) {
           const card = document.createElement('div');
           card.className = 'companion-card';
-          card.style.background = '#fafafa';
-          card.style.border = '1px solid rgba(0,0,0,0.06)';
+          // Con el fondo del evento, no con un gris fijo: en una invitación
+          // oscura esta tarjeta salía blanca con el texto claro adentro.
+          card.style.background = 'var(--velo-2)';
+          card.style.border = '1px solid var(--velo-borde)';
           card.style.borderRadius = '16px';
           card.style.padding = '16px';
           card.style.marginBottom = '12px';
@@ -2377,7 +2413,7 @@
         const limP = document.getElementById('rsvp-lim-p');
         if (limP) limP.style.display = 'none';
         document.querySelector('.rsvp-form').innerHTML = `
-          <div style="text-align:center;font-weight:600;padding:50px 30px;font-size:1.4rem;color:#1a1a1a;background:var(--white);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.05);margin-top:20px;border:2px solid var(--accent-text);">
+          <div style="text-align:center;font-weight:600;padding:50px 30px;font-size:1.4rem;color:var(--ink);background:var(--white);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.05);margin-top:20px;border:2px solid var(--accent-text);">
             ✨ ¡Asistencia registrada correctamente!<br>
             <span style="font-size:1.1rem;font-weight:normal;color:var(--ink-soft);margin-top:10px;display:block;">¡Te esperamos para celebrar juntos! 🎉</span>
           </div>
