@@ -194,6 +194,21 @@ body.on-dark .btn-solid{background:#F6F1E8; color:#191410}
 .phone-screen{
   border-radius:35px; overflow:hidden; position:relative; background:#000;
 }
+/* El filo del vidrio. Sin esto, una invitación de fondo oscuro (zaira15
+   #0d0d1a, boda-elena #0d0d0d, boda-julieta #080f1a) queda contra un marco
+   casi del mismo negro (#100d0a) y las dos cosas se funden en una mancha:
+   se pierde la silueta de la pantalla y el celular parece apagado.
+   Un teléfono real separa vidrio de marco con el reflejo del borde; esto es
+   ese reflejo. Sobre una invitación clara es blanco sobre blanco, o sea
+   invisible: arregla las oscuras sin tocar las demás.
+   z-index 2 lo deja por encima del iframe (que va arriba de todo el área) y
+   por debajo de la isla, que es 3. */
+.phone-screen::after{
+  content:''; position:absolute; inset:0; z-index:2; pointer-events:none;
+  border-radius:inherit;
+  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.28),
+             inset 0 0 22px rgba(255,255,255,.05);
+}
 .phone-island{
   position:absolute; top:9px; left:50%; transform:translateX(-50%);
   width:48%; max-width:64px; height:15px; background:#000; border-radius:10px; z-index:3;
