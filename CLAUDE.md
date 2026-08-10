@@ -511,6 +511,17 @@ Si algún día se le agrega un formulario, **ese es el momento de volver a revis
 - **Fix en admin.html `guardarTodo()`:** Normalizar `layout.order` antes de guardar — agregar todas las secciones de `SECTIONS` que no estén en el array
 - **Fix en Supabase:** SQL UPDATE para forzar el array completo en todos los eventos
 
+### La invitación arrancaba por la mitad (invitacion.html)
+- **Causa:** dos cosas sumadas. El navegador **restaura el scroll al recargar**, y como
+  el splash es `position:fixed` y tapa la pantalla entera, eso no se ve — la página de
+  atrás ya está scrolleada. Y el botón "Ingresar" solo escondía el splash, nunca subía.
+- **Fix:** `history.scrollRestoration = 'manual'` en el `<head>` (al final del `<body>`
+  se llega tarde: la restauración ocurre al terminar de cargar), y `scrollTo(0,0)` en el
+  handler **antes** de esconder el splash, con `scroll-behavior` apagado un instante —
+  `<html>` lo tiene en `smooth` y si no, la invitación se ve "rebobinar" durante el fundido.
+- Medido a 390px: antes 238px, después 0px. Los links de `/i` quedan cubiertos porque
+  `api/i.js` trae `invitacion.html` entera y solo reescribe las etiquetas og.
+
 ### Foto hashtag invisible (invitacion.html)
 - **Causa:** `src=""` en el `<img>` dispara `onerror` → `display:none` → JS no puede mostrarla después
 - **Fix:** Remover el atributo `src=""` del elemento `<img id="txt-hashtag-foto">`
