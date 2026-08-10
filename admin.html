@@ -1238,7 +1238,13 @@ tr:hover td{background:rgba(255,255,255,0.01);}
     <div class="card" style="padding:0">
       <div class="card-head" style="padding:16px 20px">
         <span class="card-title">Todas las invitaciones</span>
-        <button class="btn btn-primary btn-sm" onclick="alert('Creá un nuevo ID en Diseño Global')">+ Nueva</button>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0">
+          <span id="hist-cuenta" style="font-size:0.7rem;color:var(--tx3);white-space:nowrap"></span>
+          <input type="search" id="hist-search" class="form-input"
+                 style="padding:6px 12px;font-size:0.75rem;width:190px;max-width:100%"
+                 placeholder="Buscar nombre, ID o tipo…" oninput="pintarHistorial()">
+          <button class="btn btn-primary btn-sm" onclick="alert('Creá un nuevo ID en Diseño Global')">+ Nueva</button>
+        </div>
       </div>
       <div class="tbl-wrap">
         <table>
@@ -2378,18 +2384,96 @@ async function borrarInvitado(id, quien) {
   if (typeof loadMesasData === 'function') sinRomper(loadMesasData());
 }
 
+// La lista queda en memoria: el buscador filtra acá y no le vuelve a pedir
+// la tabla a Supabase en cada tecla.
+let historialEventos = [];
+
 async function loadHistorial() {
-  const { data } = await sb.from('eventos').select('id, config').order('id');
-  document.getElementById('hist-rows').innerHTML = (data||[]).map(ev => `
-    <tr>
-      <td><code style="color:var(--oro);background:rgba(247,206,132,0.08);padding:3px 8px;border-radius:6px;font-size:0.78rem">${ev.id}</code></td>
-      <td>${ev.config?.nombre||'—'}</td>
-      <td>${ev.config?.tipo||'—'}</td>
-      <td>
-        <button class="btn btn-ghost btn-sm" onclick="window.location.search='?evento=${ev.id}'">Gestionar</button>
-      </td>
-    </tr>
-  `).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--tx3);padding:24px">Sin invitaciones</td></tr>';
+  const { data, error } = await sb.from('eventos').select('id, config').order('id');
+  if (error) { toast('❌ No se pudo cargar el historial: ' + error.message); return; }
+  historialEventos = data || [];
+  pintarHistorial();
+}
+
+// Sin tildes y en minúscula de los dos lados: así "maria" encuentra a "María"
+// y "delfi" a "Delfina". Exigir la tilde exacta en un panel que se usa desde
+// el celular es pedirle al usuario que pelee con el teclado.
+const histPlano = s => (s == null ? '' : String(s))
+  // El rango del replace son las tildes sueltas que deja NFD (U+0300 a
+  // U+036F). En el editor se ven como dos marquitas invisibles: es la misma
+  // forma que ya usa api/i.js. ⚠️ Si alguna herramienta rompe la codificación
+  // del archivo, este rango se corrompe y el buscador deja de encontrar
+  // cualquier nombre con tilde, sin ningún error que lo delate.
+  .toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+function histCelda(col, valor) {
+  const td = document.createElement('td');
+  td.dataset.col = col;
+  const v = (valor == null ? '' : String(valor)).trim();
+  if (v) { td.textContent = v; }
+  // Debajo de 860px cada fila es una ficha y `.vacio` se esconde: un "—" en
+  // la tabla es una raya, en la ficha es un renglón entero que no dice nada.
+  else { td.className = 'vacio'; td.textContent = '—'; }
+  return td;
+}
+
+function pintarHistorial() {
+  const crudo = document.getElementById('hist-search').value.trim();
+  const q = histPlano(crudo);
+  const lista = q
+    ? historialEventos.filter(ev =>
+        histPlano(ev.id).includes(q) ||
+        histPlano(ev.config?.nombre).includes(q) ||
+        histPlano(ev.config?.tipo).includes(q))
+    : historialEventos;
+
+  document.getElementById('hist-cuenta').textContent = q
+    ? `${lista.length} de ${historialEventos.length}`
+    : `${historialEventos.length} en total`;
+
+  const tbody = document.getElementById('hist-rows');
+  tbody.textContent = '';
+
+  if (!lista.length) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 4;
+    td.style.cssText = 'text-align:center;color:var(--tx3);padding:24px';
+    td.textContent = q ? `Ninguna invitación coincide con "${crudo}"` : 'Sin invitaciones';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+    return;
+  }
+
+  // Se arma con DOM y NO con innerHTML, a propósito. `admin_guardar_evento`
+  // crea un evento nuevo sin pedir clave —hace falta para dar de alta
+  // clientes—, así que cualquiera con la anon key (está a la vista en el
+  // código fuente) puede inventar un evento y elegirle el `id` y el
+  // `config.nombre`. Eso caía en esta tabla y se pintaba como HTML dentro
+  // del panel del superadmin, con la clave viva en memoria. Con textContent
+  // un nombre con etiquetas adentro se lee como texto y no se ejecuta.
+  lista.forEach(ev => {
+    const tr = document.createElement('tr');
+
+    const tdId = document.createElement('td');
+    tdId.dataset.col = 'ID';
+    const code = document.createElement('code');
+    code.style.cssText = 'color:var(--oro);background:rgba(247,206,132,0.08);' +
+                         'padding:3px 8px;border-radius:6px;font-size:0.78rem';
+    code.textContent = ev.id;
+    tdId.appendChild(code);
+
+    const tdAcc = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-ghost btn-sm';
+    btn.textContent = 'Gestionar';
+    btn.onclick = () => { location.search = '?evento=' + encodeURIComponent(ev.id); };
+    tdAcc.appendChild(btn);
+
+    tr.append(tdId, histCelda('Nombre', ev.config?.nombre),
+                    histCelda('Tipo',   ev.config?.tipo), tdAcc);
+    tbody.appendChild(tr);
+  });
 }
 
 async function generarLink() {
