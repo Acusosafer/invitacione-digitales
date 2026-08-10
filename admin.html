@@ -731,7 +731,40 @@ tr:hover td{background:rgba(255,255,255,0.01);}
      típica del robo de credenciales. Ahora dice quién es, qué es, y le da
      salida a quien llegó por error. -->
 <div id="login-overlay">
-  <div class="login-card">
+  <!-- Tarjeta que se muestra cuando el link NO trae ?evento=. Antes en ese
+       caso el panel abría CALLADO el evento de otra persona (valentina15) y
+       rechazaba la clave con "Clave incorrecta": la clienta creía que su
+       clave estaba mal cuando en realidad estaba en la puerta equivocada.
+       Le pasó a una clienta real el 10/08/2026, entrando desde el botón
+       "Panel" de la web con el celular. -->
+  <div class="login-card" id="card-sin-evento" style="display:none">
+    <h2 class="shimmer">Invitaciones Digitales</h2>
+    <p style="margin-bottom:4px"><strong>Te falta el link de tu evento</strong></p>
+    <p style="font-size:.86rem;opacity:.75;margin-bottom:18px;line-height:1.6">
+      Cada fiesta tiene su propio panel, así que no alcanza con la clave:
+      hace falta el link de la tuya. Te lo mandamos por WhatsApp junto con
+      la invitación, y termina con el nombre de tu evento.
+    </p>
+    <input id="evento-manual" type="text" class="form-input" placeholder="Nombre de tu evento"
+           autocapitalize="off" autocorrect="off" spellcheck="false">
+    <button class="btn btn-primary btn-full" onclick="irAEvento()">Entrar a mi panel</button>
+    <p style="font-size:.8rem;opacity:.7;margin-top:20px;line-height:1.55">
+      ¿No lo tenés a mano? Escribinos y te lo reenviamos al toque.
+    </p>
+    <p style="font-size:.86rem;margin-top:10px">
+      <a href="https://wa.me/5491124576536?text=Hola!%20Perd%C3%AD%20el%20link%20de%20mi%20panel%2C%20%C2%BFme%20lo%20reenviás%3F"
+         style="color:inherit"><strong>Pedime mi link por WhatsApp</strong></a>
+    </p>
+    <p style="font-size:.8rem;opacity:.7;margin-top:20px;line-height:1.55">
+      ¿Sos invitado a una fiesta? <strong>Esto no es tu invitación</strong> —
+      la tuya te llega por WhatsApp con tu nombre.
+    </p>
+    <p style="font-size:.8rem;margin-top:14px">
+      <a href="index.html" style="color:inherit">← Volver a invitacionesdigitalesoficial.com</a>
+    </p>
+  </div>
+
+  <div class="login-card" id="card-clave">
     <h2 class="shimmer">Invitaciones Digitales</h2>
     <p style="margin-bottom:4px"><strong>Panel de clientes</strong></p>
     <p style="font-size:.86rem;opacity:.75;margin-bottom:20px">
@@ -1189,7 +1222,29 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY, { db: { schema: 'invitaciones' } });
 
 const params = new URLSearchParams(window.location.search);
-const eventoId = params.get('evento') || 'valentina15';
+
+// De dónde sale el evento, en este orden:
+//   1. el ?evento= del link que le mandamos al cliente
+//   2. el último que entró bien en ESTE dispositivo (comodidad, no seguridad:
+//      guarda el nombre del evento, nunca la clave)
+//   3. ninguno → se muestra "te falta tu link" y el panel no arranca
+//
+// El fallback a 'valentina15' que había acá era una trampa: quien entraba por
+// el botón "Panel" de la web caía en el evento de otro y su clave era
+// rechazada, así que creía que el problema era su clave.
+const ULTIMO = 'ultimo_evento';
+function recordarEvento(id) { try { localStorage.setItem(ULTIMO, id); } catch (e) {} }
+function eventoRecordado() { try { return localStorage.getItem(ULTIMO) || ''; } catch (e) { return ''; } }
+
+const eventoId = (params.get('evento') || eventoRecordado() || '').trim();
+const SIN_EVENTO = !eventoId;
+
+// Salta al panel del evento que la persona escriba a mano.
+function irAEvento() {
+  const v = (document.getElementById('evento-manual').value || '').trim().toLowerCase();
+  if (!v) { toast('Escribí el nombre de tu evento'); return; }
+  location.search = '?evento=' + encodeURIComponent(v);
+}
 // Clave de esta sesión. Postgres la re-valida en CADA operación privilegiada:
 // no alcanza con haber entrado una vez. Solo en memoria, nunca en localStorage.
 let adminClave = '';
@@ -1358,12 +1413,17 @@ async function checkPass() {
   if (rol === 'super') {
     adminClave = p;
     isSuperAdmin = true;
+    recordarEvento(eventoId);
     unlockSuperAdmin();
   } else if (rol === 'cliente') {
     adminClave = p;
+    recordarEvento(eventoId);
     unlockClient();
   } else {
-    toast('❌ Clave incorrecta');
+    // Va el nombre del evento a propósito: si alguien entró por el link
+    // equivocado, "Clave incorrecta" a secas lo manda a buscar el error donde
+    // no está. Con el nombre a la vista se da cuenta de que no es su fiesta.
+    toast(`❌ Esa clave no es del evento "${eventoId}". Revisá que sea el link de tu fiesta.`);
   }
 }
 
@@ -2678,7 +2738,7 @@ function exportarMesasPDF() {
   });
   html += `</tbody></table>
   <div class="footer">
-      Documento generado automáticamente por <a href="https://invitacionesdigitales.oficial" target="_blank">Invitaciones Digitales Oficial</a>
+      Documento generado automáticamente por <a href="https://invitacionesdigitalesoficial.com" target="_blank">Invitaciones Digitales Oficial</a>
   </div>
   </body></html>`;
   const ventana = window.open();
@@ -2692,11 +2752,21 @@ function exportarMesasPDF() {
 // se acumule basura en el navegador de nadie.
 try { localStorage.removeItem(`mesa_fallback_${eventoId}`); } catch (e) {}
 
-refreshUI();
-document.getElementById('pass').addEventListener('keydown', e => { if (e.key === 'Enter') checkPass(); });
-setInterval(loadData, 15000);
-setupColorSync();
-updatePalette();
+if (SIN_EVENTO) {
+  // Sin evento no hay nada que cargar: se pide el link y el panel no arranca.
+  // Importante que NO corra el resto — el setInterval de abajo golpearía la
+  // base cada 15 segundos con un evento vacío.
+  document.getElementById('card-clave').style.display = 'none';
+  document.getElementById('card-sin-evento').style.display = '';
+  const inp = document.getElementById('evento-manual');
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') irAEvento(); });
+} else {
+  refreshUI();
+  document.getElementById('pass').addEventListener('keydown', e => { if (e.key === 'Enter') checkPass(); });
+  setInterval(loadData, 15000);
+  setupColorSync();
+  updatePalette();
+}
 </script>
 </body>
 </html>
