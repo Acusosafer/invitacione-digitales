@@ -222,32 +222,107 @@
       letter-spacing: 1px;
     }
 
+    /* ── Botón de música ─────────────────────────────────────────────────
+       Era el triángulo de play de siempre, el mismo que usa todo el mundo.
+       Un triángulo además dice "video", no "música", y no dice nada del
+       estado: hay que traducirlo mentalmente.
+
+       Ahora son cuatro barras que BAILAN mientras suena y se aquietan cuando
+       está en silencio. El movimiento no decora: es el estado. Se entiende
+       sin leer nada y sin saber qué significa ningún símbolo.
+
+       Se anima sólo `transform` (scaleY), nunca `height`: la altura obliga
+       al navegador a recalcular el layout en cada cuadro y a 60 cuadros por
+       segundo eso se nota en un celular. */
     .floating-music {
       position: fixed;
       bottom: 20px;
       right: 20px;
       z-index: 9999;
+      /* 50px: por encima de los 44 mínimos para que el dedo no falle. */
       width: 50px;
       height: 50px;
       border-radius: 50%;
       background: var(--secondary);
-      border: 2px solid var(--black);
+      /* El aro sale del color de acento, no de la tinta: así funciona sobre
+         cualquier paleta que elija el cliente sin quedar duro. */
+      border: 1.5px solid color-mix(in srgb, var(--on-accent) 24%, transparent);
       cursor: pointer;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.3s;
+      /* Nunca `all`: obliga a animar propiedades que no queremos tocar. */
+      transition: transform 160ms cubic-bezier(.23, 1, .32, 1),
+                  box-shadow 220ms ease;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .floating-music:hover {
-      transform: scale(1.1);
+    /* El hover sólo donde hay mouse de verdad: en un celular se queda pegado
+       después de tocar. */
+    @media (hover: hover) and (pointer: fine) {
+      .floating-music:hover {
+        transform: scale(1.06);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.26);
+      }
     }
 
-    .floating-music svg {
-      width: 24px;
-      height: 24px;
-      fill: var(--black);
+    /* Faltaba: sin esto el botón no acusa recibo del toque. */
+    .floating-music:active {
+      transform: scale(.94);
+    }
+
+    .eq {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      height: 18px;
+    }
+
+    .eq span {
+      width: 3px;
+      height: 18px;
+      border-radius: 2px;
+      /* --on-accent lo calcula el JS para que contraste contra el acento.
+         Antes era --black fijo, que sobre un acento oscuro desaparecía. */
+      background: var(--on-accent);
+      transform: scaleY(.26);           /* en silencio: cuatro rayitas */
+      transform-origin: center;
+      /* Apagadas, no sólo quietas: sin esto pesan igual que sonando y el
+         estado se lee peor. 0.72 deja el contraste en ~5:1, muy por encima
+         del piso de 3:1 para un glifo. */
+      opacity: .72;
+      transition: transform 340ms cubic-bezier(.23, 1, .32, 1),
+                  opacity 340ms ease;
+    }
+
+    .floating-music.sonando .eq span {
+      opacity: 1;
+      animation: eq-baile 900ms ease-in-out infinite;
+    }
+
+    /* Duraciones y arranques distintos por barra: con el mismo tiempo las
+       cuatro suben y bajan juntas y parece un semáforo, no música. */
+    .floating-music.sonando .eq span:nth-child(1) { animation-duration: 760ms;  animation-delay: -200ms }
+    .floating-music.sonando .eq span:nth-child(2) { animation-duration: 1080ms; animation-delay: -520ms }
+    .floating-music.sonando .eq span:nth-child(3) { animation-duration: 880ms;  animation-delay: -80ms  }
+    .floating-music.sonando .eq span:nth-child(4) { animation-duration: 1220ms; animation-delay: -340ms }
+
+    @keyframes eq-baile {
+      0%, 100% { transform: scaleY(.30) }
+      50%      { transform: scaleY(1) }
+    }
+
+    /* Para quien pidió menos movimiento en su sistema: las barras no bailan,
+       pero los dos estados siguen distinguiéndose por la FORMA. El estado no
+       puede depender sólo del color ni sólo del movimiento. */
+    @media (prefers-reduced-motion: reduce) {
+      .floating-music.sonando .eq span { animation: none }
+      .floating-music.sonando .eq span:nth-child(1) { transform: scaleY(.55) }
+      .floating-music.sonando .eq span:nth-child(2) { transform: scaleY(1)   }
+      .floating-music.sonando .eq span:nth-child(3) { transform: scaleY(.72) }
+      .floating-music.sonando .eq span:nth-child(4) { transform: scaleY(.44) }
     }
 
     .btn {
@@ -1312,10 +1387,14 @@
   </div>
 
   <!-- FLOATING MUSIC BTN -->
-  <button id="floating-music-btn" class="floating-music" style="display:none;">
-    <svg id="music-icon-svg" viewBox="0 0 24 24">
-      <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-    </svg>
+  <!-- El aria-label y el aria-pressed los actualiza toggleMusic(): un botón
+       sin texto necesita decirle a un lector de pantalla qué hace y en qué
+       estado está. -->
+  <button id="floating-music-btn" class="floating-music" style="display:none;"
+          aria-label="Poner la música" aria-pressed="false">
+    <span class="eq" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+    </span>
   </button>
 
   <!-- AUDIO -->
@@ -2312,35 +2391,40 @@
       btn.onclick = () => window.open(url, '_blank', 'noopener');
     }
 
+    // Un solo lugar decide cómo se ve el botón. Antes cada rama escribía el
+    // SVG a mano y quedaban tres dibujos distintos —nota, pausa y play— para
+    // dos estados: al abrir mostraba una nota musical que no era ninguno de
+    // los dos.
+    function pintarBotonMusica(sonando) {
+      const btn = document.getElementById('floating-music-btn');
+      if (!btn) return;
+      btn.classList.toggle('sonando', sonando);
+      btn.setAttribute('aria-pressed', sonando ? 'true' : 'false');
+      btn.setAttribute('aria-label', sonando ? 'Silenciar la música' : 'Poner la música');
+    }
+
     function toggleMusic() {
       const audio = document.getElementById('audio');
-      const btn = document.getElementById('floating-music-btn');
-      const svg = document.getElementById('music-icon-svg');
 
       if (audio.paused) {
-        audio.play().then(() => {
-          // Changed to pause icon
-          svg.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-        }).catch(() => {
-          toast('🔊 Nota: Habilita el sonido para escuchar la música');
-        });
+        audio.play()
+          .then(() => pintarBotonMusica(true))
+          .catch(() => toast('🔊 Tocá de nuevo para escuchar la música'));
       } else {
         audio.pause();
-        // Changed to play icon
-        svg.innerHTML = '<path d="M8 5v14l11-7z"/>';
+        pintarBotonMusica(false);
       }
     }
 
     function autoPlayMusic() {
       const audio = document.getElementById('audio');
-      const svg = document.getElementById('music-icon-svg');
 
       if (C.musica_url && audio.paused) {
-        audio.play().then(() => {
-          svg.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-        }).catch(() => {
-          // Silenciosamente fallar si no hay permisos
-        });
+        audio.play()
+          .then(() => pintarBotonMusica(true))
+          // El navegador puede bloquear el autoplay: no es un error, el
+          // invitado toca el botón y listo. El botón ya está en silencio.
+          .catch(() => {});
       }
     }
 
