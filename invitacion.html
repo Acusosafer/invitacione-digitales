@@ -1574,12 +1574,15 @@
       </p>
 
       <div class="rsvp-form">
+        <!-- Los dos obligatorios. El asterisco va con --ink-soft y no con un
+             color fijo: sobre una invitación de fondo oscuro un gris de papel
+             blanco no se ve. -->
         <div class="form-group">
-          <label class="form-label">Nombre</label>
+          <label class="form-label">Nombre <span style="color:var(--ink-soft)">*</span></label>
           <input type="text" id="f-nombre" class="form-input" placeholder="Tu nombre">
         </div>
         <div class="form-group">
-          <label class="form-label">Apellido</label>
+          <label class="form-label">Apellido <span style="color:var(--ink-soft)">*</span></label>
           <input type="text" id="f-apellido" class="form-input" placeholder="Tu apellido">
         </div>
         <div class="form-group">
@@ -2330,16 +2333,16 @@
             </div>
             
             <div class="form-group" style="margin-bottom:4px;">
-              <label class="form-label" style="font-size:0.72rem; color:rgba(0,0,0,0.5); text-transform:none; letter-spacing:0;">¿Asiste a la fiesta?</label>
+              <label class="form-label" style="font-size:0.72rem; color:var(--ink-soft); text-transform:none; letter-spacing:0;">¿Asiste a la fiesta?</label>
               <div class="opts-row" style="display:flex; gap:8px;">
-                <div class="opt-btn comp-asiste-btn sel" data-val="si" style="flex:1; text-align:center; padding:8px; border-radius:8px; border:1px solid rgba(0,0,0,0.1); cursor:pointer; font-size:0.8rem; font-weight:600;" onclick="toggleCompAsiste(this, 'si', ${i})">Sí</div>
-                <div class="opt-btn comp-asiste-btn" data-val="no" style="flex:1; text-align:center; padding:8px; border-radius:8px; border:1px solid rgba(0,0,0,0.1); cursor:pointer; font-size:0.8rem; font-weight:600;" onclick="toggleCompAsiste(this, 'no', ${i})">No</div>
+                <div class="opt-btn comp-asiste-btn sel" data-val="si" style="flex:1; text-align:center; padding:8px; border-radius:8px; border:1px solid var(--velo-borde); cursor:pointer; font-size:0.8rem; font-weight:600;" onclick="toggleCompAsiste(this, 'si', ${i})">Sí</div>
+                <div class="opt-btn comp-asiste-btn" data-val="no" style="flex:1; text-align:center; padding:8px; border-radius:8px; border:1px solid var(--velo-borde); cursor:pointer; font-size:0.8rem; font-weight:600;" onclick="toggleCompAsiste(this, 'no', ${i})">No</div>
               </div>
             </div>
             
             <div id="comp-details-${i}" class="comp-details-panel" style="display:flex; flex-direction:column; gap:12px;">
               <div class="form-group">
-                <label class="form-label" style="font-size:0.72rem; color:rgba(0,0,0,0.5); text-transform:none; letter-spacing:0;">¿Alguna restricción alimentaria?</label>
+                <label class="form-label" style="font-size:0.72rem; color:var(--ink-soft); text-transform:none; letter-spacing:0;">¿Alguna restricción alimentaria?</label>
                 <div class="opts-tags" style="display:flex; flex-wrap:wrap; gap:6px;">
                   <div class="tag-btn comp-tag-btn" data-diet="Vegetariano" onclick="toggleCompDiet(this)" style="flex:1 1 auto; white-space:nowrap; padding:5px 10px; font-size:0.75rem;">Vegetariano</div>
                   <div class="tag-btn comp-tag-btn" data-diet="Vegano" onclick="toggleCompDiet(this)" style="flex:1 1 auto; white-space:nowrap; padding:5px 10px; font-size:0.75rem;">Vegano</div>
@@ -2350,7 +2353,7 @@
               </div>
               
               <div class="form-group">
-                <label class="form-label" style="font-size:0.72rem; color:rgba(0,0,0,0.5); text-transform:none; letter-spacing:0;">Canción sugerida</label>
+                <label class="form-label" style="font-size:0.72rem; color:var(--ink-soft); text-transform:none; letter-spacing:0;">Canción sugerida</label>
                 <input type="text" class="form-input comp-cancion" placeholder="Ej: La Bachata - Manuel Turizo" style="padding:8px 12px; font-size:0.85rem;">
               </div>
             </div>
@@ -2495,12 +2498,24 @@
     }
 
     async function confirmar() {
-      const campoNombre = document.getElementById('f-nombre');
-      const nombre = campoNombre.value.trim();
+      // Nombre Y apellido, obligatorios los dos. Con la lista a medias no se
+      // pueden armar las mesas ni entregarle nada prolijo al salón: media
+      // fiesta llena de "Juan", "Sofi" y "la prima de Ale" no se ordena por
+      // apellido ni se cruza con nadie.
+      const campoNombre   = document.getElementById('f-nombre');
+      const campoApellido = document.getElementById('f-apellido');
+      const nombre   = campoNombre.value.trim();
+      const apellido = campoApellido.value.trim();
+
       marcarFalta(campoNombre, !nombre);
-      if (!nombre) {
-        campoNombre.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        toast('⚠️ Ingresá tu nombre');
+      marcarFalta(campoApellido, !apellido);
+
+      if (!nombre || !apellido) {
+        (!nombre ? campoNombre : campoApellido)
+          .scrollIntoView({ behavior: 'smooth', block: 'center' });
+        toast(!nombre && !apellido ? '⚠️ Ingresá tu nombre y tu apellido'
+            : !nombre              ? '⚠️ Ingresá tu nombre'
+            :                        '⚠️ Ingresá tu apellido');
         return;
       }
 
@@ -2513,19 +2528,24 @@
       // el cliente se enteraban. (El `required` de los inputs no sirve acá:
       // no hay submit de formulario, es un botón con onclick.)
       if (asiste === 'si') {
-        const faltantes = [...document.querySelectorAll('.companion-card')]
-          .map(card => card.querySelector('.comp-nombre'))
-          .filter(input => {
+        const faltantes = [];
+        document.querySelectorAll('.companion-card').forEach(card => {
+          ['.comp-nombre', '.comp-apellido'].forEach(sel => {
+            const input = card.querySelector(sel);
             const vacio = !input.value.trim();
             marcarFalta(input, vacio);
-            return vacio;
+            if (vacio) faltantes.push(input);
           });
+        });
 
         if (faltantes.length) {
+          // Se cuentan las TARJETAS incompletas, no los campos: "faltan datos
+          // de 2 acompañantes" se entiende, "faltan 4 datos" no dice de quién.
+          const tarjetas = new Set(faltantes.map(i => i.closest('.companion-card'))).size;
           faltantes[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-          toast(faltantes.length === 1
-            ? '⚠️ Falta el nombre de un acompañante'
-            : `⚠️ Faltan ${faltantes.length} nombres. Si van menos, cambiá la cantidad de personas.`);
+          toast(tarjetas === 1
+            ? '⚠️ Completá el nombre y el apellido del acompañante'
+            : `⚠️ Faltan datos de ${tarjetas} acompañantes. Si van menos, cambiá la cantidad de personas.`);
           return;
         }
       }
@@ -2564,7 +2584,10 @@
             ? card.querySelector('.comp-cancion').value.trim()
             : '';
 
-          if (cNombre) {
+          // Red de seguridad: la validación de arriba ya garantiza los dos.
+          // Si algún día se toca aquello, acá una fila a medias no se guarda
+          // en silencio — se nota que falta gente, no aparece un "Juan" suelto.
+          if (cNombre && cApellido) {
             companions.push({
               evento_id: eventoId,
               invitado_url: invitado || 'general',

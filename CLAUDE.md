@@ -211,11 +211,21 @@ Ambas se verifican con `verificar_clave()` en Postgres. La clave queda en memori
 
 Al generar un link, el admin **pre-inserta filas en `confirmaciones`** con `asiste: 'pendiente'` para el titular y cada acompañante. Cuando el invitado confirma, esas filas se borran y se reinsertan con los datos reales.
 
-⚠️ **Por eso el RSVP exige el nombre de cada acompañante.** Confirmar borra la pre-alta y
-la reemplaza por lo que mandó el invitado; una fila sin nombre no se guarda. Hasta el
-06/08/2026, elegir 5 personas y dejar los campos en blanco borraba 4 cupos en silencio —
-le pasó a cuatro grupos en el evento de una clienta. El `required` de los inputs no sirve
-acá: no hay submit de formulario, es un botón con `onclick`.
+⚠️ **Por eso el RSVP exige nombre Y apellido**, del titular y de cada acompañante.
+Confirmar borra la pre-alta y la reemplaza por lo que mandó el invitado; una fila
+incompleta no se guarda. Hasta el 06/08/2026, elegir 5 personas y dejar los campos en
+blanco borraba 4 cupos en silencio — le pasó a cuatro grupos en el evento de una clienta.
+El apellido pasó a ser obligatorio el 10/08/2026: sin él no se pueden armar las mesas ni
+entregarle al salón una lista ordenada por apellido, que es la mitad del producto. El
+`required` de los inputs no sirve acá: no hay submit de formulario, es un botón con
+`onclick`.
+
+⚠️ **Las tarjetas de acompañante se arman con `innerHTML` desde el JS y solo aparecen si
+el invitado elige 2 o más personas.** Por eso se les escaparon los colores fijos cuando se
+arreglaron los temas oscuros: una auditoría que fotografía la página no las ve, porque no
+existen todavía. Sus tres etiquetas estaban en `rgba(0,0,0,0.5)` — **1,11:1 sobre
+`zaira15`, o sea invisibles**. Cualquier bloque que se pinte desde JS hay que auditarlo
+*después* de hacerlo aparecer.
 
 ### `currentConfig` se carga para los DOS roles
 
