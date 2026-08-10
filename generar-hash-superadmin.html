@@ -29,41 +29,71 @@
 
   <input id="pass" type="text" placeholder="Escribí tu clave nueva" autocomplete="off">
   <div class="out" id="out">El hash aparece acá</div>
-  <button id="copiar">Copiar hash</button>
+
+  <p style="margin-top:22px"><strong>El SQL, listo para pegar en Supabase:</strong></p>
+  <div class="out" id="sql">Escribí la clave y acá aparece la línea completa</div>
+  <button id="copiar">Copiar el SQL</button>
 
   <div class="warn">
-    <strong>Elegí una clave larga y difícil de adivinar.</strong> El hash queda visible en el código, así que
-    una clave corta o común se puede romper por fuerza bruta. Usá al menos 16 caracteres, o tres o cuatro
-    palabras sueltas que solo vos asocies.
+    <strong>Elegí una clave larga y difícil de adivinar.</strong> Usá al menos 16 caracteres, o tres o
+    cuatro palabras sueltas que solo vos asocies. Esta clave abre TODOS los eventos, no uno.
   </div>
 
   <ol>
-    <li>Copiá el hash de arriba.</li>
-    <li>Abrí <code>admin.html</code> y buscá <code>SUPERADMIN_HASH</code>.</li>
-    <li>Reemplazá <code>'PEGAR_HASH_ACA'</code> por el hash (entre comillas).</li>
-    <li>Guardá y subí el cambio.</li>
+    <li>Copiá el SQL de arriba con el botón.</li>
+    <li>Entrá a Supabase → <strong>SQL Editor</strong> → pegalo → <strong>Run</strong>.</li>
+    <li>Tiene que decir <code>Success</code>. Si dice <code>0 rows</code>, avisá: la fila no está
+        y la clave no cambió.</li>
+    <li><strong>Probá entrar al panel con la clave nueva antes de cerrar esta pestaña.</strong>
+        Si algo salió mal, todavía la tenés escrita acá.</li>
   </ol>
+
+  <div class="warn">
+    <strong>Por qué se copia el hash y no la clave.</strong> Podrías hacer que Postgres calcule el
+    hash solo, pero entonces tu clave en texto plano queda guardada en el historial de consultas
+    del panel de Supabase. Así, la clave no sale nunca de esta pantalla: lo que viaja es el hash,
+    que no se puede revertir.
+  </div>
 </div>
 
 <script>
   const inp = document.getElementById('pass');
   const out = document.getElementById('out');
+  const sql = document.getElementById('sql');
+
+  const armarSql = h =>
+    `update invitaciones.ajustes\n   set valor = '${h}'\n where clave = 'superadmin_hash';`;
 
   async function calcular() {
-    if (!inp.value) { out.textContent = 'El hash aparece acá'; return; }
+    if (!inp.value) {
+      out.textContent = 'El hash aparece acá';
+      sql.textContent = 'Escribí la clave y acá aparece la línea completa';
+      return;
+    }
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value));
-    out.textContent = Array.from(new Uint8Array(buf))
+    const hex = Array.from(new Uint8Array(buf))
       .map(b => b.toString(16).padStart(2, '0')).join('');
+    out.textContent = hex;
+    sql.textContent = armarSql(hex);
   }
 
   inp.addEventListener('input', calcular);
 
   document.getElementById('copiar').addEventListener('click', async () => {
     if (!inp.value) return;
-    await navigator.clipboard.writeText(out.textContent);
     const b = document.getElementById('copiar');
-    b.textContent = '✓ Copiado';
-    setTimeout(() => b.textContent = 'Copiar hash', 1600);
+    try {
+      await navigator.clipboard.writeText(sql.textContent);
+      b.textContent = '✓ Copiado';
+    } catch (e) {
+      // Abierto con doble clic, el portapapeles a veces está bloqueado.
+      // Se selecciona el texto para que alcance con Ctrl+C.
+      const r = document.createRange();
+      r.selectNodeContents(sql);
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      b.textContent = 'Seleccionado — apretá Ctrl+C';
+    }
+    setTimeout(() => b.textContent = 'Copiar el SQL', 2200);
   });
 </script>
 </body>
