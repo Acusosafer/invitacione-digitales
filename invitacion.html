@@ -1969,8 +1969,17 @@
         const parts = invitado.split(' ');
         document.getElementById('f-nombre').value = parts[0] || '';
         document.getElementById('f-apellido').value = parts.slice(1).join(' ') || '';
-        const n = invitado.toUpperCase();
-        document.getElementById('h-invitado').innerHTML = `Hola <strong>${n}</strong><br>Te espero en este momento tan especial`;
+        // Con DOM y no con innerHTML: `invitado` sale de la URL, así que
+        // cualquiera puede armar un link con etiquetas adentro y meter
+        // contenido en una página de este dominio. Hoy el toUpperCase() de
+        // abajo rompe la mayoría de los scripts de casualidad — no es una
+        // defensa, es suerte.
+        const saludo = document.getElementById('h-invitado');
+        const fuerte = document.createElement('strong');
+        fuerte.textContent = invitado.toUpperCase();
+        saludo.textContent = '';
+        saludo.append('Hola ', fuerte, document.createElement('br'),
+                      'Te espero en este momento tan especial');
         if (mesa_param) {
           document.getElementById('splash-mesa').style.display = 'inline-block';
           document.getElementById('mesa-num').textContent = mesa_param;
