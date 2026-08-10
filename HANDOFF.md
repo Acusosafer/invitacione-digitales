@@ -37,6 +37,57 @@ Storage. Las tres ya corridas. Las tres son idempotentes.
 
 ---
 
+## Hecho el 10/08/2026 — el día que salió a la calle
+
+**Instagram lanzado.** Primer dato real, y lo que dijo:
+
+```
+22 visitas de Argentina en 3 días  ·  9 s de permanencia
+6 tocaron el botón de WhatsApp     ·  0 escribieron
+```
+
+- **La geografía es la buena noticia**: Buenos Aires, González Catán, Berazategui,
+  El Palomar, **Posadas** y **Concordia**. Las dos últimas están a más de 900 km: eso no
+  es su círculo, es Instagram distribuyendo de verdad el primer día.
+- **6 de 22 es un 27% de clics.** No fue casualidad: clickearon para averiguar el precio.
+- **El precio no estaba en ningún lado de la web.** Al llegar al chat tenían que hacer
+  ELLAS la pregunta incómoda, y seis de seis decidieron que no valía la pena. Esconder el
+  precio le pasa al cliente el costo de preguntar.
+
+⚠️ **Cómo leer ese GA4 sin engañarse:** de 82 usuarios totales, la mayoría eran robots
+escaneando el dominio nuevo. Se delatan por la ciudad — **Boardman** (Amazon), **Ashburn**
+(el mayor nudo de servidores del mundo), **Council Bluffs** (Google) — y por los números:
+5 s de permanencia global contra 9 s en Argentina, e inglés como idioma dominante en un
+sitio 100% en español. **Mirar siempre con la comparación "País = Argentina" puesta.**
+En GA4 el evento `click` es **clic de salida**: en esta landing es el botón de WhatsApp.
+
+### Lo que se arregló
+
+- **Las tres invitaciones oscuras estaban rotas en producción.** El mensaje personal salía
+  en negro sobre negro y las secciones Ubicación, Regalos y RSVP eran bandas casi blancas
+  con texto blanco: invisibles enteras. **No era cosa de los demos: cualquier clienta que
+  eligiera colores oscuros recibía eso.** Causa: `--black`/`--white` fijos y las franjas
+  alternas escritas a mano como `#f9f9f9`. Ver la sección de tokens en `CLAUDE.md`.
+- **Login del panel.** Sin `?evento=` el panel abría CALLADO el evento de otro y rechazaba
+  la clave con "Clave incorrecta". Una clienta no podía entrar desde el celular —había ido
+  por el botón "Panel" de la web— y creía que su clave estaba mal.
+- **El parpadeo al abrir una invitación.** Se veía 1,7 s otra invitación (blanco y verde,
+  la paleta por defecto) antes de la propia. Ahora `api/i.js` sirve la paleta ya resuelta.
+- **Encuadre de fotos**: marco arrastrable en el panel con la forma real de cada lugar.
+- **Botón de música**: el triángulo de play genérico pasó a un ecualizador que muestra el
+  estado con el movimiento.
+- **Sección de precio publicada**: `$50.000`, "precio de agosto", sin lista de tildes.
+- **Reel vertical** de la placa de agosto, generado por código (`publicidad/generar-reel.js`).
+- La galería de la landing: las demos oscuras se fundían con el marco del celular.
+- El título que faltaba en Dresscode.
+
+### Decisiones de Fer
+
+- **Precio a la vista: `$50.000`, "precio de agosto".** Solo sirve si en septiembre
+  realmente cambia; un plazo que no se cumple se nota y quema la credibilidad.
+- **WhatsApp del negocio en una línea aparte**, para no perder su perfil personal. Ver la
+  sección "El número de WhatsApp" de `CLAUDE.md` antes de tocarlo.
+
 ## Hecho el 07/08/2026
 
 - **Google Safe Browsing levantado.** Chrome ya no marca el sitio. Instagram queda liberado.
@@ -92,32 +143,35 @@ Storage. Las tres ya corridas. Las tres son idempotentes.
 
 ## Pendientes, en orden
 
-1. **Lanzar Instagram.** Es lo que estuvo trabado dos semanas y hoy dejó de estarlo: hay
-   dominio y Chrome ya no marca el sitio. Todo el material está listo en `publicidad/`:
-   perfil, bio, seis piezas con sus textos, foto de perfil y cuatro portadas de destacadas.
-   Falta actualizar el link de la bio al dominio nuevo y terminar la pieza 4.
-2. **Recuperar los cupos perdidos en el evento de Flor** (`florviera`): Flia Sosa,
-   Lu y Marian, Marce y Carlos, Sandra e Ines quedaron con una sola fila. Se arregla
-   borrando la fila con 🗑 y reenviándole el link. Los cupos originales no quedaron
-   registrados: hay que preguntarles.
-3. **Álbum compartido con QR** — lo único relevante que tiene la competencia y no está acá.
-   Acotado: Storage + link público por evento. Fer lo dejó pasar el 06/08, no lo descartó.
-4. **Identidad en el footer del sitio público.** Falta que Fer defina cómo firma el negocio,
-   qué contacto va y si tiene Instagram. Hoy el sitio no dice quién es en ninguna parte.
-5. **Cuántas horas lleva una invitación** de punta a punta. Sin ese dato no se sabe si los
-   $50.000 cierran o si está trabajando barato.
-6. **Terminar `almamia15`**: volver a subir la portada (la vieja pesa 2,26 MB) y cambiar
+1. **La línea nueva de WhatsApp.** Fer la consigue, instala WhatsApp Business (nombre, logo
+   y **mensaje de bienvenida automático** — ese es el que convierte), y pasa el número.
+   Ahí hay que cambiarlo en los **nueve lugares de texto MÁS el MP4 del reel y el PNG de la
+   placa**, que lo tienen en los píxeles. Lista completa en `CLAUDE.md`.
+   ⚠️ **No publicar el reel actual en Instagram** si el número va a cambiar.
+2. **Esperar el primer mensaje.** Es la única métrica que decide si el precio publicado
+   arregló la fuga. Volver a mirar GA4 con Argentina aislada en 4-5 días:
+   los clics deberían BAJAR (el precio filtra antes) y los mensajes subir.
+3. **Terminar `almamia15`**: volver a subir la portada (la vieja pesa 2,26 MB) y cambiar
    `foto_galeria_2`, que todavía apunta a `/assets/valentina15/...` de cuando se copió ese evento.
 7. **Escuchar dos temas** asignados con dudas: `luna15` (capoeira, se pidió folk de jardín) y
    `boda-julieta` (se llama "morning" y se pidió ambient nocturno).
-8. **Dos mejoras de ergonomía del admin**: que `verificar_clave` distinga "falta configurar el
+8. **La landing tarda.** Medida en 4G con CPU de gama media: primer texto a los 2,4 s, pero
+   **todo cargado recién a los 7,3 s** — son 14 iframes y 2 MB. La visita promedio dura 9 s,
+   así que lo que mejor vende —los celulares con invitaciones moviéndose— aparece justo
+   cuando la persona se está yendo. **No tocar hasta tener más datos**: con 22 visitas,
+   cambiar por esto es leer ruido. Si con más tráfico el tiempo sigue en 9 s, el arreglo es
+   que los tres del hero carguen ya y los doce de la galería recién al bajar.
+9. **Dos mejoras de ergonomía del admin**: que `verificar_clave` distinga "falta configurar el
    hash" de "clave incorrecta" (hoy dice lo mismo para las dos cosas), y un formulario para
    cambiar la clave de superadmin sin pasar por SQL.
-9. **Que el invitado pueda corregir su confirmación.** Hoy si se equivoca queda trabado y
+10. **Que el invitado pueda corregir su confirmación.** Hoy si se equivoca queda trabado y
    depende de que el cliente le borre la fila.
-10. **Mail propio** (`fer@invitacionesdigitalesoficial.com`). Ahora que hay dominio se puede.
+11. **Mail propio** (`fer@invitacionesdigitalesoficial.com`). Ahora que hay dominio se puede.
    Zoho Mail free alcanza; hay que cargar SPF, DKIM y MX en el Advanced DNS de Namecheap,
    **sin tocar** el A `@` ni el CNAME `www` que apuntan a Vercel.
+12. **Verificar el dominio en Meta** (registro TXT en Namecheap). Solo importa el día que
+   ponga plata en publicidad: sin eso el píxel mide con limitaciones a los que vienen de
+   iPhone, que en su rubro son casi todos.
 
 ---
 

@@ -418,6 +418,35 @@ El sitio está en Vercel con auto-deploy desde GitHub.
   adaptan al dominio desde el que se abran. Sólo hay literales en el footer de
   `invitacion.html`, la constante `WEB` de `admin.html` y el mockup de chat de `index.html`.
 
+## Los colores de la invitación siguen al tema (leer antes de tocar el CSS)
+
+El cliente elige `color_1` (tinta), `color_2` (acento) y `color_bg` (papel). **Ningún color
+puede estar escrito a mano en `invitacion.html`**, porque lo que sobre blanco es "gris
+clarito" sobre `#0d0d1a` es "casi blanco".
+
+Hasta el 10/08/2026 las tres invitaciones oscuras estaban **rotas en producción**: el
+mensaje personal salía en negro sobre negro y las secciones Ubicación, Regalos y RSVP eran
+bandas casi blancas con texto blanco encima. No era un problema de los demos — cualquier
+clienta que eligiera colores oscuros recibía eso.
+
+| Token | Qué significa | Se usa para |
+|---|---|---|
+| `--black` | **la tinta del evento** (= `--primary`) | textos, íconos, bordes |
+| `--white` | **el papel del evento** (= `--bg`) | fondos de bloques invertidos |
+| `--ink-soft` | tinta apagada, mezclada con el papel | subtítulos, direcciones |
+| `--on-accent` | texto legible **sobre el acento** — lo calcula el JS | botones, chips, countdown, el ecualizador |
+| `--velo-1` / `--velo-2` | un velo de tinta sobre el papel | franjas alternas, focos de campos, tarjetas |
+
+**Dos excepciones, a mano y comentadas en el código:**
+- **El hero**: atrás hay una foto con velo negro, no el fondo del evento. Texto blanco fijo.
+- **El footer**: sus textos internos están escritos como `rgba(255,255,255,x)`, así que el
+  bloque tiene que quedar oscuro sí o sí. Si algún día se cambia, hay que cambiar los seis.
+
+**Cómo se verifica:** midiendo el contraste real de cada texto contra el fondo que
+efectivamente tiene detrás, en los 12 demos, no a ojo. Ojo con `color-mix()`: se serializa
+como `color(srgb 0.72 0.72 0.75)` con valores de 0 a 1, no de 0 a 255 — leerlos mal da 1:1
+en todos lados y manda a perseguir fantasmas.
+
 ## El número de WhatsApp — dónde vive (leer antes de cambiarlo)
 
 Hoy es `+54 9 11 2457-6536` (`5491124576536` en los links). Fer decidió el
