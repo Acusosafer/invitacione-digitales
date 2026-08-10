@@ -4,6 +4,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    /* El navegador guarda a qué altura quedó el scroll y lo restaura solo al
+       recargar. Acá eso se ve como un bug: el splash es `position:fixed` y
+       tapa la pantalla entera, así que la página de atrás queda scrolleada a
+       la mitad sin que se note. El invitado toca "Ingresar", el splash se
+       desvanece, y aparece en medio de la invitación.
+
+       Va en el <head> y no al final del <body>: la restauración ocurre apenas
+       termina de cargar el documento, y desde ahí abajo se llega tarde. */
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  </script>
   <meta id="og-title" property="og:title" content="💌 Quiero que seas parte de este momento especial">
   <meta id="og-desc" property="og:description" content="Si te llegó este enlace sos importante para mi">
   <meta id="og-img" property="og:image" content="logo-og.png">
@@ -2119,6 +2130,17 @@
       if (C.musica_url) document.getElementById('audio').src = C.musica_url;
       document.getElementById('floating-music-btn').onclick = toggleMusic;
       document.getElementById('btn-enter').onclick = () => {
+        // Arriba de todo SIEMPRE, y antes de esconder el splash: el salto
+        // ocurre detrás del splash todavía opaco, así que nadie lo ve.
+        // El apagado temporal de `scroll-behavior` es obligatorio — <html> lo
+        // tiene en `smooth`, y sin esto la invitación se ve "rebobinar"
+        // durante los 0,8s del fundido.
+        const raiz = document.documentElement;
+        const comportamiento = raiz.style.scrollBehavior;
+        raiz.style.scrollBehavior = 'auto';
+        window.scrollTo(0, 0);
+        raiz.style.scrollBehavior = comportamiento;
+
         document.getElementById('splash').classList.add('hidden');
         document.getElementById('floating-music-btn').style.display = 'flex';
         autoPlayMusic();
