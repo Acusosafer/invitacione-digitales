@@ -2142,7 +2142,10 @@
         raiz.style.scrollBehavior = comportamiento;
 
         document.getElementById('splash').classList.add('hidden');
-        document.getElementById('floating-music-btn').style.display = 'flex';
+        // El botón solo aparece si hay música. Antes salía siempre: un
+        // evento sin `musica_url` mostraba un botón flotante que no hacía
+        // absolutamente nada al tocarlo, y eso se lee como "está roto".
+        if (C.musica_url) document.getElementById('floating-music-btn').style.display = 'flex';
         autoPlayMusic();
         revealSections();
       };
