@@ -1593,15 +1593,21 @@
           </div>
         </div>
 
+        <!-- `rsvp-details` ya NO se esconde entero cuando el titular dice que
+             no puede ir: la cantidad de personas y las tarjetas de acompañante
+             siguen a la vista, porque cada uno contesta por su cuenta. Lo único
+             que se esconde es la dieta del titular, que si no va no significa
+             nada. Antes se escondía todo y los cupos de los demás se borraban
+             sin dejar rastro. -->
         <div id="rsvp-details">
           <div class="form-group">
-            <label class="form-label">Cantidad de personas</label>
+            <label class="form-label">¿Cuántos son en total?</label>
             <div class="opts-row" id="opts-personas"></div>
             <div style="font-size:0.78rem;color:var(--ink-soft);margin-top:8px;line-height:1.45">
-              Si van menos, elegí el número exacto: solo se reservan los lugares que confirmes.
+              Contá a todos los que están invitados con vos, vayan o no. Después cada uno dice si va.
             </div>
           </div>
-          <div class="form-group">
+          <div class="form-group" id="rsvp-dieta-titular">
             <label class="form-label">Requerimientos alimenticios</label>
             <div class="opts-tags">
               <button class="tag-btn" data-diet="Celíaco">Celíaco</button>
@@ -1967,8 +1973,17 @@
       // Guest info
       if (invitado) {
         const parts = invitado.split(' ');
-        document.getElementById('f-nombre').value = parts[0] || '';
-        document.getElementById('f-apellido').value = parts.slice(1).join(' ') || '';
+
+        // "Familia Ferreyra" no es el nombre de una persona. Autocompletado
+        // dejaba nombre="Familia" y apellido="Ferreyra": los dos campos llenos,
+        // así que la validación lo aceptaba y a la mesa iba a sentarse alguien
+        // llamado "Familia Ferreyra". Cuando el link nombra a un grupo, los
+        // campos quedan vacíos y los escribe quien confirma.
+        const primera = (parts[0] || '').toLowerCase().replace(/\./g, '');
+        const esGrupo = ['familia', 'familias', 'flia', 'fam'].includes(primera);
+
+        document.getElementById('f-nombre').value   = esGrupo ? '' : (parts[0] || '');
+        document.getElementById('f-apellido').value = esGrupo ? '' : (parts.slice(1).join(' ') || '');
         // Con DOM y no con innerHTML: `invitado` sale de la URL, así que
         // cualquiera puede armar un link con etiquetas adentro y meter
         // contenido en una página de este dominio. Hoy el toUpperCase() de
@@ -2181,11 +2196,11 @@
           document.querySelectorAll('#opts-asiste .opt-btn').forEach(b => b.classList.remove('sel'));
           btn.classList.add('sel');
           const isSi = btn.dataset.val === 'si';
-          document.getElementById('rsvp-details').style.display = isSi ? 'block' : 'none';
-          const companionContainer = document.getElementById('companion-inputs-container');
-          if (companionContainer) {
-            companionContainer.style.display = isSi ? 'flex' : 'none';
-          }
+          // Los acompañantes siguen a la vista aunque el titular no vaya:
+          // cada uno contesta por su cuenta. Lo único que se esconde es la
+          // dieta del titular, que si no va no significa nada.
+          const dieta = document.getElementById('rsvp-dieta-titular');
+          if (dieta) dieta.style.display = isSi ? 'block' : 'none';
         };
       });
       // Inicializar con la cantidad máxima predeterminada
@@ -2536,7 +2551,10 @@
       // los nombres en blanco borraba 4 cupos en silencio: ni el invitado ni
       // el cliente se enteraban. (El `required` de los inputs no sirve acá:
       // no hay submit de formulario, es un botón con onclick.)
-      if (asiste === 'si') {
+      // Se valida SIEMPRE, vaya o no el titular: cada acompañante contesta por
+      // su cuenta. Antes esto corría solo si el titular iba, y si decía que no
+      // sus cupos se borraban sin quedar ni en "no" ni en "pendiente".
+      {
         const faltantes = [];
         document.querySelectorAll('.companion-card').forEach(card => {
           ['.comp-nombre', '.comp-apellido'].forEach(sel => {
@@ -2554,7 +2572,7 @@
           faltantes[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
           toast(tarjetas === 1
             ? '⚠️ Completá el nombre y el apellido del acompañante'
-            : `⚠️ Faltan datos de ${tarjetas} acompañantes. Si van menos, cambiá la cantidad de personas.`);
+            : `⚠️ Faltan datos de ${tarjetas} acompañantes. Si son menos, cambiá el número de arriba.`);
           return;
         }
       }
@@ -2579,8 +2597,9 @@
       };
 
       // Gather companions with advanced details (attendance, diet, song)
+      // Se arman siempre: cada acompañante trae su propio sí o no.
       const companions = [];
-      if (asiste === 'si') {
+      {
         const cards = document.querySelectorAll('.companion-card');
         cards.forEach((card, idx) => {
           const cNombre = card.querySelector('.comp-nombre').value.trim();
