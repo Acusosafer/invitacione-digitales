@@ -429,6 +429,52 @@ body.on-dark .mesa.full u{background:var(--live)}
 /* ══════════════════════════════════════════════════════════════════
    CIERRE
    ══════════════════════════════════════════════════════════════════ */
+/* ── Precio ────────────────────────────────────────────────────────
+   Antes no estaba en ningún lado, y ese era el problema: el 10/08/2026,
+   con 22 visitas, seis personas tocaron el botón de WhatsApp y ninguna
+   escribió. Habían clickeado para averiguar cuánto salía, y al abrirse
+   un chat con un desconocido tenían que hacer ELLAS la pregunta
+   incómoda. Esconder el precio le pasa al cliente el costo de preguntar.
+
+   Sin lista de tildes a propósito: lo que hace fuerte a este precio no
+   es lo que incluye, es que no hay nada después. Eso es una frase, no
+   una grilla de íconos.
+
+   El número va en tinta y no en dorado porque la página se tiñe con el
+   color de la invitación que estés mirando: sobre un fondo oscuro el
+   dorado profundo se cae, y --ink se invierte solo. */
+.precio{padding:118px 0 96px; text-align:center; position:relative; overflow:hidden}
+.precio::before{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(56% 44% at 50% 6%, rgba(247,206,132,.34) 0%, transparent 64%);
+}
+.precio-caja{position:relative; max-width:46ch; margin:0 auto}
+.precio-label{
+  font-size:.76rem; letter-spacing:.26em; text-transform:uppercase;
+  color:var(--ink-3);
+}
+.precio-num{
+  font-family:'Fraunces',Georgia,serif;
+  font-variation-settings:'SOFT' 40,'WONK' 1,'opsz' 144;
+  font-weight:400;
+  font-size:clamp(3.7rem,14vw,6.6rem); line-height:1; letter-spacing:-.03em;
+  margin:14px 0 0;
+}
+.precio-mes{
+  display:inline-block; margin-top:14px;
+  font-size:.74rem; letter-spacing:.14em; text-transform:uppercase;
+  /* --ink-2 y no --gold: el dorado da 3:1, que alcanza para un número
+     grande pero no para una etiqueta de 12px. Y --ink-2 se invierte solo
+     cuando la página se tiñe de oscuro. */
+  color:var(--ink-2);
+  border:1px solid var(--line); border-radius:999px; padding:6px 14px;
+}
+.precio-txt{
+  color:var(--ink-2); font-size:1.05rem; line-height:1.65;
+  margin:30px auto 0; max-width:42ch;
+}
+.precio-cta{margin-top:36px}
+
 .closing{padding:130px 0; text-align:center}
 .closing h2{font-size:clamp(2.3rem,6vw,4.2rem); max-width:16ch; margin:0 auto}
 .closing p{color:var(--ink-2); max-width:46ch; margin:24px auto 0; font-size:1.05rem}
@@ -475,6 +521,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="nav-links">
     <a href="#como">Cómo funciona</a>
     <a href="#demos">Invitaciones</a>
+    <!-- El precio, a un toque desde arriba: la visita promedio dura 9
+         segundos y es lo primero que la gente quiere saber. -->
+    <a href="#precio">Precio</a>
     <a href="admin.html">Panel</a>
   </div>
   <a class="nav-cta" href="https://wa.me/5491124576536?text=Hola!%20Quiero%20una%20invitaci%C3%B3n%20digital">Pedir la mía</a>
@@ -640,6 +689,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="ui-lbl">Plano del salón</div>
           <div class="salon" id="salon"></div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ PRECIO ═══════════════════════ -->
+<section class="precio" id="precio">
+  <div class="wrap">
+    <div class="precio-caja" data-reveal>
+      <div class="precio-label">Una vez y listo</div>
+      <div class="precio-num">$50.000</div>
+      <div class="precio-mes">Precio de agosto</div>
+      <p class="precio-txt">
+        No hay costo por invitado, no hay mensualidad y no hay nada que
+        aparezca después. Diseño la invitación entera —tus colores, tus fotos,
+        tu música— y en 24 a 48 horas la estás mandando.
+      </p>
+      <div class="precio-cta">
+        <!-- El mensaje que va escrito ya nombra el precio: así la persona no
+             tiene que preguntarlo, que es exactamente donde se caían. -->
+        <a class="btn btn-solid"
+           href="https://wa.me/5491124576536?text=Hola!%20Vi%20la%20web%20y%20quiero%20mi%20invitaci%C3%B3n%20por%20%2450.000.%20Te%20cuento%20de%20la%20fiesta%3A">Quiero la mía</a>
       </div>
     </div>
   </div>
