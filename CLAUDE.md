@@ -276,6 +276,30 @@ Los cupos salen de contar las filas `pendiente` de ese grupo — el `personas` o
 se guarda en ningún lado. Se arma con DOM, **no con `innerHTML`**: los nombres los escribe
 el cliente y terminan dentro de una URL y de un mensaje.
 
+### `mensaje` es la canción, y nada más
+
+La columna `mensaje` de `confirmaciones` guarda **la canción sugerida**. Pero se usó también
+como marca interna: la pre-alta escribe `Invitación pre-cargada`, y hasta el 10/08/2026 un
+acompañante que no pedía tema quedaba con **`Acompañante de Fulano`** guardado ahí. En el
+panel de una clienta con la fiesta en curso, la columna Canción mezclaba temas con
+acompañantes.
+
+El fallback ya no se escribe, pero **los eventos en curso lo tienen adentro**. Por eso el
+filtro `cancionReal()` de `admin.html` es **de lectura**: limpia la vista sin tocar una sola
+fila de la base de un cliente en plena fiesta. Se usa en las dos tablas, en el CSV y en la
+lista del DJ — si aparece un lugar nuevo donde se muestre `mensaje`, va con el filtro.
+Solo descarta el prefijo exacto `Acompañante de `: una canción que empiece con
+"Acompañado por…" se conserva.
+
+### Lista para el DJ
+
+Tarjeta en la pestaña Invitados. Agrupa **por canción y no por persona**: si tres invitados
+piden el mismo tema, el DJ lo ve una vez con el número al lado, y ordenado por cantidad de
+pedidos. Sale como texto para pegar en WhatsApp o como PDF para imprimir.
+
+Se arma con DOM, no con `innerHTML`. El texto lo escribe el invitado y antes entraba **como
+HTML** en el panel del cliente (`tdCancion.innerHTML = \`🎵 ${inv.mensaje}\``).
+
 ### Qué se puede saber de un link, y qué no
 
 **No se puede saber a qué número se mandó un link, ni reconstruirlo hacia atrás.** El panel

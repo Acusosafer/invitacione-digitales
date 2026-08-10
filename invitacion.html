@@ -2624,7 +2624,12 @@
               asiste: cAsiste,
               personas: 1,
               dieta: cDieta,
-              mensaje: cCancion || `Acompañante de ${nombre}`,
+              // `mensaje` es LA CANCIÓN SUGERIDA y nada más. Antes, un
+              // acompañante que no pedía tema quedaba con "Acompañante de
+              // Fulano" guardado ahí: ensuciaba la columna Canción del panel
+              // y, peor, la lista que se le pasa al DJ. De quién viene cada
+              // uno ya se sabe por `invitado_url`, que los agrupa.
+              mensaje: cCancion,
               mesa: mesa
             });
           }

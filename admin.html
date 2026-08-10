@@ -936,6 +936,22 @@ tr:hover td{background:rgba(255,255,255,0.01);}
       <div id="pend-lista" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
 
+    <!-- Lo que pidieron los invitados, listo para mandarle al DJ -->
+    <div class="card" id="card-dj" style="display:none;margin-bottom:18px">
+      <div class="card-head">
+        <span class="card-title">🎧 Lista para el DJ</span>
+        <span class="badge badge-amber" id="dj-total">0</span>
+      </div>
+      <p style="color:var(--tx3);font-size:0.8rem;margin:-4px 0 14px;line-height:1.5">
+        Los temas que pidieron tus invitados, los más pedidos primero.
+      </p>
+      <div id="dj-lista" style="display:flex;flex-direction:column;gap:2px;margin-bottom:16px"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="copiarListaDJ()">💬 Copiar para WhatsApp</button>
+        <button class="btn btn-ghost btn-sm" onclick="imprimirListaDJ()">📄 PDF para imprimir</button>
+      </div>
+    </div>
+
     <div class="card" style="padding:0">
       <div class="tbl-wrap">
         <table>
@@ -2085,6 +2101,23 @@ function esc(v) {
     ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 }
 
+// La columna `mensaje` guarda la canción sugerida, pero también se usó como
+// marca interna: la pre-alta escribe "Invitación pre-cargada", y hasta el
+// 10/08/2026 un acompañante que no pedía tema quedaba con "Acompañante de
+// Fulano" ahí adentro. Eso mezclaba canciones con acompañantes en el panel y
+// habría metido basura en la lista del DJ.
+//
+// El fallback ya no se escribe, pero los eventos que están en curso lo tienen
+// guardado. Por eso el filtro es de LECTURA: limpia lo que ya está sin tocar
+// una sola fila de la base de un cliente en plena fiesta.
+function cancionReal(mensaje) {
+  const v = String(mensaje ?? '').trim();
+  if (!v) return '';
+  if (v === 'Invitación pre-cargada' || v === 'Acompañante pre-cargado') return '';
+  if (/^acompañante de /i.test(v)) return '';
+  return v;
+}
+
 // Los botones "↻ Actualizar" no daban ninguna señal: si andaba, no se
 // notaba, y si fallaba tampoco. Fer terminaba apretando F5, que lo sacaba
 // del panel porque la clave vive solo en memoria.
@@ -2251,11 +2284,135 @@ const celda = (col, valor) => valor
   ? `<td data-col="${col}">${valor}</td>`
   : `<td data-col="${col}" class="vacio">—</td>`;
 
+// ═══════════════════════════════════════════════════════════════════════
+// LISTA PARA EL DJ
+// ═══════════════════════════════════════════════════════════════════════
+let invitadosData = [];
+
+// Se agrupa por canción y no por persona: si tres invitados piden el mismo
+// tema, el DJ tiene que verlo UNA vez y con el número al lado, no tres veces
+// salteado entre otros treinta. Y ordenado por cantidad de pedidos, que es lo
+// que le dice cuál no puede faltar.
+function listaDJ() {
+  const mapa = new Map();
+  invitadosData.forEach(r => {
+    const cancion = cancionReal(r.mensaje);
+    if (!cancion) return;
+    const llave = cancion.toLowerCase();
+    if (!mapa.has(llave)) mapa.set(llave, { cancion, quienes: [] });
+    mapa.get(llave).quienes.push(`${r.nombre} ${r.apellido || ''}`.trim());
+  });
+  return [...mapa.values()].sort((a, b) =>
+    b.quienes.length - a.quienes.length ||
+    a.cancion.localeCompare(b.cancion, 'es'));
+}
+
+function pintarListaDJ() {
+  const temas = listaDJ();
+  const card = document.getElementById('card-dj');
+  if (!card) return;
+  card.style.display = temas.length ? 'block' : 'none';
+  document.getElementById('dj-total').textContent =
+    temas.length === 1 ? '1 tema' : `${temas.length} temas`;
+
+  const cont = document.getElementById('dj-lista');
+  cont.textContent = '';
+  temas.forEach((t, i) => {
+    const fila = document.createElement('div');
+    fila.style.cssText = 'display:flex;gap:10px;align-items:baseline;padding:7px 0;' +
+                         'border-bottom:1px solid var(--bdr);font-size:0.86rem';
+    const num = document.createElement('span');
+    num.style.cssText = 'color:var(--tx3);font-size:0.75rem;min-width:22px;flex:none';
+    num.textContent = (i + 1) + '.';
+
+    const txt = document.createElement('div');
+    txt.style.cssText = 'flex:1;min-width:0;overflow-wrap:anywhere';
+    txt.textContent = t.cancion;
+
+    const quien = document.createElement('div');
+    quien.style.cssText = 'color:var(--tx3);font-size:0.72rem;margin-top:2px';
+    quien.textContent = t.quienes.length > 1
+      ? `${t.quienes.length} personas: ${t.quienes.join(', ')}`
+      : t.quienes[0];
+    txt.appendChild(quien);
+
+    fila.append(num, txt);
+    cont.appendChild(fila);
+  });
+}
+
+function textoListaDJ() {
+  const temas = listaDJ();
+  const evento = currentConfig?.nombre || eventoId;
+  const cuando = currentConfig?.fecha_texto ? `\n${currentConfig.fecha_texto}` : '';
+  let t = `*Música pedida por los invitados*\n${evento}${cuando}\n\n`;
+  temas.forEach((x, i) => {
+    t += `${i + 1}. ${x.cancion}`;
+    if (x.quienes.length > 1) t += `  (la pidieron ${x.quienes.length})`;
+    t += '\n';
+  });
+  t += `\nSon ${temas.length} ${temas.length === 1 ? 'tema' : 'temas'}.`;
+  return t;
+}
+
+function copiarListaDJ() {
+  const texto = textoListaDJ();
+  navigator.clipboard.writeText(texto)
+    .then(() => toast('✅ Lista copiada — pegala en el chat del DJ'))
+    .catch(() => toast('❌ No se pudo copiar. Usá el PDF.'));
+}
+
+function imprimirListaDJ() {
+  const temas = listaDJ();
+  const evento = currentConfig?.nombre || eventoId;
+  const filas = temas.map((t, i) => `<tr>
+      <td class="n">${i + 1}</td>
+      <td><strong>${escapeHtml(t.cancion)}</strong>${
+        t.quienes.length > 1
+          ? `<div class="q">La pidieron ${t.quienes.length}: ${escapeHtml(t.quienes.join(', '))}</div>`
+          : `<div class="q">${escapeHtml(t.quienes[0])}</div>`}</td>
+    </tr>`).join('');
+
+  const html = `<html><head><meta charset="utf-8"><title>Música pedida — ${escapeHtml(evento)}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..700&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    @media print { body { margin:0; padding:20px } }
+    body{font-family:'Instrument Sans',system-ui,sans-serif;background:#fff;color:#1f2937;margin:40px}
+    .header{text-align:center;margin-bottom:34px;border-bottom:2px solid #f3f4f6;padding-bottom:26px}
+    .logo{font-family:'Fraunces',Georgia,serif;font-weight:800;font-size:30px;color:#8A5F17}
+    .sub{font-weight:800;font-size:13px;letter-spacing:6px;text-transform:uppercase;color:#8A5F17;margin-top:3px}
+    h1{font-family:'Fraunces',Georgia,serif;font-size:23px;margin:16px 0 4px}
+    .ev{font-size:14px;color:#6b7280}
+    table{border-collapse:collapse;width:100%}
+    td{padding:11px 14px;border-bottom:1px solid #f3f4f6;font-size:13px;vertical-align:top}
+    tr:nth-child(even) td{background:#fcfcfc}
+    .n{width:34px;color:#9ca3af;font-family:'Fraunces',Georgia,serif;font-weight:700}
+    .q{font-size:11px;color:#9ca3af;margin-top:3px}
+    .pie{margin-top:40px;text-align:center;font-size:11px;color:#9ca3af;
+         border-top:1px solid #f3f4f6;padding-top:18px}
+  </style></head><body>
+  <div class="header">
+    <div class="logo">Invitaciones Digitales</div><div class="sub">OFICIAL</div>
+    <h1>Música pedida por los invitados</h1>
+    <div class="ev">${escapeHtml(evento)}${
+      currentConfig?.fecha_texto ? ' · ' + escapeHtml(currentConfig.fecha_texto) : ''} · ${temas.length} temas</div>
+  </div>
+  <table>${filas}</table>
+  <div class="pie">Generado por Invitaciones Digitales Oficial</div>
+  </body></html>`;
+
+  const v = window.open();
+  v.document.write(html);
+  v.document.close();
+  v.print();
+}
+
 async function loadData() {
   const { data, error } = await sb.rpc('admin_invitados', { p_evento: eventoId, p_clave: adminClave });
   // Antes el error se descartaba y la tabla quedaba en "Sin respuestas aún":
   // idéntico a un evento vacío. Parecía que se habían borrado los invitados.
   if (error) throw new Error('No se pudo leer la lista: ' + error.message);
+  invitadosData = data || [];   // lo usa la lista del DJ
   let sSi=0, sNo=0, sPend=0;
 
   // Cada fila es UNA persona: el titular y cada acompañante van por separado.
@@ -2275,7 +2432,7 @@ async function loadData() {
       <td data-col="Asiste">${badge}</td>
       ${celda('Mesa', esc(r.mesa))}
       ${celda('Dieta', esc(r.dieta))}
-      ${celda('Canción', esc(r.mensaje))}
+      ${celda('Canción', esc(cancionReal(r.mensaje)))}
       <td data-col="Fecha">${new Date(r.created_at).toLocaleDateString('es-AR')}</td>
       <td><button class="btn btn-ghost btn-sm" title="Eliminar de la lista"
             onclick="borrarInvitado(${r.id}, '${esc(quien).replace(/&#39;/g, "\\'")}')">🗑</button></td>
@@ -2298,6 +2455,7 @@ async function loadData() {
   if (dot) dot.className = `nav-dot${(sSi + sNo) > 0 ? ' on' : ''}`;
 
   renderPendientes(data || []);
+  pintarListaDJ();
 }
 
 // Los que todavía no contestaron, agrupados por link. Se arma con DOM y no
@@ -2541,7 +2699,7 @@ async function exportCSV() {
   const { data } = await sb.rpc('admin_invitados', { p_evento: eventoId, p_clave: adminClave });
   if (!data?.length) { toast('No hay datos para exportar'); return; }
   let csv = 'Nombre,Apellido,Invitado,Asiste,Personas,Mesa,Dieta,Mensaje,Fecha\n';
-  data.forEach(r => csv += `"${r.nombre}","${r.apellido||''}","${r.invitado_url}","${r.asiste}","${r.personas}","${r.mesa||''}","${r.dieta||''}","${r.mensaje||''}","${r.created_at}"\n`);
+  data.forEach(r => csv += `"${r.nombre}","${r.apellido||''}","${r.invitado_url}","${r.asiste}","${r.personas}","${r.mesa||''}","${r.dieta||''}","${cancionReal(r.mensaje)}","${r.created_at}"\n`);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
   a.download = `confirmaciones_${eventoId}.csv`;
@@ -2794,12 +2952,18 @@ function renderizarMesasTabla() {
     const tdDieta = document.createElement('td');
     tdDieta.innerHTML = inv.dieta ? `🍲 ${inv.dieta}` : '<span style="color:var(--tx3)">Ninguno</span>';
     
-    // Canción
+    // Canción — con textContent y no innerHTML: el texto lo escribe el
+    // invitado, y así entraba como HTML en el panel del cliente.
     const tdCancion = document.createElement('td');
-    const isSpecialMsg = inv.mensaje === 'Invitación pre-cargada' || inv.mensaje === 'Acompañante pre-cargado';
-    tdCancion.innerHTML = (inv.mensaje && !isSpecialMsg) 
-      ? `🎵 ${inv.mensaje}` 
-      : '<span style="color:var(--tx3)">—</span>';
+    const cancion = cancionReal(inv.mensaje);
+    if (cancion) {
+      tdCancion.textContent = '🎵 ' + cancion;
+    } else {
+      const raya = document.createElement('span');
+      raya.style.color = 'var(--tx3)';
+      raya.textContent = '—';
+      tdCancion.appendChild(raya);
+    }
     
     tr.appendChild(tdNombre);
     tr.appendChild(tdEstado);
