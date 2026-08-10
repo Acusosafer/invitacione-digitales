@@ -418,6 +418,31 @@ El sitio está en Vercel con auto-deploy desde GitHub.
   adaptan al dominio desde el que se abran. Sólo hay literales en el footer de
   `invitacion.html`, la constante `WEB` de `admin.html` y el mockup de chat de `index.html`.
 
+## El número de WhatsApp — dónde vive (leer antes de cambiarlo)
+
+Hoy es `+54 9 11 2457-6536` (`5491124576536` en los links). Fer decidió el
+10/08/2026 pasar el negocio a una **línea aparte**, para que su WhatsApp personal
+siga siendo personal: un número vive en una sola cuenta, o WhatsApp o Business,
+nunca las dos. Las dos apps sí conviven en el mismo teléfono con números distintos.
+
+Cuando cambie, son **nueve lugares en cinco archivos** más **dos que no aparecen
+en una búsqueda de texto**:
+
+| Dónde | Qué |
+|---|---|
+| `index.html` ×4 | nav, hero, precio y cierre |
+| `admin.html` ×2 | "pedime mi link" y el pie del login |
+| `publicidad/agosto-a.html` | el número escrito en la placa |
+| `publicidad/agosto-a-reel.html` | el número escrito en el reel |
+| `publicidad/instagram.md` | el botón de contacto del perfil |
+| ⚠️ **`publicidad/agosto-a-reel.mp4`** | **el número está en los píxeles.** Hay que regenerarlo: `node publicidad/generar-reel.js` |
+| ⚠️ **La placa PNG de agosto** | ídem, hay que volver a exportarla |
+
+⚠️ **Si la línea del negocio es prepaga, se vence sin uso.** El día que caduque,
+el número muere y con él los botones de toda la web, el reel, la placa y el link
+de la bio de Instagram — todos apuntando a un número que no existe. Conviene una
+eSIM sobre el plan que ya paga, o una prepaga con recarga automática.
+
 ## Medición (leer antes de agregar cualquier script de terceros)
 
 Instalado el 07/08/2026. Estos tres IDs **no son secretos** —cualquiera los lee en el código
