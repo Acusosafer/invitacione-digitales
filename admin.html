@@ -2197,14 +2197,17 @@ function msgEntrega() {
   const nombre = currentConfig?.nombre || '';
   const tipo   = (currentConfig?.tipo || '').toLowerCase();
   const clave  = (document.getElementById('ventas-clave')?.value || '').trim();
-  const base   = location.origin + location.pathname.replace('admin.html', '');
-  const suya   = `${base}i?evento=${encodeURIComponent(eventoId)}`;
-  const panel  = `${base}admin.html?evento=${encodeURIComponent(eventoId)}`;
+  // Los links que se le mandan a la clienta van SIEMPRE al dominio propio,
+  // no al que tenga abierto Fer. Con `location.origin` salían apuntando a
+  // invitacionesdigitalesoficial.vercel.app cada vez que el panel se abría
+  // desde ahí, y la clienta se guardaba ESE link — el de la web vieja.
+  const suya   = `${WEB}/i?evento=${encodeURIComponent(eventoId)}`;
+  const panel  = `${WEB}/admin.html?evento=${encodeURIComponent(eventoId)}`;
 
   return `¡Ya está lista! 🎉${nombre ? `\n\nTu invitación de ${tipo ? tipo + ' — ' : ''}${nombre}:` : '\n\nTu invitación:'}
 ${suya}
 
-Abrila, recorrela hasta abajo y decime si querés cambiar algo. Los ajustes los hago yo, no toques nada vos.
+Abrila, recorrela hasta abajo y decime si querés cambiar algo.
 
 *TU PANEL*
 ${panel}
