@@ -1584,6 +1584,21 @@
     const personas_param = params.get('personas') || '1';
     const mesa_param = params.get('mesa') || '';
 
+    // ── Encuadre de las fotos ──────────────────────────────────────────
+    // Toda foto entra recortada: una foto de celular es 3:4 y el círculo del
+    // splash es 1:1, así que algo se pierde sí o sí. Lo que se pierde lo elige
+    // el cliente arrastrando la foto en el panel, y queda guardado como
+    // `<clave>_pos`. Sin esto el recorte era siempre por el centro, que en una
+    // foto de cuerpo entero deja a la quinceañera sin cabeza.
+    //
+    // Se valida porque el valor termina dentro de una propiedad CSS. Si viene
+    // cualquier cosa, se cae al centro, que es como funcionaba antes.
+    const encuadre = clave => {
+      const v = C[clave + '_pos'];
+      return (typeof v === 'string' && /^\d{1,3}(?:\.\d+)?% \d{1,3}(?:\.\d+)?%$/.test(v.trim()))
+        ? v.trim() : '50% 50%';
+    };
+
     // Red de seguridad del velo de carga: si Supabase no contesta o el config
     // viene roto, nadie llega a poner la clase `listo` y el splash quedaría
     // invisible para siempre. Preferible mostrarlo con los valores por defecto
@@ -1829,8 +1844,10 @@
       document.getElementById('splash-nombre').textContent = C.nombre;
       document.getElementById('splash-sub').textContent = C.subtitulo;
       const spImg = document.getElementById('splash-img');
-      if (C.foto_splash) spImg.src = C.foto_splash;
-      else spImg.style.display = 'none';
+      if (C.foto_splash) {
+        spImg.src = C.foto_splash;
+        spImg.style.objectPosition = encuadre('foto_splash');
+      } else spImg.style.display = 'none';
 
       // Recién ahora el splash tiene los datos de ESTE evento y se puede
       // mostrar. Ver la regla de #splash > * en el CSS.
@@ -1840,7 +1857,14 @@
       document.getElementById('h-tipo').textContent = C.tipo;
       document.getElementById('h-nombre').textContent = C.nombre;
       if (C.foto_hero) {
-        document.getElementById('hero-bg').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url('${C.foto_hero}')`;
+        // Las dos capas se declaran por separado a propósito: el velo negro va
+        // siempre centrado y a pantalla completa, y solo la FOTO se mueve según
+        // el encuadre. Con la forma corta las dos compartían posición.
+        const hb = document.getElementById('hero-bg');
+        hb.style.backgroundImage    = `linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url('${C.foto_hero}')`;
+        hb.style.backgroundPosition = `center, ${encuadre('foto_hero')}`;
+        hb.style.backgroundSize     = 'cover, cover';
+        hb.style.backgroundRepeat   = 'no-repeat, no-repeat';
       }
 
       // Guest info
@@ -1894,14 +1918,21 @@
 
       if (C.foto_galeria_1 && C.layout?.show_gallery !== false) {
         document.getElementById('sec-galeria').style.display = 'flex';
-        const fotos = [C.foto_galeria_1, C.foto_galeria_2, C.foto_galeria_3, C.foto_galeria_4].filter(Boolean);
+        // Cada foto viaja con su encuadre: si se filtra solo la URL se pierde
+        // de cuál de las cuatro era, y todas terminan recortadas por el centro.
+        const fotos = [1, 2, 3, 4]
+          .map(n => ({ url: C['foto_galeria_' + n], pos: encuadre('foto_galeria_' + n) }))
+          .filter(f => f.url);
         if (fotos.length > 0) {
           document.getElementById('carousel-mobile').style.display = 'block';
           const track = document.getElementById('carousel-track');
           fotos.forEach(foto => {
             const slide = document.createElement('div');
             slide.className = 'carousel-slide';
-            slide.style.backgroundImage = `url('${foto}')`;
+            slide.style.backgroundImage    = `url('${foto.url}')`;
+            slide.style.backgroundPosition = foto.pos;
+            slide.style.backgroundSize     = 'cover';
+            slide.style.backgroundRepeat   = 'no-repeat';
             track.appendChild(slide);
           });
           if (fotos.length > 1) {
@@ -1916,11 +1947,17 @@
             document.getElementById('btn-next').style.display = 'none';
           }
 
+          // Con DOM y no con innerHTML: la URL la escribe el cliente desde el
+          // panel y acá entraría cruda dentro de un atributo.
           const grid = document.getElementById('gallery-grid');
           fotos.forEach(foto => {
             const item = document.createElement('div');
             item.className = 'gallery-item';
-            item.innerHTML = `<img src="${foto}" alt="">`;
+            const img = document.createElement('img');
+            img.src = foto.url;
+            img.alt = '';
+            img.style.objectPosition = foto.pos;
+            item.appendChild(img);
             grid.appendChild(item);
           });
         }
@@ -1956,7 +1993,11 @@
         document.getElementById('sec-hashtag').style.display = 'flex';
         document.getElementById('txt-hash').textContent = C.hashtag;
         document.getElementById('txt-hash-p').textContent = C.hashtag_texto || '';
-        if (C.foto_hashtag) document.getElementById('txt-hashtag-foto').src = C.foto_hashtag;
+        if (C.foto_hashtag) {
+          const hf = document.getElementById('txt-hashtag-foto');
+          hf.src = C.foto_hashtag;
+          hf.style.objectPosition = encuadre('foto_hashtag');
+        }
         if (C.instagram_url) document.getElementById('link-ig').href = C.instagram_url;
         if (C.tiktok_url) document.getElementById('link-tt').href = C.tiktok_url;
       }

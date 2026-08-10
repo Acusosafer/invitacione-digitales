@@ -420,6 +420,46 @@ tr:hover td{background:rgba(255,255,255,0.01);}
   position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
 }
 .file-zone-icon{font-size:1.5rem;margin-bottom:6px;display:block;}
+
+/* ── Encuadre ────────────────────────────────────────────────────────────
+   Toda foto entra recortada: una foto de celular es 3:4 y el círculo del
+   splash es 1:1. Antes el recorte era siempre por el centro y no había forma
+   de moverlo: una foto de cuerpo entero quedaba mostrando el torso.
+   Este marco tiene la MISMA forma que el lugar donde la foto va a aparecer,
+   así que lo que se ve acá es exactamente lo que va a ver el invitado. */
+.encuadre{margin-top:10px;}
+.enc-marco{
+  position:relative; width:100%; max-width:260px; margin:0 auto;
+  overflow:hidden; border-radius:12px; background:#000;
+  cursor:grab; touch-action:none;   /* sin esto, en el celular arrastra la página */
+  border:1px solid rgba(247,206,132,.22);
+}
+.enc-marco.redondo{border-radius:50%;}
+.enc-marco.arrastrando{cursor:grabbing; border-color:rgba(247,206,132,.6);}
+.enc-marco img{
+  width:100%; height:100%; object-fit:cover; display:block;
+  user-select:none; -webkit-user-drag:none; pointer-events:none;
+}
+/* Cruz de referencia: ayuda a centrar una cara sin andar adivinando. */
+.enc-marco::after{
+  content:''; position:absolute; inset:0; pointer-events:none; opacity:0;
+  transition:opacity 160ms ease;
+  background:
+    linear-gradient(to right, transparent calc(50% - 1px), rgba(255,255,255,.5) 50%, transparent calc(50% + 1px)),
+    linear-gradient(to bottom, transparent calc(50% - 1px), rgba(255,255,255,.5) 50%, transparent calc(50% + 1px));
+}
+.enc-marco.arrastrando::after{opacity:1;}
+.enc-pie{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  margin-top:8px; flex-wrap:wrap;
+}
+.enc-ayuda{font-size:.72rem; opacity:.6; line-height:1.4;}
+.enc-btn{
+  background:none; border:1px solid rgba(247,206,132,.3); color:var(--oro);
+  border-radius:8px; padding:5px 12px; font-size:.72rem; cursor:pointer;
+  font-family:inherit; white-space:nowrap;
+}
+.enc-btn:hover{border-color:var(--oro); background:rgba(247,206,132,.06);}
 .file-zone-text{font-size:0.75rem;color:var(--tx3);}
 .file-zone-status{font-size:0.72rem;color:var(--oro);margin-top:6px;font-weight:600;}
 .file-zone-preview{
@@ -1258,7 +1298,7 @@ const SECTIONS = [
     desc:'Primera pantalla animada con foto circular y música',
     toggle:'show_splash', required:false,
     fields:[
-      {type:'image',key:'foto_splash',label:'Foto de perfil',hint:'Recomendado: 600×600 px cuadrada'},
+      {type:'image',key:'foto_splash',label:'Foto de perfil',hint:'Recomendado: 600×600 px cuadrada',ratio:'1/1',redondo:true},
       {type:'audio',key:'musica_url',label:'Música de fondo (.mp3)',hint:'Se activa cuando el invitado abre la invitación'},
       {type:'text',key:'subtitulo',label:'Subtítulo de entrada',ph:'ej: Quiero que seas parte de este momento...'},
     ]
@@ -1268,7 +1308,7 @@ const SECTIONS = [
     desc:'Foto a pantalla completa con el nombre del evento',
     toggle:null, required:true,
     fields:[
-      {type:'image',key:'foto_hero',label:'Foto de portada',hint:'Recomendado: 1080×1920 px (vertical)'},
+      {type:'image',key:'foto_hero',label:'Foto de portada',hint:'Recomendado: 1080×1920 px (vertical)',ratio:'9/16'},
       {type:'select',key:'fit_hero',label:'Ajuste de imagen',opts:[['cover','📐 Llenar pantalla (Banner)'],['contain','🖼️ Mostrar imagen completa']]},
     ]
   },
@@ -1300,10 +1340,10 @@ const SECTIONS = [
     toggle:'show_gallery', required:false,
     fields:[
       {type:'text',key:'icono_galeria',label:'Icono (Emoji)',ph:'ej: 📸',hint:'Opcional'},
-      {type:'image',key:'foto_galeria_1',label:'Foto 1',hint:'Recomendado: 1000×1000 px'},
-      {type:'image',key:'foto_galeria_2',label:'Foto 2'},
-      {type:'image',key:'foto_galeria_3',label:'Foto 3'},
-      {type:'image',key:'foto_galeria_4',label:'Foto 4'},
+      {type:'image',key:'foto_galeria_1',label:'Foto 1',hint:'Recomendado: 1000×1000 px',ratio:'1/1'},
+      {type:'image',key:'foto_galeria_2',label:'Foto 2',ratio:'1/1'},
+      {type:'image',key:'foto_galeria_3',label:'Foto 3',ratio:'1/1'},
+      {type:'image',key:'foto_galeria_4',label:'Foto 4',ratio:'1/1'},
     ]
   },
   {
@@ -1345,7 +1385,7 @@ const SECTIONS = [
       {type:'text',key:'icono_hashtag',label:'Icono (Emoji)',ph:'ej: 📱',hint:'Opcional'},
       {type:'text',key:'hashtag',label:'Hashtag',ph:'ej: #ValentinaXV'},
       {type:'text',key:'hashtag_texto',label:'Instrucción para invitados',ph:'ej: Subí tus fotos con este hashtag'},
-      {type:'image',key:'foto_hashtag',label:'Foto Instagram (circular)',hint:'Recomendado: 600×600 px cuadrada'},
+      {type:'image',key:'foto_hashtag',label:'Foto Instagram (circular)',hint:'Recomendado: 600×600 px cuadrada',ratio:'1/1',redondo:true},
       {type:'url',key:'instagram_url',label:'Link de Instagram',ph:'https://instagram.com/...'},
       {type:'url',key:'tiktok_url',label:'Link de TikTok (opcional)',ph:'https://tiktok.com/...'},
     ]
@@ -1683,6 +1723,13 @@ function selectSection(secId) {
     </div>
   `;
 
+  // El encuadre guardado se recupera acá; si no hay, queda centrado, que es
+  // como se comportaba antes de que esto existiera.
+  posEncuadre = {};
+  sec.fields.forEach(f => {
+    if (f.type === 'image') posEncuadre[f.key] = currentConfig[f.key + '_pos'] || '50% 50%';
+  });
+
   sec.fields.forEach(field => {
     const val = currentConfig[field.key];
     if (!val) return;
@@ -1691,6 +1738,7 @@ function selectSection(secId) {
       const stat = document.getElementById(`fz-stat-${field.key}`);
       if (prev) { prev.src = val; prev.style.display = 'block'; }
       if (stat) stat.textContent = '✓ Imagen cargada';
+      mostrarEncuadre(field.key, val);
     } else if (field.type === 'audio') {
       const stat = document.getElementById(`fz-stat-${field.key}`);
       if (stat) stat.textContent = '✓ Audio cargado';
@@ -1706,6 +1754,85 @@ function selectSection(secId) {
       if (inp) inp.addEventListener('change', () => onFileChange(inp, field.key, field.type));
     }
   });
+}
+
+// ── Encuadre de fotos ──────────────────────────────────────────────────
+// Dónde queda el foco de cada foto, mientras se edita. Se vuelca al config
+// al guardar, como `<clave>_pos`.
+let posEncuadre = {};
+
+const acotar = v => Math.max(0, Math.min(100, Math.round(v * 10) / 10));
+
+function leerEncuadre(key) {
+  const m = String(posEncuadre[key] || '').match(/^([\d.]+)% ([\d.]+)%$/);
+  return m ? { x: parseFloat(m[1]), y: parseFloat(m[2]) } : { x: 50, y: 50 };
+}
+
+function pintarEncuadre(key) {
+  const img = document.getElementById('enc-img-' + key);
+  if (img) img.style.objectPosition = posEncuadre[key] || '50% 50%';
+}
+
+function centrarEncuadre(key) {
+  posEncuadre[key] = '50% 50%';
+  pintarEncuadre(key);
+}
+
+// Muestra el marco con la foto que corresponda. `src` puede ser la URL
+// guardada o el archivo recién elegido, todavía sin subir.
+function mostrarEncuadre(key, src) {
+  const caja = document.getElementById('enc-' + key);
+  const img  = document.getElementById('enc-img-' + key);
+  if (!caja || !img || !src) return;
+  img.src = src;
+  caja.style.display = '';
+  pintarEncuadre(key);
+  armarArrastre(key);
+}
+
+// El arrastre es 1 a 1 con el dedo: se calcula cuánta foto SOBRA fuera del
+// marco y se convierte el desplazamiento en porcentaje de esa sobra. Con una
+// cuenta aproximada la foto se adelanta o se atrasa respecto del dedo y se
+// siente rota.
+function armarArrastre(key) {
+  const marco = document.getElementById('enc-marco-' + key);
+  const img   = document.getElementById('enc-img-' + key);
+  if (!marco || marco.dataset.listo === '1') return;
+  marco.dataset.listo = '1';
+
+  let inicio = null;
+
+  marco.addEventListener('pointerdown', e => {
+    if (!img.naturalWidth) return;          // la foto todavía no cargó
+    e.preventDefault();
+    const r = marco.getBoundingClientRect();
+    const escala = Math.max(r.width / img.naturalWidth, r.height / img.naturalHeight);
+    const p = leerEncuadre(key);
+    inicio = {
+      x: e.clientX, y: e.clientY, px: p.x, py: p.y,
+      sobraX: img.naturalWidth  * escala - r.width,
+      sobraY: img.naturalHeight * escala - r.height,
+    };
+    marco.setPointerCapture(e.pointerId);
+    marco.classList.add('arrastrando');
+  });
+
+  marco.addEventListener('pointermove', e => {
+    if (!inicio) return;
+    // Arrastrar hacia abajo muestra MÁS de arriba, así que el porcentaje baja.
+    // Si en un eje la foto NO sobra —una foto cuadrada en un marco cuadrado—
+    // no hay nada que mover: se deja el valor como estaba. Pisarlo con 50
+    // borraba en silencio lo que la persona había elegido en el otro eje.
+    const dx = e.clientX - inicio.x, dy = e.clientY - inicio.y;
+    const nx = inicio.sobraX > 1 ? inicio.px - (dx / inicio.sobraX) * 100 : inicio.px;
+    const ny = inicio.sobraY > 1 ? inicio.py - (dy / inicio.sobraY) * 100 : inicio.py;
+    posEncuadre[key] = `${acotar(nx)}% ${acotar(ny)}%`;
+    pintarEncuadre(key);
+  });
+
+  const soltar = () => { inicio = null; marco.classList.remove('arrastrando'); };
+  marco.addEventListener('pointerup', soltar);
+  marco.addEventListener('pointercancel', soltar);
 }
 
 function renderSectionFields(sec) {
@@ -1740,6 +1867,20 @@ function renderSectionFields(sec) {
             <span class="file-zone-icon">🖼️</span>
             <div class="file-zone-text">Clic para subir imagen</div>
             <div class="file-zone-status" id="fz-stat-${f.key}"></div>
+          </div>
+          <div class="encuadre" id="enc-${f.key}" style="display:none">
+            <!-- El ancho se achica en los marcos verticales para que la
+                 proporción siga siendo exacta —es lo que hace que lo que se
+                 ve acá sea lo que va a ver el invitado— sin que el marco
+                 empuje el botón de Centrar fuera de la pantalla. -->
+            <div class="enc-marco${f.redondo ? ' redondo' : ''}" id="enc-marco-${f.key}"
+                 style="aspect-ratio:${f.ratio || '1/1'};max-width:${f.ratio === '9/16' ? '172px' : '250px'}">
+              <img id="enc-img-${f.key}" alt="">
+            </div>
+            <div class="enc-pie">
+              <span class="enc-ayuda">Arrastrá la foto para elegir qué se ve${f.redondo ? ' dentro del círculo' : ''}</span>
+              <button type="button" class="enc-btn" onclick="centrarEncuadre('${f.key}')">Centrar</button>
+            </div>
           </div>`;
         break;
       case 'audio':
@@ -1766,11 +1907,16 @@ function onFileChange(input, key, type) {
   if (stat) stat.textContent = `📎 ${file.name}`;
   if (type === 'image') {
     const prev = document.getElementById(`fz-prev-${key}`);
-    if (prev) {
-      const reader = new FileReader();
-      reader.onload = e => { prev.src = e.target.result; prev.style.display = 'block'; };
-      reader.readAsDataURL(file);
-    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (prev) { prev.src = e.target.result; prev.style.display = 'block'; }
+      // Foto nueva, encuadre nuevo: el de la anterior no tiene por qué servir.
+      // Se muestra el marco con el archivo elegido, todavía sin subir, así se
+      // puede acomodar antes de guardar.
+      centrarEncuadre(key);
+      mostrarEncuadre(key, e.target.result);
+    };
+    reader.readAsDataURL(file);
   }
 }
 
@@ -1806,6 +1952,11 @@ async function guardarTodo() {
               return;
             }
             if (url) currentConfig[f.key] = url;
+          }
+          // El encuadre se guarda aunque no se haya subido una foto nueva:
+          // el caso más común es acomodar una que ya estaba.
+          if (f.type === 'image' && posEncuadre[f.key]) {
+            currentConfig[f.key + '_pos'] = posEncuadre[f.key];
           }
         } else {
           const el = document.getElementById(`cf-${f.key}`);
