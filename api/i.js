@@ -232,8 +232,28 @@ module.exports = async function handler(req, res) {
   html = reemplazar(html, 'og-url',   `<meta id="og-url" property="og:url" content="${esc(base + '/i' + qs)}">`);
   html = html.replace(/<title([^>]*)>[\s\S]*?<\/title>/i, `<title$1>${esc(titulo)}</title>`);
 
+  // ── La paleta, servida ya resuelta ────────────────────────────────────
+  // Sin esto la página arranca con los valores por defecto del CSS —fondo
+  // blanco y acento verde, que son los de valentina15— y recién cuando
+  // Supabase contesta salta a los colores de verdad. Medido en una conexión
+  // de celular: 1,7 segundos viendo OTRA invitación antes de la propia.
+  //
+  // No cuesta un pedido más: el config ya se trajo arriba para armar la vista
+  // previa. Acá solo se escribe en el head, que el navegador lee antes de
+  // pintar el primer píxel.
+  //
+  // Los colores los elige el cliente desde el panel y terminan dentro de una
+  // etiqueta <style>, así que se validan uno por uno: solo hexadecimal. Un
+  // valor raro se descarta y esa variable se queda con la del CSS.
+  const hex = v => (typeof v === 'string' && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(v.trim())) ? v.trim() : '';
+  const paleta = [
+    ['--primary', hex(C.color_1)],
+    ['--secondary', hex(C.color_2)],
+    ['--bg', hex(C.color_bg)],
+  ].filter(([, v]) => v).map(([k, v]) => `${k}:${v}`).join(';');
+
   // Las que no existen en el HTML original se agregan al final del head.
-  const extra = `
+  const extra = `${paleta ? `<style id="paleta-servidor">:root{${paleta}}</style>` : ''}
   <meta name="description" content="${esc(desc)}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Invitaciones Digitales">

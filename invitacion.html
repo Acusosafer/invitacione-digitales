@@ -140,6 +140,21 @@
       pointer-events: none
     }
 
+    /* El splash no muestra nada hasta tener los datos de ESTE evento.
+       Antes se pintaba con los valores por defecto —fondo blanco, acento
+       verde: la paleta de valentina15— y el invitado veía casi un segundo
+       otra invitación antes de la suya. Medido: 1,7s en conexión de celular.
+       Los links compartidos (/i) ya llegan con la paleta resuelta desde el
+       servidor; esto cubre el resto de los caminos. */
+    #splash > * {
+      opacity: 0;
+      transition: opacity 300ms cubic-bezier(.23, 1, .32, 1);
+    }
+
+    #splash.listo > * {
+      opacity: 1;
+    }
+
     .splash-img {
       width: min(280px, 80vw);
       height: min(280px, 80vw);
@@ -1278,7 +1293,13 @@
 
   <!-- SPLASH -->
   <div id="splash">
-    <img id="splash-img" class="splash-img" src="" alt="" onerror="this.src='https://via.placeholder.com/280'">
+    <!-- Sin src="" a propósito: un src vacío dispara onerror al instante. Antes
+         eso cargaba un placeholder gris de via.placeholder.com — un pedido a un
+         servidor ajeno, en cada apertura, para mostrar un cuadro que dice
+         "280x280" donde va la foto de la quinceañera. Es el mismo bug que ya
+         hubo con la foto del hashtag. Si el evento no tiene foto, el JS lo
+         esconde. -->
+    <img id="splash-img" class="splash-img" alt="">
     <div class="splash-txt">
       <div class="splash-tipo" id="splash-tipo"></div>
       <h1 class="splash-nombre" id="splash-nombre"></h1>
@@ -1563,6 +1584,15 @@
     const personas_param = params.get('personas') || '1';
     const mesa_param = params.get('mesa') || '';
 
+    // Red de seguridad del velo de carga: si Supabase no contesta o el config
+    // viene roto, nadie llega a poner la clase `listo` y el splash quedaría
+    // invisible para siempre. Preferible mostrarlo con los valores por defecto
+    // —feo— que dejar al invitado mirando una pantalla vacía.
+    setTimeout(() => {
+      const s = document.getElementById('splash');
+      if (s) s.classList.add('listo');
+    }, 5000);
+
     let C = {};
     let selectedDiets = [];
     let carouselIndex = 0;
@@ -1798,7 +1828,13 @@
       document.getElementById('splash-tipo').textContent = C.tipo;
       document.getElementById('splash-nombre').textContent = C.nombre;
       document.getElementById('splash-sub').textContent = C.subtitulo;
-      if (C.foto_splash) document.getElementById('splash-img').src = C.foto_splash;
+      const spImg = document.getElementById('splash-img');
+      if (C.foto_splash) spImg.src = C.foto_splash;
+      else spImg.style.display = 'none';
+
+      // Recién ahora el splash tiene los datos de ESTE evento y se puede
+      // mostrar. Ver la regla de #splash > * en el CSS.
+      document.getElementById('splash').classList.add('listo');
 
       // Hero
       document.getElementById('h-tipo').textContent = C.tipo;
