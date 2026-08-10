@@ -220,6 +220,31 @@ entregarle al salón una lista ordenada por apellido, que es la mitad del produc
 `required` de los inputs no sirve acá: no hay submit de formulario, es un botón con
 `onclick`.
 
+### Los grupos: cada persona contesta por su cuenta
+
+**Un link cubre a todo un grupo** (`invitado_url` es el mismo para los N cupos). Dos reglas
+que salieron de dos bugs reales, los dos arreglados el 10/08/2026:
+
+**1 · El titular que dice "No puedo ir" NO decide por el resto.** Las tarjetas de
+acompañante siguen a la vista aunque él no vaya, y cada una trae su propio sí o no. Lo
+único que se esconde es la dieta del titular. Antes se escondía todo el bloque y
+`confirmar()` armaba las filas de acompañantes solo `if (asiste === 'si')`: de 4 cupos se
+guardaba **1**, y los otros 3 no quedaban ni en `no` ni en `pendiente` — desaparecían,
+porque `rsvp_enviar` ya había borrado la pre-alta. La cuenta del panel daba mal y no había
+forma de notarlo.
+
+**2 · Un link no se llama "Familia Ferreyra".** El prellenado parte el nombre en dos
+—primera palabra al nombre, el resto al apellido— así que quedaba `nombre="Familia"`,
+`apellido="Ferreyra"`: **los dos campos llenos, o sea que la validación lo aceptaba**, y a
+la mesa iba a sentarse alguien llamado "Familia Ferreyra". Hoy, si la primera palabra es
+`familia`, `familias`, `flia` o `fam` (con o sin punto), los campos quedan **vacíos** y los
+escribe quien confirma. Igual, **la forma correcta de nombrar el link es con el nombre real
+de una persona del grupo**: así ella lo recibe ya cargado.
+
+⚠️ **`personas` (los cupos asignados) no se guarda en ningún lado.** Se deduce contando
+filas `pendiente`. Por eso, cuando una confirmación sale mal, **no hay contra qué comparar
+para detectarlo**. Si algún día se agrega la columna, esto se vuelve auditable.
+
 ⚠️ **Las tarjetas de acompañante se arman con `innerHTML` desde el JS y solo aparecen si
 el invitado elige 2 o más personas.** Por eso se les escaparon los colores fijos cuando se
 arreglaron los temas oscuros: una auditoría que fotografía la página no las ve, porque no
@@ -250,6 +275,26 @@ Tarjeta en la pestaña Invitados con los que no contestaron, agrupados por `invi
 Los cupos salen de contar las filas `pendiente` de ese grupo — el `personas` original no
 se guarda en ningún lado. Se arma con DOM, **no con `innerHTML`**: los nombres los escribe
 el cliente y terminan dentro de una URL y de un mensaje.
+
+### Qué se puede saber de un link, y qué no
+
+**No se puede saber a qué número se mandó un link, ni reconstruirlo hacia atrás.** El panel
+arma un `wa.me` que abre WhatsApp y ahí el contacto lo elige la persona a mano: esa
+elección ocurre dentro de WhatsApp y la web nunca se entera. Tampoco se puede saber si el
+link se reenvió a un tercero (es el mismo para todo el grupo) ni si lo leyeron sin abrirlo.
+
+**Sí se sabe quién**, porque el nombre viaja en la URL (`?invitado=Susana+Ferreyra`).
+
+Decidido el 10/08/2026, para hacer **más adelante** (Fer quiso dejar circular links primero):
+
+- **Guardar el teléfono al generar el link** — campo opcional al lado de nombre y cupos.
+  El objetivo concreto: que "Recordar" **abra el chat de esa persona** en vez de dejar el
+  texto para copiar y buscar el contacto a mano.
+  ⚠️ Son datos personales de invitados de un cliente. Nunca pueden viajar al navegador del
+  invitado, y el acceso va por función `SECURITY DEFINER` como todo lo demás.
+- **Registrar la apertura del link** (fecha y cuántas veces). Es la señal que más ahorra
+  trabajo: *"abrió tres veces y no confirmó"* pide otra insistencia que *"nunca abrió"*.
+  No agrega ningún dato personal nuevo.
 
 ### Mesas
 
@@ -423,6 +468,14 @@ El sitio está en Vercel con auto-deploy desde GitHub.
 - ⚠️ **Existe también `invitacionesdigitalesofical.com`** —sin la "i" de "oficial"— comprado
   por error el mismo día. No es el dominio del sitio. Si sirve para algo es como red para
   quien escriba mal la dirección.
+⚠️ **El dominio sin www redirige al www con un 308, y el robot de WhatsApp no lo sigue.**
+Detectado el 10/08/2026: `invitacionesdigitalesoficial.com/i?evento=…` devuelve 308 y la
+vista previa sale sin foto, con el nombre del dominio pelado. El `www.…` y el `.vercel.app`
+devuelven 200 con las etiquetas correctas. **La solución va en Vercel** —hacer principal el
+dominio sin www y que el www redirija hacia él—, no en el código. Se verifica con:
+`curl -sI -A "WhatsApp/2.23" https://invitacionesdigitalesoficial.com/i?evento=X` → tiene
+que dar `200`, no `308`.
+
 - **La URL casi nunca va escrita a mano en el código.** `api/i.js` la toma de
   `x-forwarded-host`, y el generador de links del panel de `location.origin`: los dos se
   adaptan al dominio desde el que se abran. Sólo hay literales en el footer de

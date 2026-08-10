@@ -88,6 +88,47 @@ En GA4 el evento `click` es **clic de salida**: en esta landing es el botón de 
 - **WhatsApp del negocio en una línea aparte**, para no perder su perfil personal. Ver la
   sección "El número de WhatsApp" de `CLAUDE.md` antes de tocarlo.
 
+---
+
+## Hecho el 10/08/2026 a la tarde — el RSVP en grupo
+
+Fer pidió que el RSVP exigiera apellido "para después poder organizar". Tirando de ese
+hilo aparecieron cuatro cosas más, tres de ellas rotas en producción.
+
+**El apellido, obligatorio** — del titular y de cada acompañante. Sin él no se arman las
+mesas ni sale la lista ordenada para el salón, que es la mitad del producto.
+
+**Los cupos que desaparecían.** Si el titular tocaba "No puedo ir" teniendo acompañantes,
+se guardaba **1 fila de 4**: los otros tres no quedaban ni en `no` ni en `pendiente`.
+Confirmar borra la pre-alta, y las filas de acompañantes se armaban solo si el titular iba.
+Ahora cada persona del grupo contesta por su cuenta. **Estuvo vivo mientras los invitados
+de Alma confirmaban** y no hay forma automática de detectar a quién le pasó, porque los
+cupos asignados no se guardan en ningún lado.
+
+**"Familia Ferreyra" entraba como una persona.** El prellenado partía el nombre en dos y
+dejaba los dos campos llenos, así que la validación lo aceptaba.
+
+**Las etiquetas de acompañante, invisibles en temas oscuros** — `rgba(0,0,0,0.5)`, o sea
+**1,11:1 sobre `zaira15`**. Se le escaparon al arreglo de colores porque esas tarjetas las
+pinta el JS y solo existen si el invitado elige 2 o más personas: una auditoría que le saca
+una foto a la página no las ve. Quedaron en 8,94:1.
+
+**Inyección de HTML por el parámetro `?invitado=`**, que se metía tal cual en el saludo del
+hero. El `toUpperCase()` rompía la mayoría de los scripts, pero por casualidad.
+
+También, más temprano: buscador en el Historial (y se le sacó el `innerHTML`, que con la
+creación de eventos sin clave era un agujero real), el botón de música que aparecía sin
+música, el mensaje de entrega que mandaba al dominio viejo, y la herramienta de clave de
+superadmin, cuyas instrucciones apuntaban a un archivo que ya no existe.
+
+### Decisiones de Fer
+
+- **Cada persona del grupo contesta por su cuenta**, aunque el titular no vaya. Eligió el
+  dato exacto por sobre la comodidad de un solo toque.
+- **Sí a la red de seguridad para links llamados "Familia X".**
+- **Guardar el teléfono al generar el link, pero no hoy**: primero deja circular más links.
+  El objetivo es que "Recordar" abra el chat directo.
+
 ## Hecho el 07/08/2026
 
 - **Google Safe Browsing levantado.** Chrome ya no marca el sitio. Instagram queda liberado.
@@ -142,6 +183,21 @@ En GA4 el evento `click` es **clic de salida**: en esta landing es el botón de 
 - **Los asientos del croquis muestran el nombre**, con el completo al apoyar el mouse.
 
 ## Pendientes, en orden
+
+0. ⚠️ **Hacer principal el dominio SIN www, en Vercel.** Hoy el apex devuelve un **308** al
+   `www` y **el robot de WhatsApp no sigue redirecciones**: todo link al dominio sin www se
+   comparte sin foto, con el nombre del dominio pelado. El `www` y el `.vercel.app` andan
+   bien. Es un cambio de configuración en *Settings → Domains*, no de código. Se verifica
+   con `curl -sI -A "WhatsApp/2.23" https://invitacionesdigitalesoficial.com/i?evento=X`:
+   tiene que dar `200`. **Urge**, porque el dominio sin www es el que está impreso en el
+   pie de las invitaciones, el reel, la placa y la bio de Instagram.
+
+0.5. **Guardar el teléfono al generar el link**, para que "Recordar" abra el chat de esa
+   persona en vez de dejar el texto para copiar. Fer lo pidió el 10/08 **para después de
+   dejar circular más links**. Ver "Qué se puede saber de un link" en `CLAUDE.md`: son
+   datos personales de invitados de un cliente, así que van por función `SECURITY DEFINER`
+   y nunca al navegador del invitado. Junto con esto conviene **guardar los cupos
+   asignados**, que hoy no se guardan y por eso nada de esto es auditable.
 
 1. **La línea nueva de WhatsApp.** Fer la consigue, instala WhatsApp Business (nombre, logo
    y **mensaje de bienvenida automático** — ese es el que convierte), y pasa el número.
