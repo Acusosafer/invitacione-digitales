@@ -1,4 +1,4 @@
-# HANDOFF — estado al 07/08/2026
+# HANDOFF — estado al 12/08/2026
 
 > Para retomar en otra sesión. Leer junto con `CLAUDE.md`.
 
@@ -36,6 +36,35 @@ Storage. Las tres ya corridas. Las tres son idempotentes.
 - **Landing rediseñada**: el color inunda la pantalla y cambia con cada invitación.
 
 ---
+
+## Hecho el 12/08/2026 — las dos fugas de la vista previa
+
+Se cerraron los dos agujeros por los que un link compartido salía sin foto. Los dos eran
+invisibles desde el navegador: Chrome sigue los redirects solo y no muestra las
+metaetiquetas, así que abrir la web y verla bien **no prueba nada**.
+
+**1. El apex ya no redirige.** Era el pendiente 0. En Vercel → Settings → Domains, el
+dominio sin `www` estaba en *Redirect to Another Domain* y pasó a *Connect to an
+environment → Production*. **No había que tocar el código 308**, sino el radio button.
+
+```
+antes  invitacionesdigitalesoficial.com  →  308 Permanent Redirect   (WhatsApp se iba)
+ahora  invitacionesdigitalesoficial.com  →  200 OK
+```
+
+Verificado con `curl -sI -A "WhatsApp/2.23.20.0"`: da `200`, y `/i?evento=boda-ana` sirve
+`og:image` con las URLs ya apuntando al apex. El dominio impreso en el pie de las
+invitaciones, el reel, la placa y la bio de Instagram vuelve a compartirse con foto.
+
+**2. La landing no tenía NINGUNA etiqueta Open Graph** — y esto no lo causaba el redirect:
+faltaban desde siempre, en los dos dominios. Compartir `invitacionesdigitalesoficial.com`
+a secas mostraba un renglón gris sin imagen. Es el link de la bio de Instagram, o sea el
+que más circula. `logo-og.png` (1200×630) ya existía en la carpeta y no lo usaba nadie.
+Se agregó el bloque completo en el `<head>` de `index.html`, con el mismo criterio que
+`api/i.js` usa para las invitaciones.
+
+⚠️ **Cómo NO verificar esto:** abriendo la web. Se verifica con `curl` haciéndose pasar por
+el robot, o compartiendo el link por WhatsApp **con una URL nueva** (el caché es por URL).
 
 ## Hecho el 10/08/2026 — el día que salió a la calle
 
@@ -184,13 +213,13 @@ superadmin, cuyas instrucciones apuntaban a un archivo que ya no existe.
 
 ## Pendientes, en orden
 
-0. ⚠️ **Hacer principal el dominio SIN www, en Vercel.** Hoy el apex devuelve un **308** al
-   `www` y **el robot de WhatsApp no sigue redirecciones**: todo link al dominio sin www se
-   comparte sin foto, con el nombre del dominio pelado. El `www` y el `.vercel.app` andan
-   bien. Es un cambio de configuración en *Settings → Domains*, no de código. Se verifica
-   con `curl -sI -A "WhatsApp/2.23" https://invitacionesdigitalesoficial.com/i?evento=X`:
-   tiene que dar `200`. **Urge**, porque el dominio sin www es el que está impreso en el
-   pie de las invitaciones, el reel, la placa y la bio de Instagram.
+0. ✅ **HECHO el 12/08.** Era: hacer principal el dominio sin www. Ver la sección del 12/08.
+
+0.1. **Que `www` redirija al apex.** Hoy los dos sirven la web, así que Google la ve
+   duplicada. En *Settings → Domains* → `www...` → *Redirect to Another Domain* → 308 →
+   `invitacionesdigitalesoficial.com`. Es prolijidad de SEO, no urgencia: los links viejos
+   con `www` funcionan igual. Hacerlo cuando haya un rato, y después avisarle a Search
+   Console cuál es la versión buena.
 
 0.5. **Guardar el teléfono al generar el link**, para que "Recordar" abra el chat de esa
    persona en vez de dejar el texto para copiar. Fer lo pidió el 10/08 **para después de
