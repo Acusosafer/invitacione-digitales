@@ -66,6 +66,32 @@ Se agregó el bloque completo en el `<head>` de `index.html`, con el mismo crite
 ⚠️ **Cómo NO verificar esto:** abriendo la web. Se verifica con `curl` haciéndose pasar por
 el robot, o compartiendo el link por WhatsApp **con una URL nueva** (el caché es por URL).
 
+**Estado al cierre del 12/08:** commit `eaea28b`, pusheado y deployado. Producción devuelve
+las 12 etiquetas y `logo-og.png` responde `200`. Medido en producción, para que nadie vuelva
+a buscar el problema donde no está:
+
+```
+HTML            54 KB        og:title   byte 3.558     respuesta  0,14 s
+logo-og.png     171 KB       og:image   byte 3.899     apex       200 OK
+```
+
+**Pero WhatsApp seguía sin mostrar la tarjeta**, y del lado del servidor no queda nada por
+arreglar. Quedan dos causas, las dos fuera del código — ver el pendiente 0.2.
+
+### Cómo verificar una vista previa, de una vez por todas
+
+```bash
+# lo que ve el robot (NO lo que ve tu navegador)
+curl -s -A "WhatsApp/2.2429.5 N" "https://invitacionesdigitalesoficial.com/" \
+  | tr '>' '>\n' | grep -E 'og:(title|image"|url)'
+
+# que el apex no redirija: tiene que dar 200, nunca 308
+curl -sI -A "WhatsApp/2.2429.5 N" "https://invitacionesdigitalesoficial.com/" | head -1
+```
+
+Chrome sigue los redirects solo y encima **esconde el `www.` de la barra de direcciones**:
+por eso el 308 fue invisible durante días mientras la web "se veía bien".
+
 ## Hecho el 10/08/2026 — el día que salió a la calle
 
 **Instagram lanzado.** Primer dato real, y lo que dijo:
@@ -221,6 +247,27 @@ superadmin, cuyas instrucciones apuntaban a un archivo que ya no existe.
    con `www` funcionan igual. Hacerlo cuando haya un rato, y después avisarle a Search
    Console cuál es la versión buena.
 
+0.2. ⚠️ **Forzar el re-scrape en Meta.** Lo tiene que hacer Fer: necesita su cuenta.
+
+   > **developers.facebook.com/tools/debug** → pegar `https://invitacionesdigitalesoficial.com/`
+   > → **Depurar** → **Volver a extraer** (*Scrape Again*)
+
+   WhatsApp usa el scraper de Facebook. El dominio estuvo roto desde que se compró, así que
+   Meta lo tiene cacheado como "acá no hay preview" y no vuelve a mirar por su cuenta.
+   Re-extraer limpia el caché de Facebook, Instagram y WhatsApp a la vez.
+
+   Y al probar: **mandar el mensaje de verdad, y desde el celular**. WhatsApp Desktop no
+   genera la vista previa de forma confiable en el campo de escritura — el 12/08 se probó
+   dos veces ahí y pareció que el arreglo no había funcionado, cuando ya estaba en línea.
+   Cada URL probada queda cacheada con lo que devolvió esa vez: usar una nueva cada intento
+   (`/?ok=1`, `/?ok=2`), **nunca el link limpio**, que hay que dejar sin quemar.
+
+0.3. **Cambiar `logo-og.png` por una invitación real.** Hoy la tarjeta que ve todo el que
+   recibe el link muestra el logo. Funciona, pero es lo más flojo que se puede mostrar: lo
+   que vende es ver una invitación, como hace la tarjeta de `/i?evento=` con la foto de Ana
+   y José. Una 1200×630 con un celular mostrando una invitación de verdad. Es la primera
+   impresión de todo el boca a boca — ahí se juega el clic.
+
 0.5. **Guardar el teléfono al generar el link**, para que "Recordar" abra el chat de esa
    persona en vez de dejar el texto para copiar. Fer lo pidió el 10/08 **para después de
    dejar circular más links**. Ver "Qué se puede saber de un link" en `CLAUDE.md`: son
@@ -259,6 +306,93 @@ superadmin, cuyas instrucciones apuntaban a un archivo que ya no existe.
    iPhone, que en su rubro son casi todos.
 
 ---
+
+## Lo que viene: libro de deseos y galería de fotos
+
+Charlado el 12/08. Es lo único que el producto no tiene y la competencia tampoco, y lo que
+más se parece a un motivo para elegirlo.
+
+**El evento real de septiembre es el laboratorio.** Es el único que hay, está regalado a una
+pariente, así que se puede estrenar sin riesgo comercial. De ahí salen las dos cosas que hoy
+faltan: saber si la gente realmente lo usa, y **material de Instagram con una fiesta de
+verdad**, que vende mucho más que cualquier placa de diseño.
+
+### Orden recomendado
+
+| | Qué | Cuánto | Por qué en ese orden |
+|---|---|---|---|
+| 1 | **Libro de deseos** | ~1 día | Texto puro. Cero storage, cero riesgo. La mitad del valor emocional por la décima parte del trabajo. |
+| 2 | **Galería de fotos** | ~3-4 días | El diferencial fuerte, pero se lleva todos los problemas de abajo. |
+| 3 | NFC en las mesas | 1 tarde | Accesorio opcional, 10-15 tags. Ver abajo. |
+
+### Dónde van las fotos: ya está resuelto y no es Google Drive
+
+Se descartó Google Drive y OneDrive/Hotmail: para subir a una carpeta compartida el invitado
+necesita cuenta e iniciar sesión, y encima consume el espacio de alguien. En una fiesta, de
+noche, eso no lo hace nadie.
+
+**Va en el bucket `invitaciones` de Supabase Storage, que ya existe y ya está probado**
+(`sql/003_storage.sql`): `anon` puede leer y subir, no actualizar ni borrar. Es exactamente
+lo que necesita una galería colaborativa — el invitado abre el link, elige y sube. Sin
+cuenta, sin login, sin app.
+
+### La compresión no es opcional
+
+```
+100 invitados × 10 fotos × 4 MB  =  4 GB en UNA fiesta
+Supabase free                    =  1 GB
+```
+
+El primer evento revienta el plan gratis. Hay que **comprimir en el navegador antes de
+subir**, con canvas y JS puro: a 1920 px de lado largo y calidad 0,82 una foto de 4 MB baja
+a ~400 KB. Eso lleva la fiesta a ~400 MB.
+
+⚠️ **La compresión es irreversible.** Si después se manda el pack por WeTransfer, viaja lo
+comprimido. Nunca prometer "las fotos en calidad original": para eso habría que guardar los
+originales y el costo se multiplica.
+
+**No hace falta prometerlo.** La calidad alta ya la cubre el fotógrafo — para eso lo
+contratan. La galería colaborativa es otra cosa: la mesa riéndose, el abuelo bailando, la
+coreografía filmada por una amiga. Esas fotos se ven en el celular, no van a un cuadro. A
+1920 px se ven perfectas incluso impresas en 10×15, y **WhatsApp comprime más fuerte que
+eso** cuando los invitados se las mandan entre ellos.
+
+Para septiembre: arrancar en 1920 y **medir cuánto pesó de verdad**. "10 fotos por invitado"
+es un número de manual; en la práctica sube el 20-30% de la gente. Con el dato real se decide
+si conviene subir a 2560 px (~900 KB, indistinguible del original hasta impreso grande).
+
+### ⚠️ Seguridad: son fotos de menores
+
+Una galería abierta en una fiesta de 15 son **fotos de chicas de quince y sus amigas, subidas
+por invitados**, en un bucket donde `anon` puede leer. Antes de que esto exista:
+
+- **Rutas con token aleatorio largo.** Nada de `/galeria/evento/1`: si es adivinable, alguien
+  recorre todos los eventos de todos los clientes.
+- **`noindex` + robots.txt.** Que Google no indexe ni una foto.
+- **Que el cliente pueda borrar**, por función `SECURITY DEFINER` como todo lo privilegiado.
+  `anon` sigue sin poder.
+- **Validar el archivo de verdad**: tipo real (no la extensión), tamaño máximo y cantidad
+  máxima por persona.
+
+Son los puntos 1 y 2 de las reglas post-Pappos Cars, con un agravante: acá no se filtra un
+precio de compra. **Si esto sale mal no es un bug, es el fin del producto.**
+
+### El NFC, en su lugar
+
+La idea original era un souvenir NFC. Conclusión de la charla: **es un accesorio, no el
+producto**, y va último. Con cero ventas todavía, agregarle un objeto físico a algo que no
+vendió una sola unidad es construir el segundo piso antes que el primero.
+
+Lo que sí conviene, en septiembre: **10 o 15 tags NTAG213 en las mesas, no cien souvenirs**.
+Cuesta unos pocos miles de pesos y sirve para dos cosas — ver si la gente realmente toca, y
+filmar a alguien apoyando el celular en la mesa para subir fotos. Ese video vale más que
+cualquier placa.
+
+Notas técnicas por si se hace: **NTAG213 alcanza** (144 bytes; el 215/216 es pagar de más
+por memoria que no se usa). **Grabar siempre un redirect corto propio**, nunca la URL final,
+porque si no hay que reescribir los tags uno por uno. **Bloquear (read-only) recién en
+producción**, nunca en las pruebas: es irreversible. El NFC le gana al QR acá por una razón
+concreta y no de marketing: de noche, con luz baja, la cámara no enfoca el QR.
 
 ## Cosas que conviene no olvidar
 
