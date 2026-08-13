@@ -283,8 +283,10 @@ superadmin, cuyas instrucciones apuntaban a un archivo que ya no existe.
 2. **Esperar el primer mensaje.** Es la única métrica que decide si el precio publicado
    arregló la fuga. Volver a mirar GA4 con Argentina aislada en 4-5 días:
    los clics deberían BAJAR (el precio filtra antes) y los mensajes subir.
-3. **Terminar `almamia15`**: volver a subir la portada (la vieja pesa 2,26 MB) y cambiar
-   `foto_galeria_2`, que todavía apunta a `/assets/valentina15/...` de cuando se copió ese evento.
+3. ✅ **HECHO.** Era: terminar `almamia15`. Verificado el 11/08 contra Supabase — las siete
+   fotos y la música son archivos propios en Storage (ya no hay ninguna prestada de
+   `valentina15`), y las portadas pesan bien: hero 197 KB, splash 454 KB, las dos por
+   debajo del límite de ~600 KB con el que WhatsApp descarta la imagen de la vista previa.
 7. **Escuchar dos temas** asignados con dudas: `luna15` (capoeira, se pidió folk de jardín) y
    `boda-julieta` (se llama "morning" y se pidió ambient nocturno).
 8. **La landing tarda.** Medida en 4G con CPU de gama media: primer texto a los 2,4 s, pero
