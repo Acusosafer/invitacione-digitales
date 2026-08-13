@@ -46,8 +46,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
      el principal en Vercel. Las relativas no las resuelve el robot.
      ⚠️ WhatsApp cachea la vista previa POR URL. Para probar cambios
      hay que compartir una URL distinta (agregarle un ?algo=1).
-     ⚠️ Si se cambia logo-og.png, respetar 1200×630: es la proporción
+     ⚠️ `og-home.png` tiene que medir 1200×630 EXACTOS: es la proporción
      que hace que WhatsApp muestre la tarjeta grande y no la chica.
+     Y por debajo de ~600 KB, o WhatsApp la descarta y sale sin foto.
+     Se regenera con `node publicidad/generar-og-home.js`.
+     (`logo-og.png` sigue existiendo: es el respaldo de los eventos que
+      todavía no subieron su foto, lo usa invitacion.html.)
      ══════════════════════════════════════════════════════════════════ -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Invitaciones Digitales">
@@ -55,16 +59,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta property="og:title" content="Una invitación para una sola noche — la tuya">
 <meta property="og:description" content="Invitaciones digitales a medida para 15 años y casamientos. Se abren en el celular, suenan, cuentan los días y te dicen quién viene.">
 <meta property="og:url" content="https://invitacionesdigitalesoficial.com/">
-<meta property="og:image" content="https://invitacionesdigitalesoficial.com/logo-og.png">
-<meta property="og:image:secure_url" content="https://invitacionesdigitalesoficial.com/logo-og.png">
+<meta property="og:image" content="https://invitacionesdigitalesoficial.com/og-home.png">
+<meta property="og:image:secure_url" content="https://invitacionesdigitalesoficial.com/og-home.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Invitaciones Digitales — invitaciones para 15 años y casamientos">
+<meta property="og:image:alt" content="Una invitación digital abierta en un celular, con la foto y el nombre de la quinceañera">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Una invitación para una sola noche — la tuya">
 <meta name="twitter:description" content="Invitaciones digitales a medida para 15 años y casamientos. Se abren en el celular, suenan, cuentan los días y te dicen quién viene.">
-<meta name="twitter:image" content="https://invitacionesdigitalesoficial.com/logo-og.png">
+<meta name="twitter:image" content="https://invitacionesdigitalesoficial.com/og-home.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

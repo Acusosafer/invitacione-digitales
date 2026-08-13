@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Tarjeta de vista previa de la web (1200×630)</title>
+<!--
+  La imagen que ve cualquiera que comparta invitacionesdigitalesoficial.com
+  por WhatsApp. Antes era el logo: funcionaba, pero mostrar la marca no vende
+  nada. Lo que vende es VER una invitación de verdad.
+
+  El celular lleva un iframe de la invitación real, no una captura: así, si se
+  cambia el diseño, se regenera y ya está.
+
+  Se genera con `node publicidad/generar-og-home.js`. Sale `og-home.png` en la
+  raíz, que es de donde la sirve Vercel.
+
+  ⚠️ 1200×630 exactos. Es la proporción que recortan WhatsApp, Facebook y
+  Twitter; con otra medida la recortan ellos y sale cualquier cosa.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#222;display:grid;place-items:center;min-height:100vh}
+
+  .placa{
+    width:1200px; height:630px; position:relative; overflow:hidden;
+    background:#08080a;
+    font-family:'Instrument Sans',system-ui,sans-serif;
+    /* Centrado y con anchos fijos, no `flex:1`: con flex el texto se pegaba
+       al borde izquierdo, el celular al derecho y quedaba un pozo negro en el
+       medio. Los dos bloques juntos y el aire repartido a los costados. */
+    display:flex; align-items:center; justify-content:center;
+    gap:72px; padding:0 60px;
+  }
+
+  /* Focos dorados muy suaves. Sobre un negro plano el celular queda recortado
+     como una calcomanía; con el halo detrás se apoya en algo. */
+  .placa::before{
+    content:''; position:absolute; inset:0;
+    background:
+      radial-gradient(46% 58% at 72% 48%, rgba(247,206,132,.24) 0%, transparent 64%),
+      radial-gradient(52% 62% at 10% 92%, rgba(168,118,31,.22) 0%, transparent 66%);
+  }
+
+  .izq{position:relative; z-index:1; flex:none; width:474px}
+
+  .marca{
+    font-family:'Fraunces',Georgia,serif; font-weight:700;
+    font-size:47px; line-height:1.06; color:#F7CE84;
+    font-variation-settings:'SOFT' 30;
+  }
+  .oficial{
+    margin-top:11px; font-size:14px; font-weight:600;
+    letter-spacing:.42em; text-transform:uppercase; color:#A8761F;
+  }
+
+  .linea{
+    width:62px; height:2px; background:#A8761F; opacity:.55;
+    margin:34px 0 30px;
+  }
+
+  .frase{
+    font-family:'Fraunces',Georgia,serif; font-style:italic; font-weight:400;
+    font-size:31px; line-height:1.36; color:#F2EAE0; max-width:15ch;
+  }
+
+  .pie{
+    margin-top:32px; font-size:16px; letter-spacing:.2em;
+    text-transform:uppercase; color:rgba(242,234,224,.5);
+  }
+
+  /* ── El celular ────────────────────────────────────────────────────── */
+  .tel{
+    position:relative; z-index:1; flex:none;
+    width:286px; height:592px; padding:9px;
+    background:linear-gradient(150deg,#3a342c,#1c1814);
+    border-radius:44px; border:1.5px solid rgba(255,255,255,.12);
+    box-shadow:0 40px 90px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.5);
+    transform:rotate(-3deg);
+  }
+  .pantalla{
+    width:268px; height:574px; border-radius:36px; overflow:hidden;
+    position:relative; background:#000;
+  }
+  .isla{
+    position:absolute; top:11px; left:50%; transform:translateX(-50%);
+    width:74px; height:19px; background:#000; border-radius:12px; z-index:2;
+  }
+  /* El iframe se dibuja al doble y se achica a la mitad: así el texto de la
+     invitación queda nítido en la exportación en vez de pixelado. */
+  .pantalla iframe{
+    width:536px; height:1148px; border:0;
+    position:absolute; top:0; left:0;
+    transform:scale(.5); transform-origin:top left;
+  }
+</style>
+</head>
+<body>
+  <div class="placa">
+    <div class="izq">
+      <div class="marca">Invitaciones<br>Digitales</div>
+      <div class="oficial">Oficial</div>
+      <div class="linea"></div>
+      <p class="frase">Así la recibe cada invitado.</p>
+      <div class="pie">15 años · Casamientos</div>
+    </div>
+
+    <div class="tel">
+      <div class="pantalla">
+        <div class="isla"></div>
+        <iframe src="../invitacion.html?evento=almamia15" scrolling="no"></iframe>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

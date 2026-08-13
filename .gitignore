@@ -1,0 +1,10 @@
+# Dependencias de las herramientas de generación (el reel, la placa, la
+# tarjeta de vista previa). Son 109 MB y se reinstalan con:
+#     npm i puppeteer-core ffmpeg-static
+# No forman parte del sitio: Vercel publica HTML, CSS y JS sueltos.
+node_modules/
+package-lock.json
+
+# Ruido del sistema
+Thumbs.db
+.DS_Store
