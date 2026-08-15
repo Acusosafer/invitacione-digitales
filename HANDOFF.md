@@ -237,6 +237,54 @@ superadmin, cuyas instrucciones apuntaban a un archivo que ya no existe.
 - **Indicador "Deslizá"** en el hero: muchos invitados se quedaban ahí sin saber que seguía.
 - **Los asientos del croquis muestran el nombre**, con el completo al apoyar el mouse.
 
+## Hecho el 15/08/2026 — la primera venta en curso
+
+Fer comentó un reel viral de unos 15 (marzo 2027, a 7 meses) y **la madre le contestó
+"pasame y chusmeo"**. Es el primer prospecto real que llega por Instagram. Todo lo de este
+día salió de ahí.
+
+**Modo muestra (`?muestra=1`) y la ruta `/muestra`.** Le manda la invitación de Alma —con
+permiso de la familia— entera y navegable, con el RSVP funcionando, pero sin guardar nada.
+El RSVP se muestra funcionando a propósito: es la mitad de lo que se está vendiendo, y el
+momento en que se entiende el producto es justo cuando la persona lo completa.
+
+⚠️ **Dos bugs graves, los dos encontrados antes de que el link se mandara.** Instagram no
+convierte en link una URL con `?` y `&`, así que el primer mensaje llegó con la dirección
+en texto plano: desde el celular no se podía tocar. Y la ruta limpia que lo arreglaba
+**abría la invitación de `valentina15` con el RSVP vivo**, porque una ruta limpia deja
+`location.search` vacío. Ver la sección `/muestra` de `CLAUDE.md`.
+
+**El hero en PC mostraba el torso y no la cara.** Una foto vertical se recorta a lo ancho
+en el celular y a lo alto en la PC; el encuadre guardado es uno solo y está elegido para el
+celular. Le pasaba a cualquier cliente con foto vertical.
+
+**Canciones y acompañantes estaban mezclados** en el panel de Alma: un acompañante que no
+pedía tema quedaba con "Acompañante de Fulano" guardado en el campo de la canción. El
+fallback dejó de escribirse, y el filtro que limpia lo viejo es **de lectura**, para no
+tocar la base de una clienta con la fiesta en marcha. Salió de ahí la **lista para el DJ**,
+agrupada por canción y no por persona.
+
+**La tarjeta al compartir la web** ya no es el logo: es un celular con la invitación de
+Alma. 1200×630 y 245 KB, las dos medidas verificadas — la primera versión pesaba 809 KB y
+habría salido sin foto.
+
+**Maqueta del libro de deseos** (`deseos.html`), para aprobar el diseño antes de construirlo.
+
+### Decisiones de Fer
+
+- **La invitación de Alma como muestra**, ya hablado con la familia.
+- **NFC: NTAG213**, 15 o 20 para las mesas, no cien souvenirs.
+- **No poner precio en el primer mensaje.** A 7 meses la venta es ahora, pero primero que
+  vea el producto.
+
+### Lo que quedó pendiente de esa conversación
+
+⚠️ **El chat de Instagram tiene los mensajes temporales activados**: lo que le escribe se
+borra a las 24 horas. Hay que apagarlo antes de seguir esa charla.
+
+Y quedó prometido un descuento ("hay descuento?" → "obvioooo"). **No fijar un número en
+pesos con meses de anticipación**: se honra sobre el precio que esté vigente ese día.
+
 ## Pendientes, en orden
 
 0. ✅ **HECHO el 12/08.** Era: hacer principal el dominio sin www. Ver la sección del 12/08.
@@ -262,11 +310,21 @@ superadmin, cuyas instrucciones apuntaban a un archivo que ya no existe.
    Cada URL probada queda cacheada con lo que devolvió esa vez: usar una nueva cada intento
    (`/?ok=1`, `/?ok=2`), **nunca el link limpio**, que hay que dejar sin quemar.
 
-0.3. **Cambiar `logo-og.png` por una invitación real.** Hoy la tarjeta que ve todo el que
-   recibe el link muestra el logo. Funciona, pero es lo más flojo que se puede mostrar: lo
-   que vende es ver una invitación, como hace la tarjeta de `/i?evento=` con la foto de Ana
-   y José. Una 1200×630 con un celular mostrando una invitación de verdad. Es la primera
-   impresión de todo el boca a boca — ahí se juega el clic.
+0.25. **Seguir la charla con la madre del reel** (`maltech2024`). Es el único prospecto
+   real que hay. Antes de escribirle: **apagar los mensajes temporales** del chat, o lo que
+   le mande se borra en 24 horas. El link a mandarle es
+   `invitacionesdigitalesoficial.com/muestra`. La fiesta es en **marzo 2027** y las
+   invitaciones se mandan dos o tres meses antes, así que decide entre diciembre y enero.
+
+0.28. **Conectar el libro de deseos a la base.** Hoy `deseos.html` es una maqueta que no
+   guarda nada. Falta la tabla, que el cliente pueda borrar un deseo desde su panel, y
+   decidir si el muro lo ven todos o solo el agasajado. Es ~1 día. El evento de septiembre
+   es el laboratorio.
+
+0.3. ✅ **HECHO el 15/08.** Era: cambiar el logo por una invitación real en la tarjeta al
+   compartir. Hoy es `og-home.png`, un celular con la invitación de Alma. Se regenera con
+   `node publicidad/generar-og-home.js`. **Si algún día cambia, verificar las dos medidas:**
+   1200×630 exactos y menos de ~600 KB, o WhatsApp la descarta y la tarjeta sale sin foto.
 
 0.5. **Guardar el teléfono al generar el link**, para que "Recordar" abra el chat de esa
    persona en vez de dejar el texto para copiar. Fer lo pidió el 10/08 **para después de

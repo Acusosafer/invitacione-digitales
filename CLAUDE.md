@@ -300,6 +300,24 @@ pedidos. Sale como texto para pegar en WhatsApp o como PDF para imprimir.
 Se arma con DOM, no con `innerHTML`. El texto lo escribe el invitado y antes entraba **como
 HTML** en el panel del cliente (`tdCancion.innerHTML = \`🎵 ${inv.mensaje}\``).
 
+### El hero recorta por ejes distintos según la pantalla
+
+Los clientes suben **fotos verticales**, sacadas con el celular. El hero es a pantalla
+completa, así que:
+
+```
+celular 390×844  →  se ve el 100% del alto y el  69% del ancho   (recorta a lo ANCHO)
+PC 1920×1080     →  se ve el  38% del alto y el 100% del ancho   (recorta a lo ALTO)
+```
+
+El encuadre guardado es **uno solo** y el admin lo elige sobre un marco 9/16, o sea
+pensando en el celular. En la PC ese "50% vertical" cae en la banda del medio de la foto:
+**el torso, con la cara afuera**. Le pasaba a cualquier cliente con foto vertical.
+
+Hoy, cuando el recorte es vertical, el punto de mira sube solo al 25%. Se recalcula al
+girar el teléfono o agrandar la ventana. ⚠️ Si la foto tiene la cabeza pegada al borde de
+arriba, ningún valor la salva: hay que pedirle al cliente una foto con más aire.
+
 ### `/muestra` — el link que se le manda a quien todavía no es cliente
 
 `invitacionesdigitalesoficial.com/muestra` abre la invitación de `almamia15` con
@@ -308,9 +326,16 @@ Avisa dos veces que es una muestra — que alguien crea que confirmó de verdad 
 de otra persona sería peor que cualquier venta.
 
 **Por qué es una ruta limpia y no `?evento=…&muestra=1`:** una URL con `?` y `&` es frágil
-fuera de la web. Hay apps que no la convierten en link tocable —los comentarios de
-Instagram, por ejemplo, no lo hacen con ninguna—, otras la cortan en el `&`, y ninguna
-se puede dictar por teléfono. `/muestra` se puede tipear a mano.
+fuera de la web. **Instagram no la convierte en link tocable** — le llegó así a una
+prospecta el 15/08 y desde el celular no podía hacer nada con ella. `/muestra` se convierte
+en link en cualquier app y además se puede dictar por teléfono.
+
+⚠️ **Una ruta limpia deja `location.search` VACÍO en el navegador.** El rewrite de Vercel
+le pasa la query a `api/i.js`, pero la barra de direcciones sigue diciendo `/muestra`. La
+primera versión mostraba la vista previa de Alma y después **abría la invitación de
+`valentina15` —el evento por defecto— con el RSVP vivo, escribiendo filas de verdad.**
+Hoy `api/i.js` deja la query en `window.__QS_SERVIDOR` y `invitacion.html` la usa cuando
+`location.search` está vacío. **Cualquier ruta limpia nueva necesita eso.**
 
 ⚠️ El evento está escrito en `vercel.json`. Si algún día `almamia15` deja de ser el que
 conviene mostrar, se cambia ahí. **`vercel.json` es JSON puro: no acepta comentarios ni
@@ -496,6 +521,33 @@ Todos los celulares usan iframes reales en lugar de contenido CSS dibujado:
 ```
 - `pointer-events:none` en el iframe para que el click pase al `<a>` padre
 - Grid de demos: `loading="eager"` en 15años (visible), `loading="lazy"` en bodas (tab oculto)
+
+## `deseos.html` — libro de deseos (MAQUETA, no guarda nada)
+
+Lo que ve el invitado cuando apoya el celular en el tag NFC de la mesa. **Todavía no está
+conectado a la base**: los deseos son de mentira y el botón no escribe. Existe para aprobar
+el diseño antes de construir la tabla.
+
+`deseos.html?evento=almamia15` — hereda el tema del evento igual que la invitación: paleta,
+dupla tipográfica y foto. Si el invitado toca el tag y aterriza en algo que parece otra
+web, duda y se va.
+
+Decisiones que conviene sostener cuando se construya de verdad:
+
+- **Es una pregunta, no una caja vacía.** A "dejá tu mensaje" la gente le escribe
+  "felicidades!!"; a "¿Qué le deseás a Alma?" le contesta.
+- **Dos campos y nada más**: el deseo y el nombre. A la una de la mañana cada campo extra
+  pierde gente. Sin cuenta y sin login.
+- **Primero escribís, después ves los de todos.** Es lo que hace que participen todos, y
+  evita que el primero se encuentre un muro vacío.
+- **El nombre es obligatorio**: "alguien te desea lo mejor" no sirve de recuerdo.
+- El muro se arma con DOM, no con `innerHTML`: lo escriben los invitados y queda a la vista
+  de toda la fiesta.
+- Concordancia: en un casamiento son dos. Se deduce del nombre (`&`, ` y `) y se fuerza con
+  `&t=p`.
+
+Falta, antes de que sea real: la tabla, que el cliente pueda **borrar** un deseo desde su
+panel, y decidir si el muro es público o solo para el agasajado.
 
 ## Deploy
 
