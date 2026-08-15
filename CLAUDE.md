@@ -300,6 +300,22 @@ pedidos. Sale como texto para pegar en WhatsApp o como PDF para imprimir.
 Se arma con DOM, no con `innerHTML`. El texto lo escribe el invitado y antes entraba **como
 HTML** en el panel del cliente (`tdCancion.innerHTML = \`🎵 ${inv.mensaje}\``).
 
+### `/muestra` — el link que se le manda a quien todavía no es cliente
+
+`invitacionesdigitalesoficial.com/muestra` abre la invitación de `almamia15` con
+`?muestra=1`: se ve y se recorre entera, se puede completar el RSVP, y **no guarda nada**.
+Avisa dos veces que es una muestra — que alguien crea que confirmó de verdad en la fiesta
+de otra persona sería peor que cualquier venta.
+
+**Por qué es una ruta limpia y no `?evento=…&muestra=1`:** una URL con `?` y `&` es frágil
+fuera de la web. Hay apps que no la convierten en link tocable —los comentarios de
+Instagram, por ejemplo, no lo hacen con ninguna—, otras la cortan en el `&`, y ninguna
+se puede dictar por teléfono. `/muestra` se puede tipear a mano.
+
+⚠️ El evento está escrito en `vercel.json`. Si algún día `almamia15` deja de ser el que
+conviene mostrar, se cambia ahí. **`vercel.json` es JSON puro: no acepta comentarios ni
+strings sueltos dentro de `rewrites`** — Vercel valida el esquema y el deploy falla.
+
 ### Qué se puede saber de un link, y qué no
 
 **No se puede saber a qué número se mandó un link, ni reconstruirlo hacia atrás.** El panel

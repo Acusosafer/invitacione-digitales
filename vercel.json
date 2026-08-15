@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/i", "destination": "/api/i" }
+    { "source": "/i", "destination": "/api/i" },
+    { "source": "/muestra", "destination": "/api/i?evento=almamia15&muestra=1" }
   ]
 }
