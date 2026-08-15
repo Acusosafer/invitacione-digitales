@@ -1681,7 +1681,14 @@
     // Las tablas viven en el schema `invitaciones`, no en `public`.
     const sb = supabase.createClient(SUPA_URL, SUPA_KEY, { db: { schema: 'invitaciones' } });
 
-    const params = new URLSearchParams(window.location.search);
+    // Normalmente los parámetros vienen en la barra del navegador. Pero si se
+    // entró por una ruta limpia (/muestra), la query existe solo del lado del
+    // servidor, dentro del rewrite de Vercel: acá `location.search` está
+    // VACÍO. `api/i.js` la deja escrita en `window.__QS_SERVIDOR` para que se
+    // pueda leer. Sin esto, /muestra abría el evento por defecto con el RSVP
+    // vivo — o sea, escribiendo filas en la fiesta de otra persona.
+    const params = new URLSearchParams(
+      window.location.search || window.__QS_SERVIDOR || '');
     const eventoId = params.get('evento') || 'valentina15';
     const invitado = params.get('invitado');
     const personas_param = params.get('personas') || '1';

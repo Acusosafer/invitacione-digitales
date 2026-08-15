@@ -265,7 +265,17 @@ module.exports = async function handler(req, res) {
   <meta name="twitter:description" content="${esc(desc)}">
   <meta name="twitter:image" content="${esc(img)}">
 `;
-  html = html.replace('</head>', extra + '</head>');
+  // ── La query, para el navegador ───────────────────────────────────────
+  // Cuando se entra por una ruta limpia como /muestra, el rewrite de Vercel
+  // le pasa `?evento=…&muestra=1` a ESTA función, pero la barra del navegador
+  // sigue diciendo /muestra: `location.search` queda VACÍO.
+  // Sin esto, /muestra armaba la vista previa con los datos de Alma y después
+  // abría la invitación de valentina15 —el evento por defecto— con el RSVP
+  // vivo, escribiendo filas reales. Verificado antes de arreglarlo.
+  const extraQs = `<script id="qs-servidor">window.__QS_SERVIDOR=${
+    JSON.stringify(qs)};</script>`;
+
+  html = html.replace('</head>', extra + extraQs + '</head>');
 
   // El JS de la página vuelve a escribir las OG en el navegador; da igual,
   // el robot ya leyó las de arriba. Lo que el invitado ve no cambia.
