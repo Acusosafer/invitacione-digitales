@@ -1978,6 +1978,37 @@
         hb.style.backgroundPosition = `center, ${encuadre('foto_hero')}`;
         hb.style.backgroundSize     = 'cover, cover';
         hb.style.backgroundRepeat   = 'no-repeat, no-repeat';
+
+        // ── El hero recorta por ejes distintos según la pantalla ────────
+        // Los clientes suben fotos verticales, sacadas con el celular. En un
+        // celular la foto entra entera de alto y se recorta a lo ANCHO; en
+        // una PC pasa al revés: entra entera de ancho y se recorta a lo ALTO.
+        // Medido con la de almamia15 (1280×1920):
+        //     celular 390×844 → se ve el 100% del alto
+        //     PC 1920×1080    → se ve el  38% del alto
+        // El encuadre guardado es uno solo y el admin lo elige sobre un marco
+        // 9/16, o sea pensando en el celular. En la PC ese "50% vertical"
+        // muestra la banda del medio de la foto: el torso, con la cara
+        // afuera. Le pasaba a cualquier cliente con foto vertical.
+        //
+        // Cuando el recorte es vertical, el punto de mira sube al tercio de
+        // arriba, que es donde está la cara en un retrato. Cuando no lo es
+        // —foto horizontal, o pantalla de celular— no se toca nada.
+        const posGuardada = encuadre('foto_hero');
+        const [heroX, heroY] = posGuardada.split(' ');
+        const foto = new Image();
+        const acomodarHero = () => {
+          if (!foto.naturalWidth || !hb.clientHeight) return;
+          const relFoto = foto.naturalWidth / foto.naturalHeight;
+          const relCaja = hb.clientWidth / hb.clientHeight;
+          const recorteVertical = relCaja > relFoto + 0.01;
+          hb.style.backgroundPosition =
+            `center, ${heroX} ${recorteVertical ? '25%' : heroY}`;
+        };
+        foto.addEventListener('load', acomodarHero);
+        foto.src = C.foto_hero;
+        // Girar el teléfono o agrandar la ventana cambia cuál eje se recorta.
+        window.addEventListener('resize', acomodarHero, { passive: true });
       }
 
       // Guest info
