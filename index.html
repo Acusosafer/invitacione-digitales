@@ -490,9 +490,48 @@ body.on-dark .mesa.full u{background:var(--live)}
   background:radial-gradient(56% 44% at 50% 6%, rgba(247,206,132,.34) 0%, transparent 64%);
 }
 .precio-caja{position:relative; max-width:46ch; margin:0 auto}
-/* #786B5C es el gris más claro que todavía llega a 4.5:1 sobre el marfil */
-.precio-medida{margin-top:22px; font-size:.9rem; color:var(--ink-3)}
-.precio-medida a{color:var(--ink); text-decoration:underline; text-underline-offset:3px}
+
+/* ══════════════════════════════════════════════════════════════════
+   LA SEGUNDA PUERTA — el servicio a medida
+   No está acá para venderse: está para que el de $50.000 se lea como
+   conveniente. Un precio solo no es caro ni barato, es "un precio".
+   Con uno más alto arriba, el de abajo pasa a ser una decisión fácil.
+   Por eso se ve, y por eso NO compite: el número grande sigue siendo
+   el de $50.000, que es el que escala sin que Fer sea el cuello de
+   botella. El detalle completo vive en /a-medida.
+   ══════════════════════════════════════════════════════════════════ */
+.precio-medida{
+  position:relative; max-width:620px; margin:52px auto 0;
+  display:grid; grid-template-columns:auto 1fr; gap:8px 30px; align-items:center;
+  text-align:left;
+  padding:26px 30px; border:1px solid var(--line); border-radius:14px;
+  background:rgba(250,244,234,.5);
+}
+.pm-label{
+  grid-column:1; font-size:.7rem; letter-spacing:.24em; text-transform:uppercase;
+  color:var(--ink-3);
+}
+.pm-num{
+  grid-column:1; font-family:'Fraunces',Georgia,serif; font-weight:400;
+  font-variation-settings:'SOFT' 40,'WONK' 1,'opsz' 120;
+  font-size:1.9rem; line-height:1; letter-spacing:-.02em; white-space:nowrap;
+  /* #8A5F17 y no --gold: el dorado normal da 3:1 y no alcanza para
+     texto de este tamaño. Es el mismo dorado del PDF de mesas. */
+  color:#8A5F17;
+}
+.pm-txt{grid-column:2; grid-row:1/3; font-size:.95rem; line-height:1.55; color:var(--ink-2)}
+.pm-link{
+  grid-column:2; font-size:.9rem; font-weight:500; color:var(--ink);
+  text-decoration:none; display:inline-flex; align-items:center; gap:7px;
+  transition:gap 200ms var(--ease-out);
+}
+.pm-link:hover{gap:12px}
+.pm-link span{text-decoration:underline; text-underline-offset:3px}
+@media(max-width:640px){
+  .precio-medida{grid-template-columns:1fr; text-align:center; gap:10px; padding:26px 22px}
+  .pm-txt,.pm-link{grid-column:1; grid-row:auto}
+  .pm-link{justify-content:center; margin-top:4px}
+}
 .precio-label{
   font-size:.76rem; letter-spacing:.26em; text-transform:uppercase;
   color:var(--ink-3);
@@ -756,14 +795,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <a class="btn btn-solid"
            href="https://wa.me/5491124576536?text=Hola!%20Vi%20la%20web%20y%20quiero%20mi%20invitaci%C3%B3n%20por%20%2450.000.%20Te%20cuento%20de%20la%20fiesta%3A">Quiero la mía</a>
       </div>
-      <!-- La puerta al servicio a medida. Va acá y no en el nav a propósito:
-           el que está leyendo el precio es exactamente el que puede querer
-           algo más. Y va discreto — el camino principal sigue siendo el
-           modelo de $50.000, que es el que escala. -->
-      <p class="precio-medida">
-        ¿Querés algo que no salga de ningún modelo?
-        <a href="/a-medida">Mirá el servicio a medida</a>
-      </p>
+    </div>
+
+    <!-- La segunda puerta. Va acá y no en el nav a propósito: el nav se
+         esconde entero abajo de 820px, y el celular es por donde entra
+         casi todo el mundo. Acá, en cambio, la ve el que ya está mirando
+         el precio — que es exactamente el que puede querer algo más. -->
+    <div class="precio-medida" data-reveal>
+      <div class="pm-label">A medida</div>
+      <div class="pm-num">Desde $150.000</div>
+      <p class="pm-txt">Dibujada desde cero para tu fiesta: paleta, tipografía y apertura propias. No parte de ningún modelo.</p>
+      <a class="pm-link" href="/a-medida"><span>Ver el servicio a medida</span> →</a>
     </div>
   </div>
 </section>
