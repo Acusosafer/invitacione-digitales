@@ -8,3 +8,6 @@ package-lock.json
 # Ruido del sistema
 Thumbs.db
 .DS_Store
+
+# El zip que exporta Claude Design: fuente de trabajo, no del sitio.
+*.zip

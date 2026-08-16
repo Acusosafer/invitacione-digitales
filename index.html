@@ -490,6 +490,9 @@ body.on-dark .mesa.full u{background:var(--live)}
   background:radial-gradient(56% 44% at 50% 6%, rgba(247,206,132,.34) 0%, transparent 64%);
 }
 .precio-caja{position:relative; max-width:46ch; margin:0 auto}
+/* #786B5C es el gris más claro que todavía llega a 4.5:1 sobre el marfil */
+.precio-medida{margin-top:22px; font-size:.9rem; color:var(--ink-3)}
+.precio-medida a{color:var(--ink); text-decoration:underline; text-underline-offset:3px}
 .precio-label{
   font-size:.76rem; letter-spacing:.26em; text-transform:uppercase;
   color:var(--ink-3);
@@ -753,6 +756,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <a class="btn btn-solid"
            href="https://wa.me/5491124576536?text=Hola!%20Vi%20la%20web%20y%20quiero%20mi%20invitaci%C3%B3n%20por%20%2450.000.%20Te%20cuento%20de%20la%20fiesta%3A">Quiero la mía</a>
       </div>
+      <!-- La puerta al servicio a medida. Va acá y no en el nav a propósito:
+           el que está leyendo el precio es exactamente el que puede querer
+           algo más. Y va discreto — el camino principal sigue siendo el
+           modelo de $50.000, que es el que escala. -->
+      <p class="precio-medida">
+        ¿Querés algo que no salga de ningún modelo?
+        <a href="/a-medida">Mirá el servicio a medida</a>
+      </p>
     </div>
   </div>
 </section>

@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/i", "destination": "/api/i" },
-    { "source": "/muestra", "destination": "/api/i?evento=almamia15&muestra=1" }
+    { "source": "/muestra", "destination": "/api/i?evento=almamia15&muestra=1" },
+    { "source": "/a-medida", "destination": "/servicio-a-medida.html" }
   ]
 }
