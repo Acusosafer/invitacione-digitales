@@ -20,6 +20,7 @@ que siga siéndolo.
 | `invitacion.html` | Invitación visible al invitado — carga config desde Supabase según `?evento=` |
 | `admin.html` | Panel de control — gestión de invitados, mesas, links, diseño |
 | `index.html` | Landing page del servicio |
+| `servicio-a-medida.html` | La página del servicio premium — ruta `/a-medida` |
 | `api/i.js` | **Vista previa de WhatsApp.** Los links se comparten como `/i?evento=...` |
 | `vercel.json` | Rewrite `/i` → `/api/i` |
 | `.vercelignore` | Qué NO se publica: `.md`, `sql/`, `publicidad/`, herramientas internas |
@@ -521,6 +522,36 @@ Todos los celulares usan iframes reales en lugar de contenido CSS dibujado:
 ```
 - `pointer-events:none` en el iframe para que el click pase al `<a>` padre
 - Grid de demos: `loading="eager"` en 15años (visible), `loading="lazy"` en bodas (tab oculto)
+
+## `/a-medida` — la página del servicio premium
+
+`servicio-a-medida.html`, ruta corta en `vercel.json`. Salió de un diseño hecho en
+Claude Design, que vino en **formato propio** (`<x-dc>`, `sc-for`, `{{ }}`, `support.js`)
+y con **otra identidad** — Cormorant Garamond + Jost sobre fondo oscuro. Se tradujo a
+HTML plano y a los tokens de `index.html`. ⚠️ **Nada de Claude Design se publica tal
+cual**: ese formato necesita su runtime, y acá no hay build.
+
+**Tres decisiones comerciales que están escritas en la página y conviene no aflojar:**
+
+- **"Desde $150.000", no un número cerrado.** Un precio fijo pone el mismo techo para
+  una familia y para un salón. El "desde" mantiene el ancla —que fue lo que destrabó
+  las consultas cuando el precio salió a la vista— sin atarse.
+- **Las secciones que no existen son un extra pago** ("Una sección que no existe",
+  $30.000). El diseño original prometía cronograma y hoteles como si fueran un ajuste;
+  son **código nuevo, campos de admin y un cambio de esquema, por evento**.
+- **"La rehago sin costo" tiene límite: una vez.** Sin tope, un cliente difícil se
+  come el margen entero.
+
+⚠️ **Los extras van ARRIBA de los pilares, y es a propósito.** Base $50.000 + monograma
++ save the date llega casi al mismo ticket que una a medida **con una fracción del
+trabajo y sin cuello de botella**. El a medida existe, es caro, y se hace poco: el
+diseño exclusivo no escala, la plantilla sí.
+
+**SEO:** `lang="es-AR"`, canonical a `/a-medida` (se sirve en dos direcciones y sin eso
+Google reparte la fuerza entre las dos), Open Graph reusando `og-home.png`, y datos
+estructurados de `Service` con el precio. **La landing la enlaza desde la sección de
+precio** — una página sin links entrantes no posiciona. GTM sí va acá: la URL no lleva
+ningún dato personal, a diferencia de `invitacion.html`.
 
 ## `deseos.html` — libro de deseos (MAQUETA, no guarda nada)
 
