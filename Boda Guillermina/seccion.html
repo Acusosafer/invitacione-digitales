@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guillermina & — 3 de abril</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     BODA GUILLERMINA · rebanada vertical de la invitacion
+
+     Prueba interna. NO se publica (la carpeta esta en .vercelignore).
+
+     LA IDEA, y sale textual de lo que dijo ella:
+       "muchas velas y luz calida porque es atardecer noche la fiesta"
+     La invitacion ATRAVIESA LA TARDE. Arranca con luz de atardecer y
+     va cayendo la noche a medida que se scrollea, con las velas
+     encendiendose. No es "usar colores calidos": es la fiesta que ella
+     describio, contada por el fondo de la pagina.
+
+     Lo demas que pidio y esta aca adentro:
+       · "algo mas artistico con dibujos" — nada de fondo liso
+       · dibujos de linea, como el posteo que eligio
+       · naranjas, Aperol, flores (su deco)
+       · ceremonia civil y fiesta EN EL MISMO lugar, con el laguito
+       · 3 de abril de 2027
+
+     ⚠️ FALTA EL NOMBRE DE EL. Abajo va como placeholder. Preguntaselo
+     antes de mostrarle esto a ella.
+     ══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- ⚠️ Los pesos declarados son EXACTAMENTE los que publica cada
+     familia. Si se pide uno que no existe, Google rechaza el pedido
+     entero y no carga ninguna de las dos. -->
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  /* La paleta sale de SU ambientacion, no de un catalogo */
+  --naranja:#C2551F;
+  --naranja-luz:#E58B4A;
+  /* ⚠️ A 11px el naranja normal da 3,6:1 sobre el ocaso y no llega.
+     Esta version honda da 4,6:1 y es el mismo naranja, un paso mas
+     profundo — no un color nuevo. Solo para texto chico sobre claro. */
+  --naranja-hondo:#A0451A;
+  --verde:#7F8F6A;
+
+  /* Los tres momentos de la tarde */
+  --tarde:#FDF6EC;      /* la luz de las 19 */
+  --ocaso:#F3D9C0;      /* el cielo de la acuarela */
+  --noche:#1E1712;      /* la fiesta */
+
+  --tinta:#3A302A;
+  --tinta-suave:#6E6055;
+  --sobre-noche:#F6EDE2;
+  --sobre-noche-2:rgba(246,237,226,.72);
+
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--tinta);
+  font-family:'Jost',system-ui,sans-serif; font-size:17px; line-height:1.65;
+  overflow-x:hidden;
+  background:var(--noche);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAS ESCENAS — la tarde cayendo
+
+   ⚠️ Un solo degradado para toda la pagina se ve lindo pero DESACOPLA
+   el fondo del contenido: un bloque pintado para fondo claro termina
+   sobre marron oscuro segun donde caiga al scrollear, y el texto
+   desaparece. Es el mismo error que dejo rotas las invitaciones
+   oscuras en produccion.
+
+   Por eso cada seccion trae su propio suelo, y la caida de la noche
+   pasa dentro de una banda QUE NO TIENE TEXTO. Asi ningun texto se
+   apoya nunca sobre un fondo ambiguo.
+   ══════════════════════════════════════════════════════════════════ */
+.escena-dia   {background:var(--tarde)}
+.escena-ocaso {background:linear-gradient(180deg,var(--tarde) 0%,var(--ocaso) 82%,var(--ocaso) 100%)}
+.escena-cae   {background:linear-gradient(180deg,var(--ocaso) 0%,#7A5A47 52%,var(--noche) 100%)}
+.escena-noche {background:var(--noche)}
+h1,h2,h3{
+  font-family:'Cormorant Garamond',Georgia,serif; font-weight:300;
+  margin:0; line-height:1.06; letter-spacing:-.01em; text-wrap:balance;
+}
+p{margin:0}
+.wrap{width:100%; max-width:640px; margin:0 auto; padding:0 26px}
+
+.etiqueta{
+  font-size:.68rem; letter-spacing:.32em; text-transform:uppercase;
+  color:var(--naranja-hondo);
+}
+.noche .etiqueta{color:var(--naranja-luz)}
+
+/* ═══════════════ ENTRADA ═══════════════
+   No es una puerta que esconde: es la primera pagina. Ella dijo que la
+   historia tiene que estar completa, asi que aca ya esta todo lo que
+   alguien necesita — quienes, cuando y donde — y el scroll cuenta el
+   resto. Nada de un boton "pasar" que deje la cosa por la mitad. */
+.entrada{
+  min-height:100svh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center;
+  padding:56px 26px 40px; position:relative;
+}
+.entrada .dibujo{width:78px; margin-bottom:30px}
+.nombres{
+  font-size:clamp(2.9rem,13vw,4.6rem); line-height:1.02;
+}
+.nombres .y{
+  font-style:italic; color:var(--naranja); display:block;
+  font-size:.5em; margin:.08em 0;
+}
+.entrada .cuando{
+  margin-top:26px; font-size:.78rem; letter-spacing:.3em;
+  text-transform:uppercase; color:var(--tinta-suave);
+}
+.entrada .donde{
+  margin-top:10px; font-family:'Cormorant Garamond',serif;
+  font-size:1.32rem; font-style:italic; color:var(--tinta);
+}
+.bajar{
+  position:absolute; bottom:34px; left:50%; transform:translateX(-50%);
+  font-size:.62rem; letter-spacing:.28em; text-transform:uppercase;
+  color:var(--tinta-suave); text-decoration:none;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+.bajar span{display:block; width:1px; height:34px; background:var(--naranja); opacity:.55;
+  animation:respirar 3.2s ease-in-out infinite}
+@keyframes respirar{0%,100%{transform:scaleY(.55); opacity:.35}50%{transform:scaleY(1); opacity:.7}}
+
+/* ═══════════════ LA ACUARELA ═══════════════ */
+.lugar{padding:14px 0 96px; text-align:center}
+.marco{position:relative; margin:0 auto; max-width:560px}
+.marco img{width:100%; height:auto; display:block; border-radius:3px}
+.pie-foto{
+  margin-top:18px; font-size:.72rem; letter-spacing:.24em;
+  text-transform:uppercase; color:var(--tinta-suave);
+}
+
+/* ═══════════════ SECCIONES ═══════════════ */
+.bloque{padding:0 0 92px; text-align:center}
+.bloque h2{font-size:clamp(1.9rem,7vw,2.7rem); margin-bottom:16px}
+.bloque h2 em{font-style:italic; color:var(--naranja)}
+.noche .bloque h2 em{color:var(--naranja-luz)}
+.bajada{
+  max-width:38ch; margin:0 auto; color:var(--tinta-suave);
+  font-size:1rem;
+}
+.noche .bajada{color:var(--sobre-noche-2)}
+.noche, .noche h2{color:var(--sobre-noche)}
+
+.horarios{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:22px; margin-top:38px; text-align:left;
+}
+.hora{
+  padding:22px 22px 24px; border-radius:6px;
+  border:1px solid rgba(194,85,31,.22); background:rgba(255,255,255,.42);
+}
+.noche .hora{border-color:rgba(229,139,74,.34); background:rgba(255,255,255,.05)}
+.hora .num{
+  font-family:'Cormorant Garamond',serif; font-size:2.1rem; line-height:1;
+  color:var(--naranja); margin:8px 0 6px;
+}
+.noche .hora .num{color:var(--naranja-luz)}
+.hora .que{font-size:.94rem; color:var(--tinta-suave)}
+.noche .hora .que{color:var(--sobre-noche-2)}
+
+.separador{display:flex; justify-content:center; gap:26px; padding:26px 0 76px}
+/* La banda donde cae la noche necesita aire: si es angosta, el
+   cambio se ve como un corte y no como un atardecer. */
+.caida{height:190px}
+.separador svg{width:56px; height:auto}
+
+/* ═══════════════ TRAZOS ═══════════════ */
+.trazo{
+  fill:none; stroke:var(--naranja); stroke-width:1.7;
+  stroke-linecap:round; stroke-linejoin:round;
+}
+.noche .trazo{stroke:var(--naranja-luz)}
+.trazo.fino{stroke-width:1.2}
+.trazo.hoja{stroke:var(--verde)}
+.noche .trazo.hoja{stroke:#A3B189}
+.trazo.dibujando{transition:stroke-dashoffset 1.15s var(--ease)}
+
+/* Las velas: no se dibujan, se ENCIENDEN. Es lo que ella pidio y es
+   lo que hace que la noche se sienta noche. */
+.llama{opacity:0; transform-box:fill-box; transform-origin:bottom center}
+.llama.prendida{
+  opacity:1;
+  animation:titilar 2.6s ease-in-out infinite;
+  transition:opacity .9s ease;
+}
+@keyframes titilar{
+  0%,100%{transform:scaleY(1) scaleX(1)}
+  50%{transform:scaleY(1.14) scaleX(.93)}
+}
+
+/* Aparicion de bloques */
+.rev{opacity:0; transform:translateY(16px);
+  transition:opacity .9s var(--ease), transform .9s var(--ease)}
+.rev.on{opacity:1; transform:none}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .rev{opacity:1; transform:none; transition:none}
+  .trazo{stroke-dashoffset:0 !important; transition:none !important}
+  .llama{opacity:1 !important; animation:none !important}
+  .bajar span{animation:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ ENTRADA ═══════════════ -->
+<header class="entrada escena-dia">
+  <svg class="dibujo" viewBox="0 0 100 108" aria-hidden="true">
+    <path class="trazo" d="M50 30 C68 29 81 43 80 60 C79 77 66 89 49 89 C32 89 20 75 20.5 58 C21 41 33 30.5 50 30"/>
+    <path class="trazo fino" d="M50 30 C49 25 47.5 21 46 18.5"/>
+    <path class="trazo hoja" d="M46 18.5 C52 10.5 65 10 70 16.5 C64 24 52 24.5 46 18.5"/>
+    <path class="trazo hoja fino" d="M48.5 18.2 C55 17 62.5 16.6 68.5 17.2"/>
+  </svg>
+
+  <h1 class="nombres">
+    Guillermina
+    <em class="y">y</em>
+    Martín
+  </h1>
+
+  <p class="cuando">Sábado 3 de abril · 2027</p>
+  <p class="donde">Finca La Josefina</p>
+
+  <a class="bajar" href="#lugar"><span></span>Seguí bajando</a>
+</header>
+
+<!-- ═══════════════ LA ACUARELA ═══════════════ -->
+<section class="lugar escena-dia" id="lugar">
+  <div class="wrap">
+    <div class="marco rev">
+      <img src="Fotos/acuarela-josefina.jpg"
+           alt="El laguito de la Finca La Josefina al atardecer, pintado en acuarela">
+      <p class="pie-foto">El laguito, a la hora de la ceremonia</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SEPARADOR ═══════════════ -->
+<div class="separador escena-dia">
+  <svg viewBox="0 0 100 108" aria-hidden="true">
+    <path class="trazo hoja" d="M22 96 C34 78 44 58 50 38 C53.5 26.5 55 18 55 12"/>
+    <path class="trazo hoja fino" d="M45 60 C36 55.5 28.5 56.5 24 61.5 C31 66 39.5 65 45 60"/>
+    <path class="trazo hoja fino" d="M48.5 48 C57.5 42.5 65.5 42.5 70 46.5 C63.5 52.5 54.5 53 48.5 48"/>
+    <path class="trazo hoja fino" d="M52 34.5 C43.5 29.5 35.5 30 31 34.5 C37.5 40 46 39.5 52 34.5"/>
+    <path class="trazo hoja fino" d="M54 23 C62 18 69.5 18.5 73.5 22.5 C67.5 28 58.5 28 54 23"/>
+  </svg>
+</div>
+
+<!-- ═══════════════ CEREMONIA Y FIESTA ═══════════════ -->
+<section class="bloque escena-ocaso">
+  <div class="wrap">
+    <p class="etiqueta rev">Todo en el mismo lugar</p>
+    <h2 class="rev" style="margin-top:14px">Nos casamos <em>junto al agua</em>,<br>y nos quedamos.</h2>
+    <p class="bajada rev" style="margin-top:18px">
+      La ceremonia civil es en el parque, al lado del laguito. Cuando se
+      esconda el sol cruzamos unos metros y ahí nos quedamos hasta que no
+      quede nadie de pie.
+    </p>
+
+    <div class="horarios">
+      <div class="hora rev">
+        <p class="etiqueta">La ceremonia</p>
+        <p class="num">18:30</p>
+        <p class="que">En el parque, junto al laguito</p>
+      </div>
+      <div class="hora rev">
+        <p class="etiqueta">La fiesta</p>
+        <p class="num">20:00</p>
+        <p class="que">A unos metros, hasta la madrugada</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SEPARADOR: LA COPA ═══════════════ -->
+<div class="separador escena-ocaso">
+  <svg viewBox="0 0 100 128" aria-hidden="true">
+    <path class="trazo" d="M26 34 C26 28.5 74 28.5 74 34 C74 39.5 26 39.5 26 34"/>
+    <path class="trazo" d="M27.5 36 C25.5 54 34.5 70.5 50 70.5 C65.5 70.5 74.5 54 72.5 36"/>
+    <path class="trazo fino" d="M29.5 45 C38 49.5 62 49.5 70.5 45"/>
+    <path class="trazo" d="M50 71 L50 104"/>
+    <path class="trazo" d="M34 108 C34 103 66 103 66 108 C66 112.5 34 112.5 34 108"/>
+    <path class="trazo" d="M61 23 C61 17 66 12.5 72 12.5 C78 12.5 83 17 83 23 C83 29 78 33.5 72 33.5 C66 33.5 61 29 61 23"/>
+    <path class="trazo fino" d="M72 23 L72 13"/>
+    <path class="trazo fino" d="M72 23 L81.5 19.5"/>
+    <path class="trazo fino" d="M72 23 L80.5 30"/>
+    <path class="trazo fino" d="M72 23 L63.5 29.5"/>
+  </svg>
+</div>
+
+<!-- La caida de la noche: una banda SIN CONTENIDO. Todo lo que se
+     apoye sobre un degradado termina sobre un fondo que no se sabe
+     cual es. Aca no se apoya nada. -->
+<div class="caida escena-cae" aria-hidden="true"></div>
+
+<!-- ═══════════════ LA NOCHE ═══════════════ -->
+<section class="bloque noche escena-noche">
+  <div class="wrap">
+    <p class="etiqueta rev">Cuando cae el sol</p>
+    <h2 class="rev" style="margin-top:14px">Se encienden <em>las velas</em>.</h2>
+    <p class="bajada rev" style="margin-top:18px">
+      Y a partir de ahí es todo luz cálida, naranjas sobre la mesa y
+      copas que no se vacían.
+    </p>
+
+    <!-- Tres velas que se prenden una tras otra -->
+    <svg viewBox="0 0 220 120" style="width:100%;max-width:340px;margin:44px auto 0;display:block" aria-hidden="true">
+      <!-- vela 1 -->
+      <path class="trazo" d="M46 108 L46 62 L64 62 L64 108"/>
+      <path class="trazo fino" d="M46 108 C52 110 58 110 64 108"/>
+      <path class="trazo fino" d="M55 62 L55 54"/>
+      <path class="trazo llama" data-retraso="0" d="M55 53 C60 47 60 40 55 35 C50 40 50 47 55 53"/>
+      <!-- vela 2, mas alta -->
+      <path class="trazo" d="M101 108 L101 48 L119 48 L119 108"/>
+      <path class="trazo fino" d="M101 108 C107 110 113 110 119 108"/>
+      <path class="trazo fino" d="M110 48 L110 40"/>
+      <path class="trazo llama" data-retraso="700" d="M110 39 C115 33 115 26 110 21 C105 26 105 33 110 39"/>
+      <!-- vela 3 -->
+      <path class="trazo" d="M156 108 L156 70 L174 70 L174 108"/>
+      <path class="trazo fino" d="M156 108 C162 110 168 110 174 108"/>
+      <path class="trazo fino" d="M165 70 L165 62"/>
+      <path class="trazo llama" data-retraso="1400" d="M165 61 C170 55 170 48 165 43 C160 48 160 55 165 61"/>
+    </svg>
+  </div>
+</section>
+
+<script>
+/* ── Los trazos se dibujan solos ────────────────────────────────────
+   Se mide el largo REAL de cada camino. Las llamas quedan afuera: esas
+   no se dibujan, se encienden. */
+const esLlama = el => el.classList.contains('llama');
+
+function dibujar(raiz) {
+  const todos = [...raiz.querySelectorAll('.trazo')];
+  todos.forEach(t => {
+    if (esLlama(t)) return;
+    const largo = t.getTotalLength();
+    t.style.strokeDasharray = largo;
+    t.style.strokeDashoffset = largo;
+  });
+
+  /* ⚠️ Obliga a pintar el estado vacio antes de mover nada. Sin esto el
+     navegador junta los dos cambios en un cuadro y el primer trazo
+     salta de invisible a completo en vez de dibujarse. */
+  void document.body.offsetWidth;
+
+  todos.filter(t => !esLlama(t)).forEach((t, i) => {
+    t.classList.add('dibujando');
+    setTimeout(() => { t.style.strokeDashoffset = '0'; }, i * 85);
+  });
+
+  raiz.querySelectorAll('.llama').forEach(l => {
+    setTimeout(() => l.classList.add('prendida'), 900 + (+l.dataset.retraso || 0));
+  });
+}
+
+const io = new IntersectionObserver((es, obs) => {
+  es.forEach(e => {
+    if (!e.isIntersecting) return;
+    obs.unobserve(e.target);
+    if (e.target.classList.contains('rev')) { e.target.classList.add('on'); return; }
+    dibujar(e.target);
+  });
+}, { threshold: .3, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('svg').forEach(s => io.observe(s));
+document.querySelectorAll('.rev').forEach(r => io.observe(r));
+</script>
+</body>
+</html>
