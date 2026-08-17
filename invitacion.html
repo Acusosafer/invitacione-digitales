@@ -593,6 +593,58 @@
       text-align: center;
     }
 
+    /* ══════════════════════════════════════════════════════════════
+       MICRO-ANIMACIONES
+       Una sola curva para toda la invitación. Antes había cinco
+       distintas conviviendo y cada bloque se movía con su propio
+       ritmo — que es justo lo que hace que algo se sienta armado con
+       piezas sueltas en vez de diseñado.
+       ══════════════════════════════════════════════════════════════ */
+    :root { --ease: cubic-bezier(.22, .61, .36, 1); }
+
+    /* El número de la sección. Es lo que más hace que se lea como
+       editorial y no como plantilla, y no cuesta nada: es una etiqueta.
+       Apagado salvo que el config diga `secciones_numeradas`. */
+    /* HEREDA el color de su sección; no impone ninguno. Es la única
+       forma de que funcione en las nueve secciones y en los doce temas:
+       `--ink-soft` a 11px se caía a 1:1, y la tinta plena se caía en
+       Hashtag, que tiene fondo propio y su texto va en otro color.
+       Heredando, la etiqueta siempre usa el color que esa sección ya
+       decidió que se lee sobre su fondo. */
+    .sec-label {
+      display: none;
+      font-size: .7rem; letter-spacing: .3em;
+      color: inherit;
+      text-align: center; margin-bottom: 12px;
+    }
+    body.numeradas .sec-label { display: block; }
+
+    /* La línea que se dibuja sola debajo del título cuando la sección
+       entra. Solo se anima transform, que no obliga a recalcular nada. */
+    .section h2::after {
+      content: ''; display: block;
+      width: 44px; height: 1px; margin: 18px auto 0;
+      background: var(--secondary);
+      transform: scaleX(0); transform-origin: center;
+      transition: transform 1.1s var(--ease) 200ms;
+    }
+    .section.active h2::after { transform: scaleX(1); }
+
+    /* Las fotos las suben los clientes desde celulares distintos y con
+       luces distintas: juntas se ven como un collage. Un ajuste parejo
+       y suave hace que parezcan del mismo set. Se apaga con
+       `fotos_sin_filtro` para quien pagó fotógrafo. */
+    .gallery-grid img, .carousel-track img, .hero-bg {
+      filter: saturate(.88) contrast(1.04);
+    }
+    body.sin-filtro .gallery-grid img,
+    body.sin-filtro .carousel-track img,
+    body.sin-filtro .hero-bg { filter: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .section h2::after { transition: none; transform: scaleX(1); }
+    }
+
     .section p {
       font-size: 1rem;
       line-height: 1.7;
@@ -1174,10 +1226,12 @@
     }
 
     /* ANIMACIONES */
+    /* `all` obliga al navegador a vigilar todas las propiedades. Se
+       nombran las dos que de verdad cambian. */
     .rev {
       opacity: 0;
       transform: translateY(30px);
-      transition: all 0.8s ease-out
+      transition: opacity .8s var(--ease), transform .8s var(--ease)
     }
 
     .rev.active {
@@ -1811,6 +1865,56 @@
      * caso la usa de título y la acompaña con una sans segura, para que las
      * invitaciones ya creadas no se rompan.
      */
+    /* ══════════════════════════════════════════════════════════════════
+       LOS TÍTULOS DE SECCIÓN
+
+       Estaban escritos a mano en el HTML y en primera persona de
+       quinceañera, así que los SEIS casamientos decían "Mis Fotos
+       Favoritas" — hablando por una sola persona cuando son dos.
+
+       Ahora el config manda, y el valor por defecto está elegido para
+       que sirva igual en unos 15 y en un casamiento: sin posesivo, no
+       hay forma de que concuerde mal.
+       ══════════════════════════════════════════════════════════════════ */
+    const TITULOS = {
+      countdown: ['titulo_countdown', 'Faltan solo...'],
+      galeria:   ['titulo_galeria',   'Momentos'],
+      ubicacion: ['titulo_ubicacion', 'Cuándo y dónde'],
+      dresscode: ['titulo_dresscode', 'Dresscode'],
+      regalos:   ['titulo_regalos',   'Regalos']
+    };
+
+    function prepararSecciones() {
+      document.body.classList.toggle('numeradas', C.secciones_numeradas === true);
+      document.body.classList.toggle('sin-filtro', C.fotos_sin_filtro === true);
+
+      /* La numeración se arma DESPUÉS de reordenar y de esconder lo que
+         no va: si no, salen números salteados o fuera de orden. Y se
+         reconstruye entera en cada pasada para poder llamarla dos veces
+         sin que se dupliquen las etiquetas. */
+      let n = 0;
+      document.querySelectorAll('#invitation-container .section[id^="sec-"]').forEach(sec => {
+        const vieja = sec.querySelector('.sec-label');
+        if (vieja) vieja.remove();
+
+        if (getComputedStyle(sec).display === 'none') return;
+
+        const t = TITULOS[sec.id.replace('sec-', '')];
+        const h = sec.querySelector('h2');
+        if (t && h) {
+          const propio = String(C[t[0]] ?? '').trim();
+          h.textContent = propio || t[1];
+        }
+        if (!h) return;
+
+        n++;
+        const et = document.createElement('div');
+        et.className = 'sec-label';
+        et.textContent = String(n).padStart(2, '0');
+        h.parentNode.insertBefore(et, h);
+      });
+    }
+
     function aplicarTipografia(clave) {
       let d = DUPLAS[clave];
 
@@ -2253,6 +2357,8 @@
           if (!C.layout.order.includes(sec.id.replace('sec-', ''))) container.appendChild(sec);
         });
       }
+
+      prepararSecciones();
 
       // RSVP
       document.querySelectorAll('#opts-asiste .opt-btn').forEach(btn => {
