@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motivos — Boda Guillermina</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MOTIVOS QUE SE DIBUJAN SOLOS
+
+     Prueba interna. NO se publica: la carpeta "Boda Guillermina" esta
+     excluida en .vercelignore porque es material de una clienta.
+
+     La idea: los dibujos de linea son TRAZOS, y un trazo se puede
+     animar. A cada camino se le mide el largo real con getTotalLength()
+     y se lo pinta desde cero — la linea aparece como si una mano la
+     estuviera dibujando, en vivo, cuando el invitado scrollea.
+
+     No es un video: son unos kilobytes de SVG y se ve nitido en
+     cualquier pantalla, en un celular viejo o en un monitor 4K.
+     ══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  /* La paleta de ella: naranja Aperol, terracota, verde salvia */
+  --tinta:#C2551F;
+  --tinta-clara:#E07B3C;
+  --verde:#7F8F6A;
+  --papel:#FFFCF7;
+  --texto:#3A322B;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--papel); color:var(--texto);
+  font-family:'Jost',system-ui,sans-serif; font-size:16px; line-height:1.6;
+  padding:48px 20px 80px;
+}
+.wrap{max-width:940px; margin:0 auto}
+
+header{text-align:center; margin-bottom:14px}
+.kicker{
+  font-size:.7rem; letter-spacing:.3em; text-transform:uppercase;
+  color:var(--tinta); margin-bottom:14px;
+}
+h1{
+  font-family:'Cormorant Garamond',serif; font-weight:300;
+  font-size:clamp(2rem,6vw,3.2rem); line-height:1.1; margin:0;
+}
+h1 em{font-style:italic; color:var(--tinta)}
+.sub{max-width:520px; margin:18px auto 0; color:#6B6055; font-size:.98rem}
+
+.acciones{display:flex; justify-content:center; gap:12px; margin:34px 0 48px}
+button{
+  font-family:inherit; font-size:.78rem; letter-spacing:.14em; text-transform:uppercase;
+  padding:13px 26px; border-radius:999px; cursor:pointer;
+  border:1px solid var(--tinta); background:transparent; color:var(--tinta);
+  transition:transform 160ms var(--ease), background 200ms var(--ease), color 200ms var(--ease);
+}
+button:hover{background:var(--tinta); color:var(--papel)}
+button:active{transform:scale(.97)}
+
+.grid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:26px;
+}
+.card{
+  background:#fff; border:1px solid rgba(194,85,31,.14); border-radius:10px;
+  padding:26px 18px 20px; text-align:center;
+}
+.card svg{width:100%; height:auto; max-width:190px; margin:0 auto; display:block}
+.card figcaption{
+  margin-top:16px; font-size:.68rem; letter-spacing:.22em; text-transform:uppercase;
+  color:#8A7D70;
+}
+
+/* ── El trazo ──────────────────────────────────────────────
+   stroke-dasharray = el largo real del camino, y el offset lo
+   esconde entero. Al pasar el offset a 0, la linea "crece".
+   Solo se anima stroke-dashoffset: no obliga a recalcular nada. */
+.trazo{
+  fill:none; stroke:var(--tinta); stroke-width:1.7;
+  stroke-linecap:round; stroke-linejoin:round;
+}
+.trazo.fino{stroke-width:1.2}
+.trazo.hoja{stroke:var(--verde)}
+.trazo.suave{stroke:var(--tinta-clara)}
+.trazo.dibujando{transition:stroke-dashoffset 1.15s var(--ease)}
+
+.pie{
+  margin-top:56px; text-align:center; font-size:.85rem; color:#8A7D70;
+  border-top:1px solid rgba(194,85,31,.14); padding-top:26px;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .trazo{stroke-dashoffset:0 !important; transition:none !important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">Boda Guillermina · prueba interna</div>
+    <h1>Los dibujos <em>se dibujan solos</em>.</h1>
+    <p class="sub">No es un video. Son trazos que el navegador va pintando cuando el invitado llega a esa parte de la invitación. Tocá el botón para verlo de nuevo.</p>
+  </header>
+
+  <div class="acciones">
+    <button id="repetir">Dibujar de nuevo</button>
+    <button id="lento">Más lento</button>
+  </div>
+
+  <div class="grid">
+
+    <!-- ── NARANJA ── -->
+    <figure class="card">
+      <svg viewBox="0 0 100 108" aria-label="Naranja dibujada a mano">
+        <path class="trazo" d="M50 30 C68 29 81 43 80 60 C79 77 66 89 49 89 C32 89 20 75 20.5 58 C21 41 33 30.5 50 30"/>
+        <!-- El tallo TERMINA en el mismo punto donde arranca la hoja.
+             Antes quedaba un hueco de 1,5px y la hoja flotaba suelta. -->
+        <path class="trazo fino" d="M50 30 C49 25 47.5 21 46 18.5"/>
+        <path class="trazo hoja" d="M46 18.5 C52 10.5 65 10 70 16.5 C64 24 52 24.5 46 18.5"/>
+        <path class="trazo hoja fino" d="M48.5 18.2 C55 17 62.5 16.6 68.5 17.2"/>
+      </svg>
+      <figcaption>Naranja</figcaption>
+    </figure>
+
+    <!-- ── COPA DE APEROL ── -->
+    <figure class="card">
+      <svg viewBox="0 0 100 128" aria-label="Copa de Aperol Spritz dibujada a mano">
+        <!-- boca de la copa -->
+        <path class="trazo" d="M26 34 C26 28.5 74 28.5 74 34 C74 39.5 26 39.5 26 34"/>
+        <!-- cuerpo -->
+        <!-- Panza mas redonda: antes era conica y leia a martini -->
+        <path class="trazo" d="M27.5 36 C25.5 54 34.5 70.5 50 70.5 C65.5 70.5 74.5 54 72.5 36"/>
+        <!-- linea del liquido -->
+        <path class="trazo fino suave" d="M29.5 45 C38 49.5 62 49.5 70.5 45"/>
+        <!-- hielo -->
+        <path class="trazo fino" d="M37.5 52.5 L46 50 L48.5 57.5 L40 60 Z"/>
+        <path class="trazo fino" d="M53 57 L60.5 54.5 L63 61.5 L55.5 64 Z"/>
+        <!-- tallo y pie -->
+        <path class="trazo" d="M50 71 L50 104"/>
+        <path class="trazo" d="M34 108 C34 103 66 103 66 108 C66 112.5 34 112.5 34 108"/>
+        <!-- rodaja de naranja en el borde -->
+        <!-- Rodaja de verdad: rueda con gajos. Antes era un abanico y
+             parecia una hoja colgada del borde. -->
+        <path class="trazo suave" d="M61 23 C61 17 66 12.5 72 12.5 C78 12.5 83 17 83 23 C83 29 78 33.5 72 33.5 C66 33.5 61 29 61 23"/>
+        <path class="trazo fino suave" d="M72 23 L72 13"/>
+        <path class="trazo fino suave" d="M72 23 L81.5 19.5"/>
+        <path class="trazo fino suave" d="M72 23 L80.5 30"/>
+        <path class="trazo fino suave" d="M72 23 L63.5 29.5"/>
+        <path class="trazo fino suave" d="M72 23 L62.5 19"/>
+        <!-- sorbete -->
+        <path class="trazo fino" d="M57 32 L64.5 12"/>
+      </svg>
+      <figcaption>Copa de Aperol</figcaption>
+    </figure>
+
+    <!-- ── RAMITA DE OLIVO ── -->
+    <figure class="card">
+      <svg viewBox="0 0 100 108" aria-label="Ramita de olivo dibujada a mano">
+        <path class="trazo hoja" d="M22 96 C34 78 44 58 50 38 C53.5 26.5 55 18 55 12"/>
+        <path class="trazo hoja fino" d="M45 60 C36 55.5 28.5 56.5 24 61.5 C31 66 39.5 65 45 60"/>
+        <path class="trazo hoja fino" d="M48.5 48 C57.5 42.5 65.5 42.5 70 46.5 C63.5 52.5 54.5 53 48.5 48"/>
+        <path class="trazo hoja fino" d="M52 34.5 C43.5 29.5 35.5 30 31 34.5 C37.5 40 46 39.5 52 34.5"/>
+        <path class="trazo hoja fino" d="M54 23 C62 18 69.5 18.5 73.5 22.5 C67.5 28 58.5 28 54 23"/>
+        <path class="trazo hoja fino" d="M38.5 76 C31 71.5 24 72.5 20 77 C26 81.5 33.5 80.5 38.5 76"/>
+        <!-- aceitunas -->
+        <!-- La aceituna colgaba de la nada. Ahora es una elipse limpia y
+             el cabito la engancha al tallo. -->
+        <path class="trazo fino" d="M63 59.5 C67 59.5 69.5 62.5 69.5 66 C69.5 69.5 67 72.5 63 72.5 C59 72.5 56.5 69.5 56.5 66 C56.5 62.5 59 59.5 63 59.5"/>
+        <path class="trazo hoja fino" d="M62.5 59.5 C57.5 57 51.5 55 46 54.5"/>
+      </svg>
+      <figcaption>Ramita de olivo</figcaption>
+    </figure>
+
+    <!-- ── FLOR ── -->
+    <figure class="card">
+      <svg viewBox="0 0 100 108" aria-label="Flor de jardin dibujada a mano">
+        <!-- La espiral leia como un caracol. Ahora el contorno son seis
+             petalos: el borde festoneado es lo que la hace flor. -->
+        <path class="trazo" d="M50 24 C57 21 65 24.5 67 31.5 C74 32.5 78.5 39.5 75.5 46.5 C79.5 52.5 76.5 60.5 69.5 62 C67.5 69 59.5 72.5 53 68.5 C47 72.5 39 69.5 37 62.5 C30 61 26.5 53.5 30.5 47 C27 40.5 31 33 38 31.5 C40 24.5 44 21 50 24"/>
+        <path class="trazo fino" d="M44 47 C44 43 47 40 50.5 40 C54 40 57 43 57 47 C57 51 54 54 50.5 54 C47 54 44 51 44 47"/>
+        <path class="trazo fino suave" d="M48 45.5 C49 43.5 51 42.5 53 43.5"/>
+        <!-- tallo -->
+        <path class="trazo hoja" d="M48 60 C50 72 51 84 50.5 97"/>
+        <!-- hojas -->
+        <path class="trazo hoja fino" d="M49.5 72 C41 68 33.5 70.5 30 76.5 C37.5 80 46 78 49.5 72"/>
+        <path class="trazo hoja fino" d="M51 84 C59.5 80.5 67 82.5 70.5 88 C63.5 92 55 90 51 84"/>
+        <!-- capullo chico -->
+        <path class="trazo suave" d="M69 60 C74 57.5 78.5 60.5 78 66 C77.5 71 72.5 73.5 68.5 71 C65 68.5 65 62.5 69 60"/>
+        <path class="trazo hoja fino" d="M69.5 71.5 C67 77.5 63.5 82 59 85.5"/>
+      </svg>
+      <figcaption>Flor de jardín</figcaption>
+    </figure>
+
+  </div>
+
+  <p class="pie">
+    Los cuatro juntos pesan menos que una foto de WhatsApp.
+  </p>
+</div>
+
+<script>
+/* Se mide el largo REAL de cada camino en vez de estimarlo: asi el
+   trazo arranca exactamente vacio y termina exactamente lleno, sin
+   importar cuanto mida el dibujo ni en que pantalla se vea. */
+const trazos = [...document.querySelectorAll('.trazo')];
+
+function preparar() {
+  trazos.forEach(t => {
+    const largo = t.getTotalLength();
+    t.classList.remove('dibujando');
+    t.style.strokeDasharray = largo;
+    t.style.strokeDashoffset = largo;
+  });
+}
+
+function dibujar(demora = 90, duracion = 1.15) {
+  preparar();
+  /* Se fuerza al navegador a asumir el estado "vacio" antes de animar.
+     Sin esto, cambiar dasharray y dashoffset en el mismo cuadro hace
+     que no se vea nada: el navegador junta los dos cambios en uno. */
+  void document.body.offsetWidth;
+
+  trazos.forEach((t, i) => {
+    t.style.transitionDuration = duracion + 's';
+    t.classList.add('dibujando');
+    /* Escalonado: cada trazo arranca un poco despues del anterior, para
+       que se lea como una mano que dibuja y no como todo a la vez. */
+    setTimeout(() => { t.style.strokeDashoffset = '0'; }, i * demora);
+  });
+}
+
+preparar();
+
+/* Arranca cuando el dibujo entra en pantalla, no al cargar: si no, el
+   que llega scrolleando se pierde toda la animacion. */
+const io = new IntersectionObserver((entradas, obs) => {
+  entradas.forEach(e => {
+    if (!e.isIntersecting) return;
+    obs.unobserve(e.target);
+    const propios = [...e.target.querySelectorAll('.trazo')];
+    propios.forEach((t, i) => {
+      t.style.transitionDuration = '1.15s';
+      t.classList.add('dibujando');
+      setTimeout(() => { t.style.strokeDashoffset = '0'; }, i * 90);
+    });
+  });
+}, { threshold: .35 });
+document.querySelectorAll('.card').forEach(c => io.observe(c));
+
+document.getElementById('repetir').onclick = () => dibujar(90, 1.15);
+document.getElementById('lento').onclick   = () => dibujar(260, 2.4);
+</script>
+</body>
+</html>
