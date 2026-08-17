@@ -90,6 +90,23 @@ button:active{transform:scale(.97)}
 .trazo.suave{stroke:var(--tinta-clara)}
 .trazo.dibujando{transition:stroke-dashoffset 1.15s var(--ease)}
 
+/* ── Los hielos caen ──────────────────────────────────────
+   No se dibujan: aparecen arriba, caen adentro del vaso y se
+   acomodan con un rebote corto. La curva pasa de 1 y vuelve:
+   eso es lo que hace que se sienta un peso cayendo y no una
+   caja deslizandose. */
+.cae{
+  opacity:0;
+  transform:translateY(-38px) rotate(-14deg);
+  transform-box:fill-box; transform-origin:center;
+}
+.cae.cayendo{
+  opacity:1;
+  transform:translateY(0) rotate(0deg);
+  transition:transform .72s cubic-bezier(.34,1.42,.64,1) var(--retraso,0s),
+             opacity .18s ease var(--retraso,0s);
+}
+
 .pie{
   margin-top:56px; text-align:center; font-size:.85rem; color:#8A7D70;
   border-top:1px solid rgba(194,85,31,.14); padding-top:26px;
@@ -97,6 +114,8 @@ button:active{transform:scale(.97)}
 
 @media (prefers-reduced-motion:reduce){
   .trazo{stroke-dashoffset:0 !important; transition:none !important}
+  /* Los hielos quedan puestos, sin caer */
+  .cae{opacity:1 !important; transform:none !important}
 }
 </style>
 </head>
@@ -139,9 +158,11 @@ button:active{transform:scale(.97)}
         <path class="trazo" d="M27.5 36 C25.5 54 34.5 70.5 50 70.5 C65.5 70.5 74.5 54 72.5 36"/>
         <!-- linea del liquido -->
         <path class="trazo fino suave" d="M29.5 45 C38 49.5 62 49.5 70.5 45"/>
-        <!-- hielo -->
-        <path class="trazo fino" d="M37.5 52.5 L46 50 L48.5 57.5 L40 60 Z"/>
-        <path class="trazo fino" d="M53 57 L60.5 54.5 L63 61.5 L55.5 64 Z"/>
+        <!-- Los hielos no se dibujan: CAEN adentro del vaso una vez que
+             la copa termino de dibujarse. Por eso van con .cae y no
+             entran en el conteo de trazos. -->
+        <path class="trazo fino cae" style="--retraso:.15s" d="M34.5 54 L43 51 L45.5 58.5 L37 61.5 Z"/>
+        <path class="trazo fino cae" style="--retraso:.38s" d="M51.5 59 L59.5 56 L62 63 L54 66 Z"/>
         <!-- tallo y pie -->
         <path class="trazo" d="M50 71 L50 104"/>
         <path class="trazo" d="M34 108 C34 103 66 103 66 108 C66 112.5 34 112.5 34 108"/>
@@ -209,53 +230,63 @@ button:active{transform:scale(.97)}
 /* Se mide el largo REAL de cada camino en vez de estimarlo: asi el
    trazo arranca exactamente vacio y termina exactamente lleno, sin
    importar cuanto mida el dibujo ni en que pantalla se vea. */
-const trazos = [...document.querySelectorAll('.trazo')];
+/* Los que caen no se dibujan, asi que quedan afuera del escalonado */
+const esTrazo = el => !el.classList.contains('cae');
 
-function preparar() {
-  trazos.forEach(t => {
-    const largo = t.getTotalLength();
+function preparar(raiz = document) {
+  raiz.querySelectorAll('.trazo').forEach(t => {
     t.classList.remove('dibujando');
+    if (!esTrazo(t)) { t.classList.remove('cayendo'); return; }
+    const largo = t.getTotalLength();
     t.style.strokeDasharray = largo;
     t.style.strokeDashoffset = largo;
   });
 }
 
-function dibujar(demora = 90, duracion = 1.15) {
-  preparar();
-  /* Se fuerza al navegador a asumir el estado "vacio" antes de animar.
-     Sin esto, cambiar dasharray y dashoffset en el mismo cuadro hace
-     que no se vea nada: el navegador junta los dos cambios en uno. */
+/* ⚠️ UNA sola funcion para las dos formas de arrancar — al scrollear y
+   con los botones. Antes eran dos caminos parecidos y solo uno forzaba
+   el reflow, asi que el PRIMER trazo de cada dibujo aparecia de golpe
+   en vez de dibujarse. Se veia dibujar la hojita de la naranja pero no
+   el circulo. Si se vuelven a separar, vuelve el bug. */
+function dibujar(raiz = document, demora = 90, duracion = 1.15) {
+  preparar(raiz);
+
+  /* Obliga al navegador a pintar el estado "vacio" antes de mover nada.
+     Sin esto junta los dos cambios en un solo cuadro y no hay
+     transicion: el trazo salta de invisible a completo. */
   void document.body.offsetWidth;
 
-  trazos.forEach((t, i) => {
+  const dibujos = [...raiz.querySelectorAll('.trazo')].filter(esTrazo);
+  dibujos.forEach((t, i) => {
     t.style.transitionDuration = duracion + 's';
     t.classList.add('dibujando');
-    /* Escalonado: cada trazo arranca un poco despues del anterior, para
-       que se lea como una mano que dibuja y no como todo a la vez. */
+    /* Escalonado: cada trazo arranca despues del anterior, para que se
+       lea como una mano dibujando y no como todo apareciendo junto. */
     setTimeout(() => { t.style.strokeDashoffset = '0'; }, i * demora);
+  });
+
+  /* Los hielos caen DESPUES de que la copa termino de dibujarse */
+  const cuandoTermina = dibujos.length * demora + duracion * 1000;
+  raiz.querySelectorAll('.cae').forEach(h => {
+    setTimeout(() => h.classList.add('cayendo'), cuandoTermina);
   });
 }
 
 preparar();
 
-/* Arranca cuando el dibujo entra en pantalla, no al cargar: si no, el
-   que llega scrolleando se pierde toda la animacion. */
+/* Arranca cuando el dibujo entra en pantalla y no al cargar: si no, el
+   que llega scrolleando ya se lo perdio. */
 const io = new IntersectionObserver((entradas, obs) => {
   entradas.forEach(e => {
     if (!e.isIntersecting) return;
     obs.unobserve(e.target);
-    const propios = [...e.target.querySelectorAll('.trazo')];
-    propios.forEach((t, i) => {
-      t.style.transitionDuration = '1.15s';
-      t.classList.add('dibujando');
-      setTimeout(() => { t.style.strokeDashoffset = '0'; }, i * 90);
-    });
+    dibujar(e.target, 90, 1.15);
   });
 }, { threshold: .35 });
 document.querySelectorAll('.card').forEach(c => io.observe(c));
 
-document.getElementById('repetir').onclick = () => dibujar(90, 1.15);
-document.getElementById('lento').onclick   = () => dibujar(260, 2.4);
+document.getElementById('repetir').onclick = () => dibujar(document, 90, 1.15);
+document.getElementById('lento').onclick   = () => dibujar(document, 260, 2.4);
 </script>
 </body>
 </html>
