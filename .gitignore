@@ -11,3 +11,8 @@ Thumbs.db
 
 # El zip que exporta Claude Design: fuente de trabajo, no del sitio.
 *.zip
+
+# Basura de "guardar pagina" de Instagram: 43 MB de js y miniaturas.
+# Las fotos utiles viven en Boda Guillermina/Fotos/ y esas si se versionan.
+Boda Guillermina/Instagram_files/
+Boda Guillermina/Instagram.html
