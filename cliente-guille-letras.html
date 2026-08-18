@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Las letras · Guillermina &amp; Sebastián</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ELEGIR LA CALIGRAFIA · muestra para la clienta
+
+     Sale de una referencia que mandó ella: una script caligráfica fina,
+     de contraste alto y ascendentes largos (tipo copperplate). La que
+     veniamos usando —Style Script— es mas gorda y redonda, de otra
+     familia: por eso no le cerraba.
+
+     ⚠️ Cada familia se pide con los pesos EXACTOS que publica. Si se le
+     pide a Google un peso que no existe, falla el pedido entero y no
+     carga NINGUNA de las fuentes de esa linea.
+     ══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Italianno&family=Great+Vibes&family=Parisienne&family=Tangerine:wght@400;700&family=Style+Script&family=Marcellus&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --hondo:#A0451A; --papel:#F6F2E8; --tinta:#3A302A; --tinta-2:#6E6055;
+  --linea:rgba(160,69,26,.16);
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--papel); color:var(--tinta);
+  font-family:'Jost',system-ui,sans-serif; line-height:1.6;
+  padding:34px 18px 70px; overflow-x:hidden}
+
+/* El papel de algodon. feTurbulence da ruido A COLOR: sin el
+   feColorMatrix saturate 0 sale manchado de verde y de rosa. */
+.fibra,.nube{position:fixed; inset:0; pointer-events:none; z-index:9;
+  mix-blend-mode:multiply}
+.fibra{opacity:.5;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='4'/><feColorMatrix type='saturate' values='0'/></filter><rect width='220' height='220' filter='url(%23f)' opacity='.42'/></svg>")}
+.nube{opacity:.28;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='560' height='560'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='560' height='560' filter='url(%23n)' opacity='.5'/></svg>")}
+
+.wrap{max-width:640px; margin:0 auto}
+header{text-align:center}
+.kicker{font-family:'Marcellus',serif; font-size:.64rem; letter-spacing:.3em;
+  text-transform:uppercase; color:var(--hondo)}
+h1{font-family:'Marcellus',serif; font-weight:400; margin:14px 0 0;
+  font-size:clamp(1.5rem,6vw,2rem); line-height:1.2}
+.bajada{max-width:44ch; margin:12px auto 0; color:var(--tinta-2);
+  font-size:.92rem; text-align:center}
+
+/* ── Cada opción, con el layout de la referencia ── */
+.op{margin-top:34px; padding:26px 18px 22px; text-align:center;
+  background:#FFFDF9; border:1px solid rgba(58,48,42,.08); border-radius:8px}
+.num{font-family:'Marcellus',serif; font-size:.6rem; letter-spacing:.28em;
+  text-transform:uppercase; color:var(--hondo)}
+.sobre{font-family:'Marcellus',serif; font-size:.6rem; letter-spacing:.26em;
+  text-transform:uppercase; color:var(--tinta-2); margin-top:18px}
+.nom{color:var(--tinta); line-height:1.02; margin:6px 0 2px;
+  /* line-height corto: estas caligrafias tienen ascendentes largos y con
+     el interlineado normal quedan flotando lejos del resto */
+  padding:0 4px}
+.datos{font-family:'Marcellus',serif; font-size:.62rem; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--tinta-2); margin-top:12px; line-height:2}
+.cual{margin-top:16px; padding-top:12px; border-top:1px solid var(--linea);
+  font-size:.72rem; color:#9A8C7D; letter-spacing:.05em}
+.cual b{color:var(--hondo); font-weight:500}
+
+/* Las seis. El tamaño se ajusta por familia: no ocupan lo mismo con la
+   misma medida en px. */
+.f1 .nom{font-family:'Pinyon Script',cursive;  font-size:clamp(2.1rem,9.5vw,3rem)}
+.f2 .nom{font-family:'Italianno',cursive;      font-size:clamp(2.8rem,13vw,4rem)}
+.f3 .nom{font-family:'Great Vibes',cursive;    font-size:clamp(2rem,9vw,2.8rem)}
+.f4 .nom{font-family:'Parisienne',cursive;     font-size:clamp(1.9rem,8.5vw,2.6rem)}
+.f5 .nom{font-family:'Tangerine',cursive;      font-size:clamp(3rem,14vw,4.4rem); font-weight:700}
+.f6 .nom{font-family:'Style Script',cursive;   font-size:clamp(1.9rem,8vw,2.5rem)}
+
+.cierre{margin-top:40px; padding:20px 22px; border-radius:8px;
+  background:rgba(224,122,31,.07); border:1px solid var(--linea)}
+.cierre p{margin:0; font-size:.92rem; color:var(--tinta-2); max-width:52ch}
+.cierre b{color:var(--tinta); font-weight:500}
+</style>
+</head>
+<body>
+<div class="fibra"></div><div class="nube"></div>
+
+<div class="wrap">
+  <header>
+    <div class="kicker">Guillermina &amp; Sebastián</div>
+    <h1>¿Cuál de estas letras?</h1>
+    <p class="bajada">
+      Las seis con tus nombres y tu fecha, para que las compares de
+      verdad y no sobre un alfabeto suelto. Decime el número.
+    </p>
+  </header>
+
+  <div class="op f1">
+    <div class="num">Opción 1</div>
+    <div class="sobre">Celebramos la boda de</div>
+    <div class="nom">Guillermina &amp; Sebastián</div>
+    <div class="datos">Sábado 3 de abril 2027<br>Finca La Josefina · Berisso</div>
+    <div class="cual"><b>Pinyon Script</b> — la más parecida a la que mandaste</div>
+  </div>
+
+  <div class="op f2">
+    <div class="num">Opción 2</div>
+    <div class="sobre">Celebramos la boda de</div>
+    <div class="nom">Guillermina &amp; Sebastián</div>
+    <div class="datos">Sábado 3 de abril 2027<br>Finca La Josefina · Berisso</div>
+    <div class="cual"><b>Italianno</b> — más fina y estirada, la más liviana</div>
+  </div>
+
+  <div class="op f3">
+    <div class="num">Opción 3</div>
+    <div class="sobre">Celebramos la boda de</div>
+    <div class="nom">Guillermina &amp; Sebastián</div>
+    <div class="datos">Sábado 3 de abril 2027<br>Finca La Josefina · Berisso</div>
+    <div class="cual"><b>Great Vibes</b> — la clásica de casamiento, más redonda</div>
+  </div>
+
+  <div class="op f4">
+    <div class="num">Opción 4</div>
+    <div class="sobre">Celebramos la boda de</div>
+    <div class="nom">Guillermina &amp; Sebastián</div>
+    <div class="datos">Sábado 3 de abril 2027<br>Finca La Josefina · Berisso</div>
+    <div class="cual"><b>Parisienne</b> — más suelta, como escrita a mano</div>
+  </div>
+
+  <div class="op f5">
+    <div class="num">Opción 5</div>
+    <div class="sobre">Celebramos la boda de</div>
+    <div class="nom">Guillermina &amp; Sebastián</div>
+    <div class="datos">Sábado 3 de abril 2027<br>Finca La Josefina · Berisso</div>
+    <div class="cual"><b>Tangerine</b> — la más fina de todas, muy delicada</div>
+  </div>
+
+  <div class="op f6">
+    <div class="num">Opción 6</div>
+    <div class="sobre">Celebramos la boda de</div>
+    <div class="nom">Guillermina &amp; Sebastián</div>
+    <div class="datos">Sábado 3 de abril 2027<br>Finca La Josefina · Berisso</div>
+    <div class="cual"><b>Style Script</b> — la que te había puesto yo, para comparar</div>
+  </div>
+
+  <div class="cierre">
+    <p>
+      Las de arriba son <b>caligráficas</b>, de pluma: trazo fino que se
+      engorda en las curvas, como la referencia que mandaste. La 6 es de
+      otra familia —más pareja y redonda— y por eso se veía distinta.
+      <b>Decime el número y la aplico a toda la invitación.</b>
+    </p>
+  </div>
+</div>
+</body>
+</html>

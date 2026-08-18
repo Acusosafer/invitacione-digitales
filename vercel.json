@@ -23,6 +23,10 @@
     {
       "source": "/guille-dibujos",
       "destination": "/cliente-guille-dibujos.html"
+    },
+    {
+      "source": "/guille-letras",
+      "destination": "/cliente-guille-letras.html"
     }
   ]
 }
