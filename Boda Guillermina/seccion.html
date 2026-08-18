@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Guillermina & — 3 de abril</title>
+<title>Guillermina &amp; Sebastián — 3 de abril</title>
 
 <!-- ══════════════════════════════════════════════════════════════════
      BODA GUILLERMINA · rebanada vertical de la invitacion
@@ -84,6 +84,10 @@ body{
 .escena-ocaso {background:linear-gradient(180deg,var(--tarde) 0%,var(--ocaso) 82%,var(--ocaso) 100%)}
 .escena-cae   {background:linear-gradient(180deg,var(--ocaso) 0%,#7A5A47 52%,var(--noche) 100%)}
 .escena-noche {background:var(--noche)}
+/* ⚠️ Dos `escena-ocaso` seguidas vuelven a arrancar el degradado cada
+   una, y el cielo se "reinicia": queda un corte a mitad de la tarde.
+   La que continua va lisa, en el color donde termino la anterior. */
+.escena-sigue {background:var(--ocaso)}
 h1,h2,h3{
   font-family:'Cormorant Garamond',Georgia,serif; font-weight:300;
   margin:0; line-height:1.06; letter-spacing:-.01em; text-wrap:balance;
@@ -136,11 +140,28 @@ p{margin:0}
 /* ═══════════════ LA ACUARELA ═══════════════ */
 .lugar{padding:14px 0 96px; text-align:center}
 .marco{position:relative; margin:0 auto; max-width:560px}
-.marco img{width:100%; height:auto; display:block; border-radius:3px}
+.marco img{width:100%; height:auto; display:block; mix-blend-mode:multiply}
 .pie-foto{
   margin-top:18px; font-size:.72rem; letter-spacing:.24em;
   text-transform:uppercase; color:var(--tinta-suave);
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   LAS ACUARELAS
+   Vinieron con fondo de papel crema, no transparente. Sueltas dejarian
+   un rectangulo. `multiply` hace que el papel se funda con el fondo:
+   solo sobrevive lo pintado, que es mas oscuro que el papel.
+
+   ⚠️ Sobre fondo OSCURO multiply las borra —todo lo claro se va a
+   negro—. Por eso las que van en la noche llevan `screen`, que hace lo
+   contrario, o se apoyan sobre una tarjeta clara.
+   ══════════════════════════════════════════════════════════════════ */
+.acuarela{width:100%; height:auto; display:block; mix-blend-mode:multiply}
+.noche .acuarela{mix-blend-mode:screen}
+
+/* Motivo suelto, chico, para acompanar un titulo */
+.motivo{width:150px; margin:0 auto 6px; mix-blend-mode:multiply}
+.motivo.ancho{width:230px}
 
 /* ═══════════════ SECCIONES ═══════════════ */
 .bloque{padding:0 0 92px; text-align:center}
@@ -229,7 +250,7 @@ p{margin:0}
   <h1 class="nombres">
     Guillermina
     <em class="y">y</em>
-    Martín
+    Sebastián
   </h1>
 
   <p class="cuando">Sábado 3 de abril · 2027</p>
@@ -242,7 +263,7 @@ p{margin:0}
 <section class="lugar escena-dia" id="lugar">
   <div class="wrap">
     <div class="marco rev">
-      <img src="Fotos/acuarela-josefina.jpg"
+      <img src="web/vista-altar-acuarela.jpg"
            alt="El laguito de la Finca La Josefina al atardecer, pintado en acuarela">
       <p class="pie-foto">El laguito, a la hora de la ceremonia</p>
     </div>
@@ -274,7 +295,7 @@ p{margin:0}
     <div class="horarios">
       <div class="hora rev">
         <p class="etiqueta">La ceremonia</p>
-        <p class="num">18:30</p>
+        <p class="num">18:00</p>
         <p class="que">En el parque, junto al laguito</p>
       </div>
       <div class="hora rev">
@@ -286,8 +307,21 @@ p{margin:0}
   </div>
 </section>
 
+<!-- ═══════════════ ELLOS ═══════════════ -->
+<section class="bloque escena-sigue" style="padding-top:20px">
+  <div class="wrap">
+    <div class="marco rev">
+      <img class="acuarela" src="web/ellos-acuarela.jpg"
+           alt="Guillermina y Sebastián mirando el laguito al atardecer, en acuarela">
+    </div>
+    <p class="bajada rev" style="margin-top:26px">
+      Nos gustaría mucho que estés ahí.
+    </p>
+  </div>
+</section>
+
 <!-- ═══════════════ SEPARADOR: LA COPA ═══════════════ -->
-<div class="separador escena-ocaso">
+<div class="separador escena-sigue">
   <svg viewBox="0 0 100 128" aria-hidden="true">
     <path class="trazo" d="M26 34 C26 28.5 74 28.5 74 34 C74 39.5 26 39.5 26 34"/>
     <path class="trazo" d="M27.5 36 C25.5 54 34.5 70.5 50 70.5 C65.5 70.5 74.5 54 72.5 36"/>
@@ -310,6 +344,7 @@ p{margin:0}
 <!-- ═══════════════ LA NOCHE ═══════════════ -->
 <section class="bloque noche escena-noche">
   <div class="wrap">
+    <img class="motivo rev" src="web/aperol.jpg" alt="" aria-hidden="true">
     <p class="etiqueta rev">Cuando cae el sol</p>
     <h2 class="rev" style="margin-top:14px">Se encienden <em>las velas</em>.</h2>
     <p class="bajada rev" style="margin-top:18px">
