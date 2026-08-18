@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dibujos trazados a partir de la foto</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     PRUEBA · DIBUJO DE LINEA DETALLADO, VECTORIZADO Y ANIMADO
+
+     ⚠️ GENERADO. No editar a mano: lo escribe generar.py del scratchpad
+     a partir de plantilla-dibujo.html. Cualquier cambio se pisa.
+
+     La diferencia con los stickers de plantilla-ilustraciones.html: esos
+     son iconos de 10 a 20 trazos escritos como coordenadas a mano; estos
+     salen de una FOTO, con cien o doscientos trazos, y se parecen mucho
+     mas a lo que hace andina.graphic.design.
+
+     El precio es la duracion: doscientos trazos escalonados no pueden ir
+     a 80ms cada uno como los iconos (serian 16 segundos). Van a 12ms, y
+     de mayor a menor, que es como dibuja una persona: primero el
+     contorno general y despues el detalle.
+
+     ⚠️ NO SE PUBLICA. La carpeta esta excluida en .vercelignore.
+     ══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Style+Script&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --naranja:#E07A1F; --hondo:#A0451A; --papel:#F6F2E8;
+  --tinta:#3A302A; --tinta-2:#6E6055; --linea:rgba(160,69,26,.16);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--papel); color:var(--tinta);
+  font-family:'Jost',system-ui,sans-serif; font-size:16px; line-height:1.6;
+  padding:36px 18px 70px; overflow-x:hidden}
+
+/* El papel de algodon. feTurbulence da ruido A COLOR: sin el
+   feColorMatrix saturate 0 sale manchado de verde y de rosa. */
+.fibra,.nube{position:fixed; inset:0; pointer-events:none; z-index:9;
+  mix-blend-mode:multiply}
+.fibra{opacity:.5;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='4'/><feColorMatrix type='saturate' values='0'/></filter><rect width='220' height='220' filter='url(%23f)' opacity='.42'/></svg>")}
+.nube{opacity:.28;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='560' height='560'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='560' height='560' filter='url(%23n)' opacity='.5'/></svg>")}
+
+.wrap{max-width:720px; margin:0 auto}
+header{text-align:center; margin-bottom:8px}
+.kicker{font-family:'Marcellus',serif; font-size:.66rem; letter-spacing:.3em;
+  text-transform:uppercase; color:var(--hondo)}
+h1{font-family:'Marcellus',serif; font-weight:400; margin:14px 0 0;
+  font-size:clamp(1.7rem,6vw,2.4rem); line-height:1.16}
+h1 em{font-family:'Style Script',cursive; font-style:normal; color:var(--hondo);
+  font-size:1.24em; line-height:.85}
+.bajada{max-width:50ch; margin:14px auto 0; color:var(--tinta-2); font-size:.95rem}
+
+.pieza{margin-top:46px; padding-top:26px; border-top:1px solid var(--linea)}
+.cab{display:flex; justify-content:space-between; align-items:baseline;
+  gap:12px; flex-wrap:wrap}
+h2{font-family:'Marcellus',serif; font-weight:400; font-size:1.12rem; margin:0}
+.cuenta{font-size:.68rem; letter-spacing:.16em; text-transform:uppercase;
+  color:#9A8C7D}
+.nota{margin:6px 0 0; color:var(--tinta-2); font-size:.88rem; max-width:56ch}
+
+.lienzo{margin:18px 0 0}
+.lienzo svg{width:100%; height:auto; display:block}
+
+/* ── El trazo ─────────────────────────────────────────────────
+   Igual que los stickers: se mide el largo real con getTotalLength()
+   y se pinta desde cero moviendo stroke-dashoffset. */
+.t{fill:none; stroke:var(--hondo); stroke-width:1.05;
+  stroke-linejoin:round; stroke-linecap:round}
+.t.dibujando{transition:stroke-dashoffset .9s var(--ease)}
+
+.bt{margin-top:16px; font-family:'Marcellus',serif; font-size:.68rem;
+  letter-spacing:.18em; text-transform:uppercase; padding:11px 22px;
+  border-radius:999px; cursor:pointer; border:1px solid var(--hondo);
+  background:transparent; color:var(--hondo);
+  transition:transform .16s var(--ease), background .2s var(--ease), color .2s var(--ease)}
+.bt:hover{background:var(--hondo); color:var(--papel)}
+.bt:active{transform:scale(.97)}
+
+.cierre{margin-top:52px; padding:22px 24px; border-radius:8px;
+  background:rgba(224,122,31,.07); border:1px solid var(--linea)}
+.cierre h3{font-family:'Marcellus',serif; font-weight:400; margin:0 0 8px;
+  font-size:1.02rem}
+.cierre p{margin:0 0 10px; font-size:.92rem; color:var(--tinta-2); max-width:58ch}
+.cierre p:last-child{margin-bottom:0}
+.cierre b{color:var(--tinta); font-weight:500}
+
+@media (prefers-reduced-motion:reduce){
+  .t{stroke-dashoffset:0 !important; transition:none !important}
+}
+</style>
+</head>
+<body>
+<div class="fibra"></div><div class="nube"></div>
+
+<div class="wrap">
+  <header>
+    <div class="kicker">Boda Guillermina · prueba interna</div>
+    <h1>El dibujo de línea <em>que sí se parece</em></h1>
+    <p class="bajada">
+      Estos no están escritos a mano como coordenadas: salen de una foto
+      o de la acuarela, con cien o doscientos trazos en vez de quince. Y
+      se dibujan igual.
+    </p>
+  </header>
+
+<!--PIEZAS-->
+
+  <div class="cierre">
+    <h3>Lo que aprendí probando</h3>
+    <p>
+      <b>El trazador necesita bordes.</b> El cartel sale impecable porque
+      es blanco puro sobre fondo oscuro. La acuarela sale muy bien porque
+      cada mancha tiene su límite. La foto del bote falla en la ropa
+      clara sobre agua clara: ahí no hay borde que seguir y la pareja se
+      rompe en pedazos.
+    </p>
+    <p>
+      <b>Conclusión práctica:</b> conviene trazar <b>las acuarelas que ya
+      tenemos</b>, no las fotos. Ya están hechas para esta boda, tienen la
+      paleta y el contraste, y salen en el estilo suelto que buscamos.
+    </p>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   DIBUJAR
+
+   ⚠️ Las tres trampas del primer trazo, todas juntas acá:
+     1. UNA sola función para todas las formas de arrancar.
+     2. `transition:'none'` EXPLÍCITO al preparar — `transition-property`
+        vale `all` por defecto y la duración inline sobrevive a sacar la
+        clase, así que el reset también transicionaba.
+     3. Leer `getComputedStyle` de cada trazo + doble `requestAnimationFrame`:
+        `offsetWidth` fuerza el layout, y `stroke-dashoffset` es de pintado.
+   ══════════════════════════════════════════════════════════════════ */
+function preparar(svg) {
+  svg.querySelectorAll('.t').forEach(t => {
+    t.classList.remove('dibujando');
+    t.style.transition = 'none';
+    const largo = t.getTotalLength();
+    t.style.strokeDasharray = largo;
+    t.style.strokeDashoffset = largo;
+  });
+}
+
+function dibujar(svg, demora, duracion) {
+  demora = demora || 12;
+  duracion = duracion || .9;
+  preparar(svg);
+
+  const trazos = [...svg.querySelectorAll('.t')];
+  trazos.forEach(t => getComputedStyle(t).strokeDashoffset);
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    trazos.forEach((t, i) => {
+      t.style.transition = '';
+      t.classList.add('dibujando');
+      t.style.transitionDuration = duracion + 's';
+      setTimeout(() => { t.style.strokeDashoffset = '0'; }, i * demora);
+    });
+  }));
+}
+
+const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+document.querySelectorAll('.lienzo svg').forEach(preparar);
+
+if (quieto) {
+  document.querySelectorAll('.t').forEach(t => { t.style.strokeDashoffset = '0'; });
+} else {
+  const io = new IntersectionObserver((entradas, obs) => {
+    entradas.forEach(e => {
+      if (!e.isIntersecting) return;
+      obs.unobserve(e.target);
+      dibujar(e.target, 12, .9);
+    });
+  }, { threshold: .25 });
+  document.querySelectorAll('.lienzo svg').forEach(s => io.observe(s));
+}
+
+document.querySelectorAll('.bt').forEach(b => {
+  b.onclick = () => dibujar(
+    document.querySelector(`svg[data-clave="${b.dataset.para}"]`), 12, .9);
+});
+</script>
+</body>
+</html>
