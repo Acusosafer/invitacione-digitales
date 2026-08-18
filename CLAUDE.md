@@ -553,6 +553,99 @@ estructurados de `Service` con el precio. **La landing la enlaza desde la secci�
 precio** — una página sin links entrantes no posiciona. GTM sí va acá: la URL no lleva
 ningún dato personal, a diferencia de `invitacion.html`.
 
+## Boda Guillermina — la primera venta a medida (18/08/2026)
+
+Guillermina (dermatóloga, 4 consultorios) y **Sebastián Scala**. Finca La
+Josefina, Berisso. **3 de abril de 2027**, ceremonia 18:00, fiesta 20:00.
+**Ceremonia y fiesta en el mismo lugar.** Save the date en octubre.
+
+**Cerrada en $150.000 con el save the date incluido** — "es el mismo
+diseño, no tiene sentido cobrártelo dos veces". Fue el primer trabajo del
+servicio `/a-medida`, y **lo pidió ella**: mandó una web de casamiento de
+`andina.graphic.design` preguntando si se podía hacer algo así.
+
+⚠️ **Todo vive en `Boda Guillermina/`, que está en `.vercelignore`.** Son
+fotos de una clienta y del salón que contrató: no se publica nunca.
+
+### Cómo se hacen las ilustraciones
+
+`prompts-ilustraciones.md` tiene 13 prompts, **uno por ilustración**. Los
+trece comparten el **mismo primer párrafo** —paleta con hexadecimales,
+técnica de acuarela, fondo blanco— y solo cambia el sujeto. Ese párrafo
+repetido es lo único que hace que el set parezca del mismo pincel.
+
+⚠️ **Nunca pedir varias en la misma imagen**: salen chicas, con estilos
+distintos entre sí, y no se pueden separar después.
+
+**Vienen sobre papel crema, no transparente.** Sueltas dejan un
+rectángulo. Se resuelve con `mix-blend-mode: multiply`, que funde el papel
+con el fondo. ⚠️ **Sobre fondo oscuro multiply las borra** — ahí va
+`screen`.
+
+**Y pesan.** Las once primeras sumaban 8 MB. Redimensionadas a 900px los
+motivos y 1400px las escenas, JPEG 82 progresivo: **651 KB el set entero**,
+92% menos, sin diferencia visible. Van a `Boda Guillermina/web/`.
+
+### Los dibujos que se dibujan solos — el diferencial
+
+Un dibujo de línea es un **trazo**, y un trazo se puede animar: se mide con
+`getTotalLength()` y se pinta desde cero con `stroke-dashoffset`. La línea
+aparece como si una mano la dibujara, en vivo, cuando el invitado llega.
+No es un video: son kilobytes de SVG y se ve nítido en cualquier pantalla.
+
+**Andina publica sus dibujos como video en Instagram; esto pasa adentro de
+la invitación.** Su web es Wix — no lo puede hacer. Ese es el partido.
+
+⚠️ **Hay que forzar un reflow** (`void document.body.offsetWidth`) entre
+poner el `dasharray` y mover el `dashoffset`. Sin eso el navegador junta
+los dos cambios en un cuadro y **el primer trazo salta de invisible a
+completo**. Pasó dos veces: la segunda porque había dos funciones para
+arrancar la animación y solo una forzaba el reflow. **Una sola función.**
+
+Y no todo tiene que dibujarse: los hielos **caen** adentro del vaso y las
+velas **se encienden**. Cada elemento puede tener su comportamiento — pero
+**uno en movimiento por pantalla como máximo**, o parece una tarjeta de
+cumpleaños.
+
+### El papel es de algodón, no un color plano
+
+Dos capas fijas con `multiply`: la **fibra** (grano fino, el poro del
+algodón) y la **nube** (manchas grandes, la irregularidad de una hoja
+prensada en frío). Con multiply oscurecen las fibras; con opacidad sobre
+blanco solo agrisan la página. Son dos SVG embebidos, no baja ninguna
+imagen.
+
+### Tres actos, no una lista de secciones
+
+1. **Emoción** — ellos de espaldas frente al lago. **Todavía no dice dónde
+   es.** Se vende el sueño; el dato se descubre bajando.
+2. **El momento** — el mensaje íntimo, la ceremonia, el mapa.
+3. **La fiesta** — el brindis, los regalos, las fotos, confirmar.
+
+El hilo es **viajar**: ella siempre buscando un destino nuevo, él
+descubriendo el mundo al lado de ella, y la boda como el próximo destino.
+
+⚠️ **Se descartó una transición amanecer→noche** que se había construido
+entera. Era una idea mía y la clienta no la pidió. **Primero lo que le
+gusta a ella, después lo que se me ocurre a mí.**
+
+### ⚠️ Un degradado largo desacopla el fondo del contenido
+
+Un solo degradado para toda la página se ve lindo pero deja bloques
+pintados para fondo claro apoyados sobre fondo oscuro, y el texto
+desaparece — el mismo error que dejó rotas las invitaciones oscuras en
+producción. **Cada sección trae su propio suelo**, y si hay transición
+pasa en una **banda sin contenido**. Y dos secciones con el mismo
+degradado seguidas lo **reinician**: la segunda va lisa.
+
+### El mapa
+
+Acuarela en **planta pura** (el primer intento pedía vista "en ángulo" y
+salía todo encimado) con los carteles y el recorrido animados encima en
+SVG. ⚠️ **Lo que no puede faltar es el pico**: la ceremonia es sobre una
+lengua de tierra metida en el lago, con agua por tres lados. Un lago
+ovalado con el altar al costado es cualquier lago del mundo.
+
 ## `deseos.html` — libro de deseos (MAQUETA, no guarda nada)
 
 Lo que ve el invitado cuando apoya el celular en el tag NFC de la mesa. **Todavía no está

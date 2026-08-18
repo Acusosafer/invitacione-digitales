@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guillermina &amp; Sebastián · 3 de abril de 2027</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     BODA GUILLERMINA & SEBASTIAN · Finca La Josefina · 3/4/2027
+     Prueba interna. NO se publica: la carpeta esta en .vercelignore.
+
+     TRES ACTOS, no una lista de secciones:
+       1 · EMOCION   — ellos de espaldas frente al lago. Todavia no se
+                       sabe donde es. Se vende el sueño, no el dato.
+       2 · EL MOMENTO— el mensaje intimo, la ceremonia, el mapa.
+       3 · LA FIESTA — el brindis, los regalos, las fotos, confirmar.
+
+     EL HILO ES VIAJAR. Ella siempre buscando un destino nuevo; el
+     descubriendo el mundo al lado de ella. La boda es el proximo
+     destino. Sale de lo que Fer sabe de ellos, no de un molde.
+
+     ⚠️ NO va la transicion amanecer→noche que probamos antes. Era una
+     idea mia y ella no la pidio. El papel es siempre el mismo:
+     cartulina de algodon, como la tarjeta de menu que le gusto.
+     ══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Style+Script&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --naranja:#E07A1F; --hondo:#A0451A; --terracota:#A84F2A;
+  --oliva:#435F3A; --salvia:#A3B18A; --avena:#D7C3A1;
+  --agua:#4E748A;
+  /* La cartulina de algodon: crema calido, no blanco */
+  --papel:#F7F1E4; --papel-hondo:#EFE7D6;
+  --tinta:#3A302A; --tinta-2:#6B5D51;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--papel); color:var(--tinta);
+  font-family:'Jost',system-ui,sans-serif; font-size:17px; line-height:1.7;
+  overflow-x:hidden;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   EL PAPEL DE ALGODON
+   Dos capas superpuestas, porque una sola no alcanza:
+     · la FIBRA — grano fino y parejo, el poro del algodon
+     · la NUBE  — manchas grandes y suaves, la irregularidad que tiene
+                  una hoja prensada en frio contra la luz
+   Las dos con multiply: oscurecen la fibra en vez de agrisar la
+   pagina, que es lo que pasa si se ponen con opacidad sobre blanco.
+   Son dos SVG embebidos — no baja ninguna imagen.
+   ══════════════════════════════════════════════════════════════════ */
+.fibra,.nube{position:fixed; inset:0; pointer-events:none; z-index:9;
+  mix-blend-mode:multiply}
+.fibra{opacity:.55;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23f)' opacity='.4'/%3E%3C/svg%3E")}
+.nube{opacity:.3;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
+
+h1,h2,h3{font-family:'Marcellus',Georgia,serif; font-weight:400;
+  margin:0; line-height:1.18; letter-spacing:.01em; text-wrap:balance}
+p{margin:0}
+.mano{font-family:'Style Script',cursive; font-weight:400}
+
+.wrap{width:100%; max-width:620px; margin:0 auto; padding:0 28px}
+.etiqueta{font-family:'Marcellus',serif; font-size:.68rem; letter-spacing:.32em;
+  text-transform:uppercase; color:var(--hondo)}
+.bajada{max-width:36ch; margin:20px auto 0; color:var(--tinta-2); font-size:1rem}
+
+/* Las acuarelas vienen sobre papel crema: multiply funde ese papel */
+.acuarela{width:100%; height:auto; display:block; mix-blend-mode:multiply}
+.motivo{width:120px; margin:0 auto; mix-blend-mode:multiply}
+.motivo.chico{width:78px}
+
+/* ═══════════ ACTO 1 · LA PORTADA ═══════════ */
+/* No es una puerta que esconde datos: es el sueño. Todavia no dice
+   donde es. Eso se descubre adentro, y esa demora es la experiencia. */
+.portada{min-height:100svh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center;
+  padding:52px 26px 92px; position:relative}
+.portada .acuarela{max-width:520px; margin:0 auto 30px}
+.antes{font-family:'Marcellus',serif; font-size:.68rem; letter-spacing:.34em;
+  text-transform:uppercase; color:var(--hondo); margin-bottom:22px}
+.relato{max-width:30ch; margin:0 auto; color:var(--tinta-2); font-size:1.02rem;
+  line-height:1.95}
+.relato b{display:block; color:var(--tinta); font-weight:400;
+  font-family:'Marcellus',serif; font-size:1.04rem; letter-spacing:.02em}
+.nombres{font-family:'Style Script',cursive; font-size:clamp(2.9rem,13vw,4.4rem);
+  line-height:1.08; margin-top:34px}
+.nombres .y{display:block; font-size:.44em; color:var(--hondo); margin:-.02em 0}
+.btn{display:inline-block; margin-top:34px; text-decoration:none;
+  font-family:'Marcellus',serif; font-size:.72rem; letter-spacing:.22em;
+  text-transform:uppercase; padding:15px 34px; border-radius:999px;
+  border:1px solid var(--hondo); color:var(--hondo);
+  transition:transform .16s var(--ease), background .25s var(--ease), color .25s var(--ease)}
+.btn:hover{background:var(--hondo); color:var(--papel)}
+.btn:active{transform:scale(.97)}
+.btn.lleno{background:var(--hondo); color:var(--papel)}
+.btn.lleno:hover{background:var(--terracota)}
+
+/* ═══════════ SECCIONES ═══════════ */
+.acto{padding:96px 0}
+.acto.junto{padding-top:0}
+.bloque{text-align:center}
+.bloque h2{font-size:clamp(1.8rem,6.4vw,2.5rem); margin-top:16px}
+.bloque h2 em{font-family:'Style Script',cursive; font-style:normal;
+  color:var(--hondo); font-size:1.2em; line-height:.9}
+
+/* La linea que se dibuja sola debajo de cada titulo */
+.bloque h2::after{content:''; display:block; width:44px; height:1px;
+  margin:22px auto 0; background:var(--terracota);
+  transform:scaleX(0); transform-origin:center;
+  transition:transform 1.1s var(--ease) 200ms}
+.bloque.on h2::after{transform:scaleX(1)}
+
+.dato{margin-top:34px}
+.dato .cuando{font-family:'Marcellus',serif; font-size:2.3rem; color:var(--hondo);
+  line-height:1}
+.dato .donde{margin-top:8px; font-size:.95rem; color:var(--tinta-2)}
+
+.alias{display:inline-flex; align-items:center; gap:14px; margin-top:24px;
+  padding:14px 22px; border:1px dashed rgba(160,69,26,.45); border-radius:8px;
+  font-family:'Marcellus',serif; letter-spacing:.1em; color:var(--tinta)}
+.alias button{font-family:'Jost',sans-serif; font-size:.7rem; letter-spacing:.14em;
+  text-transform:uppercase; border:0; background:var(--hondo); color:var(--papel);
+  padding:9px 15px; border-radius:999px; cursor:pointer;
+  transition:transform .16s var(--ease)}
+.alias button:active{transform:scale(.95)}
+
+.hash{font-family:'Style Script',cursive; font-size:2.4rem; color:var(--hondo);
+  margin-top:20px; line-height:1.1}
+
+/* ═══════════ EL MAPA ═══════════ */
+.mapa{position:relative; margin:30px auto 0; max-width:560px}
+.mapa img{width:100%; height:auto; display:block; mix-blend-mode:multiply}
+.capa{position:absolute; inset:0; width:100%; height:100%}
+.ruta{fill:none; stroke:var(--hondo); stroke-width:3; stroke-linecap:round;
+  stroke-dasharray:2 11; opacity:0; transition:opacity 1.2s var(--ease)}
+.mapa.on .ruta{opacity:.9}
+.punta{fill:none; stroke:var(--hondo); stroke-width:3;
+  stroke-linecap:round; stroke-linejoin:round}
+
+/* ═══════════ TRAZOS QUE SE DIBUJAN ═══════════ */
+.trazo{fill:none; stroke:var(--terracota); stroke-width:1.7;
+  stroke-linecap:round; stroke-linejoin:round}
+.trazo.fina{stroke-width:1.2}
+.trazo.hoja{stroke:var(--oliva)}
+.trazo.dibujando{transition:stroke-dashoffset 1.2s var(--ease)}
+
+/* ═══════════ APARICION ═══════════ */
+.rev{opacity:0; transform:translateY(18px);
+  transition:opacity 1.1s var(--ease), transform 1.1s var(--ease)}
+.rev.on{opacity:1; transform:none}
+/* En la portada el texto entra MUY lento: es el unico lugar donde la
+   demora suma, porque todavia no hay nada que leer con apuro. */
+.portada .rev{transition-duration:1.9s}
+
+footer{padding:60px 0 70px; text-align:center; font-size:.8rem;
+  color:var(--tinta-2); letter-spacing:.04em}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .rev{opacity:1; transform:none; transition:none}
+  .trazo{stroke-dashoffset:0 !important; transition:none !important}
+  .bloque h2::after{transform:scaleX(1); transition:none}
+  .ruta{opacity:.9 !important}
+}
+</style>
+</head>
+<body>
+<div class="fibra" aria-hidden="true"></div>
+<div class="nube" aria-hidden="true"></div>
+
+<!-- ══════════ ACTO 1 · EMOCIÓN ══════════ -->
+<header class="portada">
+  <img class="acuarela rev" src="web/ellos-acuarela.jpg"
+       alt="Guillermina y Sebastián de espaldas, mirando el lago al atardecer">
+
+  <p class="antes rev">Antes de nuestro para siempre</p>
+
+  <p class="relato rev">
+    Ella, siempre buscando un destino nuevo.<br>
+    Él, descubriendo el mundo al lado de ella.<br><br>
+    Después de tantos caminos, encontramos el lugar
+    donde queremos empezar el próximo.
+  </p>
+
+  <h1 class="nombres rev">Guillermina<span class="y">y</span>Sebastián</h1>
+
+  <a class="btn lleno rev" href="#corazon">Ingresar</a>
+</header>
+
+<!-- ══════════ ACTO 2 · EL MOMENTO ══════════ -->
+<section class="acto" id="corazon">
+  <div class="wrap bloque">
+    <img class="motivo chico rev" src="web/olivo.jpg" alt="" aria-hidden="true">
+    <p class="etiqueta rev" style="margin-top:18px">Un mensaje del corazón</p>
+    <h2 class="rev">Queremos que estés <em>ahí</em>.</h2>
+    <p class="bajada rev">
+      Elegimos este lugar porque se parece a nosotros: naturaleza,
+      calma, y un horizonte que da ganas de imaginar todo lo que
+      falta vivir.
+    </p>
+    <p class="bajada rev" style="margin-top:16px">
+      Queremos empezar esta etapa rodeados de la gente que queremos.
+      Y vos sos parte de eso.
+    </p>
+  </div>
+</section>
+
+<section class="acto junto">
+  <div class="wrap bloque">
+    <p class="etiqueta rev">La ceremonia</p>
+    <h2 class="rev">Frente al lago, con el <em>atardecer</em> de fondo.</h2>
+    <p class="bajada rev">
+      Nos casamos sobre el pico que entra al agua, rodeados de árboles.
+      Después caminamos unos metros y seguimos festejando.
+    </p>
+    <div class="dato rev">
+      <p class="cuando">18:00</p>
+      <p class="donde">Sábado 3 de abril de 2027 · Finca La Josefina</p>
+    </div>
+  </div>
+</section>
+
+<section class="acto junto">
+  <div class="wrap bloque">
+    <p class="etiqueta rev">Cómo llegar</p>
+    <h2 class="rev">Finca <em>La Josefina</em></h2>
+    <p class="bajada rev">
+      Berisso, Buenos Aires. El último tramo es de tierra, así que salí
+      con tiempo.
+    </p>
+
+    <div class="mapa" id="mapa">
+      <img src="web/mapa.jpg"
+           alt="Mapa ilustrado de la Finca La Josefina: la Ruta 15, la calle 77, la tranquera, el estacionamiento, el salón y el altar sobre el lago">
+      <svg class="capa" viewBox="0 0 1000 758" preserveAspectRatio="none" aria-hidden="true">
+        <!-- El recorrido, siguiendo los caminos ya pintados -->
+        <path class="ruta" d="M170 700 C240 690 300 660 360 620 C420 582 470 566 512 560
+                              C548 554 560 530 552 500 C544 468 556 442 590 430
+                              C630 416 660 386 672 344 C682 310 700 290 726 280"/>
+        <path class="punta" id="punta" d="M706 292 L728 276 L732 302"/>
+      </svg>
+    </div>
+
+    <a class="btn rev" style="margin-top:26px"
+       href="https://maps.google.com/?q=Finca+La+Josefina+Berisso" target="_blank" rel="noopener">Abrir en el mapa</a>
+  </div>
+</section>
+
+<!-- ══════════ ACTO 3 · LA FIESTA ══════════ -->
+<section class="acto">
+  <div class="wrap bloque">
+    <img class="motivo rev" src="web/aperol.jpg" alt="" aria-hidden="true">
+    <p class="etiqueta rev" style="margin-top:14px">Y después</p>
+    <h2 class="rev">A <em>celebrar</em>.</h2>
+    <p class="bajada rev">
+      Una noche para brindar, bailar, comer rico y reírnos hasta que no
+      quede nadie sentado.
+    </p>
+    <div class="dato rev">
+      <p class="cuando">20:00</p>
+      <p class="donde">Salón principal, a unos metros del lago</p>
+    </div>
+  </div>
+</section>
+
+<section class="acto junto">
+  <div class="wrap bloque">
+    <p class="etiqueta rev">Si querés hacernos un regalo</p>
+    <h2 class="rev">Que vengas ya es <em>suficiente</em>.</h2>
+    <p class="bajada rev">
+      Pero si además querés acompañarnos con un detalle para esta nueva
+      etapa, te dejamos el alias.
+    </p>
+    <div class="alias rev">
+      <span id="alias">guille.seba.boda</span>
+      <button id="copiar" type="button">Copiar</button>
+    </div>
+  </div>
+</section>
+
+<section class="acto junto">
+  <div class="wrap bloque">
+    <p class="etiqueta rev">Nuestro día, también en tus fotos</p>
+    <h2 class="rev">Sacá <em>muchas</em>.</h2>
+    <p class="bajada rev">
+      Todo lo que subas con el hashtag lo vamos a poder ver después,
+      desde tus ojos.
+    </p>
+    <p class="hash rev">#GuilleYSeba</p>
+  </div>
+</section>
+
+<section class="acto junto">
+  <div class="wrap bloque">
+    <svg class="motivo chico rev" viewBox="0 0 100 108" aria-hidden="true">
+      <path class="trazo" d="M50 30 C68 29 81 43 80 60 C79 77 66 89 49 89 C32 89 20 75 20.5 58 C21 41 33 30.5 50 30"/>
+      <path class="trazo fina" d="M50 30 C49 25 47.5 21 46 18.5"/>
+      <path class="trazo hoja" d="M46 18.5 C52 10.5 65 10 70 16.5 C64 24 52 24.5 46 18.5"/>
+      <path class="trazo hoja fina" d="M48.5 18.2 C55 17 62.5 16.6 68.5 17.2"/>
+    </svg>
+    <p class="etiqueta rev" style="margin-top:16px">Queremos contar con vos</p>
+    <h2 class="rev">Confirmanos <em>tu lugar</em>.</h2>
+    <p class="bajada rev">
+      Estamos preparando este día con mucho cariño y nos encantaría
+      saber que vas a estar. Confirmá antes del 3 de marzo.
+    </p>
+    <a class="btn lleno rev" href="#" style="margin-top:28px">Confirmar asistencia</a>
+  </div>
+</section>
+
+<footer>Guillermina &amp; Sebastián · 3 de abril de 2027</footer>
+
+<script>
+/* ── Aparicion, trazos y mapa ─────────────────────────────────────── */
+function dibujarTrazos(raiz) {
+  const t = [...raiz.querySelectorAll('.trazo')];
+  t.forEach(p => {
+    const L = p.getTotalLength();
+    p.style.strokeDasharray = L;
+    p.style.strokeDashoffset = L;
+  });
+  /* Obliga a pintar el estado vacio antes de mover nada: sin esto el
+     navegador junta los dos cambios en un cuadro y el primer trazo
+     salta de invisible a completo. */
+  void document.body.offsetWidth;
+  t.forEach((p, i) => {
+    p.classList.add('dibujando');
+    setTimeout(() => { p.style.strokeDashoffset = '0'; }, i * 90);
+  });
+}
+
+const io = new IntersectionObserver((entradas, obs) => {
+  entradas.forEach(e => {
+    if (!e.isIntersecting) return;
+    obs.unobserve(e.target);
+    e.target.classList.add('on');
+    if (e.target.querySelector && e.target.querySelector('.trazo')) dibujarTrazos(e.target);
+    if (e.target.id === 'mapa') {
+      const p = document.getElementById('punta');
+      const L = p.getTotalLength();
+      p.style.strokeDasharray = L; p.style.strokeDashoffset = L;
+      void document.body.offsetWidth;
+      p.style.transition = 'stroke-dashoffset .7s var(--ease) 1s';
+      p.style.strokeDashoffset = '0';
+    }
+  });
+}, { threshold: .18, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.rev, .bloque, #mapa').forEach(e => io.observe(e));
+
+/* ── Copiar el alias ── */
+document.getElementById('copiar').onclick = function () {
+  const texto = document.getElementById('alias').textContent.trim();
+  navigator.clipboard.writeText(texto).then(() => {
+    this.textContent = 'Copiado';
+    setTimeout(() => { this.textContent = 'Copiar'; }, 1800);
+  });
+};
+</script>
+</body>
+</html>
