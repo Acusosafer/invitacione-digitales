@@ -33,7 +33,7 @@
 <!-- ⚠️ Los pesos declarados son EXACTAMENTE los que publica cada
      familia. Si se pide uno que no existe, Google rechaza el pedido
      entero y no carga ninguna de las dos. -->
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Style+Script&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
 :root{
@@ -89,14 +89,20 @@ body{
    La que continua va lisa, en el color donde termino la anterior. */
 .escena-sigue {background:var(--ocaso)}
 h1,h2,h3{
-  font-family:'Cormorant Garamond',Georgia,serif; font-weight:300;
-  margin:0; line-height:1.06; letter-spacing:-.01em; text-wrap:balance;
+  font-family:'Marcellus',Georgia,serif; font-weight:400;
+  margin:0; line-height:1.12; letter-spacing:.01em; text-wrap:balance;
 }
+/* La manuscrita SOLO para lo que se subraya: los nombres y una palabra
+   por titulo. Es lo que hace el cartel del Aperol —"LOVE AT FIRST" en
+   caja alta y "Spritz" a mano— y funciona porque es la excepcion. Si
+   todo va manuscrito, no se destaca nada y encima se lee peor. */
+.manuscrita{font-family:'Style Script',cursive; font-weight:400}
 p{margin:0}
 .wrap{width:100%; max-width:640px; margin:0 auto; padding:0 26px}
 
 .etiqueta{
-  font-size:.68rem; letter-spacing:.32em; text-transform:uppercase;
+  font-family:'Marcellus',serif;
+  font-size:.7rem; letter-spacing:.3em; text-transform:uppercase;
   color:var(--naranja-hondo);
 }
 .noche .etiqueta{color:var(--naranja-luz)}
@@ -113,19 +119,20 @@ p{margin:0}
 }
 .entrada .dibujo{width:78px; margin-bottom:30px}
 .nombres{
-  font-size:clamp(2.9rem,13vw,4.6rem); line-height:1.02;
+  font-family:'Style Script',cursive; font-weight:400;
+  font-size:clamp(3.2rem,15vw,5.4rem); line-height:1.06; letter-spacing:0;
 }
 .nombres .y{
-  font-style:italic; color:var(--naranja); display:block;
-  font-size:.5em; margin:.08em 0;
+  color:var(--naranja-hondo); display:block;
+  font-size:.46em; margin:-.04em 0;
 }
 .entrada .cuando{
   margin-top:26px; font-size:.78rem; letter-spacing:.3em;
   text-transform:uppercase; color:var(--tinta-suave);
 }
 .entrada .donde{
-  margin-top:10px; font-family:'Cormorant Garamond',serif;
-  font-size:1.32rem; font-style:italic; color:var(--tinta);
+  margin-top:14px; font-family:'Marcellus',serif;
+  font-size:1.16rem; letter-spacing:.04em; color:var(--tinta);
 }
 .bajar{
   position:absolute; bottom:34px; left:50%; transform:translateX(-50%);
@@ -166,7 +173,8 @@ p{margin:0}
 /* ═══════════════ SECCIONES ═══════════════ */
 .bloque{padding:0 0 92px; text-align:center}
 .bloque h2{font-size:clamp(1.9rem,7vw,2.7rem); margin-bottom:16px}
-.bloque h2 em{font-style:italic; color:var(--naranja)}
+.bloque h2 em{font-family:'Style Script',cursive; font-style:normal;
+  color:var(--naranja-hondo); font-size:1.18em; line-height:.9}
 .noche .bloque h2 em{color:var(--naranja-luz)}
 .bajada{
   max-width:38ch; margin:0 auto; color:var(--tinta-suave);
@@ -185,7 +193,7 @@ p{margin:0}
 }
 .noche .hora{border-color:rgba(229,139,74,.34); background:rgba(255,255,255,.05)}
 .hora .num{
-  font-family:'Cormorant Garamond',serif; font-size:2.1rem; line-height:1;
+  font-family:'Marcellus',serif; font-size:2.1rem; line-height:1;
   color:var(--naranja); margin:8px 0 6px;
 }
 .noche .hora .num{color:var(--naranja-luz)}

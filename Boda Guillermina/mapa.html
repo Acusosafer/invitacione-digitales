@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cómo llegar — Guillermina &amp; Sebastián</title>
+
+<!-- Prueba del mapa ilustrado. El camino se dibuja solo de arriba a
+     abajo y los carteles de cada parada aparecen detras.
+     Es un DIAGRAMA, no un satelite: cuenta el recorrido tal como lo
+     explico Guillermina, que es lo que el invitado necesita. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Style+Script&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --naranja:#E07A1F; --hondo:#A0451A; --terracota:#A84F2A;
+  --oliva:#435F3A; --salvia:#A3B18A; --avena:#C9B694;
+  --agua:#5F8399;
+  --papel:#FDF6EC; --tinta:#3A302A; --tinta-2:#6E6055;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--papel);color:var(--tinta);
+  font-family:'Jost',system-ui,sans-serif;font-size:17px;line-height:1.6;
+  padding:46px 20px 80px;overflow-x:hidden}
+.wrap{max-width:560px;margin:0 auto;text-align:center}
+
+.etiqueta{font-family:'Marcellus',serif;font-size:.7rem;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--hondo)}
+h1{font-family:'Marcellus',serif;font-weight:400;font-size:clamp(1.9rem,7vw,2.6rem);
+  margin:14px 0 0;line-height:1.16}
+h1 em{font-family:'Style Script',cursive;font-style:normal;color:var(--hondo);
+  font-size:1.2em;line-height:.9}
+.bajada{max-width:34ch;margin:16px auto 0;color:var(--tinta-2);font-size:.98rem}
+
+svg.mapa{width:100%;height:auto;display:block;margin:30px auto 0;max-width:420px}
+
+/* Todo lo dibujado */
+.t{fill:none;stroke:var(--terracota);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.t.fina{stroke-width:1.3}
+.t.verde{stroke:var(--oliva)}
+.t.agua{stroke:var(--agua)}
+.t.ruta{stroke-width:4;stroke:var(--avena)}
+svg.mapa path.dibujando{transition:stroke-dashoffset 1.4s var(--ease)}
+
+/* Los carteles */
+.parada{opacity:0;transform:translateY(6px);
+  transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.parada.puesta{opacity:1;transform:none}
+.parada text{font-family:'Marcellus',serif;font-size:11.5px;letter-spacing:.15em;
+  text-transform:uppercase;fill:var(--tinta)}
+.parada text.chico{font-size:9.5px;letter-spacing:.13em;fill:var(--tinta-2)}
+.parada text.rio{fill:var(--agua);font-family:'Style Script',cursive;
+  font-size:22px;letter-spacing:0;text-transform:none}
+.parada circle{fill:var(--papel);stroke:var(--terracota);stroke-width:1.6}
+
+.acciones{margin-top:28px}
+button{font-family:'Marcellus',serif;font-size:.72rem;letter-spacing:.18em;
+  text-transform:uppercase;padding:13px 26px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--hondo);background:transparent;color:var(--hondo);
+  transition:transform .16s var(--ease),background .2s var(--ease),color .2s var(--ease)}
+button:hover{background:var(--hondo);color:var(--papel)}
+button:active{transform:scale(.97)}
+
+.escrito{max-width:34ch;margin:32px auto 0;text-align:left;font-size:.95rem;
+  color:var(--tinta-2);line-height:1.8}
+.escrito b{color:var(--tinta);font-weight:500}
+
+@media (prefers-reduced-motion:reduce){
+  .t{stroke-dashoffset:0 !important;transition:none !important}
+  .parada{opacity:1 !important;transform:none !important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="etiqueta">Berisso · Buenos Aires</div>
+  <h1>Cómo llegar a <em>La Josefina</em></h1>
+  <p class="bajada">Está sobre la Ruta 15. El último tramo es de tierra, así que salí con tiempo.</p>
+
+  <svg class="mapa" viewBox="0 0 420 716" role="img"
+       aria-label="Mapa del recorrido: Ruta 15, Calle 77, la tranquera, el estacionamiento, el salón, el altar y el lago">
+
+    <!-- ══ EL CAMINO ══ -->
+    <path class="t ruta" d="M14 54 L406 40"/>
+    <path class="t" d="M152 48 C148 94 142 132 138 170 C136 192 142 204 164 207 L248 210"/>
+    <path class="t" d="M248 210 C270 212 278 226 274 246 C270 268 256 282 238 294"/>
+    <path class="t fina" d="M238 294 C216 308 198 324 192 346 C187 366 196 382 214 394 C234 407 256 418 270 436"/>
+    <path class="t fina" d="M270 436 C282 454 280 474 264 488"/>
+
+    <!-- ══ EL LAGO ══ -->
+    <path class="t agua" d="M92 548 C108 506 166 492 240 498 C320 504 368 528 374 566 C380 606 332 632 254 636 C168 640 106 616 94 584 C88 568 86 560 92 548"/>
+    <path class="t agua fina" d="M264 552 C284 548 302 554 304 564 C306 576 290 584 274 580 C260 576 254 556 264 552"/>
+    <path class="t agua fina" d="M126 600 C148 610 176 616 204 617"/>
+    <path class="t fina" d="M245 500 L245 522 M238 500 L252 500 M238 508 L252 508 M238 516 L252 516"/>
+
+    <!-- ══ EL BOSQUE ══ -->
+    <g class="t verde fina">
+      <path d="M40 476 L50 452 L60 476 M50 476 L50 486"/>
+      <path d="M64 500 L74 476 L84 500 M74 500 L74 510"/>
+      <path d="M118 502 L128 478 L138 502 M128 502 L128 512"/>
+      <path d="M318 462 L328 438 L338 462 M328 462 L328 472"/>
+      <path d="M342 476 L352 452 L362 476 M352 476 L352 486"/>
+      <path d="M368 502 L378 478 L388 502 M378 502 L378 512"/>
+    </g>
+
+    <!-- ══ EL ARROYO ══ -->
+    <path class="t agua fina" d="M18 670 C68 658 118 676 170 668 C222 660 272 676 326 668 C360 663 384 668 402 674"/>
+
+    <!-- ══ EL SALON ══ -->
+    <path class="t" d="M150 358 L226 338 L238 374 L162 394 Z"/>
+    <path class="t fina" d="M172 352 L184 381"/>
+
+    <!-- ══ EL ALTAR ══ -->
+    <path class="t" d="M246 472 L246 450 C246 442 266 442 266 450 L266 472"/>
+
+    <!-- ══ LAS PARADAS ══ -->
+    <g class="parada" data-orden="0">
+      <text x="210" y="26" text-anchor="middle">Ruta 15 · Av. Montevideo</text>
+    </g>
+    <g class="parada" data-orden="1">
+      <text x="106" y="122" text-anchor="end">Calle 77</text>
+      <text class="chico" x="106" y="138" text-anchor="end">hasta el final</text>
+    </g>
+    <g class="parada" data-orden="2">
+      <path class="t fina" d="M200 186 L230 192 M223 187 L230 192 L223 197"/>
+      <text class="chico" x="196" y="182" text-anchor="end">y a la derecha</text>
+    </g>
+    <g class="parada" data-orden="3">
+      <circle cx="274" cy="246" r="4"/>
+      <text x="290" y="250">La tranquera</text>
+      <text class="chico" x="290" y="265">mano izquierda</text>
+    </g>
+    <g class="parada" data-orden="4">
+      <circle cx="205" cy="318" r="4"/>
+      <text x="191" y="308" text-anchor="end">Estacionamiento</text>
+    </g>
+    <g class="parada" data-orden="5">
+      <circle cx="214" cy="394" r="4"/>
+      <text class="chico" x="204" y="414" text-anchor="end">Recepción</text>
+    </g>
+    <g class="parada" data-orden="6">
+      <text x="248" y="352">El salón</text>
+    </g>
+    <g class="parada" data-orden="7">
+      <circle cx="256" cy="461" r="4"/>
+      <text x="236" y="452" text-anchor="end">El altar</text>
+    </g>
+    <g class="parada" data-orden="8">
+      <text class="rio" x="196" y="574" text-anchor="middle">el lago</text>
+    </g>
+    <g class="parada" data-orden="9">
+      <text class="chico" x="58" y="530" text-anchor="middle">Bosque</text>
+    </g>
+    <g class="parada" data-orden="10">
+      <text class="chico" x="210" y="700" text-anchor="middle">El arroyo</text>
+    </g>
+  </svg>
+
+  <div class="acciones"><button id="repetir">Dibujar de nuevo</button></div>
+
+  <p class="escrito">
+    Tomás la <b>Ruta Provincial 15 (Avenida Montevideo)</b> y doblás en
+    <b>Calle 77</b>. Seguís hasta el final, doblás a la <b>derecha</b>, y
+    la <b>tranquera queda a mano izquierda</b>. Entrás y al fondo está el
+    estacionamiento; después la recepción y el salón, y más atrás el
+    altar, junto al lago.
+  </p>
+</div>
+
+<script>
+/* Solo <path>: un <g> no tiene getTotalLength. Los del bosque
+   heredan el trazo de su grupo pero se animan de a uno. */
+const trazos  = [...document.querySelectorAll('svg.mapa path')];
+const paradas = [...document.querySelectorAll('.parada')];
+let relojes = [];
+
+function dibujar() {
+  relojes.forEach(clearTimeout); relojes = [];
+
+  trazos.forEach(t => {
+    t.classList.remove('dibujando');
+    const largo = t.getTotalLength();
+    t.style.strokeDasharray  = largo;
+    t.style.strokeDashoffset = largo;
+  });
+  paradas.forEach(p => p.classList.remove('puesta'));
+
+  /* Obliga a pintar el estado vacio antes de mover nada. Sin esto el
+     navegador junta los dos cambios en un mismo cuadro y el primer
+     trazo salta de invisible a completo en vez de dibujarse. */
+  void document.body.offsetWidth;
+
+  trazos.forEach((t, i) => {
+    t.classList.add('dibujando');
+    relojes.push(setTimeout(() => { t.style.strokeDashoffset = '0'; }, i * 110));
+  });
+
+  /* Los carteles entran DETRAS del camino: primero se abre la ruta y
+     recien despues aparece el nombre de cada parada. Al reves se lee
+     como una lista, no como un recorrido. */
+  paradas.forEach(p => {
+    relojes.push(setTimeout(() => p.classList.add('puesta'),
+      700 + (+p.dataset.orden) * 250));
+  });
+}
+
+const io = new IntersectionObserver((entradas, obs) => {
+  entradas.forEach(e => {
+    if (!e.isIntersecting) return;
+    obs.unobserve(e.target);
+    dibujar();
+  });
+}, { threshold: .15 });
+io.observe(document.querySelector('svg.mapa'));
+
+document.getElementById('repetir').onclick = dibujar;
+</script>
+</body>
+</html>
