@@ -23,3 +23,10 @@ publicidad/
 # Material de trabajo de clientes: fotos, referencias, capturas.
 # NUNCA se publica — son fotos de gente real y del salon que contrataron.
 Boda Guillermina/
+
+# ⚠️ Los `cliente-guille-*.html` de la raiz SI se publican, a proposito:
+# son las muestras que se le mandan por link a la clienta, autocontenidas
+# (las imagenes van embebidas, no hay carpeta de assets) y con
+# `noindex, nofollow`. Las rutas cortas estan en vercel.json.
+# CUANDO LA BODA PASE O EL TRABAJO SE CIERRE, se borran los archivos y
+# las rutas: si no, en un año hay muestras de clientes viejas colgando.

@@ -1,7 +1,28 @@
 {
   "rewrites": [
-    { "source": "/i", "destination": "/api/i" },
-    { "source": "/muestra", "destination": "/api/i?evento=almamia15&muestra=1" },
-    { "source": "/a-medida", "destination": "/servicio-a-medida.html" }
+    {
+      "source": "/i",
+      "destination": "/api/i"
+    },
+    {
+      "source": "/muestra",
+      "destination": "/api/i?evento=almamia15&muestra=1"
+    },
+    {
+      "source": "/a-medida",
+      "destination": "/servicio-a-medida.html"
+    },
+    {
+      "source": "/guille",
+      "destination": "/cliente-guille-muestra.html"
+    },
+    {
+      "source": "/guille-fecha",
+      "destination": "/cliente-guille-std.html"
+    },
+    {
+      "source": "/guille-dibujos",
+      "destination": "/cliente-guille-dibujos.html"
+    }
   ]
 }
