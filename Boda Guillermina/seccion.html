@@ -47,8 +47,8 @@
   --verde:#7F8F6A;
 
   /* Los tres momentos de la tarde */
-  --tarde:#FDF6EC;      /* la luz de las 19 */
-  --ocaso:#F3D9C0;      /* el cielo de la acuarela */
+  --tarde:#F7F1E4;      /* la cartulina: el crema del menu */
+  --ocaso:#F0D6BC;      /* el cielo de la acuarela */
   --noche:#1E1712;      /* la fiesta */
 
   --tinta:#3A302A;
@@ -58,6 +58,22 @@
 
   --ease:cubic-bezier(.22,.61,.36,1);
 }
+/* ══════════════════════════════════════════════════════════════════
+   EL PAPEL
+   El fondo no es un color plano: es cartulina. La trama va en una capa
+   fija encima de todo, con multiply, asi oscurece las fibras en vez de
+   agrisar la pagina — que es lo que pasa si se pone la trama con
+   opacidad sobre blanco.
+
+   Es un SVG de ruido embebido: no baja ninguna imagen y pesa 300 bytes.
+   ══════════════════════════════════════════════════════════════════ */
+.papel{
+  position:fixed; inset:0; z-index:9; pointer-events:none;
+  opacity:.5; mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23p)' opacity='.42'/%3E%3C/svg%3E");
+}
+@media (prefers-reduced-motion:reduce){ .papel{opacity:.34} }
+
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
@@ -245,6 +261,7 @@ p{margin:0}
 </style>
 </head>
 <body>
+<div class="papel" aria-hidden="true"></div>
 
 <!-- ═══════════════ ENTRADA ═══════════════ -->
 <header class="entrada escena-dia">

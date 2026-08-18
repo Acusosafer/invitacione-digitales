@@ -216,50 +216,59 @@ postal del lugar. Un lago ovalado con el altar al costado no sirve.
 
 ---
 
-## C1 · Vista aérea de la finca → `mapa-aereo.png`
+## C1 · El mapa de la finca → `mapa-aereo.png`
 
 ⚠️ Adjuntá las capturas satelitales como referencia.
 
+**Lo que fallaba antes:** pedía una vista "en ángulo" y salía todo
+encimado. Va **planta pura, desde arriba**, como los mapas ilustrados
+de estancia — el suelo visto de arriba y los edificios dibujados como
+fachaditas chicas. Esa mezcla es la convención del mapa ilustrado y es
+lo que hace que se entienda sin esfuerzo.
+
 ```
-Delicate hand-painted watercolour illustration on clean white paper,
-in the style of fine wedding stationery. Loose transparent washes with
-visible brush strokes and soft bleeding edges that fade into the white
-background. No outlines, no photorealism, no digital gradients. Warm
-citrus palette: bright orange (#E07A1F), burnt terracotta (#A84F2A),
-deep olive green (#435F3A), soft sage green (#A3B18A), warm oat beige
-(#D7C3A1), on cream white paper (#F6F2E8). Part of a matching set of
-wedding illustrations. Absolutely no text, no lettering, no words, no
-labels, no borders, no frame.
+Delicate hand-painted watercolour illustrated map, seen from directly
+above in a flat plan view, in the style of a hand-painted estate or
+resort map. Loose transparent washes with visible brush strokes and
+soft irregular edges, over clean cream paper. Fine loose ink linework
+over the washes. No photorealism, no perspective, no digital
+gradients, no drop shadows.
 
-Subject: a bird's eye view of a countryside wedding estate, painted
-from above at a slight angle, like an illustrated map.
+Warm citrus palette: bright orange (#E07A1F), burnt terracotta
+(#A84F2A), deep olive green (#435F3A), soft sage green (#A3B18A), warm
+oat beige (#D7C3A1), soft blue-grey water, on cream paper (#F6F2E8).
 
-Upper right: a large calm lake in soft blue-grey and sage, taking up
-about a third of the picture.
+CRITICAL: every element is drawn SMALL and clearly SEPARATED, with
+generous green lawn between them. Nothing overlaps. Nothing crowds.
+The map reads at a glance, calm and airy, with white space at the
+edges.
 
-The most important feature: a rounded grassy peninsula juts out into
-the lake from the lower left shore, surrounded by water on three
-sides. On this peninsula, two neat rows of tiny white ceremony chairs
-face a small simple arch standing right at the very tip, at the water's
-edge. This tongue of land reaching into the water is the heart of the
-image and must be clearly readable.
+Layout, from above:
 
-Lower left: a long low building with a pale roof, seen from above,
-among the trees.
+Upper right, a large calm lake in soft blue-grey with a pale sandy
+rim. Reaching into it from the lower left shore, a rounded green
+peninsula surrounded by water on three sides — this tongue of land is
+the most important feature and must be unmistakable. On it, two small
+neat rows of tiny white chairs facing a little arch standing at the
+very tip, at the water edge.
 
-Between them: an open lawn, and a pale winding dirt path connecting the
-building to the peninsula, arriving from the left edge of the picture.
+Lower left, a long low building drawn as a small simple elevation with
+a pale roof, and beside it a small open parking area with a few tiny
+cars.
 
-Around everything: clusters of tall dark pines and slender poplars seen
-from above as soft rounded and pointed shapes.
+Connecting them, a pale winding dirt path that arrives from the left
+edge of the picture.
 
-Late afternoon light, long soft shadows, warm and calm. Generous white
-space around the edges.
+Scattered around, small individual trees seen as simple rounded and
+pointed shapes — dark pines and slender poplars — grouped loosely, not
+as a solid mass.
+
+Absolutely no text, no lettering, no words, no labels, no compass, no
+borders, no frame.
 ```
 
-**Qué mirar:** que el pico se lea como pico. Si el agua no lo rodea por
-tres lados, se descarta y se vuelve a tirar. Todo lo demás es
-secundario.
+**Se descarta si:** el agua no rodea el pico por tres lados, o si los
+elementos se pisan entre sí. Todo lo demás se puede acomodar después.
 
 ---
 
