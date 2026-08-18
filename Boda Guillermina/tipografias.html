@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tipografías — Boda Guillermina</title>
+<!-- ⚠️ Todas estas familias publican SOLO el peso 400. Se pide 400 y
+     nada mas: si se pide un peso que no existe, Google rechaza el
+     pedido entero y no carga ninguna. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Gilda+Display&family=Tenor+Sans&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Style+Script&family=Parisienne&family=Italianno&family=Petit+Formal+Script&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --naranja:#E07A1F; --hondo:#A84F2A; --oliva:#435F3A;
+  --salvia:#A3B18A; --avena:#D7C3A1; --crema:#F6F2E8;
+  --tinta:#33291F;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--crema);color:var(--tinta);
+  font-family:'Jost',system-ui,sans-serif;font-size:16px;padding:40px 20px 90px}
+.wrap{max-width:760px;margin:0 auto}
+header{text-align:center;margin-bottom:46px}
+header p{max-width:44ch;margin:14px auto 0;color:#6E6055;line-height:1.6}
+.kicker{font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;color:var(--hondo)}
+
+.opcion{background:#fff;border:1px solid rgba(168,79,42,.16);border-radius:10px;
+  padding:40px 30px 32px;margin-bottom:26px;text-align:center}
+.num{font-size:.66rem;letter-spacing:.28em;text-transform:uppercase;color:var(--hondo);
+  margin-bottom:26px}
+
+/* El renglon del Aperol: caja alta espaciada + manuscrita */
+.frase{line-height:1.05}
+.caps{display:block;text-transform:uppercase;letter-spacing:.26em;font-size:1.42rem}
+.script{display:block;font-size:3.5rem;color:var(--naranja);margin-top:.06em;line-height:1}
+
+/* Como quedarian los nombres de verdad */
+.nombres{margin-top:34px;padding-top:26px;border-top:1px solid rgba(168,79,42,.14)}
+.n-caps{text-transform:uppercase;letter-spacing:.3em;font-size:.78rem;color:#6E6055}
+.n-grande{font-size:clamp(2.3rem,9vw,3.4rem);line-height:1.06;margin-top:12px}
+.n-y{font-size:.52em;color:var(--naranja);display:block;margin:.04em 0}
+.ficha{margin-top:20px;font-size:.74rem;color:#8A7D70;letter-spacing:.04em}
+
+/* ── Las cuatro duplas ── */
+.o1 .caps,.o1 .n-caps{font-family:'Marcellus',serif}
+.o1 .script,.o1 .n-grande,.o1 .n-y{font-family:'Style Script',cursive}
+
+.o2 .caps,.o2 .n-caps{font-family:'Cormorant Garamond',serif}
+.o2 .script,.o2 .n-y{font-family:'Parisienne',cursive}
+.o2 .n-grande{font-family:'Cormorant Garamond',serif}
+
+.o3 .caps,.o3 .n-caps{font-family:'Gilda Display',serif}
+.o3 .script,.o3 .n-grande,.o3 .n-y{font-family:'Italianno',cursive}
+.o3 .script{font-size:4.4rem}
+.o3 .n-grande{font-size:clamp(3rem,12vw,4.6rem)}
+
+.o4 .caps,.o4 .n-caps{font-family:'Tenor Sans',sans-serif}
+.o4 .script,.o4 .n-y{font-family:'Petit Formal Script',cursive}
+.o4 .n-grande{font-family:'Tenor Sans',sans-serif;font-size:clamp(1.9rem,7.5vw,2.7rem);letter-spacing:.06em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Boda Guillermina</div>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-weight:300;font-size:2.4rem;margin:14px 0 0">
+      Cuatro duplas
+    </h1>
+    <p>Arriba, cada una escrita como el cartel del Aperol que le gustó
+       —caja alta espaciada más manuscrita—. Abajo, cómo quedarían los
+       nombres de verdad. Decime el número.</p>
+  </header>
+
+  <div class="opcion o1">
+    <div class="num">Opción 1</div>
+    <div class="frase"><span class="caps">Love at first</span><span class="script">Spritz</span></div>
+    <div class="nombres">
+      <div class="n-caps">Nos casamos</div>
+      <div class="n-grande">Guillermina<span class="n-y">y</span>Martín</div>
+    </div>
+    <div class="ficha">Marcellus + Style Script</div>
+  </div>
+
+  <div class="opcion o2">
+    <div class="num">Opción 2</div>
+    <div class="frase"><span class="caps">Love at first</span><span class="script">Spritz</span></div>
+    <div class="nombres">
+      <div class="n-caps">Nos casamos</div>
+      <div class="n-grande">Guillermina<span class="n-y">y</span>Martín</div>
+    </div>
+    <div class="ficha">Cormorant Garamond + Parisienne</div>
+  </div>
+
+  <div class="opcion o3">
+    <div class="num">Opción 3</div>
+    <div class="frase"><span class="caps">Love at first</span><span class="script">Spritz</span></div>
+    <div class="nombres">
+      <div class="n-caps">Nos casamos</div>
+      <div class="n-grande">Guillermina<span class="n-y">y</span>Martín</div>
+    </div>
+    <div class="ficha">Gilda Display + Italianno</div>
+  </div>
+
+  <div class="opcion o4">
+    <div class="num">Opción 4</div>
+    <div class="frase"><span class="caps">Love at first</span><span class="script">Spritz</span></div>
+    <div class="nombres">
+      <div class="n-caps">Nos casamos</div>
+      <div class="n-grande">Guillermina<span class="n-y">y</span>Martín</div>
+    </div>
+    <div class="ficha">Tenor Sans + Petit Formal Script</div>
+  </div>
+</div>
+</body>
+</html>
