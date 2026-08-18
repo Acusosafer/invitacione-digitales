@@ -203,22 +203,78 @@ siempre y se ve más elegante.
 
 ---
 
-# SET C — El mapa ilustrado
+# SET C — El mapa
 
-Va **al final**, cuando estén las demás. Es una composición, no un
-motivo suelto, y conviene armarla sabiendo qué piezas ya tenemos.
+⚠️ NO va dibujado a línea. Va como **acuarela aérea**, igual que las
+otras once, y los carteles y flechas se animan por encima en la web.
 
-⚠️ Fer ya lo dijo: *"vemos el mapa pero no hay mucho"*. Si la finca es
-todo un mismo predio, un mapa de rutas no aporta. Lo que sí sirve es un
-**plano del predio** con flechitas:
+Lo que NO puede faltar: **el pico**. La ceremonia es sobre una lengua
+de tierra metida adentro del lago, con agua por tres lados. Esa es la
+postal del lugar. Un lago ovalado con el altar al costado no sirve.
+
+**Sin arroyo.**
+
+---
+
+## C1 · Vista aérea de la finca → `mapa-aereo.png`
+
+⚠️ Adjuntá las capturas satelitales como referencia.
 
 ```
-el laguito → el altar → dónde se sientan ustedes → el salón
+Delicate hand-painted watercolour illustration on clean white paper,
+in the style of fine wedding stationery. Loose transparent washes with
+visible brush strokes and soft bleeding edges that fade into the white
+background. No outlines, no photorealism, no digital gradients. Warm
+citrus palette: bright orange (#E07A1F), burnt terracotta (#A84F2A),
+deep olive green (#435F3A), soft sage green (#A3B18A), warm oat beige
+(#D7C3A1), on cream white paper (#F6F2E8). Part of a matching set of
+wedding illustrations. Absolutely no text, no lettering, no words, no
+labels, no borders, no frame.
+
+Subject: a bird's eye view of a countryside wedding estate, painted
+from above at a slight angle, like an illustrated map.
+
+Upper right: a large calm lake in soft blue-grey and sage, taking up
+about a third of the picture.
+
+The most important feature: a rounded grassy peninsula juts out into
+the lake from the lower left shore, surrounded by water on three
+sides. On this peninsula, two neat rows of tiny white ceremony chairs
+face a small simple arch standing right at the very tip, at the water's
+edge. This tongue of land reaching into the water is the heart of the
+image and must be clearly readable.
+
+Lower left: a long low building with a pale roof, seen from above,
+among the trees.
+
+Between them: an open lawn, and a pale winding dirt path connecting the
+building to the peninsula, arriving from the left edge of the picture.
+
+Around everything: clusters of tall dark pines and slender poplars seen
+from above as soft rounded and pointed shapes.
+
+Late afternoon light, long soft shadows, warm and calm. Generous white
+space around the edges.
 ```
 
-Eso ubica al invitado adentro del lugar, que es la duda real: *"¿dónde
-me paro?"*. Antes de dibujarlo hay que preguntarle a Guillermina cómo
-está distribuido.
+**Qué mirar:** que el pico se lea como pico. Si el agua no lo rodea por
+tres lados, se descarta y se vuelve a tirar. Todo lo demás es
+secundario.
+
+---
+
+## C2 · Detalle de la ceremonia → `ceremonia-pico.png` (opcional)
+
+Por si conviene un plano más cerca del pico.
+
+```
+[MISMO PRIMER PÁRRAFO]
+
+Subject: a small grassy peninsula reaching into calm water, seen from
+above and slightly to the side, with two rows of tiny white chairs and
+a simple wedding arch at the very tip. Water on three sides. A few
+pines along the shore behind.
+```
 
 ---
 

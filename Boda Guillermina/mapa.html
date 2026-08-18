@@ -5,10 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cómo llegar — Guillermina &amp; Sebastián</title>
 
-<!-- Prueba del mapa ilustrado. El camino se dibuja solo de arriba a
-     abajo y los carteles de cada parada aparecen detras.
-     Es un DIAGRAMA, no un satelite: cuenta el recorrido tal como lo
-     explico Guillermina, que es lo que el invitado necesita. -->
+<!-- ══════════════════════════════════════════════════════════════════
+     EL MAPA · acuarela + carteles animados encima
+
+     La primera version era un diagrama de lineas y no servia: perdia
+     lo unico que hace unico al lugar, que es EL PICO — la lengua de
+     tierra metida adentro del lago, con agua por tres lados, donde va
+     la ceremonia.
+
+     Ahora el mapa es una ACUARELA (misma mano que las otras once) y
+     los carteles, la flecha y el recorrido van animados por encima, en
+     SVG. Asi se tiene el dibujo pintado Y el movimiento.
+
+     ⚠️ LAS POSICIONES SE AJUSTAN CUANDO ESTE LA ACUARELA FINAL. Estan
+     todas juntas en el objeto PUNTOS del script, en coordenadas del
+     viewBox (1000 x 560). Se mueve el numero, no el HTML.
+     ══════════════════════════════════════════════════════════════════ -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,16 +29,15 @@
 <style>
 :root{
   --naranja:#E07A1F; --hondo:#A0451A; --terracota:#A84F2A;
-  --oliva:#435F3A; --salvia:#A3B18A; --avena:#C9B694;
-  --agua:#5F8399;
-  --papel:#FDF6EC; --tinta:#3A302A; --tinta-2:#6E6055;
+  --oliva:#435F3A; --salvia:#A3B18A; --avena:#D7C3A1;
+  --papel:#F6F2E8; --tinta:#3A302A; --tinta-2:#6E6055;
   --ease:cubic-bezier(.22,.61,.36,1);
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--papel);color:var(--tinta);
   font-family:'Jost',system-ui,sans-serif;font-size:17px;line-height:1.6;
-  padding:46px 20px 80px;overflow-x:hidden}
-.wrap{max-width:560px;margin:0 auto;text-align:center}
+  padding:44px 18px 80px;overflow-x:hidden}
+.wrap{max-width:620px;margin:0 auto;text-align:center}
 
 .etiqueta{font-family:'Marcellus',serif;font-size:.7rem;letter-spacing:.3em;
   text-transform:uppercase;color:var(--hondo)}
@@ -36,42 +47,57 @@ h1 em{font-family:'Style Script',cursive;font-style:normal;color:var(--hondo);
   font-size:1.2em;line-height:.9}
 .bajada{max-width:34ch;margin:16px auto 0;color:var(--tinta-2);font-size:.98rem}
 
-svg.mapa{width:100%;height:auto;display:block;margin:30px auto 0;max-width:420px}
+/* ── El mapa: la acuarela abajo, los carteles arriba ── */
+.mapa{position:relative;margin:32px auto 0;max-width:600px}
+.mapa img{width:100%;height:auto;display:block;
+  /* Las acuarelas vienen sobre papel crema, no transparente. multiply
+     funde ese papel con el fondo y deja solo lo pintado. */
+  mix-blend-mode:multiply}
+.capa{position:absolute;inset:0;width:100%;height:100%}
 
-/* Todo lo dibujado */
-.t{fill:none;stroke:var(--terracota);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.t.fina{stroke-width:1.3}
-.t.verde{stroke:var(--oliva)}
-.t.agua{stroke:var(--agua)}
-.t.ruta{stroke-width:4;stroke:var(--avena)}
-svg.mapa path.dibujando{transition:stroke-dashoffset 1.4s var(--ease)}
+/* El recorrido de entrada: una linea punteada que aparece */
+.ruta{fill:none;stroke:var(--hondo);stroke-width:2.6;stroke-linecap:round;
+  stroke-dasharray:1 10;opacity:0}
+.flecha{fill:none;stroke:var(--hondo);stroke-width:2.6;
+  stroke-linecap:round;stroke-linejoin:round}
 
 /* Los carteles */
-.parada{opacity:0;transform:translateY(6px);
-  transition:opacity .6s var(--ease),transform .6s var(--ease)}
-.parada.puesta{opacity:1;transform:none}
-.parada text{font-family:'Marcellus',serif;font-size:11.5px;letter-spacing:.15em;
-  text-transform:uppercase;fill:var(--tinta)}
-.parada text.chico{font-size:9.5px;letter-spacing:.13em;fill:var(--tinta-2)}
-.parada text.rio{fill:var(--agua);font-family:'Style Script',cursive;
-  font-size:22px;letter-spacing:0;text-transform:none}
-.parada circle{fill:var(--papel);stroke:var(--terracota);stroke-width:1.6}
+.punto{opacity:0;transition:opacity .55s var(--ease)}
+.punto.puesto{opacity:1}
+.punto .guia{stroke:var(--hondo);stroke-width:1;opacity:.5}
+.punto .bolita{fill:var(--hondo)}
+.punto text{
+  font-family:'Marcellus',serif;font-size:15px;letter-spacing:.2em;
+  text-transform:uppercase;fill:var(--tinta);
+  /* Un halo del color del papel para que se lea sobre el agua y sobre
+     el pasto SIN una caja blanca, que taparia el dibujo. */
+  paint-order:stroke;stroke:var(--papel);stroke-width:4;stroke-linejoin:round;
+}
+.punto text.agua{fill:#3D6076;stroke:#DCE6EA}
+.punto text.suave{font-size:12.5px;fill:var(--tinta-2)}
+.punto text.mano{font-family:'Style Script',cursive;font-size:32px;
+  letter-spacing:0;text-transform:none;fill:#3D6076;stroke:#DCE6EA}
 
-.acciones{margin-top:28px}
+.acciones{margin-top:26px}
 button{font-family:'Marcellus',serif;font-size:.72rem;letter-spacing:.18em;
-  text-transform:uppercase;padding:13px 26px;border-radius:999px;cursor:pointer;
+  text-transform:uppercase;padding:12px 24px;border-radius:999px;cursor:pointer;
   border:1px solid var(--hondo);background:transparent;color:var(--hondo);
   transition:transform .16s var(--ease),background .2s var(--ease),color .2s var(--ease)}
 button:hover{background:var(--hondo);color:var(--papel)}
 button:active{transform:scale(.97)}
 
-.escrito{max-width:34ch;margin:32px auto 0;text-align:left;font-size:.95rem;
+.escrito{max-width:36ch;margin:32px auto 0;text-align:left;font-size:.95rem;
   color:var(--tinta-2);line-height:1.8}
 .escrito b{color:var(--tinta);font-weight:500}
 
+.aviso{max-width:38ch;margin:34px auto 0;padding:16px 18px;text-align:left;
+  border:1px dashed rgba(160,69,26,.4);border-radius:8px;
+  font-size:.84rem;color:var(--tinta-2);line-height:1.65}
+
 @media (prefers-reduced-motion:reduce){
-  .t{stroke-dashoffset:0 !important;transition:none !important}
-  .parada{opacity:1 !important;transform:none !important}
+  .punto{opacity:1 !important}
+  .ruta{opacity:1 !important}
+  .flecha{stroke-dashoffset:0 !important}
 }
 </style>
 </head>
@@ -81,143 +107,125 @@ button:active{transform:scale(.97)}
   <h1>Cómo llegar a <em>La Josefina</em></h1>
   <p class="bajada">Está sobre la Ruta 15. El último tramo es de tierra, así que salí con tiempo.</p>
 
-  <svg class="mapa" viewBox="0 0 420 716" role="img"
-       aria-label="Mapa del recorrido: Ruta 15, Calle 77, la tranquera, el estacionamiento, el salón, el altar y el lago">
+  <div class="mapa">
+    <!-- ⚠️ PROVISORIA. Va la acuarela aérea del prompt C1, con el pico. -->
+    <img id="acuarela" src="web/vista-al-lago.jpg"
+         alt="Vista aérea de la Finca La Josefina: el lago, el pico donde es la ceremonia, el salón y el estacionamiento">
 
-    <!-- ══ EL CAMINO ══ -->
-    <path class="t ruta" d="M14 54 L406 40"/>
-    <path class="t" d="M152 48 C148 94 142 132 138 170 C136 192 142 204 164 207 L248 210"/>
-    <path class="t" d="M248 210 C270 212 278 226 274 246 C270 268 256 282 238 294"/>
-    <path class="t fina" d="M238 294 C216 308 198 324 192 346 C187 366 196 382 214 394 C234 407 256 418 270 436"/>
-    <path class="t fina" d="M270 436 C282 454 280 474 264 488"/>
+    <svg class="capa" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true">
+      <path class="ruta" id="ruta" d="M-10 300 C90 296 160 300 214 318 C286 342 330 396 392 430"/>
+      <path class="flecha" id="flecha" d="M368 402 L398 432 L358 440"/>
+      <g id="carteles"></g>
+    </svg>
+  </div>
 
-    <!-- ══ EL LAGO ══ -->
-    <path class="t agua" d="M92 548 C108 506 166 492 240 498 C320 504 368 528 374 566 C380 606 332 632 254 636 C168 640 106 616 94 584 C88 568 86 560 92 548"/>
-    <path class="t agua fina" d="M264 552 C284 548 302 554 304 564 C306 576 290 584 274 580 C260 576 254 556 264 552"/>
-    <path class="t agua fina" d="M126 600 C148 610 176 616 204 617"/>
-    <path class="t fina" d="M245 500 L245 522 M238 500 L252 500 M238 508 L252 508 M238 516 L252 516"/>
-
-    <!-- ══ EL BOSQUE ══ -->
-    <g class="t verde fina">
-      <path d="M40 476 L50 452 L60 476 M50 476 L50 486"/>
-      <path d="M64 500 L74 476 L84 500 M74 500 L74 510"/>
-      <path d="M118 502 L128 478 L138 502 M128 502 L128 512"/>
-      <path d="M318 462 L328 438 L338 462 M328 462 L328 472"/>
-      <path d="M342 476 L352 452 L362 476 M352 476 L352 486"/>
-      <path d="M368 502 L378 478 L388 502 M378 502 L378 512"/>
-    </g>
-
-    <!-- ══ EL ARROYO ══ -->
-    <path class="t agua fina" d="M18 670 C68 658 118 676 170 668 C222 660 272 676 326 668 C360 663 384 668 402 674"/>
-
-    <!-- ══ EL SALON ══ -->
-    <path class="t" d="M150 358 L226 338 L238 374 L162 394 Z"/>
-    <path class="t fina" d="M172 352 L184 381"/>
-
-    <!-- ══ EL ALTAR ══ -->
-    <path class="t" d="M246 472 L246 450 C246 442 266 442 266 450 L266 472"/>
-
-    <!-- ══ LAS PARADAS ══ -->
-    <g class="parada" data-orden="0">
-      <text x="210" y="26" text-anchor="middle">Ruta 15 · Av. Montevideo</text>
-    </g>
-    <g class="parada" data-orden="1">
-      <text x="106" y="122" text-anchor="end">Calle 77</text>
-      <text class="chico" x="106" y="138" text-anchor="end">hasta el final</text>
-    </g>
-    <g class="parada" data-orden="2">
-      <path class="t fina" d="M200 186 L230 192 M223 187 L230 192 L223 197"/>
-      <text class="chico" x="196" y="182" text-anchor="end">y a la derecha</text>
-    </g>
-    <g class="parada" data-orden="3">
-      <circle cx="274" cy="246" r="4"/>
-      <text x="290" y="250">La tranquera</text>
-      <text class="chico" x="290" y="265">mano izquierda</text>
-    </g>
-    <g class="parada" data-orden="4">
-      <circle cx="205" cy="318" r="4"/>
-      <text x="191" y="308" text-anchor="end">Estacionamiento</text>
-    </g>
-    <g class="parada" data-orden="5">
-      <circle cx="214" cy="394" r="4"/>
-      <text class="chico" x="204" y="414" text-anchor="end">Recepción</text>
-    </g>
-    <g class="parada" data-orden="6">
-      <text x="248" y="352">El salón</text>
-    </g>
-    <g class="parada" data-orden="7">
-      <circle cx="256" cy="461" r="4"/>
-      <text x="236" y="452" text-anchor="end">El altar</text>
-    </g>
-    <g class="parada" data-orden="8">
-      <text class="rio" x="196" y="574" text-anchor="middle">el lago</text>
-    </g>
-    <g class="parada" data-orden="9">
-      <text class="chico" x="58" y="530" text-anchor="middle">Bosque</text>
-    </g>
-    <g class="parada" data-orden="10">
-      <text class="chico" x="210" y="700" text-anchor="middle">El arroyo</text>
-    </g>
-  </svg>
-
-  <div class="acciones"><button id="repetir">Dibujar de nuevo</button></div>
+  <div class="acciones"><button id="repetir">Verlo de nuevo</button></div>
 
   <p class="escrito">
     Tomás la <b>Ruta Provincial 15 (Avenida Montevideo)</b> y doblás en
     <b>Calle 77</b>. Seguís hasta el final, doblás a la <b>derecha</b>, y
-    la <b>tranquera queda a mano izquierda</b>. Entrás y al fondo está el
-    estacionamiento; después la recepción y el salón, y más atrás el
-    altar, junto al lago.
+    la <b>tranquera queda a mano izquierda</b>. Entrás, estacionás, y la
+    ceremonia es sobre el pico que entra al lago.
   </p>
+
+  <div class="aviso">
+    <b>Prueba interna.</b> La imagen es provisoria — va la acuarela
+    aérea del prompt C1, la que tiene el pico. Las posiciones de los
+    carteles están todas juntas en el objeto <code>PUNTOS</code> del
+    código y se ajustan cuando esté la acuarela final.
+  </div>
 </div>
 
 <script>
-/* Solo <path>: un <g> no tiene getTotalLength. Los del bosque
-   heredan el trazo de su grupo pero se animan de a uno. */
-const trazos  = [...document.querySelectorAll('svg.mapa path')];
-const paradas = [...document.querySelectorAll('.parada')];
+/* ══════════════════════════════════════════════════════════════════
+   LOS CARTELES
+   Coordenadas del viewBox (1000 x 560), tomadas del recorte que marco
+   Fer sobre el satelite. Cuando este la acuarela final se ajustan ACA
+   y nada mas: `x,y` es donde se apoya el texto, y `dx,dy` adonde llega
+   la guia que señala el lugar.
+   ══════════════════════════════════════════════════════════════════ */
+const PUNTOS = [
+  { t:'Estacionamiento', x:130, y:232, dx:200, dy:266, clase:'suave', orden:0 },
+  { t:'El salón',        x:300, y:436, dx:392, dy:458,                 orden:1 },
+  { t:'Ustedes',         x:552, y:276, dx:598, dy:302, clase:'suave', orden:2 },
+  { t:'El altar',        x:628, y:214, dx:662, dy:246,                 orden:3 },
+  { t:'el lago',         x:790, y:104,                 clase:'mano',  orden:4 },
+  { t:'Bosque',          x:902, y:302,                 clase:'suave', orden:5 },
+];
+
+const SVG = 'http://www.w3.org/2000/svg';
+const capa = document.getElementById('carteles');
+
+PUNTOS.forEach(p => {
+  const g = document.createElementNS(SVG, 'g');
+  g.setAttribute('class', 'punto');
+  g.dataset.orden = p.orden;
+
+  /* Guia y bolita solo cuando el cartel señala algo puntual. El lago y
+     el bosque son zonas: no hace falta apuntarlas con una flechita. */
+  if (p.dx !== undefined) {
+    const l = document.createElementNS(SVG, 'line');
+    l.setAttribute('class', 'guia');
+    l.setAttribute('x1', p.x + 8); l.setAttribute('y1', p.y + 6);
+    l.setAttribute('x2', p.dx);    l.setAttribute('y2', p.dy);
+    g.appendChild(l);
+
+    const c = document.createElementNS(SVG, 'circle');
+    c.setAttribute('class', 'bolita');
+    c.setAttribute('cx', p.dx); c.setAttribute('cy', p.dy); c.setAttribute('r', 3.4);
+    g.appendChild(c);
+  }
+
+  const t = document.createElementNS(SVG, 'text');
+  if (p.clase) t.setAttribute('class', p.clase);
+  t.setAttribute('x', p.x); t.setAttribute('y', p.y);
+  t.setAttribute('text-anchor', 'middle');
+  t.textContent = p.t;               /* con DOM, no innerHTML */
+  g.appendChild(t);
+
+  capa.appendChild(g);
+});
+
+const ruta = document.getElementById('ruta');
+const flecha = document.getElementById('flecha');
+const carteles = [...document.querySelectorAll('.punto')];
 let relojes = [];
 
-function dibujar() {
+function animar() {
   relojes.forEach(clearTimeout); relojes = [];
 
-  trazos.forEach(t => {
-    t.classList.remove('dibujando');
-    const largo = t.getTotalLength();
-    t.style.strokeDasharray  = largo;
-    t.style.strokeDashoffset = largo;
-  });
-  paradas.forEach(p => p.classList.remove('puesta'));
+  /* La ruta es punteada: dibujarla con dashoffset le comeria los
+     puntos, asi que aparece con opacidad. La flecha si se dibuja. */
+  ruta.style.transition = 'none';
+  ruta.style.opacity = 0;
 
-  /* Obliga a pintar el estado vacio antes de mover nada. Sin esto el
-     navegador junta los dos cambios en un mismo cuadro y el primer
-     trazo salta de invisible a completo en vez de dibujarse. */
+  const L = flecha.getTotalLength();
+  flecha.style.transition = 'none';
+  flecha.style.strokeDasharray = L;
+  flecha.style.strokeDashoffset = L;
+
+  carteles.forEach(c => c.classList.remove('puesto'));
+
+  /* Obliga a pintar el estado vacio antes de mover nada */
   void document.body.offsetWidth;
 
-  trazos.forEach((t, i) => {
-    t.classList.add('dibujando');
-    relojes.push(setTimeout(() => { t.style.strokeDashoffset = '0'; }, i * 110));
-  });
+  ruta.style.transition = 'opacity 1.1s var(--ease)';
+  ruta.style.opacity = 1;
+  flecha.style.transition = 'stroke-dashoffset .7s var(--ease) .75s';
+  flecha.style.strokeDashoffset = '0';
 
-  /* Los carteles entran DETRAS del camino: primero se abre la ruta y
-     recien despues aparece el nombre de cada parada. Al reves se lee
-     como una lista, no como un recorrido. */
-  paradas.forEach(p => {
-    relojes.push(setTimeout(() => p.classList.add('puesta'),
-      700 + (+p.dataset.orden) * 250));
+  carteles.forEach(c => {
+    relojes.push(setTimeout(() => c.classList.add('puesto'),
+      1250 + (+c.dataset.orden) * 320));
   });
 }
 
-const io = new IntersectionObserver((entradas, obs) => {
-  entradas.forEach(e => {
-    if (!e.isIntersecting) return;
-    obs.unobserve(e.target);
-    dibujar();
-  });
-}, { threshold: .15 });
-io.observe(document.querySelector('svg.mapa'));
+const io = new IntersectionObserver((es, obs) => {
+  es.forEach(e => { if (e.isIntersecting) { obs.unobserve(e.target); animar(); } });
+}, { threshold: .2 });
+io.observe(document.querySelector('.mapa'));
 
-document.getElementById('repetir').onclick = dibujar;
+document.getElementById('repetir').onclick = animar;
 </script>
 </body>
 </html>
