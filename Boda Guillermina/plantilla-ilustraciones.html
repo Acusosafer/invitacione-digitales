@@ -52,7 +52,7 @@ body{
    multiply: la FIBRA (el poro, grano fino) y la NUBE (las manchas
    grandes de una hoja prensada en frio). Con opacidad sobre blanco
    solo agrisan; con multiply oscurecen la fibra y se ve papel. */
-.hoja{
+.carilla{
   position:relative; max-width:860px; margin:0 auto 34px;
   background:var(--papel); border-radius:3px;
   padding:46px 40px 30px;
@@ -69,7 +69,12 @@ body{
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='4'/><feColorMatrix type='saturate' values='0'/></filter><rect width='220' height='220' filter='url(%23f)' opacity='.42'/></svg>")}
 .nube{opacity:.28;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='560' height='560'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='560' height='560' filter='url(%23n)' opacity='.5'/></svg>")}
-.hoja > *:not(.fibra):not(.nube){position:relative; z-index:3}
+/* ⚠️ Los hijos NO llevan z-index. Con z-index cada uno abre su propio
+   stacking context y las acuarelas de adentro se mezclan con el fondo
+   de ese contexto —transparente— en vez de con el papel: quedaban
+   recortadas en un rectangulo blanco. Sin z-index quedan en el flujo
+   normal y las capas de papel (absolute, z-index 2) igual les pasan por
+   encima, que es justo lo que se busca. */
 
 /* ── Encabezado de cada carilla ── */
 .cabeza{display:flex; justify-content:space-between; align-items:baseline;
@@ -112,6 +117,27 @@ h2{font-family:'Marcellus',serif; font-weight:400; font-size:1.02rem;
 }
 .st figcaption{margin-top:11px; font-size:.6rem; letter-spacing:.2em;
   text-transform:uppercase; color:#9A8C7D}
+
+/* ── Las acuarelas ─────────────────────────────────────────────
+   ⚠️ Vienen sobre papel crema, no sobre fondo transparente. Sueltas
+   dejan un rectangulo mas claro recortado contra la hoja. El
+   multiply funde ese papel con el fondo y deja solo lo pintado.
+   (Sobre fondo OSCURO multiply las borra: ahi iria screen.) */
+.acuarelas{display:grid; gap:16px; margin-top:24px;
+  grid-template-columns:repeat(4,1fr)}
+.ac{background:none; text-align:center; display:flex; flex-direction:column}
+.ac.ancho{grid-column:span 2}
+/* contain y no cover: los motivos ya vienen recortados al dibujo, y
+   recortarlos otra vez les comeria una hoja o un gajo. */
+.ac img{width:100%; height:132px; object-fit:contain; display:block;
+  mix-blend-mode:multiply}
+.ac.ancho img{height:168px; object-fit:cover; border-radius:6px}
+.ac figcaption{margin-top:9px; font-size:.6rem; letter-spacing:.2em;
+  text-transform:uppercase; color:#9A8C7D}
+@media (max-width:640px){
+  .acuarelas{grid-template-columns:repeat(2,1fr)}
+  .ac.ancho img{height:132px}
+}
 
 /* ── El trazo ──────────────────────────────────────────────────
    stroke-dasharray = el largo REAL del camino, medido con
@@ -257,7 +283,7 @@ button.bt:hover{background:var(--hondo); color:var(--papel)}
 button.bt:active{transform:scale(.97)}
 
 @media (max-width:520px){
-  .hoja{padding:32px 20px 22px}
+  .carilla{padding:32px 20px 22px}
   .st.ancho{grid-column:span 2}
 }
 
@@ -272,7 +298,7 @@ button.bt:active{transform:scale(.97)}
 @media print{
   body{background:#fff; padding:0}
   .acciones{display:none}
-  .hoja{box-shadow:none; margin:0; max-width:none; page-break-after:always}
+  .carilla{box-shadow:none; margin:0; max-width:none; page-break-after:always}
   .trazo{stroke-dashoffset:0 !important}
   .cae,.prende{opacity:1 !important; transform:none !important}
   .rotulo{opacity:1 !important}
@@ -286,12 +312,99 @@ button.bt:active{transform:scale(.97)}
   <button class="bt" id="lento">Más lento</button>
 </div>
 
-<!-- ══════════════ CARILLA 1 · LOS DIBUJOS ══════════════ -->
-<section class="hoja">
+<!-- ══════════════ CARILLA 1 · LAS ACUARELAS ══════════════ -->
+<!-- Va primero a proposito: es lo que ella ya vio y le gustó. Se
+     arranca por lo conocido y despues se muestra lo nuevo. -->
+<section class="carilla">
   <div class="fibra"></div><div class="nube"></div>
 
   <div class="cabeza">
-    <div class="folio">Carilla <b>01 / 02</b></div>
+    <div class="folio">Carilla <b>01 / 03</b></div>
+    <div class="par">Guillermina &amp; Sebastián · 3 de abril de 2027</div>
+  </div>
+
+  <h1>Las acuarelas <em>de tu boda</em></h1>
+  <p class="bajada">
+    Doce, pintadas para tu casamiento y nada más: el lago, el altar
+    entre los pinos, el camino hasta la tranquera. Todas con el mismo
+    pincel y la misma paleta, para que la invitación se vea como una
+    sola pieza y no como un álbum de imágenes juntadas.
+  </p>
+
+  <div class="acuarelas">
+    <figure class="ac ancho">
+      <img src="web/ellos-acuarela.jpg" alt="Guillermina y Sebastián de espaldas frente al lago, al atardecer">
+      <figcaption>Ustedes dos · la portada</figcaption>
+    </figure>
+    <figure class="ac ancho">
+      <img src="web/gemini-generated-image-fp6fmkfp6fmkfp6f.jpg" alt="El altar florido con las sillas blancas frente al lago">
+      <figcaption>El altar · la ceremonia</figcaption>
+    </figure>
+    <figure class="ac ancho">
+      <img src="web/vista-al-lago.jpg" alt="Vista del lago de la finca">
+      <figcaption>El lago</figcaption>
+    </figure>
+    <figure class="ac ancho">
+      <img src="web/mapa.jpg" alt="Mapa de la finca visto desde arriba, con el pico del altar">
+      <figcaption>Cómo llegar</figcaption>
+    </figure>
+
+    <figure class="ac">
+      <img src="web/aperol.jpg" alt="Copa de Aperol Spritz en acuarela">
+      <figcaption>El Aperol</figcaption>
+    </figure>
+    <figure class="ac">
+      <img src="web/copas-brindis.jpg" alt="Dos copas brindando en acuarela">
+      <figcaption>El brindis</figcaption>
+    </figure>
+    <figure class="ac">
+      <img src="web/vela.jpg" alt="Vela dentro de un vaso, en acuarela">
+      <figcaption>La vela</figcaption>
+    </figure>
+    <figure class="ac">
+      <img src="web/guirnalda-de-luces.jpg" alt="Guirnalda de luces en acuarela">
+      <figcaption>La guirnalda</figcaption>
+    </figure>
+    <figure class="ac">
+      <img src="web/medias-naranja.jpg" alt="Dos medias naranjas en acuarela">
+      <figcaption>Las medias naranjas</figcaption>
+    </figure>
+    <figure class="ac">
+      <img src="web/olivo.jpg" alt="Rama de olivo en acuarela">
+      <figcaption>El olivo</figcaption>
+    </figure>
+    <figure class="ac">
+      <img src="web/ramo.jpg" alt="Ramo de flores en acuarela">
+      <figcaption>El ramo</figcaption>
+    </figure>
+    <figure class="ac">
+      <img src="web/ramo-con-naranjas.jpg" alt="Ramo con naranjas en acuarela">
+      <figcaption>El ramo con naranjas</figcaption>
+    </figure>
+  </div>
+
+  <!-- ⚠️ Medido, no estimado: 786.215 bytes las doce. Si se agregan o
+       se recortan ilustraciones, este numero cambia y hay que volver
+       a medirlo — es material que ve una clienta. -->
+  <h2>Las doce juntas pesan 768 KB</h2>
+  <p class="h2-nota">
+    Menos que una sola foto sacada con el celular. Esto importa el día
+    que tus invitados abran la invitación con datos móviles en el
+    campo: carga igual de rápido con mala señal.
+  </p>
+
+  <div class="marca">
+    <span class="m-nom">Invitaciones Digitales</span>
+    <span class="m-web">invitacionesdigitalesoficial.com</span>
+  </div>
+</section>
+
+<!-- ══════════════ CARILLA 2 · LOS DIBUJOS ══════════════ -->
+<section class="carilla">
+  <div class="fibra"></div><div class="nube"></div>
+
+  <div class="cabeza">
+    <div class="folio">Carilla <b>02 / 03</b></div>
     <div class="par">Guillermina &amp; Sebastián · 3 de abril de 2027</div>
   </div>
 
@@ -480,23 +593,30 @@ button.bt:active{transform:scale(.97)}
 
     <!-- ── EL BRINDIS ── -->
     <figure class="st">
-      <svg viewBox="0 0 100 150" aria-label="Dos copas brindando">
-        <!-- copa izquierda, inclinada a la derecha -->
-        <path class="trazo" d="M12 34 C14 29 38 33 39 38 C38 42.5 14 38.5 12 34"/>
-        <path class="trazo" d="M13 36 C15 54 26 66 35 63 C43 60 44 46 38.5 37"/>
-        <path class="trazo fino suave" d="M16.5 46 C23 49 33 51 39 48"/>
-        <path class="trazo" d="M36 63 L48 96"/>
-        <path class="trazo" d="M36 102 C37.5 97 60 104 58 109 C55 112.5 34 106.5 36 102"/>
-        <!-- copa derecha, inclinada a la izquierda -->
-        <path class="trazo" d="M88 34 C86 29 62 33 61 38 C62 42.5 86 38.5 88 34"/>
-        <path class="trazo" d="M87 36 C85 54 74 66 65 63 C57 60 56 46 61.5 37"/>
-        <path class="trazo fino suave" d="M83.5 46 C77 49 67 51 61 48"/>
-        <path class="trazo" d="M64 63 L52 96"/>
-        <path class="trazo" d="M64 102 C62.5 97 40 104 42 109 C45 112.5 66 106.5 64 102"/>
+      <!-- ⚠️ CADA COPA ES UN SOLO TRAZO CONTINUO: pie, tallo, caliz,
+           boca y vuelta. Antes eran cinco pedacitos sueltos y por eso
+           se veian armadas, no dibujadas. Un trazo largo es ademas lo
+           que hace que la animacion se lea como una mano que no
+           levanta el lapiz. -->
+      <svg viewBox="0 0 100 150" aria-label="Dos copas de champagne brindando, en trazo continuo">
+        <!-- Se dibuja UNA copa vertical bien proporcionada y las dos se
+             arman con translate + rotate. Inclinarlas a mano en las
+             coordenadas del path daba caliz largos y rectos: se leian
+             como dos piernas con zapatos. -->
+        <g transform="translate(-24 0) rotate(9 50 132)">
+          <path class="trazo fino" d="M50 132 C58 132 62 134 59 136 C55.5 138 44.5 138 41 136 C38 134 42 132 50 132 L50 86 C46 74 42 58 42 40 C42 36 58 36 58 40 C58 58 54 74 50 86"/>
+          <path class="trazo fino suave" d="M42.5 42 C47 45.5 53 45.5 57.5 42"/>
+        </g>
+        <g transform="translate(24 0) rotate(-9 50 132)">
+          <path class="trazo fino" d="M50 132 C58 132 62 134 59 136 C55.5 138 44.5 138 41 136 C38 134 42 132 50 132 L50 86 C46 74 42 58 42 40 C42 36 58 36 58 40 C58 58 54 74 50 86"/>
+          <path class="trazo fino suave" d="M42.5 42 C47 45.5 53 45.5 57.5 42"/>
+        </g>
+        <!-- el rulo del brindis, arriba, uniendo las dos -->
+        <path class="trazo fino" d="M43 28 C47 16 60 12 62 19 C63.5 25 52 27 49 22"/>
         <!-- el tilín: tres chispitas que aparecen al final -->
-        <path class="trazo suave fino prende" style="--retraso:.1s" d="M50 24 L50 16"/>
-        <path class="trazo suave fino prende" style="--retraso:.22s" d="M38 27 L32 21"/>
-        <path class="trazo suave fino prende" style="--retraso:.34s" d="M62 27 L68 21"/>
+        <path class="trazo suave fino prende" style="--retraso:.1s" d="M74 22 L79 15"/>
+        <path class="trazo suave fino prende" style="--retraso:.22s" d="M28 24 L22 17"/>
+        <path class="trazo suave fino prende" style="--retraso:.34s" d="M84 36 L91 33"/>
       </svg>
       <figcaption>El brindis</figcaption>
     </figure>
@@ -639,11 +759,11 @@ button.bt:active{transform:scale(.97)}
 </section>
 
 <!-- ══════════════ CARILLA 2 · LA PALETA ══════════════ -->
-<section class="hoja">
+<section class="carilla">
   <div class="fibra"></div><div class="nube"></div>
 
   <div class="cabeza">
-    <div class="folio">Carilla <b>02 / 02</b></div>
+    <div class="folio">Carilla <b>03 / 03</b></div>
     <div class="par">Guillermina &amp; Sebastián · 3 de abril de 2027</div>
   </div>
 
@@ -709,8 +829,7 @@ button.bt:active{transform:scale(.97)}
   <div class="cierre">
     <p class="preg">¿Vamos por acá?</p>
     <p>
-      Si algo no te cierra decímelo ahora, que es cuando más barato sale
-      cambiarlo. Y si hay algo del lugar que quieras que aparezca sí o
+      Si este es el camino correcto necesitaria más info de ustedes, historia, o todo lo que te imaginas que puede llegar a estar y lo que no puede faltar. Ej: una mascota. Sihay algo del lugar que quieras que aparezca sí o
       sí —el muelle, los árboles, el arroyo— contámelo y lo dibujo.
     </p>
   </div>
@@ -782,6 +901,15 @@ const esTrazo = el => !el.classList.contains('cae') && !el.closest('.prende');
 function preparar(raiz) {
   raiz.querySelectorAll('.trazo').forEach(t => {
     t.classList.remove('dibujando');
+    /* ⚠️ transition:none EXPLICITO, y no alcanza con sacar la clase.
+       `transition-property` vale `all` por defecto, y el
+       `transitionDuration` inline que le puso el ciclo anterior NO se
+       va con la clase. Resultado: el reset a "escondido" tambien
+       transicionaba, en 1,15s y desde cero — o sea que el trazo nunca
+       llegaba a estar vacio y despues se lo mandaba de vuelta a 0.
+       Por eso el circulo de la naranja aparecia entero y de golpe a
+       partir de la SEGUNDA vuelta del loop. */
+    t.style.transition = 'none';
     if (!esTrazo(t)) return;
     const largo = t.getTotalLength();
     t.style.strokeDasharray = largo;
@@ -792,27 +920,47 @@ function preparar(raiz) {
   raiz.querySelectorAll('.rotulo').forEach(e => e.classList.remove('puesto'));
 }
 
-/* ⚠️ UNA SOLA funcion para todas las formas de arrancar: el scroll, el
-   boton y el loop. Antes habia dos caminos parecidos y solo uno
-   forzaba el reflow, asi que el PRIMER trazo de cada dibujo saltaba de
-   invisible a completo. Si se vuelven a separar, vuelve el bug. */
+/* ⚠️⚠️ EL PRIMER TRAZO — el bug que volvio tres veces ⚠️⚠️
+
+   `void document.body.offsetWidth` NO alcanza. Leer offsetWidth fuerza
+   el LAYOUT, y stroke-dashoffset no es una propiedad de layout: es de
+   pintado. El navegador puede saltearse el recalculo, juntar el
+   "escondelo" y el "mostralo" en el mismo cuadro, y entonces no hay
+   transicion — el trazo salta de invisible a completo.
+
+   Por que solo se notaba en el PRIMER trazo: los demas arrancan con un
+   setTimeout de 80ms, 160ms, 240ms... y para entonces el navegador ya
+   pinto el estado vacio por su cuenta. El trazo 0 arranca con
+   setTimeout(0) y no llega. Por eso el circulo de la naranja aparecia
+   entero y la hojita si se dibujaba.
+
+   La forma que SI funciona son dos cosas juntas:
+     1. leer getComputedStyle().strokeDashoffset de CADA trazo, que
+        obliga a computar el estilo de ese elemento y no solo el layout
+        de la pagina;
+     2. arrancar dentro de un doble requestAnimationFrame, que garantiza
+        que el cuadro con el dibujo vacio ya se pinto.
+   Si alguna de las dos se saca, vuelve el bug. */
 function dibujar(raiz, demora, duracion) {
   demora = demora || 80;
   duracion = duracion || 1.15;
 
   preparar(raiz);
 
-  /* Obliga al navegador a pintar el estado vacio ANTES de mover nada.
-     Sin esto junta los dos cambios en un solo cuadro y no hay
-     transicion. */
-  void document.body.offsetWidth;
-
   const dibujos = [...raiz.querySelectorAll('.trazo')].filter(esTrazo);
-  dibujos.forEach((t, i) => {
-    t.style.transitionDuration = duracion + 's';
-    t.classList.add('dibujando');
-    setTimeout(() => { t.style.strokeDashoffset = '0'; }, i * demora);
-  });
+
+  /* (1) obliga a computar el estado vacio en cada trazo */
+  dibujos.forEach(t => getComputedStyle(t).strokeDashoffset);
+
+  /* (2) y recien despues de que ese cuadro se pinto, mover */
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    dibujos.forEach((t, i) => {
+      t.style.transition = '';                 /* saca el none de preparar */
+      t.classList.add('dibujando');            /* y manda el CSS de la clase */
+      t.style.transitionDuration = duracion + 's';
+      setTimeout(() => { t.style.strokeDashoffset = '0'; }, i * demora);
+    });
+  }));
 
   /* Lo que no se dibuja pasa DESPUES: los hielos caen, las llamas y
      las bombitas se encienden, el nombre del cartel aparece. */

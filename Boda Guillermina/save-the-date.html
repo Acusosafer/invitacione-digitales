@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guardá la fecha · Guillermina &amp; Sebastián</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SAVE THE DATE · Guillermina & Sebastián · 3 de abril de 2027
+
+     Va en octubre de 2026, seis meses antes. Sale del mismo diseño que
+     la invitacion y por eso esta incluido en el precio: es el mismo
+     papel, la misma dupla tipografica y la misma acuarela.
+
+     Una sola pantalla, pensada para el celular. Un save the date que
+     obliga a scrollear ya es una invitacion.
+
+     ⚠️ NO SE PUBLICA. La carpeta "Boda Guillermina" esta excluida en
+     .vercelignore: es material de una clienta.
+     ══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Style+Script&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --naranja:#E07A1F; --hondo:#A0451A; --terracota:#A84F2A;
+  --oliva:#435F3A; --papel:#F6F2E8; --tinta:#3A302A; --tinta-2:#6E6055;
+  --linea:rgba(160,69,26,.18);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--papel); color:var(--tinta);
+  font-family:'Jost',system-ui,sans-serif; line-height:1.6;
+  min-height:100dvh; display:flex; align-items:center; justify-content:center;
+  padding:28px 20px; overflow-x:hidden;
+}
+
+/* El papel de algodon: la fibra (el poro) y la nube (las manchas
+   grandes de una hoja prensada en frio), las dos con multiply.
+   ⚠️ feTurbulence da ruido A COLOR: sin el feColorMatrix saturate 0
+   el papel sale manchado de verde y de rosa. */
+.fibra,.nube{position:fixed; inset:0; pointer-events:none; z-index:9;
+  mix-blend-mode:multiply}
+.fibra{opacity:.5;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='4'/><feColorMatrix type='saturate' values='0'/></filter><rect width='220' height='220' filter='url(%23f)' opacity='.42'/></svg>")}
+.nube{opacity:.28;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='560' height='560'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='560' height='560' filter='url(%23n)' opacity='.5'/></svg>")}
+
+/* ⚠️ SIN z-index. Un z-index acá crea un stacking context y la acuarela
+   de adentro pasa a mezclarse con el fondo de esta tarjeta —que es
+   transparente— en vez de mezclarse con el papel: quedaba recortada en
+   un rectangulo blanco. Las capas de papel son fixed con z-index 9, o
+   sea que van arriba igual sin necesidad de esto. */
+.tarjeta{position:relative; width:100%; max-width:430px; text-align:center}
+
+.arriba{font-family:'Marcellus',serif; font-size:.7rem; letter-spacing:.42em;
+  text-transform:uppercase; color:var(--hondo); margin-bottom:4px}
+.arriba-2{font-size:.72rem; letter-spacing:.16em; color:var(--tinta-2);
+  text-transform:uppercase}
+
+/* La acuarela viene sobre papel crema, no transparente: multiply funde
+   ese papel con el fondo y deja solo lo pintado. */
+.escena{margin:22px 0 6px}
+.escena img{width:100%; height:auto; display:block; mix-blend-mode:multiply}
+/* ⚠️ La escena entra SOLO con opacidad, sin transform. Un transform
+   crea un stacking context y el mix-blend-mode del hijo se mezcla
+   adentro de ese contexto —que esta vacio— en vez de mezclarse con el
+   papel: la acuarela quedaba recortada en un rectangulo mas claro. */
+.escena.aparece.puesto{transform:none}
+
+.nombres{font-family:'Style Script',cursive; color:var(--tinta);
+  font-size:clamp(2.5rem,13vw,3.5rem); line-height:.98; margin:6px 0 0}
+.y{display:block; font-family:'Style Script',cursive; color:var(--hondo);
+  font-size:.5em; line-height:1; margin:2px 0}
+
+.fecha{font-family:'Marcellus',serif; font-size:clamp(1.05rem,4.6vw,1.3rem);
+  letter-spacing:.12em; text-transform:uppercase; margin:22px 0 6px}
+.lugar{font-size:.88rem; color:var(--tinta-2); letter-spacing:.04em}
+
+/* ── La cuenta regresiva ──────────────────────────────────────
+   Numeros en la romana y etiquetas en la manuscrita: la dupla de
+   siempre, nunca las dos en la misma linea.
+   `tabular-nums` es obligatorio — sin eso el ancho de cada cifra
+   cambia y los numeros bailan de lado cada segundo. */
+.reloj{display:flex; justify-content:center; align-items:flex-start;
+  gap:2px; margin:26px 0 4px}
+.casillero{flex:0 0 auto; min-width:62px}
+.num{font-family:'Marcellus',serif; font-size:clamp(1.7rem,8vw,2.2rem);
+  line-height:1; color:var(--terracota); font-variant-numeric:tabular-nums}
+.rot{display:block; font-family:'Style Script',cursive; font-size:1.05rem;
+  color:var(--tinta-2); margin-top:2px}
+.dosp{font-family:'Marcellus',serif; font-size:clamp(1.3rem,6vw,1.7rem);
+  color:var(--linea); line-height:1.2; padding:0 2px}
+
+.raya{width:52px; height:1px; background:var(--linea); margin:28px auto 0}
+.cierre{margin-top:18px; font-size:.9rem; color:var(--tinta-2); max-width:30ch;
+  margin-left:auto; margin-right:auto}
+.cierre b{color:var(--hondo); font-weight:500}
+
+.pie{margin-top:32px; font-family:'Marcellus',serif; font-size:.58rem;
+  letter-spacing:.26em; text-transform:uppercase; color:#A2937F}
+
+/* Entra con un fundido corto: no hay nada que scrollear, asi que el
+   movimiento tiene que pasar al abrir o no pasa nunca. */
+.aparece{opacity:0; transform:translateY(10px)}
+.escena.aparece{transform:none}
+.aparece.puesto{opacity:1; transform:none;
+  transition:opacity .7s var(--ease) var(--r,0s),
+             transform .7s var(--ease) var(--r,0s)}
+@media (prefers-reduced-motion:reduce){
+  .aparece{opacity:1 !important; transform:none !important}
+}
+</style>
+</head>
+<body>
+<div class="fibra"></div><div class="nube"></div>
+
+<div class="tarjeta">
+  <div class="aparece" style="--r:.05s">
+    <div class="arriba">Guardá la fecha</div>
+    <div class="arriba-2">Nos casamos</div>
+  </div>
+
+  <figure class="escena aparece" style="--r:.2s">
+    <img src="web/ellos-acuarela.jpg"
+         alt="Guillermina y Sebastián de espaldas, tomados de la mano, frente al lago de la Finca La Josefina">
+  </figure>
+
+  <h1 class="nombres aparece" style="--r:.35s">
+    Guillermina<span class="y">y</span>Sebastián
+  </h1>
+
+  <div class="aparece" style="--r:.5s">
+    <div class="fecha">3 de abril de 2027</div>
+    <div class="lugar">Finca La Josefina · Berisso</div>
+  </div>
+
+  <div class="reloj aparece" style="--r:.62s" id="reloj" aria-live="off">
+    <div class="casillero"><div class="num" id="d">—</div><span class="rot">Días</span></div>
+    <div class="dosp">:</div>
+    <div class="casillero"><div class="num" id="h">—</div><span class="rot">Horas</span></div>
+    <div class="dosp">:</div>
+    <div class="casillero"><div class="num" id="m">—</div><span class="rot">Minutos</span></div>
+    <div class="dosp">:</div>
+    <div class="casillero"><div class="num" id="s">—</div><span class="rot">Segundos</span></div>
+  </div>
+
+  <div class="aparece" style="--r:.75s">
+    <div class="raya"></div>
+    <p class="cierre">
+      Todavía falta, pero <b>anotalo</b>: en unos meses te llega la
+      invitación con todos los detalles.
+    </p>
+    <div class="pie">Invitaciones Digitales</div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   LA CUENTA REGRESIVA
+
+   ⚠️ La fecha lleva la zona horaria ESCRITA (-03:00). Sin eso cada
+   navegador la lee en la suya: un invitado en Madrid veria una cuenta
+   corrida cinco horas. Ya pasó con el boton de agendar.
+   ══════════════════════════════════════════════════════════════════ */
+const BODA = new Date('2027-04-03T18:00:00-03:00');
+
+const casilla = { d: document.getElementById('d'), h: document.getElementById('h'),
+                  m: document.getElementById('m'), s: document.getElementById('s') };
+
+function tictac() {
+  let falta = Math.floor((BODA - Date.now()) / 1000);
+  if (falta < 0) falta = 0;
+  const dias  = Math.floor(falta / 86400);
+  const horas = Math.floor(falta % 86400 / 3600);
+  const min   = Math.floor(falta % 3600 / 60);
+  const seg   = falta % 60;
+
+  /* Los días van sin cero adelante (son 3 cifras y quedan raros con
+     relleno); el resto sí, para que el ancho no cambie. */
+  casilla.d.textContent = dias;
+  casilla.h.textContent = String(horas).padStart(2, '0');
+  casilla.m.textContent = String(min).padStart(2, '0');
+  casilla.s.textContent = String(seg).padStart(2, '0');
+}
+tictac();
+setInterval(tictac, 1000);
+
+/* El fundido de entrada: en el próximo cuadro, para que el estado
+   inicial llegue a pintarse. */
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  document.querySelectorAll('.aparece').forEach(e => e.classList.add('puesto'));
+}));
+</script>
+</body>
+</html>

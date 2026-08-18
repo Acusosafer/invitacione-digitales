@@ -582,9 +582,27 @@ rectángulo. Se resuelve con `mix-blend-mode: multiply`, que funde el papel
 con el fondo. ⚠️ **Sobre fondo oscuro multiply las borra** — ahí va
 `screen`.
 
+⚠️⚠️ **Un `z-index` en cualquier ancestro rompe el multiply.** Un elemento
+posicionado con `z-index` abre un *stacking context*, y desde ahí el
+`mix-blend-mode` del hijo se mezcla contra el fondo de ESE contexto —que
+es transparente— en vez de contra el papel. La acuarela vuelve a quedar
+recortada en un rectángulo blanco, igual que si no tuviera multiply. Pasó
+en `save-the-date.html` (`.tarjeta{z-index:1}`) y en la plantilla
+(`.carilla > *{z-index:3}`), y **se ve idéntico a "me olvidé el multiply",
+así que se persigue el fantasma equivocado**. Si las capas de papel son
+`position:fixed/absolute` con z-index, el contenido no necesita z-index
+propio: queda en el flujo y el papel le pasa por encima igual.
+
+**Y también vienen con mucho margen de papel.** En una grilla los motivos
+se ven diminutos dentro de un rectángulo casi vacío. Se recortan al
+contenido comparando cada píxel contra el color de la esquina
+(`ImageChops.difference` + `getbbox()`), con ~14px de respiro.
+
 **Y pesan.** Las once primeras sumaban 8 MB. Redimensionadas a 900px los
-motivos y 1400px las escenas, JPEG 82 progresivo: **651 KB el set entero**,
-92% menos, sin diferencia visible. Van a `Boda Guillermina/web/`.
+motivos y 1400px las escenas, JPEG 82 progresivo, y después recortadas al
+motivo: **768 KB las doce**. Van a `Boda Guillermina/web/`. ⚠️ Ese número
+está escrito en la plantilla que ve la clienta: si se agregan o se sacan
+ilustraciones hay que volver a medirlo, no estimarlo.
 
 ### Los dibujos que se dibujan solos — el diferencial
 
@@ -596,11 +614,29 @@ No es un video: son kilobytes de SVG y se ve nítido en cualquier pantalla.
 **Andina publica sus dibujos como video en Instagram; esto pasa adentro de
 la invitación.** Su web es Wix — no lo puede hacer. Ese es el partido.
 
-⚠️ **Hay que forzar un reflow** (`void document.body.offsetWidth`) entre
-poner el `dasharray` y mover el `dashoffset`. Sin eso el navegador junta
-los dos cambios en un cuadro y **el primer trazo salta de invisible a
-completo**. Pasó dos veces: la segunda porque había dos funciones para
-arrancar la animación y solo una forzaba el reflow. **Una sola función.**
+⚠️⚠️ **"El primer trazo no se dibuja" volvió TRES veces, y cada vez la
+causa fue otra.** El síntoma siempre es el mismo —el círculo de la naranja
+aparece entero y de golpe, la hojita sí se dibuja— así que es fácil dar
+por arreglado lo que no era. Las tres causas, todas reales:
+
+1. **Dos funciones para arrancar** (el scroll y el botón) y solo una hacía
+   el trabajo completo. → **Una sola función**, siempre.
+2. **`void document.body.offsetWidth` no alcanza.** Leer `offsetWidth`
+   fuerza el *layout*, y `stroke-dashoffset` es una propiedad de *pintado*:
+   el navegador puede saltearse el recálculo. → Leer
+   `getComputedStyle(t).strokeDashoffset` de **cada** trazo, y arrancar
+   dentro de un **doble `requestAnimationFrame`**.
+3. **`transition-property` vale `all` por defecto.** El
+   `transitionDuration` inline que puso el ciclo anterior **no se va al
+   sacar la clase**, así que el *reset* a "escondido" también transicionaba
+   —en 1,15s y desde cero—: el trazo nunca llegaba a estar vacío. → En la
+   función que prepara, `t.style.transition = 'none'` **explícito**, y
+   `t.style.transition = ''` recién al arrancar.
+
+⚠️ Esto **solo se ve midiendo**, no mirando: hay que registrar el
+`strokeDashoffset` computado cada ~90ms. En una captura de pantalla, un
+trazo que salta y uno que se dibuja rápido se ven igual. Con la causa 3
+activa, el círculo marcaba **0 desde el milisegundo cero**.
 
 Y no todo tiene que dibujarse: los hielos **caen** adentro del vaso y las
 velas **se encienden**. Cada elemento puede tener su comportamiento — pero
