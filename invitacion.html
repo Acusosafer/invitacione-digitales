@@ -421,6 +421,43 @@
       overflow: hidden;
     }
 
+    /* ── LA MASCOTA (opcional) ──────────────────────────────────────
+       Un personaje que se asoma desde el borde derecho al scrollear,
+       se queda dos segundos y se vuelve. Es un guiño: si se quedara
+       fija, a la tercera sección ya cansa.
+       `pointer-events:none` para que no tape nada que se pueda tocar. */
+    .mascota {
+      position: fixed;
+      right: 0;
+      bottom: 15vh;
+      width: 84px;
+      max-width: 22vw;
+      z-index: 60;
+      pointer-events: none;
+      transform: translateX(110%);
+      opacity: 0;
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .35));
+      transition: transform .55s cubic-bezier(.34, 1.4, .64, 1), opacity .35s ease;
+    }
+    .mascota.asomada {
+      transform: translateX(8%);
+      opacity: 1;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .mascota { display: none }
+    }
+
+    /* El video de portada. Ocupa lo mismo que el hero-bg y queda abajo:
+       el hero-bg le apoya el velo negro encima. */
+    .hero-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
     .hero-bg {
       position: absolute;
       top: 0;
@@ -1474,6 +1511,16 @@
 
     <!-- HERO -->
     <section class="hero" id="sec-hero">
+      <!-- ── VIDEO DE PORTADA (opcional) ─────────────────────────────
+           Va DETRAS del hero-bg, que le apoya encima su velo negro: asi
+           el nombre se lee igual sobre cualquier cuadro del video.
+           Sin `video_hero` en el config no existe y el hero funciona
+           exactamente como siempre.
+           ⚠️ `muted` + `playsinline` + `loop` van los tres juntos. Sin
+           `playsinline` iOS lo abre en pantalla completa y se come la
+           invitacion; sin `muted` no arranca en ningun navegador. -->
+      <video id="hero-video" class="hero-video" muted loop playsinline
+             preload="metadata" style="display:none"></video>
       <div class="hero-bg" id="hero-bg"></div>
       <div class="hero-content">
         <div class="hero-tipo" id="h-tipo"></div>
@@ -2080,12 +2127,53 @@
       // Hero
       document.getElementById('h-tipo').textContent = C.tipo;
       document.getElementById('h-nombre').textContent = C.nombre;
+      // ── El video de portada, si el evento tiene ────────────────────
+      // Va antes que la foto para que el `poster` quede puesto: mientras
+      // el video baja se ve la foto del hero y no un rectángulo negro.
+      // ── La mascota que se asoma al scrollear ───────────────────────
+      // Se crea con DOM y no con innerHTML: la URL la escribe el cliente
+      // desde su panel.
+      if (C.mascota_url) {
+        const m = document.createElement('img');
+        m.className = 'mascota';
+        m.src = C.mascota_url;
+        m.alt = '';
+        document.body.appendChild(m);
+
+        let reloj = null, ultimo = 0;
+        addEventListener('scroll', () => {
+          // Recién después del hero: sobre la portada estorba.
+          if (scrollY < innerHeight * 0.9) return;
+          const ahora = Date.now();
+          if (ahora - ultimo < 9000) return;   // como mucho, cada 9 segundos
+          ultimo = ahora;
+          m.classList.add('asomada');
+          clearTimeout(reloj);
+          reloj = setTimeout(() => m.classList.remove('asomada'), 2000);
+        }, { passive: true });
+      }
+
+      if (C.video_hero) {
+        const hv = document.getElementById('hero-video');
+        hv.src = C.video_hero;
+        if (C.foto_hero) hv.poster = C.foto_hero;
+        hv.style.display = 'block';
+        // El autoplay puede fallar igual (modo ahorro de batería, algún
+        // navegador con reglas propias). Si falla, no pasa nada: abajo
+        // queda la foto del hero como estaba siempre.
+        hv.play().catch(() => {});
+      }
+
       if (C.foto_hero) {
         // Las dos capas se declaran por separado a propósito: el velo negro va
         // siempre centrado y a pantalla completa, y solo la FOTO se mueve según
         // el encuadre. Con la forma corta las dos compartían posición.
         const hb = document.getElementById('hero-bg');
-        hb.style.backgroundImage    = `linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url('${C.foto_hero}')`;
+        // Con video, esta capa aporta SOLO el velo: la foto iría encima del
+        // video y lo taparía entero.
+        hb.style.backgroundImage    = C.video_hero
+          ? `linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4))`
+          : `linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url('${C.foto_hero}')`;
         hb.style.backgroundPosition = `center, ${encuadre('foto_hero')}`;
         hb.style.backgroundSize     = 'cover, cover';
         hb.style.backgroundRepeat   = 'no-repeat, no-repeat';

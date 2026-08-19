@@ -1332,6 +1332,10 @@ const SECTIONS = [
     fields:[
       {type:'image',key:'foto_hero',label:'Foto de portada',hint:'Recomendado: 1080×1920 px (vertical)',ratio:'9/16'},
       {type:'select',key:'fit_hero',label:'Ajuste de imagen',opts:[['cover','📐 Llenar pantalla (Banner)'],['contain','🖼️ Mostrar imagen completa']]},
+      {type:'video',key:'video_hero',label:'Video de portada (opcional)',
+       hint:'Vertical, 5 a 10 segundos, SIN audio. Tiene que pesar menos de 1 MB: lo abre gente con datos móviles. La foto de arriba se usa mientras el video carga.'},
+      {type:'image',key:'mascota_url',label:'Personaje que se asoma (opcional)',
+       hint:'PNG con fondo transparente. Aparece 2 segundos desde el borde derecho cuando el invitado baja, cada tanto.'},
     ]
   },
   {
@@ -1881,6 +1885,17 @@ function renderSectionFields(sec) {
         (f.opts||[]).forEach(([v,l]) => html += `<option value="${v}">${l}</option>`);
         html += `</select>`;
         break;
+      case 'video':
+        // Sin encuadre: el video se recorta solo con object-fit:cover, y un
+        // marco de recorte sobre algo que se mueve no ayuda a decidir nada.
+        html += `
+          <div class="file-zone" id="fz-${f.key}">
+            <input type="file" id="cf-${f.key}" accept="video/mp4,video/webm,video/quicktime">
+            <span class="file-zone-icon">🎬</span>
+            <div class="file-zone-text">Clic para subir video</div>
+            <div class="file-zone-status" id="fz-stat-${f.key}"></div>
+          </div>`;
+        break;
       case 'image':
         html += `
           <div class="file-zone" id="fz-${f.key}">
@@ -2071,6 +2086,23 @@ async function comprimirImagen(file, maxLado = 1920, calidad = 0.85) {
 async function uploadFile(input, key, targetId) {
   if (!input.files?.length) return null;
   const original = input.files[0];
+
+  // ⚠️ El video NO se puede comprimir en el navegador como las fotos: hay
+  // que avisar antes de subir 10 MB al Storage de un cliente. El limite
+  // real del bucket es 20 MB; el aviso salta mucho antes porque lo que
+  // importa no es el limite tecnico sino el invitado con datos moviles.
+  if (original.type.startsWith('video/') && original.size > 1.5 * 1024 * 1024) {
+    const mb = (original.size / 1024 / 1024).toFixed(1);
+    if (!confirm(
+      `Ese video pesa ${mb} MB.\n\n` +
+      `Un video de portada tiene que pesar menos de 1 MB: los invitados lo ` +
+      `abren con datos moviles y con este peso van a esperar mirando una ` +
+      `pantalla negra.\n\nConviene achicarlo antes. ¿Subirlo igual?`)) {
+      input.value = '';
+      return null;
+    }
+  }
+
   const file = await comprimirImagen(original);
   if (file !== original) {
     console.info(`${key}: ${(original.size/1024|0)} KB → ${(file.size/1024|0)} KB`);
