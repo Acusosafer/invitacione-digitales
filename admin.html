@@ -1334,8 +1334,8 @@ const SECTIONS = [
       {type:'select',key:'fit_hero',label:'Ajuste de imagen',opts:[['cover','📐 Llenar pantalla (Banner)'],['contain','🖼️ Mostrar imagen completa']]},
       {type:'video',key:'video_hero',label:'Video de portada (opcional)',
        hint:'Vertical, 5 a 10 segundos, SIN audio. Tiene que pesar menos de 1 MB: lo abre gente con datos móviles. La foto de arriba se usa mientras el video carga.'},
-      {type:'image',key:'mascota_url',label:'Personaje que se asoma (opcional)',
-       hint:'PNG con fondo transparente. Aparece 2 segundos desde el borde derecho cuando el invitado baja, cada tanto.'},
+      {type:'image',key:'mascota_url',label:'Personaje que se asoma (opcional)',transparente:true,
+       hint:'PNG con fondo TRANSPARENTE. Aparece 2 segundos desde el borde derecho cuando el invitado baja, cada tanto.'},
     ]
   },
   {
@@ -1775,7 +1775,7 @@ function selectSection(secId) {
   });
 
   sec.fields.forEach(field => {
-    if (field.type === 'image' || field.type === 'audio') {
+    if (field.type === 'image' || field.type === 'audio' || field.type === 'video') {
       const inp = document.getElementById(`cf-${field.key}`);
       if (inp) inp.addEventListener('change', () => onFileChange(inp, field.key, field.type));
     }
@@ -1973,12 +1973,12 @@ async function guardarTodo() {
     const sec = SECTIONS.find(s => s.id === selectedSectionId);
     if (sec) {
       for (const f of sec.fields) {
-        if (f.type === 'image' || f.type === 'audio') {
+        if (f.type === 'image' || f.type === 'audio' || f.type === 'video') {
           const inp = document.getElementById(`cf-${f.key}`);
           if (inp?.files?.length) {
             let url;
             try {
-              url = await uploadFile(inp, f.key, newId);
+              url = await uploadFile(inp, f.key, newId, f.transparente);
             } catch (e) {
               // Se corta el guardado entero a propósito: es preferible no
               // guardar nada a guardar un config que apunta a una imagen
@@ -2057,8 +2057,19 @@ function val(id) {
  * Se hace acá y no del lado del servidor porque el navegador ya tiene la
  * imagen en memoria: es gratis y no hace falta subir 2 MB para tirar 1,7.
  */
-async function comprimirImagen(file, maxLado = 1920, calidad = 0.85) {
+/* ⚠️ El JPEG NO TIENE CANAL ALFA. Nunca. Un personaje recortado subido
+   como .jpg llega con un rectángulo blanco alrededor y se ve pegoteado
+   sobre la invitación. Y comprimir un PNG a JPEG hace lo mismo: le
+   aplasta la transparencia contra un fondo blanco.
+   Por eso los campos marcados `transparente` avisan antes de subir y
+   NO se convierten a JPEG. */
+function pierdeTransparencia(file) {
+  return !/png|webp|gif|svg/i.test(file.type);
+}
+
+async function comprimirImagen(file, maxLado = 1920, calidad = 0.85, conservarAlfa = false) {
   if (!file.type.startsWith('image/')) return file;   // el audio pasa derecho
+  if (conservarAlfa) return file;                     // se sube tal cual
 
   const bitmap = await createImageBitmap(file).catch(() => null);
   if (!bitmap) return file;                            // formato raro: se sube igual
@@ -2083,7 +2094,7 @@ async function comprimirImagen(file, maxLado = 1920, calidad = 0.85) {
   return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
 }
 
-async function uploadFile(input, key, targetId) {
+async function uploadFile(input, key, targetId, transparente = false) {
   if (!input.files?.length) return null;
   const original = input.files[0];
 
@@ -2103,7 +2114,23 @@ async function uploadFile(input, key, targetId) {
     }
   }
 
-  const file = await comprimirImagen(original);
+  // Aviso antes de subir algo que va a llegar con un rectangulo blanco
+  if (transparente && original.type.startsWith('image/') && pierdeTransparencia(original)) {
+    if (!confirm(
+      `"${original.name}" es un ${original.type.split('/')[1].toUpperCase()} y ese formato ` +
+      `NO guarda transparencia.
+
+El personaje va a aparecer con un rectangulo ` +
+      `blanco alrededor, pegoteado sobre la invitacion.
+
+Necesitas un PNG con ` +
+      `fondo transparente. Subirlo igual?`)) {
+      input.value = '';
+      return null;
+    }
+  }
+
+  const file = await comprimirImagen(original, 1920, 0.85, transparente);
   if (file !== original) {
     console.info(`${key}: ${(original.size/1024|0)} KB → ${(file.size/1024|0)} KB`);
   }
