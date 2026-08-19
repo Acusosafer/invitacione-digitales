@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sofía · 15 años · portada con video</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     PORTADA CON VIDEO · Sofía, 15 años, tematica Enredados
+
+     Prueba para ver como queda antes de tocar el producto. Todavia NO
+     esta en el panel: el video va escrito aca a mano.
+
+     ⚠️ El autoplay solo funciona con `muted` + `playsinline` + `loop`.
+     Sin `playsinline`, iOS abre el video en pantalla completa y se come
+     la invitacion. Sin `muted`, no arranca en ningun navegador.
+     Y va `poster`: mientras el video baja se ve el primer cuadro y no
+     un rectangulo negro.
+
+     Los brillos y las linternas son CSS y SVG: no pesan nada. En
+     Enredados los brillos SON las linternas — es la escena de la
+     pelicula que todo el mundo reconoce.
+     ══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Great+Vibes&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --oro:#F4C77B; --oro-hondo:#C98A2E; --lila:#6B4E86;
+  --noche:#241A33; --crema:#FFF6E6;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0; background:var(--noche); color:var(--crema);
+  font-family:'Jost',system-ui,sans-serif; overflow-x:hidden}
+
+/* ── LA PORTADA ─────────────────────────────────────────────── */
+.portada{position:relative; min-height:100dvh; overflow:hidden;
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; text-align:center; padding:40px 22px}
+
+.portada video{position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; z-index:0}
+/* Un velo para que el texto se lea SIEMPRE, sin importar el cuadro del
+   video que toque detras. Es mas oscuro abajo, donde va el texto. */
+.velo{position:absolute; inset:0; z-index:1;
+  background:linear-gradient(to bottom,
+    rgba(36,26,51,.30) 0%, rgba(36,26,51,.15) 35%,
+    rgba(36,26,51,.62) 72%, rgba(36,26,51,.88) 100%)}
+
+.contenido{position:relative; z-index:3; width:100%; max-width:440px;
+  margin-top:auto}
+
+.arriba{font-family:'Cinzel',serif; font-size:.68rem; letter-spacing:.4em;
+  text-transform:uppercase; color:var(--oro)}
+.nombre{font-family:'Great Vibes',cursive; font-size:clamp(4rem,22vw,6rem);
+  line-height:.92; margin:6px 0 0; color:#fff;
+  /* el resplandor dorado la despega del video sin ponerle una caja */
+  text-shadow:0 0 26px rgba(244,199,123,.55), 0 2px 14px rgba(0,0,0,.5)}
+.quince{font-family:'Cinzel',serif; font-weight:600; font-size:.8rem;
+  letter-spacing:.44em; text-transform:uppercase; color:var(--oro);
+  margin-top:10px}
+.datos{margin-top:20px; font-size:.9rem; letter-spacing:.06em;
+  color:rgba(255,246,230,.9); line-height:1.9;
+  text-shadow:0 1px 8px rgba(0,0,0,.6)}
+
+.flor-sep{width:44px; height:auto; margin:22px auto 0; display:block;
+  filter:drop-shadow(0 0 12px rgba(244,199,123,.6))}
+
+.entrar{display:inline-block; margin-top:26px; padding:14px 40px;
+  border-radius:999px; border:1px solid var(--oro);
+  background:rgba(244,199,123,.12); backdrop-filter:blur(6px);
+  color:var(--crema); font-family:'Cinzel',serif; font-size:.7rem;
+  letter-spacing:.3em; text-transform:uppercase; text-decoration:none;
+  transition:transform .18s var(--ease), background .22s var(--ease)}
+.entrar:hover{background:rgba(244,199,123,.26)}
+.entrar:active{transform:scale(.97)}
+
+/* ── LAS LINTERNAS ──────────────────────────────────────────────
+   Suben lento y se van apagando. Cada una con su ritmo, o si no
+   parecen un ascensor. Son divs con degradado: peso cero. */
+.linternas{position:absolute; inset:0; z-index:2; pointer-events:none;
+  overflow:hidden}
+.lin{position:absolute; bottom:-70px; width:15px; height:19px;
+  border-radius:3px 3px 5px 5px;
+  background:linear-gradient(180deg,#FFE9B8,#F0A93C);
+  box-shadow:0 0 14px 4px rgba(244,180,80,.38);
+  opacity:0; animation:subir linear infinite}
+.lin::after{content:''; position:absolute; inset:auto 0 -4px 0; height:4px;
+  margin:0 auto; width:6px; background:rgba(200,120,40,.75); border-radius:0 0 2px 2px}
+@keyframes subir{
+  0%   {transform:translateY(0) translateX(0); opacity:0}
+  12%  {opacity:.95}
+  70%  {opacity:.8}
+  100% {transform:translateY(-118dvh) translateX(var(--der,16px)); opacity:0}
+}
+
+/* ── LOS BRILLOS ────────────────────────────────────────────────
+   Polvo dorado: puntitos que titilan sin moverse de lugar. */
+.chispa{position:absolute; width:3px; height:3px; border-radius:50%;
+  background:#FFE9B8; box-shadow:0 0 7px 2px rgba(244,199,123,.85);
+  opacity:0; animation:titilar ease-in-out infinite}
+@keyframes titilar{
+  0%,100%{opacity:0; transform:scale(.5)}
+  50%    {opacity:.95; transform:scale(1)}
+}
+
+/* ── PASCAL ─────────────────────────────────────────────────────
+   Asomado en una esquina, chiquito. Es un guiño, no un personaje
+   principal: si ocupa media pantalla, deja de ser gracioso. */
+.pascal{position:absolute; right:-8px; bottom:104px; width:72px; z-index:4;
+  filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));
+  animation:asomar 5.5s var(--ease) 2.4s both, respirar 3.6s ease-in-out 8s infinite}
+@keyframes asomar{
+  0%   {transform:translateX(78px) rotate(9deg)}
+  55%  {transform:translateX(0) rotate(0)}
+  100% {transform:translateX(0) rotate(0)}
+}
+@keyframes respirar{
+  0%,100%{transform:translateY(0) rotate(0)}
+  50%    {transform:translateY(-5px) rotate(-2.5deg)}
+}
+
+/* ── La ficha de abajo, solo para vos ── */
+.ficha{background:#1A1226; padding:30px 22px 44px; text-align:center}
+.ficha h2{font-family:'Cinzel',serif; font-weight:400; font-size:1rem;
+  color:var(--oro); margin:0 0 14px; letter-spacing:.1em}
+.ficha table{margin:0 auto; border-collapse:collapse; font-size:.84rem;
+  color:rgba(255,246,230,.82)}
+.ficha td{padding:7px 12px; border-bottom:1px solid rgba(244,199,123,.14);
+  text-align:left}
+.ficha td:last-child{color:var(--oro); font-variant-numeric:tabular-nums}
+.ficha p{max-width:44ch; margin:18px auto 0; font-size:.82rem;
+  color:rgba(255,246,230,.6); line-height:1.7}
+
+@media (prefers-reduced-motion:reduce){
+  .lin,.chispa,.pascal{animation:none !important}
+  .lin,.chispa{opacity:.7}
+  .portada video{display:none}
+}
+</style>
+</head>
+<body>
+
+<section class="portada">
+  <video autoplay muted loop playsinline preload="metadata"
+         poster="portada-sofia.jpg">
+    <source src="portada-sofia.mp4" type="video/mp4">
+  </video>
+  <div class="velo"></div>
+  <div class="linternas" id="linternas"></div>
+
+  <img class="pascal" src="pascal.png" alt="Pascal, el camaleón">
+
+  <div class="contenido">
+    <div class="arriba">El sueño empieza</div>
+    <h1 class="nombre">Sofía</h1>
+    <div class="quince">Mis 15 años</div>
+    <img class="flor-sep" src="flor.png" alt="">
+    <div class="datos">
+      Sábado 14 de marzo, 2027<br>
+      21:00 · Salón Corona
+    </div>
+    <a class="entrar" href="#">Ingresar</a>
+  </div>
+</section>
+
+<section class="ficha">
+  <h2>Lo que pesa</h2>
+  <table>
+    <tr><td>Video original</td><td>10.655 KB</td></tr>
+    <tr><td>Video ya listo</td><td>760 KB</td></tr>
+    <tr><td>Primer cuadro (poster)</td><td>64 KB</td></tr>
+    <tr><td>Pascal + la flor</td><td>307 KB</td></tr>
+    <tr><td>Linternas y brillos</td><td>0 KB</td></tr>
+  </table>
+  <p>
+    Las linternas y los brillos no son un video ni un GIF: son formas
+    dibujadas por el navegador. Se puede cambiar cuántas hay y a qué
+    velocidad suben sin que pese un kilobyte más.
+  </p>
+</section>
+
+<script>
+/* Las linternas y las chispas se arman con DOM, no con innerHTML, y con
+   valores al azar: si van todas iguales se ve la repeticion enseguida. */
+const zona = document.getElementById('linternas');
+const azar = (a, b) => a + Math.random() * (b - a);
+
+for (let i = 0; i < 8; i++) {
+  const l = document.createElement('div');
+  l.className = 'lin';
+  const escala = azar(.45, .95);
+  l.style.left = azar(2, 94) + '%';
+  l.style.transform = `scale(${escala})`;
+  l.style.animationDuration = azar(13, 26) + 's';
+  l.style.animationDelay = (-azar(0, 22)) + 's';   /* negativo: ya arrancadas */
+  l.style.setProperty('--der', azar(-40, 55) + 'px');
+  l.style.filter = `brightness(${azar(.8, 1.15).toFixed(2)})`;
+  zona.appendChild(l);
+}
+
+for (let i = 0; i < 20; i++) {
+  const c = document.createElement('div');
+  c.className = 'chispa';
+  c.style.left = azar(1, 98) + '%';
+  c.style.top = azar(4, 92) + '%';
+  c.style.animationDuration = azar(2.4, 5.5) + 's';
+  c.style.animationDelay = (-azar(0, 5)) + 's';
+  zona.appendChild(c);
+}
+</script>
+</body>
+</html>

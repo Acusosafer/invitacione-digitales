@@ -27,6 +27,10 @@
     {
       "source": "/guille-letras",
       "destination": "/cliente-guille-letras.html"
+    },
+    {
+      "source": "/sofia",
+      "destination": "/sofia/index.html"
     }
   ]
 }
