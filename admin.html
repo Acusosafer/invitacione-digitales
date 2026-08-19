@@ -1190,6 +1190,7 @@ tr:hover td{background:rgba(255,255,255,0.01);}
               <option value="fashion">Revista de moda — Bodoni + Inter</option>
               <option value="geometrica">Geométrica actual — Syne + Inter</option>
               <option value="suave">Editorial suave — Instrument Serif + Inter</option>
+              <option value="cuento">Cuento de hadas — Cinzel Decorative + Jost</option>
             </select>
           </div>
 
@@ -1358,6 +1359,23 @@ const SECTIONS = [
       {type:'text',key:'fecha_texto',label:'Fecha visual',ph:'ej: Sábado 14 de junio, 2025'},
       {type:'text',key:'hora_texto',label:'Hora del evento',ph:'ej: 21:00 hs'},
       {type:'datetime',key:'fecha_iso',label:'Fecha y hora exacta (para el contador)'},
+      /* ⚠️ La hora de arriba es la de un reloj, pero no dice de cuál. Sin la
+         zona, cada invitado ve la cuenta regresiva en la SUYA: la tía que
+         vive afuera veía otra cuenta que la que vive a la vuelta. */
+      {type:'select',key:'zona_horaria',label:'¿En qué país es la fiesta?',
+       hint:'Define la cuenta regresiva y el botón de agendar. Un invitado que viva en otro país va a ver la hora correcta igual.',
+       opts:[
+         ['America/Argentina/Buenos_Aires','🇦🇷 Argentina'],
+         ['America/Bogota',                '🇨🇴 Colombia'],
+         ['America/Montevideo',            '🇺🇾 Uruguay'],
+         ['America/Santiago',              '🇨🇱 Chile'],
+         ['America/Asuncion',              '🇵🇾 Paraguay'],
+         ['America/La_Paz',                '🇧🇴 Bolivia'],
+         ['America/Lima',                  '🇵🇪 Perú'],
+         ['America/Mexico_City',           '🇲🇽 México'],
+         ['America/Sao_Paulo',             '🇧🇷 Brasil'],
+         ['Europe/Madrid',                 '🇪🇸 España'],
+       ]},
     ]
   },
   {

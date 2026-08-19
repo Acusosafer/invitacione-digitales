@@ -1904,6 +1904,17 @@
       suave:       { nombre:'Editorial suave',
                      titulo:"'Instrument Serif', Georgia, serif", cuerpo:"'Inter', system-ui, sans-serif",
                      w:['Instrument+Serif','Inter:wght@300;400;500;600'] },
+      /* Para fiestas temáticas: princesas, cuentos, Disney. Cinzel
+         Decorative es una romana con los remates florecidos — el aire de
+         los títulos de esas películas. Es MUY decorativa, así que el
+         cuerpo tiene que ser lo más simple posible o la invitación se
+         vuelve ilegible. Por eso va con Jost, que es casi geométrica.
+         ⚠️ Cinzel Decorative publica 400, 700 y 900 — no tiene pesos
+         intermedios. Pedirle uno que no existe hace fallar el pedido
+         entero y no carga NINGUNA de las dos. */
+      cuento:      { nombre:'Cuento de hadas',
+                     titulo:"'Cinzel Decorative', Georgia, serif", cuerpo:"'Jost', system-ui, sans-serif",
+                     w:['Cinzel+Decorative:wght@400;700;900','Jost:wght@300;400;500;600'] },
     };
 
     /**
@@ -2655,7 +2666,43 @@
     // Queda el que cada invitado tenga puesto por defecto. La única forma de
     // forzarlo sería un archivo .ics, que es justo lo que se quiso evitar.
 
-    const ZONA = 'America/Argentina/Buenos_Aires';
+    // ── LA ZONA HORARIA DEL EVENTO ────────────────────────────────────
+    // ⚠️ `fecha_iso` se guarda SIN zona ("2026-12-04T19:00"), asi que por sí
+    // sola no significa nada: es la hora de un reloj, pero no dice de cuál.
+    // La zona la elige el cliente en su panel. Por defecto Argentina, que es
+    // donde estaban todos los eventos hasta que apareció uno en Colombia.
+    const ZONA = C.zona_horaria || 'America/Argentina/Buenos_Aires';
+
+    /* Cuánto adelanta o atrasa `zona` respecto de UTC en ese instante.
+       Se calcula preguntándole a Intl cómo se ve esa marca de tiempo allá y
+       volviendo a armarla como si fuera UTC: la diferencia es el desfasaje.
+       Se hace así y no con un número fijo porque el desfasaje CAMBIA con el
+       horario de verano — y una fiesta puede caer de cualquier lado. */
+    function desfasaje(ts, zona) {
+      const f = new Intl.DateTimeFormat('en-US', {
+        timeZone: zona, hour12: false,
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+      const p = {};
+      for (const { type, value } of f.formatToParts(new Date(ts))) p[type] = value;
+      return Date.UTC(+p.year, +p.month - 1, +p.day,
+                      +p.hour % 24, +p.minute, +p.second) - ts;
+    }
+
+    /* La hora del evento, en el reloj de SU ciudad, convertida al instante
+       real. A partir de acá el mismo momento vale igual para un invitado en
+       Cali, uno en Buenos Aires y uno en Madrid. */
+    function instanteDelEvento() {
+      const m = String(C.fecha_iso || '').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+      if (!m) return NaN;
+      const [, Y, Mo, D, H, Mi] = m.map(Number);
+      const comoSiFueraUTC = Date.UTC(Y, Mo - 1, D, H, Mi);
+      // Dos pasadas: el primer tanteo puede caer del otro lado de un cambio
+      // de horario y devolver el desfasaje equivocado por una hora.
+      let ts = comoSiFueraUTC - desfasaje(comoSiFueraUTC, ZONA);
+      return comoSiFueraUTC - desfasaje(ts, ZONA);
+    }
 
     function linkGoogle() {
       // `fecha_iso` viene sin zona ("2026-11-14T21:00"). Si se la pasa a
@@ -2748,7 +2795,11 @@
     }
 
     function startCountdown() {
-      const target = new Date(C.fecha_iso).getTime();
+      // ⚠️ NO `new Date(C.fecha_iso)`: eso lo lee en la zona del que mira, y
+      // una invitada en Cali y su tía en Buenos Aires veían cuentas distintas
+      // para la misma fiesta. Va el instante real, calculado con la zona del
+      // evento.
+      const target = instanteDelEvento();
       function update() {
         const now = new Date().getTime();
         const dist = target - now;
