@@ -961,6 +961,48 @@
       text-align: center;
     }
 
+    /* ── LLUVIA DE SOBRES ────────────────────────────────────────────
+       Misma caja que la de transferencia, para que las dos se lean como
+       dos opciones de lo mismo y no como dos secciones distintas.
+       Ningún color escrito a mano: todo sale del tema del evento. */
+    .sobres-box {
+      border: 2px dashed var(--secondary);
+      padding: 22px 20px;
+      border-radius: 12px;
+      margin: 20px auto;
+      max-width: 500px;
+      background: var(--surface);
+      text-align: center;
+    }
+    .sobres-img {
+      display: none;
+      width: 148px;
+      max-width: 62%;
+      height: auto;
+      margin: 0 auto 14px;
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .22));
+    }
+    .sobres-icono {
+      width: 54px;
+      margin: 0 auto 12px;
+      color: var(--black);
+    }
+    .sobres-icono svg { width: 100%; height: auto; display: block }
+    .sobres-label {
+      font-family: var(--font-label), var(--font);
+      font-size: .72rem;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: 8px;
+    }
+    .sobres-text {
+      margin: 0;
+      color: var(--black);
+      font-size: .96rem;
+      line-height: 1.7;
+    }
+
     .alias-label {
       font-size: 0.75rem;
       text-transform: uppercase;
@@ -1640,10 +1682,26 @@
       </div>
       <h2>Regalos</h2>
       <p class="gift-msg" id="txt-regalo"></p>
-      <div class="alias-box">
+      <!-- Las dos modalidades conviven. El cliente elige en su panel si va
+           una, la otra o las dos: hay fiestas con alias, fiestas con cofre
+           en el salón, y fiestas con los dos. -->
+      <div class="alias-box" id="caja-alias">
         <div class="alias-label">Transferencia</div>
         <div class="alias-text" id="txt-alias"></div>
         <button id="btn-copiar" class="btn btn-copiar">Copiar Alias</button>
+      </div>
+      <div class="sobres-box" id="caja-sobres" style="display:none">
+        <img class="sobres-img" id="img-cofre" alt="">
+        <div class="sobres-icono" id="icono-cofre" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5C3 8.6 4.6 7 6.5 7h11C19.4 7 21 8.6 21 10.5V19a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>
+            <path d="M3 12.5h18"/><path d="M10 12.5h4v3h-4z"/>
+            <path d="M6.5 7C6.5 4.8 8.3 3 10.5 3h3C15.7 3 17.5 4.8 17.5 7"/>
+          </svg>
+        </div>
+        <div class="sobres-label" id="txt-sobres-t">Lluvia de sobres</div>
+        <p class="sobres-text" id="txt-sobres"></p>
       </div>
     </section>
 
@@ -2351,14 +2409,44 @@
         document.getElementById('txt-dress-p').textContent = C.dresscode_texto;
       }
 
-      if (C.alias_pago && C.layout?.show_gift !== false) {
+      // ── REGALOS: transferencia, lluvia de sobres, o las dos ─────────
+      // Sin `modo_regalo` se comporta como siempre: transferencia. Los
+      // eventos que ya existen no cambian en nada.
+      const modo = C.modo_regalo || 'transferencia';
+      const hayAlias  = !!C.alias_pago && modo !== 'sobres';
+      const haySobres = modo === 'sobres' || modo === 'ambas';
+
+      // ⚠️ La sección ya NO depende de que haya alias. Antes solo aparecía
+      // con `alias_pago` cargado, así que para una fiesta sin transferencia
+      // había que inventar un alias falso para que el texto de regalos se
+      // viera. Ahora alcanza con que haya algo que mostrar.
+      if ((hayAlias || haySobres || C.regalo_texto) && C.layout?.show_gift !== false) {
         document.getElementById('sec-regalos').style.display = 'flex';
         document.getElementById('txt-regalo').textContent = C.regalo_texto || '';
-        document.getElementById('txt-alias').textContent = C.alias_pago;
-        document.getElementById('btn-copiar').onclick = () => {
-          navigator.clipboard.writeText(C.alias_pago);
-          toast('📋 Alias copiado');
-        };
+
+        document.getElementById('caja-alias').style.display = hayAlias ? '' : 'none';
+        if (hayAlias) {
+          document.getElementById('txt-alias').textContent = C.alias_pago;
+          document.getElementById('btn-copiar').onclick = () => {
+            navigator.clipboard.writeText(C.alias_pago);
+            toast('📋 Alias copiado');
+          };
+        }
+
+        if (haySobres) {
+          document.getElementById('caja-sobres').style.display = '';
+          document.getElementById('txt-sobres-t').textContent =
+            C.sobres_titulo || 'Lluvia de sobres';
+          document.getElementById('txt-sobres').textContent =
+            C.sobres_texto || 'Va a haber un cofre en el salón para dejar tu sobre.';
+          // La imagen reemplaza al ícono dibujado; si no hay, queda el ícono.
+          if (C.foto_cofre) {
+            const ic = document.getElementById('img-cofre');
+            ic.src = C.foto_cofre;
+            ic.style.display = 'block';
+            document.getElementById('icono-cofre').style.display = 'none';
+          }
+        }
       }
 
       if (C.hashtag && C.layout?.show_hashtag !== false) {

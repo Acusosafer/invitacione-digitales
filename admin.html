@@ -1418,7 +1418,21 @@ const SECTIONS = [
     fields:[
       {type:'text',key:'icono_regalos',label:'Icono (Emoji)',ph:'ej: 🎁',hint:'Opcional'},
       {type:'textarea',key:'regalo_texto',label:'Mensaje de regalos',ph:'ej: Si querés hacerme un regalo, lo más lindo es contribuir para mi viaje...'},
-      {type:'text',key:'alias_pago',label:'Alias CBU / MercadoPago',ph:'ej: valentina.15.mp'},
+      /* Dos modalidades que conviven: hay fiestas con alias, fiestas con
+         cofre en el salón, y fiestas con las dos. */
+      {type:'select',key:'modo_regalo',label:'¿Cómo reciben los regalos?',
+       opts:[
+         ['transferencia','💳 Solo transferencia (alias)'],
+         ['sobres',       '💌 Solo lluvia de sobres (cofre en el salón)'],
+         ['ambas',        '💳 + 💌 Las dos'],
+       ]},
+      {type:'text',key:'alias_pago',label:'Alias CBU / MercadoPago',ph:'ej: valentina.15.mp',
+       hint:'Solo si elegiste transferencia o las dos.'},
+      {type:'text',key:'sobres_titulo',label:'Título de la lluvia de sobres',ph:'Lluvia de sobres'},
+      {type:'textarea',key:'sobres_texto',label:'Texto de la lluvia de sobres',
+       ph:'ej: Vamos a tener un cofre en el salón para que dejes tu sobre.'},
+      {type:'image',key:'foto_cofre',label:'Imagen del cofre (opcional)',transparente:true,
+       hint:'PNG con fondo TRANSPARENTE. Si no cargás ninguna, se usa un dibujo de cofre que toma los colores de la invitación.'},
     ]
   },
   {
