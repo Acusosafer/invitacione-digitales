@@ -2119,6 +2119,33 @@
       const { data } = await sb.from('eventos').select('config').eq('id', eventoId).single();
       C = data?.config || {};
 
+      /* ── INVITACIÓN PAUSADA ────────────────────────────────────────
+         Corta el acceso a un link que ya se compartió, sin borrar nada.
+         Sirve para el que probó y no contrató: los links de prueba que
+         se mandaron quedan muertos, y si después paga se despausa con
+         un clic y vuelve todo como estaba.
+         Va PRIMERO de todo: si no, alcanza con sacar el splash desde
+         las herramientas del navegador para ver la invitación entera. */
+      if (C.pausada === true) {
+        document.title = 'Invitación no disponible';
+        document.body.innerHTML = '';
+        document.body.style.cssText =
+          'display:flex;align-items:center;justify-content:center;min-height:100dvh;' +
+          'margin:0;padding:32px;text-align:center;background:#08080a;color:#F7CE84;' +
+          "font-family:system-ui,-apple-system,'Segoe UI',sans-serif";
+        const caja = document.createElement('div');
+        caja.style.cssText = 'max-width:34ch;line-height:1.7';
+        const t = document.createElement('p');
+        t.style.cssText = 'font-size:1.05rem;margin:0 0 10px';
+        t.textContent = 'Esta invitación no está disponible.';
+        const s = document.createElement('p');
+        s.style.cssText = 'font-size:.86rem;opacity:.62;margin:0';
+        s.textContent = 'Si esperabas encontrar algo acá, escribile a quien te compartió el link.';
+        caja.append(t, s);
+        document.body.appendChild(caja);
+        return;   // no se carga NADA más: ni fotos, ni música, ni RSVP
+      }
+
       // Fallback values
       C.nombre = C.nombre || 'Evento';
       C.tipo = C.tipo || 'MIS 15';

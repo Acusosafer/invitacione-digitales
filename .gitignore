@@ -16,3 +16,11 @@ Thumbs.db
 # Las fotos utiles viven en Boda Guillermina/Fotos/ y esas si se versionan.
 Boda Guillermina/Instagram_files/
 Boda Guillermina/Instagram.html
+
+# Material de trabajo de clientes: fotos, videos y referencias que mandan
+# ellos. No se publica (esta en .vercelignore) y tampoco tiene por que
+# viajar al repo: son archivos pesados de gente real. Se quedan en la PC.
+# ⚠️ Un .mov de 132 MB que quedo suelto acá hizo rebotar un push entero:
+# GitHub rechaza cualquier archivo de mas de 100 MB.
+/15 Sofia Enredados/
+/Boda Guillermina/Fotos/

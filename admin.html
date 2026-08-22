@@ -1317,6 +1317,20 @@ let selectedSectionId = null;
 
 const SECTIONS = [
   {
+    id:'estado', label:'Estado de la invitación', icon:'🔒',
+    desc:'Cortar el acceso a los links que ya se compartieron',
+    toggle:null, required:false,
+    fields:[
+      /* Para el que probó y no contrató: los links de prueba que ya se
+         mandaron quedan muertos, sin borrar un solo dato. Si después
+         paga, se despausa y vuelve todo como estaba. */
+      {type:'select',key:'pausada',label:'¿La invitación está activa?',
+       hint:'Al pausarla, cualquiera que abra un link ya compartido ve un aviso de que no está disponible. No se borra nada y se puede volver a activar cuando quieras.',
+       opts:[[false,'✅ Activa — los invitados la ven normalmente'],
+             [true, '🔒 Pausada — los links compartidos dejan de funcionar']]},
+    ]
+  },
+  {
     id:'splash', label:'Pantalla de Entrada', icon:'🎭',
     desc:'Primera pantalla animada con foto circular y música',
     toggle:'show_splash', required:false,
