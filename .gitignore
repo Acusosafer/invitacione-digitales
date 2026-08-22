@@ -24,3 +24,7 @@ Boda Guillermina/Instagram.html
 # GitHub rechaza cualquier archivo de mas de 100 MB.
 /15 Sofia Enredados/
 /Boda Guillermina/Fotos/
+
+# Los reels pesan megas y se regeneran con herramientas/grabar-reel.js.
+# El repo guarda la herramienta, no la salida.
+publicidad/reel-*.mp4
