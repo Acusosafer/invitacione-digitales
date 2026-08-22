@@ -29,19 +29,42 @@ const FPS = 30;
    altura de pantalla. Con multiplos, el scroll llegaba al fondo a mitad
    del guion y los ultimos cinco tramos mostraban todos el formulario. */
 const GUION = [
-  { seg: 2.8, a: '#sec-hero',      texto: 'Esto no es una foto',        sub: '' },
-  { seg: 1.6, a: '#sec-hero',      texto: '',                            sub: '' },
-  { seg: 2.4, a: '#sec-mensaje',   texto: '',                            sub: '' },
-  { seg: 2.6, a: '#sec-countdown', texto: 'La cuenta baja sola',         sub: '' },
-  { seg: 2.6, a: '#sec-galeria',   texto: '',                            sub: '' },
-  { seg: 2.6, a: '#sec-ubicacion', texto: 'Con el mapa adentro',         sub: '' },
-  { seg: 2.4, a: '#sec-dresscode', texto: '',                            sub: '' },
-  { seg: 2.6, a: '#sec-regalos',   texto: 'Y detalles que nadie espera', sub: '' },
-  { seg: 2.6, a: '#sec-rsvp',      texto: 'Confirman desde el celular',  sub: '' },
-  { seg: 3.0, a: 'FINAL',          texto: '',                            sub: '' },
+  { seg: 4.0, a: '#sec-hero' },
+  { seg: 3.6, a: '#sec-mensaje' },
+  { seg: 4.0, a: '#sec-countdown' },
+  { seg: 5.0, a: '#sec-galeria',   pascal: true },
+  { seg: 4.0, a: '#sec-ubicacion' },
+  { seg: 3.6, a: '#sec-dresscode' },
+  { seg: 4.4, a: '#sec-regalos' },
+  { seg: 4.0, a: '#sec-rsvp' },
+  { seg: 3.0, a: 'FINAL' },
 ];
 
 const suave = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+
+/* ⚠️⚠️ EL TIEMPO DEL NAVEGADOR NO ES EL TIEMPO DEL VIDEO.
+   Cada captura tarda ~0,16 segundos REALES, pero avanza apenas 1/30 de
+   segundo de video. O sea que las animaciones CSS corren casi CINCO
+   VECES mas rapido de lo que se ve: los iconos laten a las corridas,
+   Pascal entra y sale en dos cuadros, y nada se llega a entender.
+
+   La solucion no es bajarles la velocidad a ojo: es SACARLES el reloj.
+   Se pausan todas y en cada cuadro se les pone a mano el tiempo de
+   video que corresponde. Asi el resultado es igual siempre, no depende
+   de lo rapida que este la maquina.
+
+   ⚠️ Cada animacion cuenta desde que APARECIO, no desde que arranco el
+   reel: las secciones se animan al entrar en pantalla, y si se les pone
+   el tiempo total ya nacen terminadas. */
+const RELOJ = `(t => {
+  window.__nace = window.__nace || new WeakMap();
+  document.getAnimations().forEach(a => {
+    if (!window.__nace.has(a)) window.__nace.set(a, t);
+    try { a.pause(); a.currentTime = Math.max(0, (t - window.__nace.get(a)) * 1000); } catch (e) {}
+  });
+  const v = document.getElementById('hero-video');
+  if (v && v.duration) { v.pause(); v.currentTime = t % v.duration; }
+})`;
 
 (async () => {
   fs.rmSync(SALIDA, { recursive: true, force: true });
@@ -61,28 +84,8 @@ const suave = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
   await pg.goto(`http://localhost:8899/invitacion.html?evento=${EVENTO}`, { waitUntil: 'networkidle0' });
   await new Promise(r => setTimeout(r, 3500));
 
-  // El cartel de texto, encima de todo
   await pg.evaluate(() => {
-    const c = document.createElement('div');
-    c.id = '__cartel';
-    c.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99999;' +
-      'text-align:center;pointer-events:none;padding:9% 8% 13%;opacity:0;' +
-      'transition:opacity .45s ease;' +
-      /* velo propio: sin esto el cartel cae sobre el texto de la seccion
-         y no se lee ninguno de los dos */
-      'background:linear-gradient(to bottom,rgba(0,0,0,.62),rgba(0,0,0,.34) 62%,transparent)';
-    const t = document.createElement('div');
-    t.id = '__t';
-    t.style.cssText = "font-family:'Cinzel Decorative',Georgia,serif;font-size:34px;" +
-      'font-weight:700;color:#fff;line-height:1.25;' +
-      'text-shadow:0 2px 18px rgba(0,0,0,.85),0 0 34px rgba(0,0,0,.6)';
-    const s = document.createElement('div');
-    s.id = '__s';
-    s.style.cssText = "font-family:'Jost',system-ui,sans-serif;font-size:17px;" +
-      'letter-spacing:.16em;color:rgba(255,255,255,.92);margin-top:10px;' +
-      'text-shadow:0 2px 12px rgba(0,0,0,.9)';
-    c.append(t, s);
-    document.body.appendChild(c);
+    // Sin carteles: los textos los pone Fer arriba, en Instagram.
 
     // Entrar sin tocar: el splash tapa todo y el reel tiene que arrancar
     // mostrando la invitación.
@@ -107,11 +110,7 @@ const suave = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
     fw.style.cssText = "font-family:'Jost',system-ui,sans-serif;font-size:19px;" +
       'letter-spacing:.16em;margin-top:20px;color:rgba(247,206,132,.72)';
     fw.textContent = 'invitacionesdigitalesoficial.com';
-    const fc = document.createElement('div');
-    fc.style.cssText = "font-family:'Jost',system-ui,sans-serif;font-size:22px;" +
-      'margin-top:40px;color:#fff;line-height:1.5';
-    fc.textContent = '¿Querés una así para tu fiesta?';
-    fin.append(fm, fw, fc);
+    fin.append(fm, fw);
     document.body.appendChild(fin);
 
     document.documentElement.style.scrollBehavior = 'auto';
@@ -124,7 +123,6 @@ const suave = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
 
     if (tramo.a === 'FINAL') {
       await pg.evaluate(() => {
-        document.getElementById('__cartel').style.opacity = '0';
         document.getElementById('__final').style.opacity = '1';
       });
       for (let i = 0; i < cuadros; i++) {
@@ -144,20 +142,36 @@ const suave = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
       return Math.max(0, Math.min(centrado, document.body.scrollHeight - innerHeight));
     }, tramo.a);
 
-    await pg.evaluate((tx, sb) => {
-      document.getElementById('__t').textContent = tx;
-      document.getElementById('__s').textContent = sb;
-      document.getElementById('__cartel').style.opacity = tx ? '1' : '0';
-    }, tramo.texto, tramo.sub);
+    // Pascal se asoma cuando lo dice el guion. Su logica propia mide el
+    // tiempo con el reloj REAL, que durante la grabacion no sirve.
+    // ⚠️ Y NO se usa su clase `asomada`: entra por una transicion CSS, y el
+    // control de reloj se la cancela (currentTime mayor que su duracion =
+    // el navegador la descarta y vuelve al reposo). Se le calcula la
+    // posicion a mano, cuadro por cuadro.
+    await pg.evaluate(() => {
+      const m = document.querySelector('.mascota');
+      if (m) { m.classList.remove('asomada'); m.style.transition = 'none'; }
+    });
 
     for (let i = 0; i < cuadros; i++) {
       const y = desde + (hasta - desde) * suave(i / Math.max(1, cuadros - 1));
-      await pg.evaluate((yy, t) => {
+      await pg.evaluate((yy, t, reloj, pas, dentro) => {
         window.scrollTo(0, yy);
-        // el video de portada, cuadro a cuadro, para que corra a su ritmo
-        const v = document.getElementById('hero-video');
-        if (v && v.duration) { v.pause(); v.currentTime = t % v.duration; }
-      }, y, (n / FPS));
+        eval(reloj)(t);
+        const m = document.querySelector('.mascota');
+        if (m) {
+          if (!pas) { m.style.opacity = '0'; m.style.transform = 'translateX(110%)'; }
+          else {
+            // entra en 0,7s, se queda, y se va en los ultimos 0,7s
+            const ent = Math.min(1, dentro / 0.7);
+            const sal = Math.min(1, Math.max(0, (dentro - (pas - 0.7)) / 0.7));
+            const p = ent * (1 - sal);
+            const rebote = p < 1 ? 1 - Math.pow(1 - p, 3) : 1;
+            m.style.opacity = String(Math.min(1, p * 1.6));
+            m.style.transform = `translateX(${110 - 102 * rebote}%)`;
+          }
+        }
+      }, y, (n / FPS), RELOJ, tramo.pascal ? tramo.seg : 0, (i / FPS));
       await pg.screenshot({ path: path.join(SALIDA, String(n).padStart(5, '0') + '.png') });
       n++;
     }
