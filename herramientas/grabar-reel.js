@@ -32,7 +32,7 @@ const GUION = [
   { seg: 4.0, a: '#sec-hero' },
   { seg: 3.6, a: '#sec-mensaje' },
   { seg: 4.0, a: '#sec-countdown' },
-  { seg: 5.0, a: '#sec-galeria',   pascal: true },
+  { seg: 7.4, a: '#sec-galeria',   pascal: true },
   { seg: 4.0, a: '#sec-ubicacion' },
   { seg: 3.6, a: '#sec-dresscode' },
   { seg: 4.4, a: '#sec-regalos' },
@@ -64,6 +64,29 @@ const RELOJ = `(t => {
   });
   const v = document.getElementById('hero-video');
   if (v && v.duration) { v.pause(); v.currentTime = t % v.duration; }
+
+  // El carrusel: una foto cada 2,4 segundos DE VIDEO
+  const pista = document.getElementById('carousel-track');
+  if (pista && pista.children.length > 1) {
+    const n = pista.children.length;
+    const i = Math.floor(Math.max(0, t - (window.__gal0 || 0)) / 2.4) % n;
+    pista.style.transition = 'transform .7s cubic-bezier(.22,.61,.36,1)';
+    pista.style.transform = 'translateX(-' + (i * 100) + '%)';
+  }
+
+  // La cuenta regresiva, avanzando al ritmo del video y no al del reloj
+  const dias = document.getElementById('days');
+  if (dias && window.__cd) {
+    let f = Math.max(0, Math.floor(window.__cd - t));
+    const dd = String(Math.floor(f / 86400));
+    const hh = String(Math.floor(f % 86400 / 3600)).padStart(2, '0');
+    const mm = String(Math.floor(f % 3600 / 60)).padStart(2, '0');
+    const ss = String(f % 60).padStart(2, '0');
+    dias.textContent = dd.padStart(2, '0');
+    document.getElementById('hours').textContent = hh;
+    document.getElementById('mins').textContent = mm;
+    document.getElementById('secs').textContent = ss;
+  }
 })`;
 
 (async () => {
@@ -115,6 +138,14 @@ const RELOJ = `(t => {
 
     document.documentElement.style.scrollBehavior = 'auto';
     window.scrollTo(0, 0);
+
+    /* ⚠️ El carrusel de fotos y la cuenta regresiva avanzan con
+       `setInterval`, o sea con el reloj REAL: 2 segundos reales son
+       apenas 0,4 de video, y las fotos pasaban de a tres por segundo.
+       Se cortan TODOS los intervalos y desde acá se manejan a mano, con
+       el tiempo del video. */
+    window.__cd = (instanteDelEvento() - Date.now()) / 1000;
+    for (let i = 1; i < 99999; i++) clearInterval(i);
   });
 
   let n = 0, desde = 0;
@@ -148,10 +179,12 @@ const RELOJ = `(t => {
     // control de reloj se la cancela (currentTime mayor que su duracion =
     // el navegador la descarta y vuelve al reposo). Se le calcula la
     // posicion a mano, cuadro por cuadro.
-    await pg.evaluate(() => {
+    await pg.evaluate((esGal, t0) => {
       const m = document.querySelector('.mascota');
       if (m) { m.classList.remove('asomada'); m.style.transition = 'none'; }
-    });
+      // el carrusel arranca de la primera foto cuando la galeria entra
+      if (esGal) window.__gal0 = t0;
+    }, tramo.a === '#sec-galeria', n / FPS);
 
     for (let i = 0; i < cuadros; i++) {
       const y = desde + (hasta - desde) * suave(i / Math.max(1, cuadros - 1));

@@ -818,6 +818,132 @@ clic y llega a la web — el invitado que no hace nada no queda registrado en ni
 eso la *coincidencia avanzada automática* del píxel de Meta no tiene nada personal que leer.
 Si algún día se le agrega un formulario, **ese es el momento de volver a revisar esa opción**.
 
+## Video de portada, mascota y zona horaria (agosto 2026)
+
+Tres campos nuevos de `config`, los tres **opcionales**: sin ellos, los eventos
+que ya existen no cambian en nada.
+
+| Campo | Qué hace |
+|---|---|
+| `video_hero` | Video a pantalla completa en la portada |
+| `mascota_url` | Un personaje que se asoma 2s al scrollear, como mucho cada 9 |
+| `zona_horaria` | El país de la fiesta — **define la cuenta regresiva** |
+
+⚠️ **El autoplay necesita `muted` + `playsinline` + `loop` juntos.** Sin
+`playsinline`, iOS abre el video en pantalla completa y se come la invitación.
+La foto del hero queda de `poster`, así que mientras baja se ve la foto y no un
+rectángulo negro — y si el autoplay falla igual queda la foto de siempre.
+
+⚠️ **Con video, el `hero-bg` aporta SOLO el velo.** La foto iría encima del
+video y lo taparía entero.
+
+⚠️ **El bucket rechazaba video con 415**: tenía lista blanca de tipos.
+`sql/004_video_portada.sql` agrega mp4/webm/mov y sube el límite a 20 MB. **El
+límite es el techo del sistema, no el objetivo**: un video de portada tiene que
+pesar menos de 1 MB. El panel avisa arriba de 1,5 MB porque **el video no se
+puede comprimir en el navegador** como las fotos.
+
+### La cuenta regresiva estaba mal para todo evento fuera de Argentina
+
+`fecha_iso` se guarda **sin zona** (`2026-12-04T19:00`): es la hora de un reloj,
+pero no dice de cuál. El contador hacía `new Date(C.fecha_iso)`, que **cada
+navegador lee en SU zona**. Para una fiesta en Cali, una invitada allá veía una
+cuenta y su tía en Buenos Aires veía otra, con dos horas de diferencia.
+
+Hoy el instante real se calcula con `Intl` y la zona del evento. ⚠️ **Va en DOS
+PASADAS**: el primer tanteo puede caer del otro lado de un cambio de horario de
+verano y devolver el desfasaje corrido una hora.
+
+## Regalos: transferencia, lluvia de sobres, o las dos
+
+`modo_regalo` = `transferencia` (por defecto) | `sobres` | `ambas`. Con `sobres`
+desaparece el botón de copiar alias y aparece el cofre con su texto.
+
+⚠️ **La sección ya NO depende de que haya alias.** Antes solo aparecía con
+`alias_pago` cargado, así que para una fiesta sin transferencia había que
+inventar un alias falso — en `sofiaenredados15` el alias era literalmente `♡`.
+
+Si no cargan imagen de cofre hay un dibujo que toma los colores del evento.
+
+## Pausar una invitación
+
+`pausada: true` y los links ya compartidos muestran un aviso. **No se borra
+nada** y se revierte con un clic. Es para el que probó y no contrató.
+
+⚠️ La comprobación va **primero de todo** en `initApp` y hace `return`. Si fuera
+después, o si solo escondiera el splash, alcanzaba con abrir las herramientas del
+navegador para ver la invitación entera. Verificado: pausada da 0 secciones y
+**cero fotos pedidas al Storage**.
+
+## El grabador de reels — `herramientas/grabar-reel.js`
+
+Abre la invitación en un navegador de verdad, la scrollea y guarda un PNG por
+cuadro; ffmpeg los pega a 30 fps. Sale un 1080×1920 listo para Instagram.
+
+⚠️⚠️ **EL TIEMPO DEL NAVEGADOR NO ES EL TIEMPO DEL VIDEO.** Cada captura tarda
+~0,16 segundos **reales** pero avanza 1/30 de segundo de video: todo lo animado
+corre **cinco veces más rápido** de lo que se ve. Los íconos laten a las
+corridas, las fotos del carrusel pasan de a tres por segundo, y nada se entiende.
+
+La solución no es bajarles la velocidad a ojo, es **sacarles el reloj**:
+
+1. **Animaciones CSS** → se pausan todas y en cada cuadro se les pone el tiempo
+   de video. ⚠️ Cada una cuenta **desde que apareció**, no desde que arrancó el
+   reel: las secciones se animan al entrar en pantalla y con el tiempo total ya
+   nacen terminadas.
+2. **`setInterval`** (el carrusel y la cuenta regresiva) → se cortan todos y se
+   manejan a mano. ⚠️ El carrusel cuenta **desde que la galería entra en
+   pantalla**: si cuenta desde el inicio del reel, cuando se llega ya va por la
+   tercera foto y la primera no se ve nunca.
+3. **Transiciones CSS** (la mascota) → **no se pueden pausar**: con un
+   `currentTime` mayor que su duración el navegador **las descarta** y el
+   elemento vuelve al reposo. Hay que calcularles la posición a mano.
+
+⚠️ **No usar el screencast de puppeteer**: entrega los cuadros cuando quiere, el
+video sale con tirones y no dura lo que uno pidió.
+
+⚠️ Dos cosas que delatan la captura: **la barra de scroll** (se esconde con CSS)
+y los carteles de texto cayendo sobre el texto de cada sección. **Los textos no
+van quemados en el video** — se ponen arriba en Instagram, donde se pueden
+cambiar.
+
+## `demo-enredados` — la demo de temática Disney
+
+Nació de una venta perdida: la clienta de Cali no pagó y Fer quería hacer
+contenido con esa invitación. **No se puede**: tenía su nombre, sus fotos, la
+dirección exacta del salón, la fecha y su Instagram, y es una chica de 15 años
+que además no era clienta.
+
+La demo tiene la misma estética con datos inventados (Emilia), y **las imágenes
+salen de cuadros del propio video**, que es generado por IA. Clave `demo1234`.
+
+⚠️ **Nunca publicar la invitación de un cliente con sus datos reales.** Es
+material de una persona real, y muchas veces menor de edad.
+
+### Los archivos que mandan los clientes vienen con sorpresas
+
+- El video traía la marca de agua de **KlingAI** abajo a la derecha
+- El PNG de Pascal traía la firma de **otro autor**
+- El "PNG transparente" del cofre tenía **el damero dibujado encima** — era una
+  captura de pantalla de un editor
+
+⚠️ **Revisar siempre las esquinas** de lo que se baja de generadores y bancos de
+imágenes, antes de que salga en algo que se cobra.
+
+⚠️ **El JPEG no tiene canal alfa. Nunca.** Un personaje recortado subido como
+`.jpg` llega con un rectángulo blanco. Y comprimir un PNG a JPEG hace lo mismo.
+Los campos marcados `transparente` en el panel avisan y no se convierten.
+
+⚠️ **Para quitar un fondo va un relleno DESDE LOS BORDES**, no borrar todo lo
+claro: si no, se comen los brillos de adentro de la figura.
+
+## Cotizar afuera: la moneda al lado del número
+
+La venta de Cali se cayó porque la clienta **confundió pesos colombianos con
+argentinos**: 50.000 ARS son unos 150.000 COP, casi el triple de lo que entendió.
+Un número sin moneda es un malentendido esperando pasar. **Cotizar en dólares o
+en la moneda de quien lee.**
+
 ## Bugs corregidos (historial)
 
 ### Orden de secciones incorrecto (invitacion.html)
