@@ -28,6 +28,7 @@ que siga siéndolo.
 | `sql/001_schema_invitaciones.sql` | Schema, tablas, funciones y permisos |
 | `sql/002_demos.sql` | Los 12 eventos demo de la landing |
 | `sql/003_storage.sql` | Bucket de Storage y sus permisos |
+| `sql/005_telefono_links.sql` | La tabla `links` y el teléfono del generador |
 | `logo.png` / `logo-og.png` | Marca. El `-og` es el respaldo de vista previa (1200×630, fondo oscuro) |
 | `publicidad/agosto-a.html` | Placa de la campaña (1080×1080) |
 | `publicidad/instagram.md` | Perfil, bio y prompts de las piezas. No se publica |
@@ -104,6 +105,9 @@ el cliente. Si hace falta una operación nueva, va como función.
 
 **`ajustes`** — `clave`/`valor`. Hoy solo `superadmin_hash`.
 
+**`links`** — `evento_id` + `invitado_url` (PK), `telefono`, `cupos`, `created_at`,
+`updated_at`. Un renglón por link generado. **Sin un solo grant para `anon`.**
+
 ### Funciones (todo el acceso privilegiado)
 
 | Función | Para qué |
@@ -116,6 +120,8 @@ el cliente. Si hace falta una operación nueva, va como función.
 | `admin_prealta(evento, clave, invitado, cupos)` | Filas `pendiente` del generador de links |
 | `admin_actualizar_fila(evento, clave, id, asiste, mesa)` | Editar desde el panel |
 | `admin_borrar_fila(evento, clave, id)` | Borrar un invitado |
+| `admin_links(evento, clave)` | Los links con su teléfono y sus cupos |
+| `admin_link_telefono(evento, clave, invitado, tel)` | Cargar o corregir el número de un link |
 
 ### Storage
 
@@ -351,16 +357,39 @@ link se reenvió a un tercero (es el mismo para todo el grupo) ni si lo leyeron 
 
 **Sí se sabe quién**, porque el nombre viaja en la URL (`?invitado=Susana+Ferreyra`).
 
-Decidido el 10/08/2026, para hacer **más adelante** (Fer quiso dejar circular links primero):
+Queda pendiente **registrar la apertura del link** (fecha y cuántas veces). Es la señal
+que más ahorra trabajo: *"abrió tres veces y no confirmó"* pide otra insistencia que
+*"nunca abrió"*. No agrega ningún dato personal nuevo, y la tabla `links` ya es el lugar.
 
-- **Guardar el teléfono al generar el link** — campo opcional al lado de nombre y cupos.
-  El objetivo concreto: que "Recordar" **abra el chat de esa persona** en vez de dejar el
-  texto para copiar y buscar el contacto a mano.
-  ⚠️ Son datos personales de invitados de un cliente. Nunca pueden viajar al navegador del
-  invitado, y el acceso va por función `SECURITY DEFINER` como todo lo demás.
-- **Registrar la apertura del link** (fecha y cuántas veces). Es la señal que más ahorra
-  trabajo: *"abrió tres veces y no confirmó"* pide otra insistencia que *"nunca abrió"*.
-  No agrega ningún dato personal nuevo.
+### El teléfono del link (27/08/2026)
+
+Campo **opcional** al lado de nombre y cupos. Si se carga, **"Recordar" abre el chat de esa
+persona**: un toque y el mensaje está escrito. Antes armaba un `wa.me/?text=` sin número,
+así que WhatsApp abría el selector de contactos y había que buscar a la persona a mano.
+
+Vive en su propia tabla `invitaciones.links` (clave `evento_id + invitado_url`), **no** en
+`confirmaciones`: esa se borra y se reinserta en cada RSVP, y el número se perdería al
+confirmar. De paso guarda `cupos`, que hasta hoy no se guardaba en ningún lado.
+
+⚠️ Son datos personales de invitados de un cliente. `links` no tiene **ningún** grant para
+`anon`: se lee solo por `admin_links()` / se escribe por `admin_prealta()` y
+`admin_link_telefono()`, las tres `security definer` con clave. Nunca viaja a la invitación.
+
+⚠️ **Un número mal normalizado no es un detalle de formato**: `wa.me/<n>` abre el chat de
+quien sea que tenga ese número. Por eso `normalizarTel()` no adivina — normaliza lo seguro
+(el 0, el 15, el +54, el 9) y **rechaza** lo que no da 10 dígitos, en vez de guardarlo a
+medias. Con **`+` adelante** se respeta el país tal cual, que es lo que la hace servir para
+una clienta de Colombia. Y el número normalizado **se muestra en pantalla** antes de mandar.
+
+⚠️ **Al generar un link se limpian nombre y teléfono.** Si el número quedara puesto, el link
+del invitado siguiente se guardaría con el WhatsApp del anterior — y el recordatorio saldría
+al chat equivocado con el link equivocado adentro.
+
+⚠️ `admin_prealta` pasó de 4 a 5 parámetros, así que **hubo que borrarla y recrearla**
+(`create or replace` con otra firma crea una sobrecarga y PostgREST no sabe cuál llamar), y
+el drop se lleva puesto el grant. Mientras la migración `sql/005` no esté corrida, el panel
+pide 5 parámetros a una función de 4 y da 404: por eso **`generarLink()` reintenta sin el
+teléfono**. El generador de links —lo que más se usa del panel— nunca deja de funcionar.
 
 ### Mesas
 

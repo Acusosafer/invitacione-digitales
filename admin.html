@@ -600,7 +600,13 @@ tr:hover td{background:rgba(255,255,255,0.01);}
   .stats-grid{ gap:10px; }
   .stat-card{ padding:16px 12px; }
   .stat-val{ font-size:1.7rem; }
+  /* ⚠️ No alcanza con pasar la grilla a una columna: los hijos con
+     `col-full` piden `span 2`, y un ítem que abarca dos columnas en un
+     grid que tiene UNA se crea la segunda solo — implícita y `auto`. La
+     grilla volvía a partirse en dos columnas desparejas y los campos
+     quedaban de 74px, con las etiquetas en cuatro renglones. */
   .form-grid{ grid-template-columns:1fr; }
+  .form-grid > .col-full{ grid-column:1 / -1; }
 
   /* Una tabla de 7 columnas no entra en 390px. Cada fila pasa a ser una
      ficha, con el nombre de la columna al lado del dato. */
@@ -931,7 +937,8 @@ tr:hover td{background:rgba(255,255,255,0.01);}
       </div>
       <p style="color:var(--tx3);font-size:0.8rem;margin:-4px 0 14px;line-height:1.5">
         Cada botón abre WhatsApp con el mensaje listo y el link personal de ese invitado.
-        Elegís el contacto y mandás.
+        Si guardaste su número con 📱, abre <strong>directo su chat</strong>: solo apretás
+        enviar. Si no, WhatsApp te pide el contacto.
       </p>
       <div id="pend-lista" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
@@ -1084,6 +1091,16 @@ tr:hover td{background:rgba(255,255,255,0.01);}
             <input id="lk-cupos" type="number" class="form-input" value="1" min="1" max="20">
           </div>
           <div class="form-group">
+            <label class="form-label">WhatsApp <span style="color:var(--tx3);font-weight:400">(opcional)</span></label>
+            <input id="lk-tel" type="tel" class="form-input" placeholder="Ej: 11 2457-6536"
+                   autocomplete="off" oninput="pintarTelLink()">
+            <div id="lk-tel-hint" style="font-size:.72rem;color:var(--tx3);margin-top:6px;line-height:1.4">
+              Si lo cargás, el botón de WhatsApp abre directo el chat de esa
+              persona — acá y cuando le mandes el recordatorio. Para otro país,
+              escribilo con el <strong>+</strong> adelante (ej: +57 300 123 4567).
+            </div>
+          </div>
+          <div class="form-group">
             <label class="form-label">Cómo saludarlo en la vista previa</label>
             <select id="lk-trato" class="form-select">
               <option value="">Automático</option>
@@ -1109,6 +1126,7 @@ tr:hover td{background:rgba(255,255,255,0.01);}
           <div class="link-result">
             <div class="link-result-label">Link generado</div>
             <div class="link-url" id="lk-url"></div>
+            <div id="lk-destino" style="font-size:.74rem;margin-top:8px;line-height:1.4"></div>
           </div>
           <div style="display:flex;gap:8px;margin-top:10px">
             <button class="btn btn-ghost" style="flex:1" onclick="copiarLink()">📋 Copiar</button>
@@ -2559,6 +2577,9 @@ async function loadData() {
   const dot = document.getElementById('dot-stats');
   if (dot) dot.className = `nav-dot${(sSi + sNo) > 0 ? ' on' : ''}`;
 
+  // Los teléfonos van ANTES de pintar: si llegan después, el botón
+  // "Recordar" se arma sin número y abre el selector de contactos.
+  await loadLinks();
   renderPendientes(data || []);
   pintarListaDJ();
 }
@@ -2599,9 +2620,12 @@ function renderPendientes(data) {
     const nom = document.createElement('div');
     nom.style.cssText = 'font-weight:600;font-size:0.88rem;overflow-wrap:anywhere';
     nom.textContent = invitado;
+    const tel = linksTel.get(invitado) || '';
     const sub = document.createElement('div');
-    sub.style.cssText = 'color:var(--tx3);font-size:0.72rem;margin-top:2px';
-    sub.textContent = cupos === 1 ? '1 lugar reservado' : `${cupos} lugares reservados`;
+    sub.style.cssText = 'font-size:0.72rem;margin-top:2px;color:'
+      + (tel ? '#6ee7b7' : 'var(--tx3)');
+    sub.textContent = (cupos === 1 ? '1 lugar reservado' : `${cupos} lugares reservados`)
+      + (tel ? ' · ' + telLegible(tel) : '');
     quien.append(nom, sub);
 
     const url = `${base}?evento=${encodeURIComponent(eventoId)}`
@@ -2609,12 +2633,23 @@ function renderPendientes(data) {
     const texto = `Hola! Te recordamos confirmar tu asistencia`
                 + (evento ? ` a ${evento}` : '') + ` 💌\n\n${url}`;
 
+    // Con el número guardado, esto abre SU chat: un toque y el mensaje
+    // está escrito. Sin número, WhatsApp abre el selector de contactos —
+    // que es lo que hacía siempre, así que los links viejos no se rompen.
     const wa = document.createElement('a');
     wa.className = 'btn btn-primary btn-sm';
     wa.target = '_blank';
     wa.rel = 'noopener';
-    wa.href = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+    wa.href = `https://wa.me/${tel}?text=${encodeURIComponent(texto)}`;
     wa.textContent = '💬 Recordar';
+    wa.title = tel ? `Abre el chat de ${telLegible(tel)}` : 'WhatsApp te va a pedir el contacto';
+
+    const nro = document.createElement('button');
+    nro.className = 'btn btn-ghost btn-sm';
+    nro.textContent = tel ? '✏️' : '📱';
+    nro.style.display = (faltaMigracion && !tel) ? 'none' : '';
+    nro.title = tel ? 'Cambiar el número' : 'Guardar su WhatsApp';
+    nro.onclick = () => guardarTelLink(invitado, tel);
 
     const copiar = document.createElement('button');
     copiar.className = 'btn btn-ghost btn-sm';
@@ -2626,7 +2661,7 @@ function renderPendientes(data) {
 
     const acciones = document.createElement('div');
     acciones.style.cssText = 'display:flex;gap:8px;flex:0 0 auto';
-    acciones.append(wa, copiar);
+    acciones.append(wa, nro, copiar);
     fila.append(quien, acciones);
     lista.appendChild(fila);
   });
@@ -2742,10 +2777,136 @@ function pintarHistorial() {
   });
 }
 
+/* ══ El teléfono del link ═════════════════════════════════════════════
+   ⚠️ Un número mal normalizado NO es un detalle de formato: `wa.me/<n>`
+   abre el chat de quien sea que tenga ese número. Así que acá no se
+   adivina — se normaliza solo lo que es seguro y lo que no cierra se
+   rechaza con un aviso, en vez de guardarlo a medias.
+
+   Devuelve { tel, ok, aviso }. `tel` va sin + ni espacios, que es lo
+   único que entiende wa.me. */
+function normalizarTel(bruto) {
+  const s = (bruto || '').trim();
+  if (!s) return { tel: '', ok: true, aviso: '' };
+
+  // Con + adelante la persona declaró el país: se respeta tal cual.
+  // Es lo que hace que sirva para una clienta de Colombia o de España.
+  if (s.startsWith('+')) {
+    const d = s.replace(/\D/g, '');
+    if (d.length < 8 || d.length > 15)
+      return { tel: '', ok: false, aviso: 'Ese número internacional no parece completo.' };
+    return { tel: d, ok: true, aviso: '' };
+  }
+
+  // Sin +, se asume Argentina.
+  let d = s.replace(/\D/g, '');
+  d = d.replace(/^0+/, '');                                  // 011 4444-5555
+  if (d.startsWith('54')) d = d.slice(2);                    // 54 11 ...
+  if (d.length === 11 && d.startsWith('9')) d = d.slice(1);  // 9 11 2457 6536
+
+  // El 15: un celular argentino, sin el 0 y sin el 15, tiene 10 dígitos.
+  // Si sobran justo dos y hay un "15" pegado a la característica, es ese.
+  if (d.length === 12) {
+    for (const i of [2, 3, 4]) {
+      if (d.slice(i, i + 2) === '15') { d = d.slice(0, i) + d.slice(i + 2); break; }
+    }
+  }
+
+  if (d.length !== 10)
+    return { tel: '', ok: false, aviso: 'Un celular argentino tiene 10 dígitos: característica sin el 0, número sin el 15 (ej: 11 2457-6536). Si es de otro país, escribilo con + adelante.' };
+
+  return { tel: '549' + d, ok: true, aviso: '' };
+}
+
+// Para que Fer VEA a qué número va a salir antes de apretar el botón.
+function telLegible(tel) {
+  if (!tel) return '';
+  if (tel.startsWith('549') && tel.length === 13) {
+    const n = tel.slice(3);
+    // CABA es 11 + 8 dígitos; el interior, 3 + 7. No es exacto para todas
+    // las características, pero los dígitos están todos y en orden — que es
+    // lo que importa para reconocer el número de un vistazo.
+    return n.startsWith('11')
+      ? `+54 9 11 ${n.slice(2, 6)}-${n.slice(6)}`
+      : `+54 9 ${n.slice(0, 3)} ${n.slice(3, 6)}-${n.slice(6)}`;
+  }
+  return '+' + tel;
+}
+
+function pintarTelLink() {
+  const hint = document.getElementById('lk-tel-hint');
+  const val  = document.getElementById('lk-tel').value;
+  if (!hint) return;
+  const r = normalizarTel(val);
+  if (!val.trim()) {
+    hint.style.color = 'var(--tx3)';
+    hint.innerHTML = 'Si lo cargás, el botón de WhatsApp abre directo el chat de esa '
+      + 'persona — acá y cuando le mandes el recordatorio. Para otro país, '
+      + 'escribilo con el <strong>+</strong> adelante (ej: +57 300 123 4567).';
+    return;
+  }
+  if (!r.ok) { hint.style.color = '#fbbf24'; hint.textContent = '⚠️ ' + r.aviso; return; }
+  hint.style.color = '#6ee7b7';
+  hint.textContent = '✓ El mensaje va a salir a ' + telLegible(r.tel);
+}
+
+// PostgREST no encuentra una función con esa firma: la base todavía tiene
+// la versión anterior. Se distingue del resto de los errores para poder
+// seguir andando en vez de cortar.
+let faltaMigracion = false;
+function esFuncionVieja(error) {
+  const t = ((error?.code || '') + ' ' + (error?.message || '')).toLowerCase();
+  return t.includes('pgrst202') || t.includes('could not find') || t.includes('does not exist');
+}
+
+// Los teléfonos de los links de este evento: invitado_url → teléfono.
+// ⚠️ Nunca viajan a la invitación: se leen con la clave del panel, desde
+// una tabla sin un solo grant para `anon`.
+let linksTel = new Map();
+
+async function loadLinks() {
+  const { data, error } = await sb.rpc('admin_links', { p_evento: eventoId, p_clave: adminClave });
+  // Si todavía no se corrió la migración 005, esto falla y el panel tiene
+  // que seguir funcionando exactamente como antes: sin número, el botón
+  // de WhatsApp abre el selector de contactos, que es lo de siempre.
+  if (error) { if (esFuncionVieja(error)) faltaMigracion = true; linksTel = new Map(); return; }
+  linksTel = new Map((data || []).map(l => [l.invitado_url, l.telefono || '']));
+}
+
+async function guardarTelLink(invitado, actual) {
+  if (faltaMigracion) {
+    toast('⚠️ Falta activar los teléfonos en la base. Escribime y lo dejo listo.');
+    return;
+  }
+  const bruto = prompt(`WhatsApp de "${invitado}"\n\nSe usa para que "Recordar" abra su chat directo.\nDejalo vacío para borrarlo.`, actual ? telLegible(actual) : '');
+  if (bruto === null) return;
+  const r = normalizarTel(bruto);
+  if (!r.ok) { toast('⚠️ ' + r.aviso); return; }
+
+  const { error } = await sb.rpc('admin_link_telefono', {
+    p_evento: eventoId, p_clave: adminClave, p_invitado: invitado, p_telefono: r.tel
+  });
+  if (error) {
+    toast(esFuncionVieja(error)
+      ? '⚠️ Falta activar los teléfonos en la base. Escribime y lo dejo listo.'
+      : '❌ No se pudo guardar el número: ' + error.message);
+    return;
+  }
+
+  linksTel.set(invitado, r.tel);
+  toast(r.tel ? '💾 Número guardado' : '🗑 Número borrado');
+  renderPendientes(invitadosData || []);
+}
+
 async function generarLink() {
   const n = document.getElementById('lk-nombre').value.trim();
   const c = parseInt(document.getElementById('lk-cupos').value) || 1;
   if (!n) { toast('⚠️ Ingresá un nombre'); return; }
+
+  // Se valida ANTES de escribir en la base: si el número está mal, no se
+  // genera nada a medias.
+  const tel = normalizarTel(document.getElementById('lk-tel').value);
+  if (!tel.ok) { toast('⚠️ ' + tel.aviso); document.getElementById('lk-tel').focus(); return; }
   
   const btn = document.querySelector('button[onclick="generarLink()"]');
   btn.textContent = '⏳ Cargando invitados...';
@@ -2754,12 +2915,25 @@ async function generarLink() {
   // Titular + acompañantes en 'pendiente'. Los arma Postgres, que además
   // borra la pre-alta anterior: regenerar el link de alguien ya no le duplica
   // las filas, y no pisa las confirmaciones reales que ya haya dado.
-  const { error } = await sb.rpc('admin_prealta', {
+  let { error } = await sb.rpc('admin_prealta', {
     p_evento: eventoId,
     p_clave: adminClave,
     p_invitado: n,
-    p_cupos: c
+    p_cupos: c,
+    p_telefono: tel.tel
   });
+
+  // ⚠️ Mientras la migración 005 no esté corrida, en la base vive la función
+  // VIEJA, de cuatro parámetros: pedirle cinco da 404 y el generador de
+  // links —lo que más se usa del panel— dejaría de funcionar. Si pasa eso,
+  // se reintenta sin el teléfono: se genera el link igual, solo que el
+  // recordatorio va a pedir el contacto como hasta ahora.
+  if (error && esFuncionVieja(error)) {
+    faltaMigracion = true;
+    ({ error } = await sb.rpc('admin_prealta', {
+      p_evento: eventoId, p_clave: adminClave, p_invitado: n, p_cupos: c
+    }));
+  }
   if (error) {
     toast('❌ No se pudo pre-cargar el invitado: ' + error.message);
     btn.textContent = '✨ Generar Link Único';
@@ -2787,8 +2961,32 @@ async function generarLink() {
   
   const msgText = `${currentConfig.nombre || ''} - ${currentConfig.tipo || ''}\n\n${url}`;
   
-  document.getElementById('lk-wa').href = `https://wa.me/?text=${encodeURIComponent(msgText)}`;
+  // Con número, wa.me abre SU chat. Sin número, el selector de contactos.
+  document.getElementById('lk-wa').href =
+    `https://wa.me/${tel.tel}?text=${encodeURIComponent(msgText)}`;
+
+  const dest = document.getElementById('lk-destino');
+  if (dest) {
+    // Sin la migración corrida el número NO quedó guardado, así que acá no
+    // se puede prometer que el recordatorio también le va a llegar.
+    dest.textContent = !tel.tel
+      ? 'Sin número, WhatsApp te va a pedir que elijas el contacto.'
+      : faltaMigracion
+        ? `Se lo vas a mandar a ${telLegible(tel.tel)}.`
+        : `Se lo vas a mandar a ${telLegible(tel.tel)} — y el recordatorio también.`;
+    dest.style.color = tel.tel ? '#6ee7b7' : 'var(--tx3)';
+  }
+
+  if (tel.tel) linksTel.set(n, tel.tel);
   document.getElementById('lk-res').style.display = 'block';
+
+  // ⚠️ Se limpian nombre y teléfono: cada link es OTRA persona. Si el
+  // número quedara puesto, el link del siguiente invitado se guardaría
+  // con el WhatsApp del anterior — y el recordatorio saldría al chat
+  // equivocado, con el link equivocado adentro.
+  document.getElementById('lk-nombre').value = '';
+  document.getElementById('lk-tel').value = '';
+  pintarTelLink();
 }
 
 function copiarLink() {
