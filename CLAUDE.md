@@ -747,7 +747,27 @@ mensajes de todos los invitados de una clienta.
   "felicidades!!"; a "¿Qué le deseás a Alma?" le contesta.
 - **Tres disparadores** ("Un recuerdo", "Un consejo", "Una promesa") que arrancan la frase.
   *"No sé qué poner"* es la razón número uno por la que alguien abre esto y lo cierra.
-  ⚠️ No pisan lo que ya escribió: si hay texto, solo enfocan.
+  ⚠️ **Un disparador reemplaza la frase del anterior, pero nunca lo que escribió la
+  persona.** Hay que guardar cuál fue la última frase puesta: sin eso no se puede
+  distinguir "lo que escribió" de "lo que pusimos nosotros", y tocar un segundo chip no
+  cambiaba nada — encima quedaba marcado un chip que no correspondía al texto.
+  ⚠️ **En cuanto escribe algo suyo, los chips se van** (y vuelven si borra todo): ya
+  cumplieron, y con el teclado abierto el espacio es lo que falta.
+
+### ⚠️ La paleta del cliente puede dejar la pantalla ilegible
+
+`demo-enredados` tiene tinta `#f9f3ae` sobre papel `#b37fc3`: **2,74:1 a tinta plena**.
+Ninguna variable arregla eso — es la combinación que eligió el cliente.
+
+Por eso `pintarTema()` **no confía en `color_1`**: si no llega a 4,5:1 sobre el papel, usa
+negro o blanco (el que gane). Y `--ink-soft` no es un 62% fijo —que se lee sobre blanco y
+desaparece sobre un papel de color— sino la mezcla más suave que todavía llegue a 4,5:1.
+
+⚠️ Ese cálculo va contra **`--velo-2`, no contra el papel**: los chips y los campos van
+sobre el velo, que es el fondo más parecido a la tinta y por lo tanto el peor caso.
+Midiendo contra el papel quedaban en 4,38:1 — apenas debajo, y a ojo no se nota.
+
+Medido en los tres temas: claro 5,41:1 · oscuro 6,17:1 · el lila de Enredados 4,79:1.
 - **Dos campos y nada más.** A la una de la mañana cada campo extra pierde gente.
 - **El nombre es obligatorio**: "alguien te desea lo mejor" no sirve de recuerdo.
 - Concordancia: en un casamiento son dos. Se deduce del nombre (`&`, ` y `) y se fuerza con `&t=p`.

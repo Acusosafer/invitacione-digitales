@@ -123,6 +123,12 @@ h1{
 }
 .chip:active{transform:scale(.95)}
 .chip.puesto{background:var(--secondary);color:var(--on-accent);border-color:transparent}
+/* En cuanto escribís algo tuyo, los disparadores ya cumplieron: se van y
+   te dejan la pantalla, que con el teclado abierto es lo que falta.
+   Vuelven si borrás todo. */
+.chips{overflow:hidden;max-height:120px;
+       transition:max-height 320ms var(--curva), opacity 240ms ease, margin-top 320ms var(--curva)}
+.chips.guardados{max-height:0;opacity:0;margin-top:0;pointer-events:none}
 
 /* ── El formulario ─────────────────────────────────────────────────── */
 form{margin-top:24px}
@@ -356,14 +362,56 @@ const DISPAROS = [
   // una fila a 390px y el tercero cae solo al medio, que se ve desprolijo.
 ];
 
+// Cuánto contrastan dos colores. 4,5:1 es el mínimo para que un texto se
+// lea; abajo de 3:1 directamente desaparece.
+const razon = (a, b) => {
+  const L1 = luminancia(a), L2 = luminancia(b);
+  if (L1 === null || L2 === null) return 21;
+  return (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05);
+};
+// Mezcla dos colores, igual que color-mix(in srgb).
+const mezclar = (a, b, pct) => {
+  const h = x => /^#?([0-9a-f]{6})$/i.exec((x||'').trim());
+  const A = h(a), B = h(b);
+  if (!A || !B) return a;
+  const c = i => Math.round(parseInt(A[1].substr(i,2),16) * pct
+                          + parseInt(B[1].substr(i,2),16) * (1 - pct));
+  return '#' + [0,2,4].map(i => c(i).toString(16).padStart(2,'0')).join('');
+};
+
 let C = {};
 
 function pintarTema() {
   const raiz = document.documentElement.style;
-  if (C.color_1)  raiz.setProperty('--primary', C.color_1);
-  if (C.color_2)  raiz.setProperty('--secondary', C.color_2);
-  if (C.color_bg) raiz.setProperty('--bg', C.color_bg);
+  const papel = C.color_bg || '#ffffff';
+
+  /* ⚠️ NINGUNA paleta de cliente puede dejar esta pantalla ilegible.
+     Un amarillo pálido sobre lila —que un cliente puede elegir, y de
+     hecho eligió en `demo-enredados`— da 2,7:1: el texto se ve como una
+     mancha. Si la tinta que eligió no llega a 4,5:1 sobre su papel, se
+     usa negro o blanco, el que gane. */
+  const tinta = razon(C.color_1 || '#1a1a1a', papel) >= 4.5
+    ? (C.color_1 || '#1a1a1a')
+    : contrasteSobre(papel);
+
+  raiz.setProperty('--primary', tinta);
+  if (C.color_2) raiz.setProperty('--secondary', C.color_2);
+  raiz.setProperty('--bg', papel);
   raiz.setProperty('--on-accent', contrasteSobre(C.color_2 || '#d6ecc0'));
+
+  /* Los textos secundarios son tinta rebajada con papel. El 62% fijo se
+     lee bien sobre blanco y desaparece sobre un papel de color, así que
+     se busca la mezcla MÁS SUAVE que todavía llegue a 4,5:1.
+     ⚠️ Se mide contra `--velo-2`, no contra el papel: los chips y los
+     campos van sobre el velo, que es el fondo MÁS parecido a la tinta y
+     por lo tanto el peor caso. Midiendo contra el papel quedaban a
+     4,38:1 — apenas debajo del mínimo, y a ojo no se nota. */
+  const peorFondo = mezclar(tinta, papel, 0.06);
+  let suave = mezclar(tinta, papel, 0.62);
+  for (let pct = 0.62; pct <= 1.001 && razon(suave, peorFondo) < 4.5; pct += 0.05) {
+    suave = mezclar(tinta, papel, Math.min(1, pct));
+  }
+  raiz.setProperty('--ink-soft', suave);
 
   const d = DUPLAS[C.fuente] || DUPLAS.clasica;
   raiz.setProperty('--font-titulo', d.titulo);
@@ -412,6 +460,15 @@ function pintarCabecera() {
            : `Lo ${leen} a leer después de la fiesta.`;
 }
 
+// La última frase que puso un disparador. ⚠️ Sin esto no se puede
+// distinguir "lo que escribió la persona" de "la frase que puso el chip
+// anterior": tocar un segundo chip no cambiaba nada, y encima quedaba
+// marcado un chip que no correspondía al texto.
+let frasePuesta = '';
+
+// ¿El campo tiene todavía lo que pusimos nosotros, o ya escribió?
+const soloArranque = () => ta.value.trim() === '' || ta.value === frasePuesta;
+
 function pintarChips() {
   const cont = document.getElementById('chips');
   DISPAROS.forEach(d => {
@@ -420,10 +477,15 @@ function pintarChips() {
     b.className = 'chip';
     b.textContent = d.chip;
     b.onclick = () => {
+      // Solo se reemplaza la frase de arranque. Lo que escribió la
+      // persona no se toca nunca — y por eso los chips desaparecen en
+      // cuanto empieza a escribir, así este caso no llega a pasar.
+      if (!soloArranque()) return;
       cont.querySelectorAll('.chip').forEach(x => x.classList.remove('puesto'));
       b.classList.add('puesto');
-      // No pisa lo que ya escribió: si hay texto, solo enfoca.
-      if (!ta.value.trim()) { ta.value = d.ph + ' '; crecer(); }
+      ta.value = d.ph + ' ';
+      frasePuesta = ta.value;
+      crecer();
       ta.focus();
       ta.setSelectionRange(ta.value.length, ta.value.length);
     };
@@ -441,6 +503,12 @@ function crecer() {
   const quedan = 600 - ta.value.length;
   q.textContent = quedan + ' caracteres';
   q.classList.toggle('cerca', quedan <= 100);
+
+  const chips = document.getElementById('chips');
+  const arranque = soloArranque();
+  chips.classList.toggle('guardados', !arranque);
+  // Un chip marcado con un texto que ya no es su frase miente.
+  if (!arranque) chips.querySelectorAll('.chip').forEach(x => x.classList.remove('puesto'));
 }
 ta.addEventListener('input', crecer);
 
@@ -525,6 +593,7 @@ document.getElementById('form').addEventListener('submit', async e => {
 
 document.getElementById('btn-otro').addEventListener('click', () => {
   ta.value = '';
+  frasePuesta = '';
   document.getElementById('firma').value = '';
   crecer();
   document.getElementById('chips').querySelectorAll('.chip').forEach(x => x.classList.remove('puesto'));
