@@ -6,10 +6,14 @@
 <title id="pg-title">Dejá tu deseo</title>
 
 <!-- ══════════════════════════════════════════════════════════════════════
-     LIBRO DE DESEOS — MAQUETA
+     LIBRO DE DESEOS
      Lo que ve el invitado cuando apoya el celular en el tag NFC de la mesa
-     (o escanea el QR del cartelito). Todavía NO guarda nada: el botón no
-     escribe en la base. Existe para aprobar el diseño antes de construirla.
+     (o escanea el QR del cartelito de la mesa).
+
+     ⚠️ El invitado ESCRIBE y nada más: no puede leer un solo deseo, ni el
+     suyo. `deseo_enviar` devuelve un número, nunca filas — si devolviera
+     la lista, cualquiera con el slug leería los mensajes de todos.
+     Se activa por evento con `config.deseos_activo`.
 
      ⚠️ ES UN BUZÓN PRIVADO, decidido el 27/08/2026. Los deseos NO se
      muestran a los demás invitados: van derecho al panel de la clienta.
@@ -222,12 +226,6 @@ textarea:focus,input:focus{
   .entra{opacity:1;transform:none}
 }
 
-.maqueta{
-  display:block;width:max-content;margin:34px auto 0;
-  background:var(--velo-2);border:1px solid var(--borde);
-  color:var(--ink-soft);font-size:.66rem;letter-spacing:.1em;
-  padding:6px 14px;border-radius:50px;
-}
 </style>
 </head>
 <body>
@@ -295,8 +293,6 @@ textarea:focus,input:focus{
     </div>
   </section>
 
-  <div class="maqueta">Maqueta · todavía no guarda nada</div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -360,7 +356,7 @@ const DISPAROS = [
   // una fila a 390px y el tercero cae solo al medio, que se ve desprolijo.
 ];
 
-let C = {}, N_FALSO = 33;
+let C = {};
 
 function pintarTema() {
   const raiz = document.documentElement.style;
@@ -479,7 +475,9 @@ function avisar(txt, foco) {
   if (foco) foco.focus();
 }
 
-document.getElementById('form').addEventListener('submit', e => {
+const btn = document.querySelector('.enviar');
+
+document.getElementById('form').addEventListener('submit', async e => {
   e.preventDefault();
   const texto = ta.value.trim();
   const firma = document.getElementById('firma').value.trim();
@@ -491,11 +489,37 @@ document.getElementById('form').addEventListener('submit', e => {
                             document.getElementById('firma'));
   document.getElementById('aviso').classList.remove('visible');
 
+  // ⚠️ Se bloquea el botón ANTES de la llamada: en el salón la conexión
+  // es mala, la respuesta tarda, y el invitado vuelve a tocar. Sin esto
+  // el mismo deseo entra dos y tres veces.
+  if (btn.disabled) return;
+  btn.disabled = true;
+  const antes = btn.textContent;
+  btn.textContent = 'Guardando…';
+
+  const { data, error } = await sb.rpc('deseo_enviar', {
+    p_evento: eventoId, p_nombre: firma, p_deseo: texto,
+    p_mesa: mesa || null
+  });
+
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = antes;
+    // El mensaje escrito NO se pierde: sigue en el campo, listo para
+    // reintentar. Perder un texto que alguien acaba de pensar es lo peor
+    // que puede pasar acá.
+    return avisar(/no está activo|pausada|completo|no existe/i.test(error.message)
+      ? 'Este libro de deseos no está recibiendo mensajes.'
+      : 'No se pudo guardar. Fijate la señal y probá de nuevo — tu mensaje sigue acá.');
+  }
+
   // La carta se va, y recién cuando terminó de irse aparece el sobre.
   document.getElementById('paso-escribir').classList.add('enviando');
   setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = antes;
     mostrar('paso-listo');
-    contarHasta(++N_FALSO);
+    contarHasta(Number(data) || 1);
   }, 700);
 });
 
@@ -508,6 +532,20 @@ document.getElementById('btn-otro').addEventListener('click', () => {
   mostrar('paso-escribir');
 });
 
+// El libro cerrado. ⚠️ Se comprueba ANTES de pintar el formulario: dejar
+// que alguien escriba diez renglones para avisarle recién al enviar que no
+// está activo es la peor forma de decirlo.
+function cerrado(txt) {
+  document.getElementById('paso-escribir').hidden = true;
+  const s = document.getElementById('paso-listo');
+  s.hidden = false;
+  s.querySelector('.sobre').remove();
+  s.querySelector('.numero').remove();
+  document.getElementById('btn-otro').remove();
+  document.getElementById('ok-titulo').textContent = 'El libro está cerrado';
+  document.getElementById('ok-texto').textContent = txt;
+}
+
 (async () => {
   const { data } = await sb.from('eventos').select('id, config').eq('id', eventoId).maybeSingle();
   C = (data && data.config) || {};
@@ -515,6 +553,14 @@ document.getElementById('btn-otro').addEventListener('click', () => {
   pintarCabecera();
   pintarChips();
   crecer();
+
+  if (!data) {
+    cerrado('No encontramos esta fiesta. Fijate que el link esté completo.');
+  } else if (C.pausada === true) {
+    cerrado('Esta invitación está pausada.');
+  } else if (C.deseos_activo !== true) {
+    cerrado('Esta fiesta no tiene libro de deseos.');
+  }
   await (document.fonts ? document.fonts.ready : Promise.resolve());
   document.body.classList.add('listo');
 })();

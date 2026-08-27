@@ -29,6 +29,7 @@ que siga siéndolo.
 | `sql/002_demos.sql` | Los 12 eventos demo de la landing |
 | `sql/003_storage.sql` | Bucket de Storage y sus permisos |
 | `sql/005_telefono_links.sql` | La tabla `links` y el teléfono del generador |
+| `sql/006_deseos.sql` | El libro de deseos: tabla, funciones y permisos |
 | `logo.png` / `logo-og.png` | Marca. El `-og` es el respaldo de vista previa (1200×630, fondo oscuro) |
 | `publicidad/agosto-a.html` | Placa de la campaña (1080×1080) |
 | `publicidad/instagram.md` | Perfil, bio y prompts de las piezas. No se publica |
@@ -108,6 +109,9 @@ el cliente. Si hace falta una operación nueva, va como función.
 **`links`** — `evento_id` + `invitado_url` (PK), `telefono`, `cupos`, `created_at`,
 `updated_at`. Un renglón por link generado. **Sin un solo grant para `anon`.**
 
+**`deseos`** — `id`, `evento_id` (FK), `nombre`, `deseo`, `mesa`, `created_at`. El buzón del
+libro de deseos. **Sin un solo grant para `anon`**: se escribe por función y leer exige clave.
+
 ### Funciones (todo el acceso privilegiado)
 
 | Función | Para qué |
@@ -122,6 +126,9 @@ el cliente. Si hace falta una operación nueva, va como función.
 | `admin_borrar_fila(evento, clave, id)` | Borrar un invitado |
 | `admin_links(evento, clave)` | Los links con su teléfono y sus cupos |
 | `admin_link_telefono(evento, clave, invitado, tel)` | Cargar o corregir el número de un link |
+| `deseo_enviar(evento, nombre, deseo, mesa)` | **La única pública del libro.** Escribe y devuelve un número, nunca filas |
+| `admin_deseos(evento, clave)` | Los mensajes del libro, para el panel |
+| `admin_borrar_deseo(evento, clave, id)` | Borrar un mensaje |
 
 ### Storage
 
@@ -711,32 +718,89 @@ SVG. ⚠️ **Lo que no puede faltar es el pico**: la ceremonia es sobre una
 lengua de tierra metida en el lago, con agua por tres lados. Un lago
 ovalado con el altar al costado es cualquier lago del mundo.
 
-## `deseos.html` — libro de deseos (MAQUETA, no guarda nada)
+## `deseos.html` — el libro de deseos
 
-Lo que ve el invitado cuando apoya el celular en el tag NFC de la mesa. **Todavía no está
-conectado a la base**: los deseos son de mentira y el botón no escribe. Existe para aprobar
-el diseño antes de construir la tabla.
+Lo que ve el invitado cuando apoya el celular en el tag NFC de la mesa, o escanea el QR
+del cartelito. Ruta corta **`/deseos?evento=X&mesa=7`**.
 
-`deseos.html?evento=almamia15` — hereda el tema del evento igual que la invitación: paleta,
-dupla tipográfica y foto. Si el invitado toca el tag y aterriza en algo que parece otra
-web, duda y se va.
+Hereda el tema del evento igual que la invitación: paleta, dupla tipográfica y foto. Si el
+invitado toca el tag y aterriza en algo que parece otra web, duda y se va.
 
-Decisiones que conviene sostener cuando se construya de verdad:
+### Es un BUZÓN PRIVADO, no un muro (decidido el 27/08/2026)
+
+Fer eligió que **los deseos no se muestren a los demás invitados**: van derecho al panel de
+la clienta. Es lo más cuidadoso con datos de terceros y saca de raíz el riesgo del mensaje
+fuera de lugar proyectado en el salón.
+
+⚠️ **Eso saca el empuje de ver que otros ya escribieron**, que era lo que hacía participar.
+Se compensa con el **contador**: *"sos el deseo 34º de la noche"*. Da la sensación de fiesta
+entera participando **sin revelar un solo nombre**. Y el privado juega a favor: quien
+escribe sabe que solo lo lee ella, y se anima a escribir en serio — la pantalla lo dice.
+
+**El invitado escribe y nada más: no puede leer ni el suyo.** `deseo_enviar` devuelve **un
+entero, nunca filas**. Si devolviera la lista, cualquiera con el slug del evento leería los
+mensajes de todos los invitados de una clienta.
+
+### Decisiones que conviene sostener
 
 - **Es una pregunta, no una caja vacía.** A "dejá tu mensaje" la gente le escribe
   "felicidades!!"; a "¿Qué le deseás a Alma?" le contesta.
-- **Dos campos y nada más**: el deseo y el nombre. A la una de la mañana cada campo extra
-  pierde gente. Sin cuenta y sin login.
-- **Primero escribís, después ves los de todos.** Es lo que hace que participen todos, y
-  evita que el primero se encuentre un muro vacío.
+- **Tres disparadores** ("Un recuerdo", "Un consejo", "Una promesa") que arrancan la frase.
+  *"No sé qué poner"* es la razón número uno por la que alguien abre esto y lo cierra.
+  ⚠️ No pisan lo que ya escribió: si hay texto, solo enfocan.
+- **Dos campos y nada más.** A la una de la mañana cada campo extra pierde gente.
 - **El nombre es obligatorio**: "alguien te desea lo mejor" no sirve de recuerdo.
-- El muro se arma con DOM, no con `innerHTML`: lo escriben los invitados y queda a la vista
-  de toda la fiesta.
-- Concordancia: en un casamiento son dos. Se deduce del nombre (`&`, ` y `) y se fuerza con
-  `&t=p`.
+- Concordancia: en un casamiento son dos. Se deduce del nombre (`&`, ` y `) y se fuerza con `&t=p`.
+- ⚠️ **El botón se bloquea ANTES de la llamada**: en un salón la conexión es mala, la
+  respuesta tarda y el invitado vuelve a tocar. Sin eso el mismo deseo entra tres veces.
+- ⚠️ **Si falla, el texto NO se pierde**: sigue en el campo, listo para reintentar. Perder
+  un texto que alguien acaba de pensar es lo peor que puede pasar acá.
+- ⚠️ **Se comprueba que el libro esté activo ANTES de pintar el formulario.** Dejar que
+  alguien escriba diez renglones para avisarle recién al enviar es la peor forma de decirlo.
 
-Falta, antes de que sea real: la tabla, que el cliente pueda **borrar** un deseo desde su
-panel, y decidir si el muro es público o solo para el agasajado.
+### Lo "juvenil" está en el movimiento, no en la tipografía
+
+La fuente la elige la clienta y **la misma pantalla sirve para unos 15 y para un
+casamiento**: una fuente juvenil fija rompe la boda de Guillermina. La personalidad la
+ponen la entrada escalonada, la carta que se va volando, el sobre que se cierra y el número
+que sube. Lo único tipográfico fijo es **la manuscrita de la firma** (Caveat), que funciona
+bien en los dos — y se repite en el PDF del libro.
+
+⚠️ **Un solo elemento animado en bucle** (el halo de la foto). Dos distraen.
+
+Verificado a 390px en tema claro y oscuro: contraste peor **4,60:1 y 6,62:1**, ningún toque
+menor a 44px, sin scroll horizontal.
+
+### En el panel
+
+**Editor de Secciones → 💫 Libro de Deseos** lo activa por evento (`config.deseos_activo`).
+Apagado, la pantalla dice que esa fiesta no tiene libro de deseos.
+
+**Invitados → 💫 Libro de deseos** muestra los mensajes y deja borrar el que no corresponda
+(borra de verdad: en la fiesta de una clienta, un mensaje fuera de lugar no se esconde, se
+saca). La tarjeta aparece con el libro activo **aunque no haya ninguno todavía**, o el
+cliente no encuentra dónde bajar los carteles.
+
+Dos PDF:
+- **Carteles para las mesas** — uno por mesa asignada, A5 (dos por hoja A4), con su QR.
+  ⚠️ El QR se genera con `qrcode-generator` **bajado bajo demanda** (56 KB): el panel se
+  abre desde el celular y con datos. Verificado leyendo los QR renderizados a 38 mm / 300
+  dpi con un lector de verdad (jsQR) — los siete devolvieron su URL con su mesa.
+  ⚠️ El cartel dice **"escaneá el código"**, no "apoyá el celular": el tag NFC es opcional,
+  el QR impreso está siempre.
+- **Imprimir el libro** — lo que se le regala a la clienta cuando pasó todo. Va con aire y
+  las firmas en manuscrita: tiene que leerse como un libro, no como una lista de tareas.
+
+⚠️ **Los mensajes los escribe un invitado en una fiesta y terminan en la pantalla del
+cliente**: la lista se arma con DOM, nunca con `innerHTML`, y en el PDF va con `escapeHtml`.
+
+⚠️ **`🪧` no existe en Windows 10** (Unicode 13, año 2020): sale un cuadrito vacío. Antes de
+usar un emoji nuevo en el panel, mirarlo en la máquina de Fer.
+
+### Riesgo aceptado
+
+Quien sepa el slug del evento puede escribir un deseo, igual que puede confirmar asistencia.
+Es spam, no una fuga: no puede leer nada. Tope de 2000 por evento.
 
 ## Deploy
 

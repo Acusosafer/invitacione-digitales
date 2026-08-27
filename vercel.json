@@ -9,6 +9,10 @@
       "destination": "/api/i?evento=almamia15&muestra=1"
     },
     {
+      "source": "/deseos",
+      "destination": "/deseos.html"
+    },
+    {
       "source": "/a-medida",
       "destination": "/servicio-a-medida.html"
     },

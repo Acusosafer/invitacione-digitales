@@ -943,6 +943,22 @@ tr:hover td{background:rgba(255,255,255,0.01);}
       <div id="pend-lista" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
 
+    <!-- Los mensajes que dejaron desde las mesas. Buzón PRIVADO: los ve
+         el cliente acá y nadie más. -->
+    <div class="card" id="card-deseos" style="display:none;margin-bottom:18px">
+      <div class="card-head">
+        <span class="card-title">💫 Libro de deseos</span>
+        <span class="badge badge-amber" id="des-total">0</span>
+      </div>
+      <p style="color:var(--tx3);font-size:0.8rem;margin:-4px 0 14px;line-height:1.5"
+         id="des-bajada"></p>
+      <div id="des-lista" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="imprimirCarteles()">🖨️ Carteles para las mesas</button>
+        <button class="btn btn-ghost btn-sm" onclick="imprimirDeseos()">📄 Imprimir el libro</button>
+      </div>
+    </div>
+
     <!-- Lo que pidieron los invitados, listo para mandarle al DJ -->
     <div class="card" id="card-dj" style="display:none;margin-bottom:18px">
       <div class="card-head">
@@ -1346,6 +1362,20 @@ const SECTIONS = [
        hint:'Al pausarla, cualquiera que abra un link ya compartido ve un aviso de que no está disponible. No se borra nada y se puede volver a activar cuando quieras.',
        opts:[[false,'✅ Activa — los invitados la ven normalmente'],
              [true, '🔒 Pausada — los links compartidos dejan de funcionar']]},
+    ]
+  },
+  {
+    id:'deseos', label:'Libro de Deseos', icon:'💫',
+    desc:'El tag NFC o el QR de las mesas, para que le dejen un mensaje',
+    toggle:null, required:false,
+    fields:[
+      /* Es un BUZÓN PRIVADO: el invitado escribe y nada más. Los deseos
+         no se muestran a los demás invitados; los lee el cliente desde
+         su panel. Ver sql/006_deseos.sql. */
+      {type:'select',key:'deseos_activo',label:'¿Está activo el libro de deseos?',
+       hint:'Con esto activado, quien apoye el celular en el tag de la mesa (o escanee el QR) puede dejarle un mensaje. Nadie más lo lee: van derecho a la pestaña Invitados de este panel. Los carteles para imprimir se descargan desde ahí.',
+       opts:[[false,'⚪ Apagado — la pantalla dice que no hay libro de deseos'],
+             [true, '💫 Activo — reciben mensajes desde las mesas']]},
     ]
   },
   {
@@ -2485,6 +2515,196 @@ function copiarListaDJ() {
     .catch(() => toast('❌ No se pudo copiar. Usá el PDF.'));
 }
 
+/* ══ LIBRO DE DESEOS ══════════════════════════════════════════════════
+   Buzón privado: los mensajes que dejaron desde las mesas los ve el
+   cliente acá y nadie más. El invitado no puede leer ni el suyo.
+   ══════════════════════════════════════════════════════════════════ */
+let deseosData = [];
+
+async function loadDeseos() {
+  const { data, error } = await sb.rpc('admin_deseos', { p_evento: eventoId, p_clave: adminClave });
+  // Si todavía no se corrió la migración 006, el panel sigue funcionando
+  // igual que antes: la tarjeta no aparece y listo.
+  if (error) { deseosData = []; pintarDeseos(); return; }
+  deseosData = data || [];
+  pintarDeseos();
+}
+
+// Se arma con DOM y NO con innerHTML: el texto lo escribe un invitado en
+// una fiesta y termina acá, en la pantalla del cliente.
+function pintarDeseos() {
+  const card = document.getElementById('card-deseos');
+  const lista = document.getElementById('des-lista');
+  if (!card || !lista) return;
+
+  // La tarjeta aparece si el libro está activo, aunque todavía no haya
+  // ninguno: si no, el cliente no encuentra dónde bajar los carteles.
+  const activo = currentConfig?.deseos_activo === true;
+  if (!activo && !deseosData.length) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  const n = deseosData.length;
+  document.getElementById('des-total').textContent = n;
+  document.getElementById('des-bajada').textContent = n
+    ? `${n} ${n === 1 ? 'mensaje' : 'mensajes'} desde las mesas. Solo los ves vos: no se publican en ningún lado.`
+    : 'Todavía no dejaron ninguno. Imprimí los carteles y ponelos en las mesas.';
+
+  lista.textContent = '';
+  deseosData.forEach(d => {
+    const caja = document.createElement('div');
+    caja.style.cssText = 'border:1px solid var(--bdr);border-radius:12px;'
+      + 'background:var(--s1);padding:14px 16px;border-left:3px solid var(--oro3)';
+
+    const txt = document.createElement('div');
+    txt.style.cssText = 'font-size:0.92rem;line-height:1.55;overflow-wrap:anywhere';
+    txt.textContent = d.deseo;
+
+    const pie = document.createElement('div');
+    pie.style.cssText = 'display:flex;align-items:center;justify-content:space-between;'
+      + 'gap:10px;flex-wrap:wrap;margin-top:10px';
+
+    const firma = document.createElement('div');
+    firma.style.cssText = 'font-size:0.72rem;color:var(--tx3);letter-spacing:.06em';
+    firma.textContent = d.nombre + (d.mesa ? ` · mesa ${d.mesa}` : '');
+
+    const borrar = document.createElement('button');
+    borrar.className = 'btn btn-ghost btn-sm';
+    borrar.textContent = '🗑';
+    borrar.title = 'Borrar este mensaje';
+    borrar.onclick = () => borrarDeseo(d.id, d.nombre);
+
+    pie.append(firma, borrar);
+    caja.append(txt, pie);
+    lista.appendChild(caja);
+  });
+}
+
+async function borrarDeseo(id, quien) {
+  if (!confirm(`¿Borrar el mensaje de "${quien}"?\n\nNo se puede deshacer.`)) return;
+  const { error } = await sb.rpc('admin_borrar_deseo', {
+    p_evento: eventoId, p_clave: adminClave, p_id: id
+  });
+  if (error) { toast('❌ No se pudo borrar: ' + error.message); return; }
+  toast('🗑 Mensaje borrado');
+  await sinRomper(loadDeseos());
+}
+
+// La librería del QR pesa 56 KB, así que se baja recién cuando se aprieta
+// el botón: el panel se abre desde el celular y con datos.
+function cargarQR() {
+  if (window.qrcode) return Promise.resolve();
+  return new Promise((ok, mal) => {
+    const t = document.createElement('script');
+    t.src = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';
+    t.onload = ok;
+    t.onerror = () => mal(new Error('sin conexión'));
+    document.head.appendChild(t);
+  });
+}
+
+// Un cartel por mesa. Las mesas salen de las que ya asignaste; si todavía
+// no asignaste ninguna, sale un cartel general que sirve igual.
+async function imprimirCarteles() {
+  try { await cargarQR(); }
+  catch { toast('❌ No se pudo bajar el generador de QR. Fijate la conexión.'); return; }
+
+  const mesas = [...new Set((invitadosData || []).map(r => (r.mesa || '').trim()).filter(Boolean))]
+    .sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0) || a.localeCompare(b));
+  const cuales = mesas.length ? mesas : [''];
+
+  const evento = currentConfig?.nombre || eventoId;
+  const plural = /\s(&|y)\s/i.test(evento);
+
+  const carteles = cuales.map(m => {
+    const url = `${location.origin}/deseos?evento=${encodeURIComponent(eventoId)}`
+              + (m ? `&mesa=${encodeURIComponent(m)}` : '');
+    const q = qrcode(0, 'M');
+    q.addData(url);
+    q.make();
+    return `<section class="cartel">
+      <div class="marca">Invitaciones Digitales</div>
+      <h1>${escapeHtml(plural ? `Dejales un mensaje a ${evento}` : `Dejale un mensaje a ${evento}`)}</h1>
+      <p class="sub">${plural ? 'Lo van' : 'Lo va'} a leer después de la fiesta. Nadie más lo ve.</p>
+      <div class="qr">${q.createSvgTag({ cellSize: 4, margin: 0, scalable: true })}</div>
+      <p class="como">Escaneá el código con la cámara del celular</p>
+      ${m ? `<div class="mesa">Mesa ${escapeHtml(m)}</div>` : ''}
+    </section>`;
+  }).join('');
+
+  abrirParaImprimir(`Carteles — ${escapeHtml(evento)}`, `
+    @page{size:A4;margin:0}
+    body{margin:0;font-family:'Instrument Sans',system-ui,sans-serif;color:#1f2937}
+    .cartel{
+      width:210mm;height:148.5mm;box-sizing:border-box;padding:16mm 18mm;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      text-align:center;border-bottom:1px dashed #d8d2c6;page-break-inside:avoid;
+    }
+    .marca{font-family:'Fraunces',Georgia,serif;font-weight:800;font-size:15px;
+           color:#8A5F17;letter-spacing:.02em;margin-bottom:10mm}
+    h1{font-family:'Fraunces',Georgia,serif;font-size:27px;font-weight:600;
+       margin:0;line-height:1.2;max-width:150mm}
+    .sub{font-size:12px;color:#6b7280;margin:6px 0 9mm}
+    .qr{width:38mm;height:38mm}
+    .qr svg{width:100%;height:100%;display:block}
+    .como{font-size:12px;color:#6b7280;margin-top:7mm;line-height:1.5}
+    .mesa{margin-top:6mm;font-family:'Fraunces',Georgia,serif;font-size:20px;
+          font-weight:700;color:#8A5F17}
+  `, carteles);
+}
+
+// El libro entero, para imprimir y regalárselo. Es lo que queda de la
+// fiesta cuando pasó todo.
+function imprimirDeseos() {
+  if (!deseosData.length) { toast('Todavía no hay ningún deseo'); return; }
+  const evento = currentConfig?.nombre || eventoId;
+  const filas = deseosData.slice().reverse().map(d => `<article>
+      <p>${escapeHtml(d.deseo)}</p>
+      <div class="firma">${escapeHtml(d.nombre)}${
+        d.mesa ? `<span class="mesa">mesa ${escapeHtml(d.mesa)}</span>` : ''}</div>
+    </article>`).join('');
+
+  abrirParaImprimir(`Libro de deseos — ${escapeHtml(evento)}`, `
+    @page{margin:18mm}
+    body{font-family:'Instrument Sans',system-ui,sans-serif;color:#1f2937;margin:0}
+    .header{text-align:center;margin-bottom:14mm}
+    .logo{font-family:'Fraunces',Georgia,serif;font-weight:800;font-size:28px;color:#8A5F17}
+    .sub{font-weight:800;font-size:12px;letter-spacing:6px;text-transform:uppercase;
+         color:#8A5F17;margin-top:3px}
+    h1{font-family:'Fraunces',Georgia,serif;font-size:23px;margin:14px 0 4px;font-weight:600}
+    .ev{font-size:13px;color:#6b7280}
+    /* Esto se imprime y se le regala: tiene que leerse como un libro, no
+       como una lista. Aire entre mensajes, la firma escrita a mano. */
+    article{padding:0 0 11mm;page-break-inside:avoid}
+    article p{font-size:15px;line-height:1.75;margin:0;color:#26221c}
+    .firma{margin-top:7px;font-family:'Caveat',cursive;font-size:21px;color:#8A5F17}
+    .firma .mesa{font-family:'Instrument Sans',system-ui,sans-serif;font-size:10px;
+                 color:#b6ada0;letter-spacing:.1em;text-transform:uppercase;margin-left:8px}
+    .pie{margin-top:14mm;text-align:center;font-size:11px;color:#9ca3af;
+         border-top:1px solid #f0ede6;padding-top:12px}
+  `, `<div class="header">
+        <div class="logo">Invitaciones Digitales</div><div class="sub">Oficial</div>
+        <h1>Libro de deseos</h1>
+        <div class="ev">${escapeHtml(evento)}${
+          currentConfig?.fecha_texto ? ' · ' + escapeHtml(currentConfig.fecha_texto) : ''
+        } · ${deseosData.length} ${deseosData.length === 1 ? 'mensaje' : 'mensajes'}</div>
+      </div>
+      ${filas}
+      <div class="pie">Generado por Invitaciones Digitales Oficial</div>`);
+}
+
+// Los PDF del panel abren una ventana y la mandan a imprimir. Estaba
+// repetido en cada uno; acá va una sola vez.
+function abrirParaImprimir(titulo, css, cuerpo) {
+  const v = window.open();
+  if (!v) { toast('⚠️ El navegador bloqueó la ventana. Permitila y probá de nuevo.'); return; }
+  v.document.write(`<html><head><meta charset="utf-8"><title>${titulo}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..800&family=Instrument+Sans:wght@400;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+    <style>${css}</style></head><body>${cuerpo}</body></html>`);
+  v.document.close();
+  // Las fuentes tardan: sin esperarlas, imprime con la del sistema.
+  v.onload = () => setTimeout(() => v.print(), 400);
+}
+
 function imprimirListaDJ() {
   const temas = listaDJ();
   const evento = currentConfig?.nombre || eventoId;
@@ -2582,6 +2802,7 @@ async function loadData() {
   await loadLinks();
   renderPendientes(data || []);
   pintarListaDJ();
+  sinRomper(loadDeseos());
 }
 
 // Los que todavía no contestaron, agrupados por link. Se arma con DOM y no
