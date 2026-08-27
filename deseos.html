@@ -7,19 +7,30 @@
 
 <!-- ══════════════════════════════════════════════════════════════════════
      LIBRO DE DESEOS — MAQUETA
-     Esto es lo que ve el invitado cuando apoya el celular en el tag NFC
-     de la mesa. Todavía NO guarda nada: los deseos son de mentira y el
-     botón no escribe en la base. Sirve para aprobar el diseño antes de
-     construir la tabla.
+     Lo que ve el invitado cuando apoya el celular en el tag NFC de la mesa
+     (o escanea el QR del cartelito). Todavía NO guarda nada: el botón no
+     escribe en la base. Existe para aprobar el diseño antes de construirla.
 
-     La pantalla hereda el tema del evento (?evento=almamia15): los
-     colores que eligió la clienta, su dupla tipográfica y su foto. Eso NO
-     es decoración — si el invitado toca el tag y aterriza en algo que
-     parece otra web, duda y se va. Tiene que ser la misma invitación.
+     ⚠️ ES UN BUZÓN PRIVADO, decidido el 27/08/2026. Los deseos NO se
+     muestran a los demás invitados: van derecho al panel de la clienta.
+     Eso saca el muro público —y con él, el empuje de ver que otros ya
+     escribieron—, así que se compensa con el CONTADOR: "sos el deseo
+     número 34 de la noche". Da la sensación de fiesta entera participando
+     sin revelar un solo nombre. Y de paso el privado juega a favor: quien
+     escribe sabe que solo lo lee ella, y se anima a escribir en serio.
+
+     ⚠️ La pantalla hereda el tema del evento: colores, dupla tipográfica y
+     foto. Si el invitado toca el tag y aterriza en algo que parece otra
+     web, duda y se va.
 
      ⚠️ Ningún color escrito a mano, por la misma razón que en
      invitacion.html: lo que sobre blanco es "gris clarito", sobre #0d0d1a
      es "casi blanco". Ver la sección de colores en CLAUDE.md.
+
+     ⚠️ Lo "juvenil" está en el MOVIMIENTO, no en la tipografía: la fuente
+     la elige la clienta y la misma pantalla tiene que servir para unos 15
+     y para un casamiento. Lo único fijo es la manuscrita de la firma, que
+     funciona bien en los dos.
      ══════════════════════════════════════════════════════════════════════ -->
 <style>
 :root{
@@ -27,11 +38,16 @@
   --on-accent:#1a1a1a;
   --font-titulo:'Cormorant Garamond',Georgia,serif;
   --font:'Jost',system-ui,sans-serif;
+  --font-mano:'Caveat',cursive;
 
   --ink-soft: color-mix(in srgb, var(--primary) 62%, var(--bg));
   --velo-1:   color-mix(in srgb, var(--primary) 3%,  var(--bg));
   --velo-2:   color-mix(in srgb, var(--primary) 6%,  var(--bg));
   --borde:    color-mix(in srgb, var(--primary) 14%, transparent);
+
+  /* La curva de todo. Un ease-out fuerte: arranca rápido, frena suave.
+     Es lo que hace que una pantalla se sienta despierta y no pesada. */
+  --curva: cubic-bezier(.23,1,.32,1);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
@@ -39,29 +55,49 @@ body{
   background:var(--bg); color:var(--primary);
   font-family:var(--font); font-size:17px; line-height:1.6;
   min-height:100dvh; padding:0 22px calc(40px + env(safe-area-inset-bottom));
-  opacity:0; transition:opacity 420ms cubic-bezier(.23,1,.32,1);
+  opacity:0; transition:opacity 420ms var(--curva);
+  overflow-x:hidden;
 }
 body.listo{opacity:1}
 
 .hoja{max-width:520px;margin:0 auto}
 
-/* ── Encabezado: la mantiene atada a la invitación ─────────────────── */
+/* Entrada escalonada. Cada bloque entra 60ms después del anterior: se lee
+   como una sola cosa que se acomoda, no como cinco que aparecen sueltas. */
+.entra{opacity:0;transform:translateY(14px);
+       animation:entrar 620ms var(--curva) forwards}
+@keyframes entrar{to{opacity:1;transform:none}}
+
+/* ── Encabezado ────────────────────────────────────────────────────── */
 .top{display:flex;flex-direction:column;align-items:center;text-align:center;
-     padding:38px 0 30px}
+     padding:34px 0 26px}
+.retrato-caja{position:relative;width:86px;height:86px}
 .retrato{
-  width:78px;height:78px;border-radius:50%;object-fit:cover;
+  width:100%;height:100%;border-radius:50%;object-fit:cover;
   border:2px solid var(--secondary); background:var(--velo-2);
+  position:relative;z-index:1;
+}
+/* Un halo que late despacio. Es el único elemento que se mueve solo en
+   toda la pantalla: uno alcanza para que se sienta viva, dos distraen. */
+.retrato-caja::after{
+  content:'';position:absolute;inset:-7px;border-radius:50%;
+  border:1px solid var(--secondary);opacity:.34;
+  animation:latir 3.4s ease-in-out infinite;
+}
+@keyframes latir{
+  0%,100%{transform:scale(1);opacity:.34}
+  50%    {transform:scale(1.06);opacity:.12}
 }
 .tipo{
   margin-top:16px;font-size:.66rem;letter-spacing:.34em;text-transform:uppercase;
   color:var(--ink-soft);
 }
-.quien{font-family:var(--font-titulo);font-size:1.6rem;line-height:1.1;margin-top:4px}
+.quien{font-family:var(--font-titulo);font-size:1.65rem;line-height:1.1;margin-top:4px}
 
 /* ── La pregunta ───────────────────────────────────────────────────── */
 h1{
   font-family:var(--font-titulo); font-weight:400;
-  font-size:clamp(1.85rem,7.4vw,2.4rem); line-height:1.14;
+  font-size:clamp(1.95rem,7.8vw,2.5rem); line-height:1.12;
   letter-spacing:-.015em; text-wrap:balance; text-align:center;
 }
 .ayuda{
@@ -69,8 +105,23 @@ h1{
   text-align:center;text-wrap:pretty;
 }
 
+/* ── Los disparadores ──────────────────────────────────────────────────
+   "No sé qué poner" es la razón número uno por la que alguien abre esto y
+   lo cierra sin escribir. Tres botones que arrancan la frase por vos.  */
+.chips{
+  display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:22px;
+}
+.chip{
+  font-family:inherit;font-size:.8rem;color:var(--ink-soft);
+  background:var(--velo-1);border:1px solid var(--borde);
+  border-radius:50px;padding:11px 14px;min-height:44px;cursor:pointer;
+  transition:transform 160ms var(--curva), background 200ms ease, color 200ms ease;
+}
+.chip:active{transform:scale(.95)}
+.chip.puesto{background:var(--secondary);color:var(--on-accent);border-color:transparent}
+
 /* ── El formulario ─────────────────────────────────────────────────── */
-form{margin-top:28px}
+form{margin-top:24px}
 label{
   display:block;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
   color:var(--ink-soft);margin-bottom:8px;
@@ -78,80 +129,99 @@ label{
 textarea,input{
   width:100%;font-family:inherit;font-size:1.05rem;color:var(--primary);
   background:var(--velo-1);border:1px solid var(--borde);border-radius:14px;
-  padding:15px 16px;transition:border-color 180ms ease, background 180ms ease;
+  padding:15px 16px;
+  transition:border-color 200ms ease, background 200ms ease;
 }
-textarea{min-height:150px;resize:vertical;line-height:1.55}
-textarea::placeholder,input::placeholder{color:var(--ink-soft);opacity:.75}
+textarea{min-height:132px;resize:none;line-height:1.55;overflow:hidden}
+textarea::placeholder,input::placeholder{color:var(--ink-soft);opacity:.7}
 textarea:focus,input:focus{
   outline:none;border-color:var(--secondary);background:var(--velo-2);
 }
+/* La firma se escribe a mano, como en una tarjeta de verdad. Es el toque
+   que la hace sentir personal sin romper un casamiento clásico: la letra
+   manuscrita funciona igual de bien en los dos. */
+#firma{font-family:var(--font-mano);font-size:1.5rem;padding-top:11px;padding-bottom:11px}
+#firma::placeholder{font-family:var(--font);font-size:1.05rem}
 .campo + .campo{margin-top:18px}
 
+.cuenta{
+  text-align:right;font-size:.72rem;color:var(--ink-soft);
+  margin-top:7px;opacity:0;transition:opacity 240ms ease;
+}
+.cuenta.cerca{opacity:1}
+
 .enviar{
-  width:100%;margin-top:24px;
+  width:100%;margin-top:22px;min-height:56px;
   font-family:inherit;font-size:.82rem;font-weight:600;
   letter-spacing:.16em;text-transform:uppercase;
   background:var(--secondary);color:var(--on-accent);
   border:0;border-radius:50px;padding:17px 24px;cursor:pointer;
-  transition:transform 160ms cubic-bezier(.23,1,.32,1), opacity 160ms ease;
+  transition:transform 160ms var(--curva), opacity 200ms ease;
 }
 .enviar:active{transform:scale(.975)}
 .enviar[disabled]{opacity:.5;cursor:default}
 
-.cuantos{
-  margin-top:18px;text-align:center;font-size:.8rem;color:var(--ink-soft);
-}
 .aviso{
-  margin-top:10px;text-align:center;font-size:.78rem;color:#c0392b;
-  min-height:1.1em;
+  margin-top:12px;text-align:center;font-size:.8rem;
+  color:var(--primary);min-height:1.15em;
+  opacity:0;transform:translateY(-4px);
+  transition:opacity 220ms ease, transform 220ms var(--curva);
 }
+.aviso.visible{opacity:1;transform:none}
+.privado{
+  margin-top:20px;text-align:center;font-size:.78rem;line-height:1.5;
+  color:var(--ink-soft);text-wrap:pretty;
+}
+
+/* ── El envío: la carta se va ──────────────────────────────────────── */
+#paso-escribir.enviando{
+  animation:volar 760ms var(--curva) forwards;
+  pointer-events:none;
+}
+@keyframes volar{
+  30% {transform:scale(.985) translateY(4px);opacity:1}
+  100%{transform:scale(.9) translateY(-40px);opacity:0}
+}
+
+.sobre{width:96px;height:96px;margin:0 auto 26px;display:block}
+.sobre .solapa{
+  transform-origin:50% 30%;
+  animation:cerrar 620ms var(--curva) 120ms both;
+}
+@keyframes cerrar{from{transform:rotateX(-172deg)}to{transform:rotateX(0)}}
+.sobre .cuerpo{animation:entrar 460ms var(--curva) both}
 
 /* ── Confirmación ──────────────────────────────────────────────────── */
-.ok{text-align:center;padding:56px 0 20px}
-.sello{
-  width:74px;height:74px;border-radius:50%;margin:0 auto 24px;
-  background:var(--secondary);color:var(--on-accent);
-  display:grid;place-items:center;font-size:2rem;
-  animation:aparece 520ms cubic-bezier(.23,1,.32,1) both;
-}
-@keyframes aparece{from{transform:scale(.86);opacity:0}to{transform:scale(1);opacity:1}}
-.ok h2{font-family:var(--font-titulo);font-weight:400;font-size:1.9rem;line-height:1.15}
-.ok p{margin-top:12px;color:var(--ink-soft);font-size:.95rem}
-.ver{
-  margin-top:30px;background:transparent;color:var(--primary);
-  border:1px solid var(--borde);border-radius:50px;padding:15px 30px;
-  font-family:inherit;font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;
-  cursor:pointer;transition:transform 160ms cubic-bezier(.23,1,.32,1);
-}
-.ver:active{transform:scale(.975)}
-
-/* ── El muro ───────────────────────────────────────────────────────── */
-.muro h2{
-  font-family:var(--font-titulo);font-weight:400;font-size:1.75rem;
-  text-align:center;padding:34px 0 6px;
-}
-.muro .sub{text-align:center;color:var(--ink-soft);font-size:.85rem;margin-bottom:26px}
-.deseo{
+.ok{text-align:center;padding:46px 0 20px}
+.ok h2{font-family:var(--font-titulo);font-weight:400;font-size:2rem;line-height:1.15}
+.ok p{margin-top:12px;color:var(--ink-soft);font-size:.95rem;text-wrap:pretty}
+.numero{
+  margin-top:30px;padding:22px 18px;border-radius:18px;
   background:var(--velo-1);border:1px solid var(--borde);
-  border-left:3px solid var(--secondary);
-  border-radius:4px 14px 14px 4px;padding:18px 20px;margin-bottom:12px;
-  animation:sube 460ms cubic-bezier(.23,1,.32,1) both;
 }
-@keyframes sube{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
-.deseo p{font-size:1rem;line-height:1.6;text-wrap:pretty}
-.deseo .firma{
-  margin-top:11px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
+.numero .n{
+  font-family:var(--font-titulo);font-size:3rem;line-height:1;
+  color:var(--primary);font-variant-numeric:tabular-nums;
+}
+/* El ordinal, o "34 deseo de la noche" se lee mal. */
+.numero .orden{font-size:1.5rem;vertical-align:top;line-height:1.5;opacity:.6}
+.numero .t{
+  margin-top:8px;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;
   color:var(--ink-soft);
 }
-.deseo.mio{background:var(--velo-2)}
-.deseo.mio .firma::after{content:' · tu deseo'}
+.otro{
+  margin-top:26px;background:transparent;color:var(--primary);
+  border:1px solid var(--borde);border-radius:50px;padding:15px 30px;min-height:48px;
+  font-family:inherit;font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;
+  cursor:pointer;transition:transform 160ms var(--curva);
+}
+.otro:active{transform:scale(.975)}
 
 @media (prefers-reduced-motion:reduce){
   *{animation:none !important;transition:none !important}
+  .entra{opacity:1;transform:none}
 }
 
-/* Marca de maqueta. Va EN EL FLUJO y no fija: fija tapaba una tarjeta del
-   muro cada vez que se scrolleaba. */
 .maqueta{
   display:block;width:max-content;margin:34px auto 0;
   background:var(--velo-2);border:1px solid var(--borde);
@@ -164,22 +234,27 @@ textarea:focus,input:focus{
 
 <div class="hoja">
 
-  <div class="top">
-    <img id="retrato" class="retrato" alt="">
+  <div class="top entra" style="animation-delay:60ms">
+    <div class="retrato-caja" id="retrato-caja">
+      <img id="retrato" class="retrato" alt="">
+    </div>
     <div class="tipo" id="tipo"></div>
     <div class="quien" id="quien"></div>
   </div>
 
   <!-- PASO 1 — escribir -->
   <section id="paso-escribir">
-    <h1 id="pregunta"></h1>
-    <p class="ayuda" id="ayuda"></p>
+    <h1 id="pregunta" class="entra" style="animation-delay:140ms"></h1>
+    <p class="ayuda entra" id="ayuda" style="animation-delay:200ms"></p>
 
-    <form id="form" novalidate>
+    <div class="chips entra" id="chips" style="animation-delay:260ms"></div>
+
+    <form id="form" novalidate class="entra" style="animation-delay:320ms">
       <div class="campo">
         <label for="texto">Tu deseo</label>
         <textarea id="texto" maxlength="600"
           placeholder="Que nunca se te apague esa risa…"></textarea>
+        <div class="cuenta" id="cuenta"></div>
       </div>
       <div class="campo">
         <label for="firma">De parte de</label>
@@ -188,25 +263,36 @@ textarea:focus,input:focus{
       </div>
       <button class="enviar" type="submit">Dejar mi deseo</button>
       <p class="aviso" id="aviso"></p>
-      <p class="cuantos" id="cuantos"></p>
+      <p class="privado" id="privado"></p>
     </form>
   </section>
 
   <!-- PASO 2 — listo -->
   <section id="paso-listo" hidden>
     <div class="ok">
-      <div class="sello">✓</div>
-      <h2>Quedó guardado</h2>
+      <!-- Un sobre que se cierra. No es un tilde genérico: lo que acaba de
+           pasar es que dejaste una carta, y eso es lo que se ve. -->
+      <svg class="sobre" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+        <g class="cuerpo">
+          <rect x="10" y="28" width="80" height="56" rx="7"
+                fill="var(--velo-2)" stroke="var(--secondary)" stroke-width="2.4"/>
+          <path d="M14 78 L44 54 M86 78 L56 54"
+                stroke="var(--secondary)" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>
+        </g>
+        <path class="solapa" d="M10 34 L50 62 L90 34"
+              stroke="var(--secondary)" stroke-width="2.8"
+              stroke-linecap="round" stroke-linejoin="round" fill="var(--bg)"/>
+      </svg>
+      <h2 id="ok-titulo">Quedó guardado</h2>
       <p id="ok-texto"></p>
-      <button class="ver" id="btn-ver">Ver los de todos</button>
-    </div>
-  </section>
 
-  <!-- PASO 3 — el muro -->
-  <section id="paso-muro" class="muro" hidden>
-    <h2>El libro de deseos</h2>
-    <p class="sub" id="muro-sub"></p>
-    <div id="muro-lista"></div>
+      <div class="numero">
+        <div class="n"><span id="ok-n">0</span><span class="orden" id="ok-orden">º</span></div>
+        <div class="t" id="ok-n-txt">deseo de la noche</div>
+      </div>
+
+      <button class="otro" id="btn-otro">Escribir otro</button>
+    </div>
   </section>
 
   <div class="maqueta">Maqueta · todavía no guarda nada</div>
@@ -219,8 +305,9 @@ const SUPA_URL = 'https://ldvosdztnhrvrqxnjuco.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxkdm9zZHp0bmhydnJxeG5qdWNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyOTY1MjAsImV4cCI6MjEwMDg3MjUyMH0.u64wnWOA-Bp0NfOR3tLOAtSkG34P-ApTS00KwTEkGRM';
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY, { db: { schema: 'invitaciones' } });
 
-const params  = new URLSearchParams(location.search);
+const params   = new URLSearchParams(location.search);
 const eventoId = (params.get('evento') || 'almamia15').trim();
+const mesa     = (params.get('mesa') || '').trim();
 
 // La misma tabla de duplas que invitacion.html. Los pesos son los que
 // publica cada familia: si se le pide a Google uno que no existe, falla el
@@ -242,6 +329,8 @@ const DUPLAS = {
                  w:['Syne:wght@400;600;700;800','Inter:wght@300;400;500;600'] },
   suave:       { titulo:"'Instrument Serif', Georgia, serif", cuerpo:"'Inter', system-ui, sans-serif",
                  w:['Instrument+Serif','Inter:wght@300;400;500;600'] },
+  cuento:      { titulo:"'Cinzel Decorative', Georgia, serif", cuerpo:"'Jost', system-ui, sans-serif",
+                 w:['Cinzel+Decorative:wght@400;700;900','Jost:wght@300;400;500;600'] },
 };
 
 const luminancia = hex => {
@@ -261,16 +350,17 @@ const contrasteSobre = hex => {
   return r(L, luminancia('#1a1a1a')) >= r(L, luminancia('#ffffff')) ? '#1a1a1a' : '#ffffff';
 };
 
-// Deseos de ejemplo, para que el muro no se vea vacío al aprobar el diseño.
-const EJEMPLO = [
-  { texto:'Que la vida te trate como vos tratás a los demás. Te quiero muchísimo.', firma:'Tía Susana' },
-  { texto:'Nos conocemos desde sala de 3 y no me pierdo un solo cumple tuyo. Que sean mil más.', firma:'Guada' },
-  { texto:'Sos la nieta más linda que me pudo tocar. Que Dios te bendiga siempre.', firma:'Abuela Nélida' },
-  { texto:'Bailá toda la noche, que mañana descansás.', firma:'Marcos' },
-  { texto:'Gracias por hacernos reír siempre. Te merecés todo lo bueno que viene.', firma:'Familia Arce' },
+// Los disparadores. "No sé qué poner" es la razón número uno por la que
+// alguien abre esto y lo cierra sin escribir.
+const DISPAROS = [
+  { chip:'Un recuerdo', ph:'Me acuerdo la vez que…' },
+  { chip:'Un consejo',  ph:'Si te puedo decir una sola cosa, es que…' },
+  { chip:'Una promesa', ph:'Te prometo que…' },
+  // ⚠️ Textos cortos a propósito: con uno más largo los tres no entran en
+  // una fila a 390px y el tercero cae solo al medio, que se ve desprolijo.
 ];
 
-let C = {};
+let C = {}, N_FALSO = 33;
 
 function pintarTema() {
   const raiz = document.documentElement.style;
@@ -285,8 +375,9 @@ function pintarTema() {
 
   const l = document.createElement('link');
   l.rel = 'stylesheet';
+  // Caveat va SIEMPRE, además de la dupla: es la manuscrita de la firma.
   l.href = 'https://fonts.googleapis.com/css2?' +
-           d.w.map(x => 'family=' + x).join('&') + '&display=swap';
+           d.w.concat(['Caveat:wght@400;600']).map(x => 'family=' + x).join('&') + '&display=swap';
   document.head.appendChild(l);
 }
 
@@ -298,84 +389,123 @@ function pintarCabecera() {
 
   const img = document.getElementById('retrato');
   const foto = C.foto_splash || C.foto_hashtag || C.foto_hero;
-  if (foto) { img.src = foto; img.alt = nombre; } else { img.remove(); }
+  if (foto) { img.src = foto; img.alt = nombre; }
+  else { document.getElementById('retrato-caja').remove(); }
 
   // Una PREGUNTA, no "dejá tu mensaje". A una caja vacía la gente le
   // escribe "felicidades!!"; a una pregunta le contesta de verdad.
   // Concordancia: en un casamiento son DOS. "Elena & Pablo lo va a leer"
-  // se lee mal y es lo primero que nota un cliente. Se deduce del nombre
-  // ("Elena & Pablo", "Ana y José") y se puede forzar con &t=p, igual que
-  // el saludo de la invitación.
-  const plural = (params.get('t') || '').toLowerCase() === 'p' ||
-                 /\s(&|y)\s/i.test(nombre);
-  const leen     = plural ? 'van' : 'va';
-  const escribi  = plural ? 'Escribiles' : 'Escribile';
+  // se lee mal y es lo primero que nota un cliente.
+  const plural  = (params.get('t') || '').toLowerCase() === 'p' || /\s(&|y)\s/i.test(nombre);
+  const leen    = plural ? 'van' : 'va';
+  const escribi = plural ? 'Escribiles' : 'Escribile';
 
   document.getElementById('pregunta').textContent =
     nombre ? `¿Qué le deseás a ${nombre}?` : '¿Qué le deseás?';
   document.getElementById('ayuda').textContent =
-    nombre ? `${escribi} unas líneas. ${nombre} las ${leen} a leer todas, una por una, cuando pase la fiesta.`
-           : `Escribí unas líneas. Las ${leen} a leer todas cuando pase la fiesta.`;
+    nombre ? `${escribi} unas líneas. Nadie más las lee: ${leen} directo a ${nombre}.`
+           : 'Escribí unas líneas. Nadie más las lee.';
 
-  document.getElementById('cuantos').textContent =
-    `Ya le dejaron ${EJEMPLO.length} deseos`;
+  // El buzón privado, dicho como lo que es: una ventaja para quien escribe.
+  document.getElementById('privado').textContent =
+    nombre ? `Tu deseo no se publica en ningún lado. Lo lee ${nombre} y nadie más — escribí tranquilo.`
+           : 'Tu deseo no se publica en ningún lado.';
+
   document.getElementById('ok-texto').textContent =
-    nombre ? `${nombre} lo ${leen} a leer después de la fiesta.`
+    nombre ? `${nombre} lo ${leen} a leer después de la fiesta, con todos los demás.`
            : `Lo ${leen} a leer después de la fiesta.`;
-  document.getElementById('muro-sub').textContent =
-    nombre ? `Lo que le dejaron a ${nombre}` : '';
 }
 
+function pintarChips() {
+  const cont = document.getElementById('chips');
+  DISPAROS.forEach(d => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    b.textContent = d.chip;
+    b.onclick = () => {
+      cont.querySelectorAll('.chip').forEach(x => x.classList.remove('puesto'));
+      b.classList.add('puesto');
+      // No pisa lo que ya escribió: si hay texto, solo enfoca.
+      if (!ta.value.trim()) { ta.value = d.ph + ' '; crecer(); }
+      ta.focus();
+      ta.setSelectionRange(ta.value.length, ta.value.length);
+    };
+    cont.appendChild(b);
+  });
+}
+
+// El campo crece con lo que escribís, en vez de dejarte espiando lo que
+// escribiste por una ventanita de tres renglones.
+const ta = document.getElementById('texto');
+function crecer() {
+  ta.style.height = 'auto';
+  ta.style.height = Math.max(132, ta.scrollHeight) + 'px';
+  const q = document.getElementById('cuenta');
+  const quedan = 600 - ta.value.length;
+  q.textContent = quedan + ' caracteres';
+  q.classList.toggle('cerca', quedan <= 100);
+}
+ta.addEventListener('input', crecer);
+
 function mostrar(id) {
-  ['paso-escribir','paso-listo','paso-muro'].forEach(p => {
+  ['paso-escribir','paso-listo'].forEach(p => {
     document.getElementById(p).hidden = (p !== id);
   });
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
-// Se arma con DOM y no con innerHTML: los deseos y las firmas los escribe
-// el invitado, y terminan a la vista de toda la fiesta.
-function pintarMuro(mio) {
-  const cont = document.getElementById('muro-lista');
-  cont.textContent = '';
-  const todos = mio ? [mio, ...EJEMPLO] : EJEMPLO;
-  todos.forEach((d, i) => {
-    const caja = document.createElement('div');
-    caja.className = 'deseo' + (d === mio ? ' mio' : '');
-    caja.style.animationDelay = Math.min(i * 55, 400) + 'ms';
-    const p = document.createElement('p');
-    p.textContent = d.texto;
-    const f = document.createElement('div');
-    f.className = 'firma';
-    f.textContent = d.firma;
-    caja.append(p, f);
-    cont.appendChild(caja);
-  });
+// El número sube en vez de aparecer. Es la única recompensa que le queda
+// al invitado cuando el muro es privado, así que se le da su segundo.
+function contarHasta(n) {
+  const el = document.getElementById('ok-n');
+  const desde = performance.now(), dur = 900;
+  const paso = t => {
+    const p = Math.min(1, (t - desde) / dur);
+    el.textContent = Math.round(n * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(paso);
+  };
+  requestAnimationFrame(paso);
+  // Con 1 el ordinal sobra: "primer deseo" ya lo dice.
+  document.getElementById('ok-orden').textContent = n === 1 ? '' : 'º';
+  document.getElementById('ok-n-txt').textContent =
+    n === 1 ? 'primer deseo de la noche' : 'deseo de la noche';
 }
 
-let miDeseo = null;
+function avisar(txt, foco) {
+  const a = document.getElementById('aviso');
+  a.textContent = txt;
+  a.classList.add('visible');
+  if (foco) foco.focus();
+}
 
 document.getElementById('form').addEventListener('submit', e => {
   e.preventDefault();
-  const texto = document.getElementById('texto').value.trim();
+  const texto = ta.value.trim();
   const firma = document.getElementById('firma').value.trim();
-  const aviso = document.getElementById('aviso');
 
   // Sin nombre el deseo no sirve de recuerdo: "alguien te desea lo mejor"
   // no se puede guardar. Los dos campos, y el error donde está el problema.
-  if (!texto) { aviso.textContent = 'Escribí tu deseo antes de enviarlo.';
-                document.getElementById('texto').focus(); return; }
-  if (!firma) { aviso.textContent = 'Poné tu nombre así sabe quién se lo escribió.';
-                document.getElementById('firma').focus(); return; }
-  aviso.textContent = '';
+  if (!texto) return avisar('Escribí tu deseo antes de enviarlo.', ta);
+  if (!firma) return avisar('Poné tu nombre así sabe quién se lo escribió.',
+                            document.getElementById('firma'));
+  document.getElementById('aviso').classList.remove('visible');
 
-  miDeseo = { texto, firma };
-  mostrar('paso-listo');
+  // La carta se va, y recién cuando terminó de irse aparece el sobre.
+  document.getElementById('paso-escribir').classList.add('enviando');
+  setTimeout(() => {
+    mostrar('paso-listo');
+    contarHasta(++N_FALSO);
+  }, 700);
 });
 
-document.getElementById('btn-ver').addEventListener('click', () => {
-  pintarMuro(miDeseo);
-  mostrar('paso-muro');
+document.getElementById('btn-otro').addEventListener('click', () => {
+  ta.value = '';
+  document.getElementById('firma').value = '';
+  crecer();
+  document.getElementById('chips').querySelectorAll('.chip').forEach(x => x.classList.remove('puesto'));
+  document.getElementById('paso-escribir').classList.remove('enviando');
+  mostrar('paso-escribir');
 });
 
 (async () => {
@@ -383,6 +513,8 @@ document.getElementById('btn-ver').addEventListener('click', () => {
   C = (data && data.config) || {};
   pintarTema();
   pintarCabecera();
+  pintarChips();
+  crecer();
   await (document.fonts ? document.fonts.ready : Promise.resolve());
   document.body.classList.add('listo');
 })();
