@@ -1085,6 +1085,7 @@ tr:hover td{background:rgba(255,255,255,0.01);}
     <div id="mesas-vista-croquis" class="card" style="padding:20px;display:none;">
       <div class="card-head" style="padding:0 0 16px 0;margin-bottom:20px;">
         <span class="card-title">🪑 Croquis de Mesas (10 Asientos por Mesa)</span>
+        <span class="badge badge-amber" id="mesas-ubicados" style="display:none"></span>
       </div>
       <div id="mesas-visuals-container" class="mesas-grid">
         <!-- Cargado dinámicamente -->
@@ -3582,6 +3583,37 @@ function renderizarMesasVisuales() {
     wrapper.appendChild(circleDiv);
     container.appendChild(wrapper);
   });
+
+  contarUbicados();
+}
+
+/* Cuántos de los que VAN ya tienen mesa.
+   ⚠️ El denominador son los que confirmaron que asisten, no todos. Los que
+   dijeron que no van no necesitan mesa, y los que no contestaron todavía no
+   se sabe: contándolos, el número no llega nunca a cerrar y a los dos días
+   se deja de mirar. Así, 96/96 significa "terminé".
+   ⚠️ Va envuelto en try: esto es un número informativo y no puede, bajo
+   ninguna circunstancia, dejar sin croquis a una clienta con la fiesta
+   encima. */
+function contarUbicados() {
+  const badge = document.getElementById('mesas-ubicados');
+  if (!badge) return;
+  try {
+    const van = (mesasInvitados || []).filter(i => i.asiste === 'si');
+    const conMesa = van.filter(i => String(i.mesa ?? '').trim() !== '').length;
+    const pendientes = (mesasInvitados || []).filter(i => i.asiste === 'pendiente').length;
+
+    if (!van.length) { badge.style.display = 'none'; return; }
+
+    badge.textContent = `${conMesa}/${van.length} ubicados`
+      + (pendientes ? ` · ${pendientes} sin responder` : '');
+    badge.title = conMesa === van.length
+      ? 'Todos los que confirmaron tienen mesa'
+      : `Faltan ubicar ${van.length - conMesa}`;
+    badge.style.display = '';
+  } catch (e) {
+    badge.style.display = 'none';
+  }
 }
 
 function extraerApellido(nombreCompleto) {
