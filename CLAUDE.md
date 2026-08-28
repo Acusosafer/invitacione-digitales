@@ -440,6 +440,12 @@ adentro de la URL, así que saldría un link roto a nombre del cliente.
 ⚠️ El botón se bloquea **antes** de la llamada: dos toques seguidos cargaban a la misma
 persona dos veces, y el salón sirve dos cubiertos.
 
+⚠️ **La tarjeta va plegada** (`<details>` nativo, sin JavaScript). Esto se usa tres veces
+por evento y desplegada medía **508px en un celular de 844**: tapaba la tabla entera. Cerrada
+mide 54px. La pista del título se esconde abajo de 860px — no entra al lado y cae a un
+segundo renglón, dejando el chevron descolgado. Después de cargar a alguien **queda abierta**:
+los papás, los hermanos y la agasajada se cargan de a varios seguidos.
+
 ### Mesas
 
 - La columna `mesa` existe siempre. **Se eliminó el fallback a `localStorage`**: guardaba la mesa solo en ESE navegador, así que el plano del salón salía distinto según desde dónde se abriera.
