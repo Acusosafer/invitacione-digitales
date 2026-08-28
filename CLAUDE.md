@@ -30,6 +30,7 @@ que siga siéndolo.
 | `sql/003_storage.sql` | Bucket de Storage y sus permisos |
 | `sql/005_telefono_links.sql` | La tabla `links` y el teléfono del generador |
 | `sql/006_deseos.sql` | El libro de deseos: tabla, funciones y permisos |
+| `sql/007_invitado_a_mano.sql` | Cargar invitados sin link (la familia, la agasajada) |
 | `logo.png` / `logo-og.png` | Marca. El `-og` es el respaldo de vista previa (1200×630, fondo oscuro) |
 | `publicidad/agosto-a.html` | Placa de la campaña (1080×1080) |
 | `publicidad/instagram.md` | Perfil, bio y prompts de las piezas. No se publica |
@@ -129,6 +130,7 @@ libro de deseos. **Sin un solo grant para `anon`**: se escribe por función y le
 | `deseo_enviar(evento, nombre, deseo, mesa)` | **La única pública del libro.** Escribe y devuelve un número, nunca filas |
 | `admin_deseos(evento, clave)` | Los mensajes del libro, para el panel |
 | `admin_borrar_deseo(evento, clave, id)` | Borrar un mensaje |
+| `admin_agregar_invitado(evento, clave, nombre, apellido, asiste, mesa)` | Alta a mano, para quien no recibe link |
 
 ### Storage
 
@@ -397,6 +399,46 @@ al chat equivocado con el link equivocado adentro.
 el drop se lleva puesto el grant. Mientras la migración `sql/005` no esté corrida, el panel
 pide 5 parámetros a una función de 4 y da 404: por eso **`generarLink()` reintenta sin el
 teléfono**. El generador de links —lo que más se usa del panel— nunca deja de funcionar.
+
+### La mesa 0 es la Mesa Principal
+
+Los padres, los hermanos y la agasajada se sientan en la mesa principal. Se resolvió
+usando **el número 0**, no una mesa con nombre: `parseInt("0")` es un número, así que
+funciona con todo el código que ya existía. Se descartó renombrar la Mesa 1 porque una
+clienta ya la tenía armada con gente adentro.
+
+⚠️⚠️ **El 0 es "falso" en JavaScript.** `inv.mesa ? inv.mesa : ''` funciona con `"5"` y
+falla con `0` — y el panel, al guardar, convierte la mesa a **número**. O sea que hasta
+recargar la página, la mesa principal **desaparecía del listado del salón**, del contador
+de asignados y del croquis. Eran cinco lugares. Por eso existen `tieneMesa(inv)`,
+`nroMesa(inv)` y `nombreMesa(n)`: **son la única forma correcta de preguntar por la mesa**,
+y cualquier lugar nuevo que lea `mesa` tiene que usarlas.
+
+La Mesa Principal **se dibuja solo si hay alguien sentado en ella** —un evento que no la
+usa no ve una mesa vacía de más— pero **se ofrece siempre** en los desplegables, que es la
+única forma de estrenarla. En ella entra cualquiera: los cargados a mano y también alguien
+que llegó por su link.
+
+⚠️ `mesasConfig.length` dejó de ser el número de la última mesa en cuanto existe la 0. El
+tope sale del número más alto de verdad (`reduce(max)`), o "+ Agregar Mesa" pisa una que ya
+existe.
+
+### Cargar un invitado a mano (`admin_agregar_invitado`)
+
+Hay gente que va a la fiesta y **nunca recibe un link**. Sin esto no figuraba en ningún
+lado: el contador mentía y **el listado del salón salía incompleto** — y el salón cobra por
+cubierto.
+
+⚠️ No se podía reusar `admin_prealta`: mete el nombre entero en `nombre` y deja `apellido`
+vacío, y el listado del salón **se ordena por apellido**. Por eso el apellido es obligatorio
+también acá.
+
+⚠️ Estas filas van con `invitado_url = 'Cargado a mano'`, y la tarjeta de "Todavía no
+respondieron" **las saltea**: agrupa por `invitado_url` y arma un `wa.me` con ese texto
+adentro de la URL, así que saldría un link roto a nombre del cliente.
+
+⚠️ El botón se bloquea **antes** de la llamada: dos toques seguidos cargaban a la misma
+persona dos veces, y el salón sirve dos cubiertos.
 
 ### Mesas
 

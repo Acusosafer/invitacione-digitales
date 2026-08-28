@@ -1049,6 +1049,47 @@ tr:hover td{background:rgba(255,255,255,0.01);}
       </div>
     </div>
 
+    <!-- Los que van sin haber recibido un link: los padres, los hermanos,
+         la agasajada. Sin esto no figuran en la lista del salón. -->
+    <div class="card" id="card-a-mano" style="margin-bottom:18px">
+      <div class="card-head">
+        <span class="card-title">➕ Agregar a alguien sin link</span>
+      </div>
+      <p style="color:var(--tx3);font-size:0.8rem;margin:-4px 0 14px;line-height:1.5">
+        Los papás, los hermanos, la agasajada. Van a la fiesta pero nunca reciben
+        un link, así que hoy no aparecen en el listado que le das al salón — y el
+        salón cobra por cubierto.
+      </p>
+      <div class="form-grid col-full">
+        <div class="form-group">
+          <label class="form-label">Nombre</label>
+          <input id="am-nombre" type="text" class="form-input" placeholder="Ej: Roberto">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Apellido</label>
+          <input id="am-apellido" type="text" class="form-input" placeholder="Ej: Gómez">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mesa</label>
+          <select id="am-mesa" class="form-select">
+            <option value="0">🥂 Mesa Principal</option>
+            <option value="">Sin mesa por ahora</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">¿Asiste?</label>
+          <select id="am-asiste" class="form-select">
+            <option value="si">🟢 Confirmado</option>
+            <option value="pendiente">🟡 Pendiente</option>
+            <option value="no">🔴 No asiste</option>
+          </select>
+        </div>
+        <div class="col-full">
+          <button class="btn btn-primary btn-full" onclick="agregarAMano(this)">➕ Agregar a la lista</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Vista 1: Tabla de Invitados (Full Width) -->
     <div id="mesas-vista-tabla" class="card" style="padding:0;display:flex;flex-direction:column;">
       <div class="card-head" style="padding:14px 20px;">
@@ -2821,7 +2862,10 @@ function renderPendientes(data) {
   if (!card || !lista) return;
 
   const grupos = new Map();
-  data.filter(r => r.asiste === 'pendiente').forEach(r => {
+  // ⚠️ Los cargados a mano (los padres, los hermanos) NO tienen link: si
+  // entraran acá, el botón "Recordar" armaría un wa.me con un link roto a
+  // nombre del cliente.
+  data.filter(r => r.asiste === 'pendiente' && r.invitado_url !== 'Cargado a mano').forEach(r => {
     grupos.set(r.invitado_url, (grupos.get(r.invitado_url) || 0) + 1);
   });
 
@@ -3254,6 +3298,95 @@ let mesasFiltroTexto = '';
 let mesasFiltroEstado = 'todos';
 let mesasFiltroMesa = 'todas';
 
+/* ⚠️ LA MESA 0 ES LA PRINCIPAL, y el 0 es "falso" en JavaScript.
+   `inv.mesa ? ... : ''` funciona con "5" pero NO con 0: cuando el panel
+   guarda, convierte la mesa a NÚMERO, así que hasta recargar la página la
+   mesa principal desaparecía del listado del salón y del contador. Estos
+   dos ayudantes son la única forma correcta de preguntar por la mesa. */
+const tieneMesa = inv => String(inv?.mesa ?? '').trim() !== '';
+const nroMesa   = inv => tieneMesa(inv) ? parseInt(inv.mesa) : NaN;
+// Cómo se llama cada mesa en pantalla y en los PDF.
+const nombreMesa = n => Number(n) === 0 ? 'Mesa Principal' : `Mesa ${n}`;
+
+/* Cargar a alguien que va a la fiesta sin haber recibido un link: los
+   papás, los hermanos, la agasajada. Sin esto no figuran en el listado
+   que se le entrega al salón, y el salón cobra por cubierto. */
+async function agregarAMano(btn) {
+  const nombre   = document.getElementById('am-nombre').value.trim();
+  const apellido = document.getElementById('am-apellido').value.trim();
+  const mesa     = document.getElementById('am-mesa').value;
+  const asiste   = document.getElementById('am-asiste').value;
+
+  // El apellido es obligatorio por lo mismo que en el RSVP: el listado del
+  // salón se ordena por apellido, y sin él esa persona queda descolgada.
+  if (!nombre)   { toast('⚠️ Falta el nombre');
+                   document.getElementById('am-nombre').focus(); return; }
+  if (!apellido) { toast('⚠️ Falta el apellido — el listado del salón se ordena por apellido');
+                   document.getElementById('am-apellido').focus(); return; }
+
+  // ⚠️ Se bloquea ANTES de la llamada: dos toques seguidos cargaban a la
+  // misma persona dos veces, y el salón sirve dos cubiertos.
+  if (btn.disabled) return;
+  btn.disabled = true;
+  const antes = btn.textContent;
+  btn.textContent = '⏳ Agregando...';
+
+  const { error } = await sb.rpc('admin_agregar_invitado', {
+    p_evento: eventoId, p_clave: adminClave,
+    p_nombre: nombre, p_apellido: apellido,
+    p_asiste: asiste, p_mesa: mesa
+  });
+
+  btn.disabled = false;
+  btn.textContent = antes;
+
+  if (error) {
+    toast(/Could not find|does not exist|PGRST202/i.test(error.message)
+      ? '⚠️ Falta activar esto en la base. Escribime y lo dejo listo.'
+      : '❌ No se pudo agregar: ' + error.message);
+    return;
+  }
+
+  toast(`🟢 ${nombre} ${apellido} agregado`);
+  document.getElementById('am-nombre').value = '';
+  document.getElementById('am-apellido').value = '';
+  document.getElementById('am-nombre').focus();
+
+  await sinRomper(loadMesasData());
+  sinRomper(loadData());
+}
+
+// Las mesas que existen, para el desplegable del alta manual. Se rearma
+// cada vez que se cargan las mesas: si se creó una mesa nueva, aparece.
+function pintarMesasAMano() {
+  const sel = document.getElementById('am-mesa');
+  if (!sel) return;
+  const elegida = sel.value;
+  sel.textContent = '';
+
+  const pral = document.createElement('option');
+  pral.value = '0';
+  pral.textContent = '🥂 Mesa Principal';
+  sel.appendChild(pral);
+
+  const ultima = (mesasConfig || []).reduce((m, x) => Math.max(m, x.numero), 6);
+  for (let i = 1; i <= ultima; i++) {
+    const o = document.createElement('option');
+    o.value = String(i);
+    o.textContent = 'Mesa ' + i;
+    sel.appendChild(o);
+  }
+
+  const nada = document.createElement('option');
+  nada.value = '';
+  nada.textContent = 'Sin mesa por ahora';
+  sel.appendChild(nada);
+
+  // Se conserva lo que estaba elegido, o queda la principal, que es el
+  // caso para el que existe esta tarjeta.
+  sel.value = [...sel.options].some(o => o.value === elegida) ? elegida : '0';
+}
+
 async function loadMesasData() {
   const { data, error } = await sb.rpc('admin_invitados', { p_evento: eventoId, p_clave: adminClave });
   if (error) throw new Error('No se pudieron cargar las mesas: ' + error.message);
@@ -3267,14 +3400,20 @@ async function loadMesasData() {
 
 // Calcular cantidad de mesas dinámicamente basándonos en el número más alto asignado, mínimo 6 mesas
   let maxMesaNum = 6;
+  let hayPrincipal = false;
   mesasInvitados.forEach(inv => {
-    if (inv.mesa) {
-      const num = parseInt(inv.mesa);
-      if (num > maxMesaNum) maxMesaNum = num;
-    }
+    if (!tieneMesa(inv)) return;
+    const num = nroMesa(inv);
+    if (num === 0) hayPrincipal = true;
+    if (num > maxMesaNum) maxMesaNum = num;
   });
   
   mesasConfig = [];
+  // La Mesa Principal solo aparece si hay alguien sentado en ella: un
+  // evento que no la usa no tiene por qué ver una mesa vacía de más.
+  if (hayPrincipal) {
+    mesasConfig.push({ numero: 0, capacidad: 10, asientos: Array(10).fill(null) });
+  }
   for (let i = 1; i <= maxMesaNum; i++) {
     mesasConfig.push({
       numero: i,
@@ -3286,14 +3425,15 @@ async function loadMesasData() {
   reconstruirMesasAsientos();
   renderizarMesasTabla();
   renderizarMesasVisuales();
+  pintarMesasAMano();
 }
 
 function reconstruirMesasAsientos() {
   // Calculate assigned counts for each table to scale capacity dynamically if it exceeds 10
   const counts = {};
   mesasInvitados.forEach(inv => {
-    if (inv.mesa && inv.asiste !== 'no') {
-      const num = parseInt(inv.mesa);
+    if (tieneMesa(inv) && inv.asiste !== 'no') {
+      const num = nroMesa(inv);
       if (!isNaN(num)) {
         counts[num] = (counts[num] || 0) + 1;
       }
@@ -3306,9 +3446,9 @@ function reconstruirMesasAsientos() {
     mesa.asientos = Array(mesa.capacidad).fill(null);
   });
   
-  const invitadosConMesa = mesasInvitados.filter(inv => inv.mesa !== null && inv.mesa !== "" && inv.mesa !== undefined && inv.asiste !== 'no');
+  const invitadosConMesa = mesasInvitados.filter(inv => tieneMesa(inv) && inv.asiste !== 'no');
   invitadosConMesa.forEach(inv => {
-    const numMesa = parseInt(inv.mesa);
+    const numMesa = nroMesa(inv);
     const mesaObj = mesasConfig.find(m => m.numero === numMesa);
     if (mesaObj) {
       const indexLibre = mesaObj.asientos.findIndex(as => as === null);
@@ -3340,9 +3480,8 @@ function renderizarMesasTabla() {
     const matchTexto = fullName.includes(mesasFiltroTexto);
     const matchEstado = mesasFiltroEstado === 'todos' || inv.asiste === mesasFiltroEstado;
     // Una mesa cargada con espacios en blanco no es una mesa.
-    const tieneMesa = String(inv.mesa ?? '').trim() !== '';
     const matchMesa = mesasFiltroMesa === 'todas'
-      || (mesasFiltroMesa === 'sin' ? !tieneMesa : tieneMesa);
+      || (mesasFiltroMesa === 'sin' ? !tieneMesa(inv) : tieneMesa(inv));
     return matchTexto && matchEstado && matchMesa;
   });
   
@@ -3416,14 +3555,26 @@ function renderizarMesasTabla() {
     const emptyOpt = document.createElement('option');
     emptyOpt.value = '';
     emptyOpt.textContent = 'Sin mesa';
-    if (!inv.mesa) emptyOpt.selected = true;
+    if (!tieneMesa(inv)) emptyOpt.selected = true;
     selectMesa.appendChild(emptyOpt);
-    
-    for (let i = 1; i <= mesasConfig.length; i++) {
+
+    // La principal se ofrece SIEMPRE, aunque todavía no haya nadie: es la
+    // única forma de estrenarla. En la mesa principal entra cualquiera —
+    // los padres cargados a mano y también alguien que llegó por su link.
+    const optPral = document.createElement('option');
+    optPral.value = '0';
+    optPral.textContent = '🥂 Mesa Principal';
+    if (tieneMesa(inv) && nroMesa(inv) === 0) optPral.selected = true;
+    selectMesa.appendChild(optPral);
+
+    // `mesasConfig.length` ya no es el número de la última mesa cuando
+    // existe la 0. El tope sale del número más alto de verdad.
+    const ultima = mesasConfig.reduce((m, x) => Math.max(m, x.numero), 6);
+    for (let i = 1; i <= ultima; i++) {
       const elOpt = document.createElement('option');
       elOpt.value = i.toString();
       elOpt.textContent = `Mesa ${i}`;
-      if (inv.mesa && inv.mesa.toString() === i.toString()) elOpt.selected = true;
+      if (tieneMesa(inv) && nroMesa(inv) === i) elOpt.selected = true;
       selectMesa.appendChild(elOpt);
     }
     
@@ -3435,7 +3586,7 @@ function renderizarMesasTabla() {
     
     selectMesa.onchange = async () => {
       if (selectMesa.value === 'new') {
-        const nextMesa = mesasConfig.length + 1;
+        const nextMesa = mesasConfig.reduce((m, x) => Math.max(m, x.numero), 0) + 1;
         mesasConfig.push({
           numero: nextMesa,
           capacidad: 10,
@@ -3449,7 +3600,7 @@ function renderizarMesasTabla() {
           toast('❌ No se pudo asignar la mesa: ' + error.message);
           return;
         }
-        toast(`🟢 Mesa ${nextMesa} creada y asignada`);
+        toast(`🟢 Mesa ${nextMesa} creada y asignada`);  // la nueva nunca es la 0
         sinRomper(loadMesasData());
         return;
       }
@@ -3461,11 +3612,11 @@ function renderizarMesasTabla() {
       
       // Warn when assigning more than 10 people to a table!
       if (newMesa !== null) {
-        const assignedCount = mesasInvitados.filter(g => parseInt(g.mesa) === newMesa && g.id !== inv.id && g.asiste !== 'no').length;
+        const assignedCount = mesasInvitados.filter(g => nroMesa(g) === newMesa && g.id !== inv.id && g.asiste !== 'no').length;
         if (assignedCount >= 10) {
-          const confirmOk = confirm(`⚠️ La Mesa ${newMesa} ya tiene ${assignedCount} personas sentadas (Límite máximo recomendado: 10). ¿Querés sentar a este invitado de todas formas?`);
+          const confirmOk = confirm(`⚠️ La ${nombreMesa(newMesa)} ya tiene ${assignedCount} personas sentadas (Límite máximo recomendado: 10). ¿Querés sentar a este invitado de todas formas?`);
           if (!confirmOk) {
-            selectMesa.value = inv.mesa ? inv.mesa.toString() : '';
+            selectMesa.value = tieneMesa(inv) ? String(inv.mesa).trim() : '';
             return;
           }
         }
@@ -3547,7 +3698,8 @@ function renderizarMesasVisuales() {
   mesasConfig.forEach(mesa => {
     const wrapper = document.createElement('div');
     wrapper.className = 'mesa-wrapper';
-    wrapper.innerHTML = `<div class="mesa-titulo">Mesa ${mesa.numero}</div>`;
+    wrapper.innerHTML = `<div class="mesa-titulo">${
+      mesa.numero === 0 ? '🥂 Mesa Principal' : 'Mesa ' + mesa.numero}</div>`;
     
     const circleDiv = document.createElement('div');
     circleDiv.className = 'mesa-circular';
@@ -3652,7 +3804,10 @@ function exportarMesasPDF() {
   const lista = mesasInvitados.map(inv => ({
     nombre: inv.nombre,
     apellido: inv.apellido || extraerApellido(inv.nombre),
-    mesa: inv.mesa ? inv.mesa : ''
+    // ⚠️ `inv.mesa ? ... : ''` acá borraba la MESA PRINCIPAL: es la 0, y el
+    // 0 es falso en JavaScript. Los padres desaparecían del listado que se
+    // le entrega al salón.
+    mesa: tieneMesa(inv) ? String(inv.mesa).trim() : ''
   }));
   
   lista.sort((a,b) => a.apellido.localeCompare(b.apellido));
@@ -3697,8 +3852,8 @@ function exportarMesasPDF() {
   
   <div class="stats-bar">
       <div class="stat-item"><div class="stat-val">${lista.length}</div><div class="stat-lbl">Invitados Totales</div></div>
-      <div class="stat-item"><div class="stat-val">${lista.filter(i => i.mesa).length}</div><div class="stat-lbl">Asignados</div></div>
-      <div class="stat-item"><div class="stat-val">${lista.filter(i => !i.mesa).length}</div><div class="stat-lbl">Sin Mesa</div></div>
+      <div class="stat-item"><div class="stat-val">${lista.filter(i => i.mesa !== '').length}</div><div class="stat-lbl">Asignados</div></div>
+      <div class="stat-item"><div class="stat-val">${lista.filter(i => i.mesa === '').length}</div><div class="stat-lbl">Sin Mesa</div></div>
   </div>
 
   <table>
@@ -3708,7 +3863,7 @@ function exportarMesasPDF() {
       html += `<tr>
           <td><strong>${escapeHtml(item.apellido)}</strong></td>
           <td>${escapeHtml(item.nombre)}</td>
-          <td>${item.mesa ? '<span class="mesa-badge">Mesa ' + item.mesa + '</span>' : '<span class="no-mesa">— Sin asignar</span>'}</td>
+          <td>${item.mesa !== '' ? '<span class="mesa-badge">' + nombreMesa(item.mesa) + '</span>' : '<span class="no-mesa">— Sin asignar</span>'}</td>
       </tr>`;
   });
   html += `</tbody></table>
