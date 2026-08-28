@@ -1053,13 +1053,19 @@ tr:hover td{background:rgba(255,255,255,0.01);}
     <div id="mesas-vista-tabla" class="card" style="padding:0;display:flex;flex-direction:column;">
       <div class="card-head" style="padding:14px 20px;">
         <span class="card-title">👥 Estado & Mesa de Invitados</span>
-        <div style="display:flex;gap:8px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <input type="text" id="mesas-search" class="form-input" style="padding:6px 12px;font-size:0.75rem;width:150px;" placeholder="Buscar..." oninput="filtrarMesasInvitados()">
           <select id="mesas-filter-status" class="form-select" style="padding:6px 12px;font-size:0.75rem;width:120px;" onchange="filtrarMesasInvitados()">
             <option value="todos">Todos</option>
             <option value="si">🟢 Confirmados</option>
             <option value="pendiente">🟡 Pendientes</option>
             <option value="no">🔴 No asiste</option>
+          </select>
+          <!-- Para sentar a los que faltan sin ir buscándolos entre todos. -->
+          <select id="mesas-filter-mesa" class="form-select" style="padding:6px 12px;font-size:0.75rem;width:130px;" onchange="filtrarMesasInvitados()">
+            <option value="todas">Con y sin mesa</option>
+            <option value="sin">🪑 Falta ubicar</option>
+            <option value="con">✅ Ya tienen mesa</option>
           </select>
         </div>
       </div>
@@ -3246,6 +3252,7 @@ let mesasInvitados = [];
 let mesasConfig = [];
 let mesasFiltroTexto = '';
 let mesasFiltroEstado = 'todos';
+let mesasFiltroMesa = 'todas';
 
 async function loadMesasData() {
   const { data, error } = await sb.rpc('admin_invitados', { p_evento: eventoId, p_clave: adminClave });
@@ -3320,6 +3327,7 @@ function reconstruirMesasAsientos() {
 function filtrarMesasInvitados() {
   mesasFiltroTexto = document.getElementById('mesas-search').value.toLowerCase();
   mesasFiltroEstado = document.getElementById('mesas-filter-status').value;
+  mesasFiltroMesa = document.getElementById('mesas-filter-mesa')?.value || 'todas';
   renderizarMesasTabla();
 }
 
@@ -3331,11 +3339,20 @@ function renderizarMesasTabla() {
     const fullName = `${inv.nombre} ${inv.apellido || ''}`.toLowerCase();
     const matchTexto = fullName.includes(mesasFiltroTexto);
     const matchEstado = mesasFiltroEstado === 'todos' || inv.asiste === mesasFiltroEstado;
-    return matchTexto && matchEstado;
+    // Una mesa cargada con espacios en blanco no es una mesa.
+    const tieneMesa = String(inv.mesa ?? '').trim() !== '';
+    const matchMesa = mesasFiltroMesa === 'todas'
+      || (mesasFiltroMesa === 'sin' ? !tieneMesa : tieneMesa);
+    return matchTexto && matchEstado && matchMesa;
   });
   
   if (filtrados.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--tx3);padding:20px;">No se encontraron invitados</td></tr>';
+    // ⚠️ Sin este mensaje, filtrar "falta ubicar" cuando ya no falta nadie
+    // se ve igual que una tabla que no cargó.
+    const vacio = mesasFiltroMesa === 'sin' && mesasFiltroTexto === ''
+      ? '🎉 No falta ubicar a nadie'
+      : 'No se encontraron invitados';
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--tx3);padding:20px;">${vacio}</td></tr>`;
     return;
   }
   
