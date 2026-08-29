@@ -1157,6 +1157,28 @@ argentinos**: 50.000 ARS son unos 150.000 COP, casi el triple de lo que entendi�
 Un número sin moneda es un malentendido esperando pasar. **Cotizar en dólares o
 en la moneda de quien lee.**
 
+## ⚠️ Pendiente: invitaciones ilegibles en producción (28/08/2026)
+
+Medido texto por texto, contra el fondo que efectivamente tiene detrás:
+
+| evento | textos | peor | ilegibles |
+|---|---|---|---|
+| `demo-enredados` | 56 | 2,02:1 | **29** |
+| `zaira15` | 57 | 1,09:1 | 7 |
+| `almamia15` | 57 | 4,67:1 | 0 |
+
+En `demo-enredados` **la mitad de los textos no se leen** — y es el demo con el que se
+vende la temática Enredados y del que salió el reel. La causa es la paleta elegida: tinta
+`#f9f3ae` sobre papel `#b37fc3` da **2,74:1 a tinta plena**. Ninguna variable lo arregla.
+
+En `zaira15` los rotos son los que **se pintan desde JavaScript** (flechas del carrusel
+1,09:1; botones "No puedo ir" y "Celíaco" 1,15:1): una auditoría que fotografía la página
+no los ve.
+
+`deseos.html` **ya se defiende sola** (ver su sección). `invitacion.html` no. Fer sabe del
+problema; falta decidir el alcance: arreglar la paleta del demo (un dato, cinco minutos) o
+blindar la invitación como el libro de deseos (toca clientas en producción).
+
 ## Bugs corregidos (historial)
 
 ### Orden de secciones incorrecto (invitacion.html)
