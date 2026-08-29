@@ -865,6 +865,58 @@ cliente**: la lista se arma con DOM, nunca con `innerHTML`, y en el PDF va con `
 ⚠️ **`🪧` no existe en Windows 10** (Unicode 13, año 2020): sale un cuadrito vacío. Antes de
 usar un emoji nuevo en el panel, mirarlo en la máquina de Fer.
 
+### ⚠️⚠️ Un `<select>` de sí/no guardaba la PALABRA "true"
+
+`el.value` de un `<select>` es **siempre texto**. `guardarTodo()` hacía
+`currentConfig[f.key] = el.value`, así que un desplegable de sí/no guardaba
+`"true"`, no `true`. Y las pantallas comparan contra el booleano:
+
+- activar el libro de deseos **no lo activaba** — decía "esta fiesta no tiene
+  libro de deseos" con el interruptor en Activo;
+- y, mucho peor, **pausar una invitación desde el panel NO la pausaba**. La función
+  de cortar un link compartido estuvo rota en producción desde que se construyó.
+
+Se arregló en los dos extremos: el panel convierte `"true"`/`"false"` a booleano al
+guardar, y las pantallas aceptan **las dos formas** — los eventos guardados antes del
+28/08/2026 tienen el texto adentro y no se van a volver a guardar solos.
+
+⚠️ Cualquier campo de `config` que se lea con `=== true` necesita lo mismo. Se verifica
+con las dos formas, no con una.
+
+### Los QR de las mesas — `herramientas/generar-qr.js`
+
+Una pieza circular por mesa: el QR adentro, el anillo con el texto curvo alrededor y el
+número en el centro. **El QR sigue siendo cuadrado** — las tres esquinas grandes son las
+que el celular usa para orientarse; lo que es redondo es la pieza.
+
+⚠️⚠️ **Los módulos redondos SUELTOS no se leen.** Un círculo de radio 0,44 del paso cubre
+el 61% de su celda: el lector promedia y la toma por blanca. De trece piezas no se leía
+**ninguna**. La forma correcta es **unir los módulos vecinos** —un punto más un puente
+hacia el de al lado—: en las zonas densas se funden en formas orgánicas, queda mejor que
+los puntos sueltos, y la cobertura queda entera.
+
+⚠️⚠️ **El pistacho claro no se lee.** Medido con jsQR sobre papel blanco:
+
+| color | contraste | resultado |
+|---|---|---|
+| `#b5d99c` pistacho claro | 1,57:1 | no lee en ningún tamaño |
+| `#99b57d` salvia | 2,27:1 | lee chico, **falla en grande** |
+| `#7a9c5c` pistacho medio | 3,12:1 | lee chico, **falla en grande** |
+| `#5d7a42` verde profundo | 4,85:1 | lee siempre |
+
+Los del medio son los peligrosos: andan en la prueba y fallan cuando el invitado acerca
+el celular. Por eso la pieza usa **dos verdes**: el código en el profundo y el anillo, el
+centro y los adornos en el pistacho. Se ve pistacho y funciona.
+
+⚠️ El marco de los ojos va de **6 módulos, no de 7**: el `stroke` de SVG se pinta mitad
+adentro y mitad afuera, y un rect de 7 se come medio módulo de la zona quieta.
+
+⚠️ El texto curvo necesita su **propio radio**, separado del aro: pegados, las letras se
+apoyan contra la línea.
+
+**Cada pieza se verifica leyéndola con jsQR a cuatro tamaños**, desde el que va a tener
+impresa en la mesa. Un QR lindo que no se lee es un cartel inútil impreso trece veces.
+
 ### Riesgo aceptado
 
 Quien sepa el slug del evento puede escribir un deseo, igual que puede confirmar asistencia.

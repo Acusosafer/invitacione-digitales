@@ -25,8 +25,11 @@ const fs = require('fs');
 const path = require('path');
 
 const L = 1200, CENTRO = L / 2;
-const R_EXT = L / 2 - 6;
-const R_INT = R_EXT - 76;
+/* ⚠️ El texto curvo se apoyaba contra el anillo: hay que separar el radio
+   del texto del radio del aro, no dejarlos pegados. El aro entra un poco
+   y el texto se corre hacia adentro. */
+const R_EXT = L / 2 - 26;
+const R_INT = R_EXT - 92;
 
 /* ⚠️ EL PISTACHO CLARO NO SE LEE. Medido con un lector real: #b5d99c da
    1,57:1 contra el papel y no lo lee en ningún tamaño; el salvia del
@@ -73,7 +76,7 @@ function pieza({ url, etiqueta, centro, color, acento, tinta, nombre }) {
               rx="${(paso*1.0).toFixed(2)}" fill="${color}"/>`;
   };
 
-  const rTxt = R_EXT - 40;
+  const rTxt = R_EXT - 52;
   const arco = (arriba) => `M ${CENTRO} ${CENTRO} m ${-rTxt} 0 a ${rTxt} ${rTxt} 0 1 ${arriba ? 1 : 0} ${rTxt*2} 0`;
   const rHueco = h * paso * 0.56;
 
@@ -88,12 +91,12 @@ function pieza({ url, etiqueta, centro, color, acento, tinta, nombre }) {
   <circle cx="${CENTRO}" cy="${CENTRO}" r="${R_EXT-14}" fill="none" stroke="${acento}" stroke-width="13"/>
   <circle cx="${CENTRO}" cy="${CENTRO}" r="${R_EXT-14}" fill="none" stroke="${color}" stroke-width="1.5" opacity=".45"/>
 
-  <text font-family="Fraunces, Georgia, serif" font-size="43" font-weight="600"
-        fill="${tinta}" letter-spacing="6">
+  <text font-family="Fraunces, Georgia, serif" font-size="38" font-weight="600"
+        fill="${tinta}" letter-spacing="5">
     <textPath href="#ar" startOffset="50%" text-anchor="middle">DEJALE UN MENSAJE A ${nombre}</textPath>
   </text>
-  <text font-family="Fraunces, Georgia, serif" font-size="35" font-weight="600"
-        fill="${color}" letter-spacing="10">
+  <text font-family="Fraunces, Georgia, serif" font-size="31" font-weight="600"
+        fill="${color}" letter-spacing="9">
     <textPath href="#ab" startOffset="50%" text-anchor="middle">${etiqueta}</textPath>
   </text>
 

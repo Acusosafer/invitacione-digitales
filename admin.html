@@ -2166,7 +2166,14 @@ async function guardarTodo() {
           }
         } else {
           const el = document.getElementById(`cf-${f.key}`);
-          if (el) currentConfig[f.key] = el.value;
+          /* ⚠️ El `value` de un <select> es SIEMPRE texto: un desplegable
+             de sí/no guardaba la palabra "true", no el sí. La invitación
+             compara `C.pausada === true` y el libro `C.deseos_activo !==
+             true`, así que ninguno de los dos funcionaba desde el panel:
+             se activaba el libro y seguía diciendo que no había libro, y
+             —peor— se pausaba una invitación y NO se pausaba. */
+          if (el) currentConfig[f.key] =
+            (el.value === 'true') ? true : (el.value === 'false') ? false : el.value;
         }
       }
     }

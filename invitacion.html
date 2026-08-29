@@ -2126,7 +2126,11 @@
          un clic y vuelve todo como estaba.
          Va PRIMERO de todo: si no, alcanza con sacar el splash desde
          las herramientas del navegador para ver la invitación entera. */
-      if (C.pausada === true) {
+      /* ⚠️ Acepta `true` y el texto "true": hasta el 28/08/2026 el panel
+         guardaba la PALABRA, porque el value de un <select> es siempre
+         texto. Una invitación pausada desde el panel no se pausaba. Los
+         eventos guardados antes del arreglo siguen teniendo el texto. */
+      if (C.pausada === true || C.pausada === 'true') {
         document.title = 'Invitación no disponible';
         document.body.innerHTML = '';
         document.body.style.cssText =

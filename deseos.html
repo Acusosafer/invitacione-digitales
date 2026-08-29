@@ -379,6 +379,12 @@ const mezclar = (a, b, pct) => {
   return '#' + [0,2,4].map(i => c(i).toString(16).padStart(2,'0')).join('');
 };
 
+/* ⚠️ Acepta `true` y el texto "true". Hasta el 28/08/2026 el panel
+   guardaba la PALABRA "true" —el value de un <select> es siempre texto—,
+   así que activar el libro no lo activaba. Los eventos guardados antes
+   del arreglo siguen teniendo el texto adentro. */
+const esSi = v => v === true || v === 'true';
+
 let C = {};
 
 function pintarTema() {
@@ -625,9 +631,9 @@ function cerrado(txt) {
 
   if (!data) {
     cerrado('No encontramos esta fiesta. Fijate que el link esté completo.');
-  } else if (C.pausada === true) {
+  } else if (esSi(C.pausada)) {
     cerrado('Esta invitación está pausada.');
-  } else if (C.deseos_activo !== true) {
+  } else if (!esSi(C.deseos_activo)) {
     cerrado('Esta fiesta no tiene libro de deseos.');
   }
   await (document.fonts ? document.fonts.ready : Promise.resolve());
