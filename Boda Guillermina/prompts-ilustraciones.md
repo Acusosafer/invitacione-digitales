@@ -203,6 +203,81 @@ siempre y se ve más elegante.
 
 ---
 
+## B4 · El save the date — ellos frente al lago → `save-the-date.png`
+
+⚠️ **Es la ilustración que más les gustó y no tenía prompt escrito.**
+Se generó a mano y casi se pierde. Queda acá.
+
+### Primero probá EDITAR, no volver a generar
+
+Adjuntá la imagen que ya existe (`web/save the date final.jpg`) y pedí
+sólo el cambio. Volver a generar devuelve **otra escena entera** —otro
+atardecer, otro muelle, otras sillas— y lo que a ellos les gustó es
+ésta.
+
+```
+Edit this watercolour illustration. Keep absolutely everything else
+identical — the same sunset sky, the same lake and reflections, the
+same autumn trees, the same wooden deck with the white chairs and the
+fairy lights, the same grass, the same poses, the same clothes, the
+same deckled paper edge. Do not re-compose or re-paint the scene.
+
+Change only the hair of the two people:
+
+1. The man: make his hair a noticeably darker brown — a warm dark
+   chestnut instead of the current light brown. Same haircut, same
+   shape, same length.
+
+2. The woman: make her hair clearly longer, reaching down to her lower
+   back near her waist. Keep the same golden blonde colour, the same
+   soft waves and the same loose parting — just continue the same wavy
+   strands further down, with individual strands and the wavy silhouette
+   still readable at the ends, painted with the same loose transparent
+   watercolour washes and soft edges.
+
+Match the existing watercolour technique exactly: visible brush
+strokes, transparent washes, soft bleeding edges, no outlines, no
+photorealism, no digital shading. Absolutely no text, no lettering.
+```
+
+### Y si hay que generarla de cero
+
+Es el mismo primer párrafo de siempre, con la composición apaisada:
+
+```
+Delicate hand-painted watercolour illustration on clean white paper,
+in the style of fine wedding stationery. Loose transparent washes with
+visible brush strokes and soft bleeding edges that fade into the white
+background. No outlines, no photorealism, no digital gradients. Warm
+citrus palette: bright orange (#E07A1F), burnt terracotta (#A84F2A),
+deep olive green (#435F3A), soft sage green (#A3B18A), warm oat beige
+(#D7C3A1), on cream white paper (#F6F2E8). Wide horizontal landscape
+composition with a deckled watercolour paper edge all around. Part of
+a matching set of wedding illustrations. Absolutely no text, no
+lettering, no words, no borders, no frame.
+
+Subject: a young couple seen from behind, sitting close together on
+the grass at the near shore of a calm countryside lake at sunset,
+looking out at the water. He is on the left, wearing a light blue-grey
+linen shirt with rolled sleeves, one hand resting on the grass behind
+him; his hair is short and a warm dark chestnut brown. She leans her
+head lightly on his shoulder, wearing a simple long cream dress spread
+over the grass; her hair is long golden blonde, softly wavy, falling
+well past her shoulders down to her lower back, with the wavy strands
+still readable at the ends. Faces not visible. Behind them the sun sits
+low on the horizon with warm coral and orange reflections on the still
+water, autumn trees along the far shore, and on the right a low wooden
+deck with a neat row of small white ceremony chairs and strings of tiny
+warm fairy lights hanging between tall slender poplars.
+```
+
+⚠️ Pedí **3 o 4 variantes** y elegí. Y mirá dos cosas antes de darla por
+buena: que el pelo de ella termine en **mechones**, no en una mancha —
+que es justo lo que falló cuando lo retoqué a mano— y que el muelle siga
+teniendo las sillas y las luces.
+
+---
+
 # SET C — El mapa
 
 ⚠️ NO va dibujado a línea. Va como **acuarela aérea**, igual que las
