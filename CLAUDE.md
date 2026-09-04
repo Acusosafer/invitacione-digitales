@@ -789,6 +789,54 @@ escribe sabe que solo lo lee ella, y se anima a escribir en serio — la pantall
 entero, nunca filas**. Si devolviera la lista, cualquiera con el slug del evento leería los
 mensajes de todos los invitados de una clienta.
 
+### La portada, y todo en una pantalla (04/09/2026)
+
+La foto ocupa **el ancho entero** arriba de todo y se disuelve hacia abajo en el papel del
+evento. Antes era un redondelito de 86px que no cumplía ninguna función; reconocer la cara de
+la agasajada es lo que confirma, en medio segundo, que el que escaneó el QR está en el lugar
+correcto.
+
+**La pregunta vive adentro de la portada**, no en un bloque aparte que repite el nombre: son
+~90px menos, que es exactamente lo que hace que **todo lo que hay que hacer entre en una
+pantalla de celular sin scrollear**. Verificado en 390×844, 375×667 y 360×740, en tema claro,
+oscuro y en el lila de Enredados: el botón de enviar siempre queda arriba del pliegue.
+
+⚠️⚠️ **El texto NO se apoya sobre la foto.** Abajo del título sube una pared de papel
+(`.marca::before`) que llega a opaca **4px antes** de la primera letra. Es la única garantía
+posible: la foto la elige el cliente —puede ser un cielo blanco o una noche negra— y la misma
+pantalla tiene que servir con papel blanco y con papel casi negro. No existe una opacidad que
+funcione en los cuatro casos.
+
+⚠️ **La pared va en px, no en %.** En porcentaje se corre según cuántos renglones ocupe la
+pregunta, y *"¿Qué les deseás a Carolina & Martín?"* ocupa uno más que *"¿Qué le deseás a
+Alma?"*.
+
+⚠️ **La portada queda FUERA de los dos pasos**, así que la carta se va volando y la foto se
+queda. Por eso `mostrar()` y `cerrado()` tienen que **esconder la pregunta**: si no, el libro
+cerrado pregunta "¿qué le deseás?" y abajo avisa que no se puede contestar, y la pantalla de
+"quedó guardado" vuelve a preguntar algo que la persona acaba de contestar.
+
+⚠️ **Medir el contraste acá exige apagar las transiciones.** Los chips animan el color en
+200ms: una captura sacada al instante los agarra todavía grises y da **3:1 en un chip que en
+realidad se lee a 5,2:1**. Y se mide el rectángulo de las **letras** (un `Range` sobre el nodo
+de texto), no el del elemento: en una píldora, el borde y las esquinas redondeadas caen adentro
+de la caja y dan otro fantasma igual de convincente.
+
+### El alias, después de enviar
+
+Muchos invitados recibieron la invitación **meses antes** y para la noche de la fiesta ya no la
+tienen a mano. El alias aparece en la pantalla de confirmación, con un botón para copiarlo.
+
+**Va después de enviar el deseo, nunca antes.** Recién escribió algo cariñoso, está con el
+celular en la mano y adentro de la fiesta: ese es el momento en que el alias sirve. Arriba,
+compitiendo con el campo de texto, sería un cartel de cobro y le sacaría lugar a lo único que
+hay que hacer en esa pantalla.
+
+⚠️ **Con `modo_regalo: 'sobres'` no aparece**: en esa fiesta no hay nada que transferir y
+mandaría a la gente a buscar un alias que no existe. Tampoco si el evento no tiene alias
+cargado, ni en la pantalla de libro cerrado —una fiesta pausada o inexistente no tiene que
+mandar a nadie a transferirle plata a nadie—.
+
 ### Decisiones que conviene sostener
 
 - **Es una pregunta, no una caja vacía.** A "dejá tu mensaje" la gente le escribe

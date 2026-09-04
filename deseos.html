@@ -72,48 +72,95 @@ body.listo{opacity:1}
        animation:entrar 620ms var(--curva) forwards}
 @keyframes entrar{to{opacity:1;transform:none}}
 
-/* ── Encabezado ────────────────────────────────────────────────────── */
-.top{display:flex;flex-direction:column;align-items:center;text-align:center;
-     padding:34px 0 26px}
-.retrato-caja{position:relative;width:86px;height:86px}
-.retrato{
-  width:100%;height:100%;border-radius:50%;object-fit:cover;
-  border:2px solid var(--secondary); background:var(--velo-2);
-  position:relative;z-index:1;
+/* ── La portada ───────────────────────────────────────────────────────
+   Lo primero que ve alguien que acaba de escanear el QR de una mesa. La
+   foto ocupa el ancho entero y se disuelve hacia abajo en el papel del
+   evento: reconocer la cara de la agasajada es lo que confirma, en medio
+   segundo, que está en el lugar correcto. Antes era un redondelito de
+   86px y no cumplía esa función.
+
+   ⚠️⚠️ EL TEXTO NO SE APOYA NUNCA SOBRE LA FOTO. Abajo del título sube
+   una pared de papel que llega a opaca 4px ANTES de donde arranca la
+   primera letra. Es la única garantía posible: la foto la elige el
+   cliente —puede ser un cielo blanco o una noche negra— y la misma
+   pantalla tiene que servir con papel blanco y con papel casi negro. No
+   existe una opacidad que funcione en los cuatro casos.
+   ⚠️ La pared va en px, NO en %: en porcentaje se corre según cuántos
+   renglones ocupe la pregunta, y "¿Qué les deseás a Carolina & Martín?"
+   ocupa uno más que "¿Qué le deseás a Alma?".                          */
+.portada{
+  position:relative; margin:0 -22px;
+  min-height:clamp(250px, 42dvh, 360px);
+  display:flex; flex-direction:column; justify-content:flex-end;
+  align-items:center; text-align:center;
+  padding:0 22px;
 }
-/* Un halo que late despacio. Es el único elemento que se mueve solo en
-   toda la pantalla: uno alcanza para que se sienta viva, dos distraen. */
-.retrato-caja::after{
-  content:'';position:absolute;inset:-7px;border-radius:50%;
-  border:1px solid var(--secondary);opacity:.34;
-  animation:latir 3.4s ease-in-out infinite;
+.portada .foto{position:absolute; inset:0; overflow:hidden; background:var(--velo-2)}
+/* La foto se acomoda al entrar: un acercamiento de UNA SOLA VEZ. El único
+   que se repite en bucle sigue siendo el halo; dos distraen.
+   ⚠️ El transform va en el hijo: escalar el contenedor le movería también
+   la pared de papel al texto. */
+.portada .foto > i{
+  position:absolute; inset:0; display:block;
+  background-size:cover; background-position:center 25%;
+  animation:acomodar 2600ms var(--curva) both;
 }
-@keyframes latir{
-  0%,100%{transform:scale(1);opacity:.34}
-  50%    {transform:scale(1.06);opacity:.12}
+@keyframes acomodar{from{transform:scale(1.07)}to{transform:scale(1)}}
+
+.marca{position:relative; z-index:1; width:100%; padding:60px 0 0}
+.marca::before{
+  content:''; position:absolute; left:-22px; right:-22px; top:0; bottom:-1px;
+  background:linear-gradient(to bottom, transparent 0, var(--bg) 56px);
+  z-index:-1;
 }
 .tipo{
-  margin-top:16px;font-size:.66rem;letter-spacing:.34em;text-transform:uppercase;
+  font-size:.64rem;letter-spacing:.34em;text-transform:uppercase;
   color:var(--ink-soft);
 }
-.quien{font-family:var(--font-titulo);font-size:1.65rem;line-height:1.1;margin-top:4px}
+/* Sin foto la portada no tiene nada que mostrar: se achica y el nombre
+   del evento pasa a ser el encabezado. */
+.portada.sin-foto{min-height:0;padding-top:30px}
+.portada.sin-foto .marca{padding-top:0}
+.portada.sin-foto .marca::before{display:none}
 
-/* ── La pregunta ───────────────────────────────────────────────────── */
+/* Ya escribió: la pregunta no se vuelve a hacer y la foto se corre para
+   que el número y el alias queden arriba del pliegue. */
+body.compacta #pregunta{display:none}
+body.compacta .portada{min-height:clamp(150px, 24dvh, 210px)}
+
+/* ⚠️ Pantallas cortas (un iPhone SE, o cualquier celular con la barra del
+   navegador comiéndose 120px). Sin esto la portada se lleva puesto el
+   botón de enviar, que es lo único que NO puede quedar abajo del pliegue. */
+@media (max-height:760px){
+  .portada{min-height:clamp(140px, 26dvh, 230px)}
+  .marca{padding-top:44px}
+  .marca::before{background:linear-gradient(to bottom, transparent 0, var(--bg) 40px)}
+  h1{font-size:clamp(1.5rem,6.2vw,1.9rem)}
+  .ayuda{margin-top:10px;font-size:.85rem}
+  .chips{margin-top:14px}
+  form{margin-top:15px}
+  textarea{min-height:84px}
+}
+
+/* ── La pregunta ──────────────────────────────────────────────────────
+   Una PREGUNTA, no "dejá tu mensaje": a una caja vacía la gente le
+   escribe "felicidades!!". Va acá arriba, adentro de la portada, en vez
+   de repetir el nombre en un bloque aparte — son ~90px menos, que es lo
+   que hace que todo lo que hay que hacer entre en una sola pantalla. */
 h1{
   font-family:var(--font-titulo); font-weight:400;
-  font-size:clamp(1.95rem,7.8vw,2.5rem); line-height:1.12;
-  letter-spacing:-.015em; text-wrap:balance; text-align:center;
+  font-size:clamp(1.8rem,7.2vw,2.35rem); line-height:1.1;
+  letter-spacing:-.015em; text-wrap:balance; margin-top:6px;
 }
 .ayuda{
-  margin-top:14px;font-size:.93rem;line-height:1.55;color:var(--ink-soft);
+  margin-top:13px;font-size:.9rem;line-height:1.5;color:var(--ink-soft);
   text-align:center;text-wrap:pretty;
 }
-
 /* ── Los disparadores ──────────────────────────────────────────────────
    "No sé qué poner" es la razón número uno por la que alguien abre esto y
    lo cierra sin escribir. Tres botones que arrancan la frase por vos.  */
 .chips{
-  display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:22px;
+  display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:18px;
 }
 .chip{
   font-family:inherit;font-size:.8rem;color:var(--ink-soft);
@@ -131,10 +178,14 @@ h1{
 .chips.guardados{max-height:0;opacity:0;margin-top:0;pointer-events:none}
 
 /* ── El formulario ─────────────────────────────────────────────────── */
-form{margin-top:24px}
+form{margin-top:20px}
+/* El contador va en la MISMA fila que la etiqueta. Suelto abajo del campo
+   ocupaba 24px fijos aunque estuviera invisible — y esos 24px son la
+   diferencia entre entrar en una pantalla y no entrar. */
 label{
-  display:block;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--ink-soft);margin-bottom:8px;
+  display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-soft);margin-bottom:7px;
 }
 textarea,input{
   width:100%;font-family:inherit;font-size:1.05rem;color:var(--primary);
@@ -142,7 +193,7 @@ textarea,input{
   padding:15px 16px;
   transition:border-color 200ms ease, background 200ms ease;
 }
-textarea{min-height:132px;resize:none;line-height:1.55;overflow:hidden}
+textarea{min-height:104px;resize:none;line-height:1.55;overflow:hidden}
 textarea::placeholder,input::placeholder{color:var(--ink-soft);opacity:.7}
 textarea:focus,input:focus{
   outline:none;border-color:var(--secondary);background:var(--velo-2);
@@ -152,20 +203,21 @@ textarea:focus,input:focus{
    manuscrita funciona igual de bien en los dos. */
 #firma{font-family:var(--font-mano);font-size:1.5rem;padding-top:11px;padding-bottom:11px}
 #firma::placeholder{font-family:var(--font);font-size:1.05rem}
-.campo + .campo{margin-top:18px}
+.campo + .campo{margin-top:14px}
 
 .cuenta{
-  text-align:right;font-size:.72rem;color:var(--ink-soft);
-  margin-top:7px;opacity:0;transition:opacity 240ms ease;
+  font-size:.64rem;letter-spacing:.04em;text-transform:none;
+  color:var(--ink-soft);white-space:nowrap;
+  opacity:0;transition:opacity 240ms ease;
 }
 .cuenta.cerca{opacity:1}
 
 .enviar{
-  width:100%;margin-top:22px;min-height:56px;
+  width:100%;margin-top:18px;min-height:54px;
   font-family:inherit;font-size:.82rem;font-weight:600;
   letter-spacing:.16em;text-transform:uppercase;
   background:var(--secondary);color:var(--on-accent);
-  border:0;border-radius:50px;padding:17px 24px;cursor:pointer;
+  border:0;border-radius:50px;padding:16px 24px;cursor:pointer;
   transition:transform 160ms var(--curva), opacity 200ms ease;
 }
 .enviar:active{transform:scale(.975)}
@@ -178,11 +230,6 @@ textarea:focus,input:focus{
   transition:opacity 220ms ease, transform 220ms var(--curva);
 }
 .aviso.visible{opacity:1;transform:none}
-.privado{
-  margin-top:20px;text-align:center;font-size:.78rem;line-height:1.5;
-  color:var(--ink-soft);text-wrap:pretty;
-}
-
 /* ── El envío: la carta se va ──────────────────────────────────────── */
 #paso-escribir.enviando{
   animation:volar 760ms var(--curva) forwards;
@@ -202,7 +249,7 @@ textarea:focus,input:focus{
 .sobre .cuerpo{animation:entrar 460ms var(--curva) both}
 
 /* ── Confirmación ──────────────────────────────────────────────────── */
-.ok{text-align:center;padding:46px 0 20px}
+.ok{text-align:center;padding:26px 0 16px}
 .ok h2{font-family:var(--font-titulo);font-weight:400;font-size:2rem;line-height:1.15}
 .ok p{margin-top:12px;color:var(--ink-soft);font-size:.95rem;text-wrap:pretty}
 .numero{
@@ -219,8 +266,35 @@ textarea:focus,input:focus{
   margin-top:8px;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;
   color:var(--ink-soft);
 }
+/* ── El recordatorio del regalo ───────────────────────────────────────
+   Va DESPUÉS de enviar el deseo, nunca antes. Recién escribió algo
+   cariñoso, está con el celular en la mano y en la fiesta: es el momento
+   en que el alias sirve. Arriba, compitiendo con el campo de texto,
+   sería un cartel de cobro y le sacaría lugar a lo único que hay que
+   hacer en esa pantalla.
+   Aparece solo si el evento tiene alias cargado y no es una fiesta de
+   lluvia de sobres — ahí no hay nada que transferir. */
+.regalo{
+  margin-top:26px;padding:20px 18px 18px;border-radius:18px;
+  background:var(--velo-1);border:1px solid var(--borde);
+}
+.regalo-t{font-size:.88rem;line-height:1.5;color:var(--ink-soft);text-wrap:pretty}
+.alias{
+  margin-top:13px;width:100%;min-height:56px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  background:var(--secondary);color:var(--on-accent);border:0;border-radius:16px;
+  padding:12px 18px;cursor:pointer;font-family:inherit;
+  transition:transform 160ms var(--curva);
+}
+.alias:active{transform:scale(.975)}
+/* El alias es un dato que se copia: va en un ancho fijo por carácter, o
+   una "l" y una "i" pegadas se leen como una sola letra al dictarlo. */
+.alias .a{font-size:1.08rem;font-weight:600;word-break:break-all;
+          font-variant-numeric:tabular-nums;letter-spacing:.01em;line-height:1.25}
+.alias .c{font-size:.63rem;letter-spacing:.16em;text-transform:uppercase}
+
 .otro{
-  margin-top:26px;background:transparent;color:var(--primary);
+  margin-top:22px;background:transparent;color:var(--primary);
   border:1px solid var(--borde);border-radius:50px;padding:15px 30px;min-height:48px;
   font-family:inherit;font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;
   cursor:pointer;transition:transform 160ms var(--curva);
@@ -238,27 +312,28 @@ textarea:focus,input:focus{
 
 <div class="hoja">
 
-  <div class="top entra" style="animation-delay:60ms">
-    <div class="retrato-caja" id="retrato-caja">
-      <img id="retrato" class="retrato" alt="">
+  <!-- La portada queda FUERA de los dos pasos: la carta se va volando y
+       la foto se queda. Es lo que hace que enviar se sienta como algo que
+       pasó adentro de la misma pantalla y no como otra página. -->
+  <header class="portada entra" id="portada" style="animation-delay:60ms">
+    <div class="foto" id="foto" aria-hidden="true"><i></i></div>
+    <div class="marca">
+      <div class="tipo" id="tipo"></div>
+      <h1 id="pregunta"></h1>
     </div>
-    <div class="tipo" id="tipo"></div>
-    <div class="quien" id="quien"></div>
-  </div>
+  </header>
 
   <!-- PASO 1 — escribir -->
   <section id="paso-escribir">
-    <h1 id="pregunta" class="entra" style="animation-delay:140ms"></h1>
-    <p class="ayuda entra" id="ayuda" style="animation-delay:200ms"></p>
+    <p class="ayuda entra" id="ayuda" style="animation-delay:180ms"></p>
 
-    <div class="chips entra" id="chips" style="animation-delay:260ms"></div>
+    <div class="chips entra" id="chips" style="animation-delay:240ms"></div>
 
     <form id="form" novalidate class="entra" style="animation-delay:320ms">
       <div class="campo">
-        <label for="texto">Tu deseo</label>
+        <label for="texto">Tu deseo <span class="cuenta" id="cuenta"></span></label>
         <textarea id="texto" maxlength="600"
           placeholder="Que nunca se te apague esa risa…"></textarea>
-        <div class="cuenta" id="cuenta"></div>
       </div>
       <div class="campo">
         <label for="firma">De parte de</label>
@@ -267,7 +342,6 @@ textarea:focus,input:focus{
       </div>
       <button class="enviar" type="submit">Dejar mi deseo</button>
       <p class="aviso" id="aviso"></p>
-      <p class="privado" id="privado"></p>
     </form>
   </section>
 
@@ -293,6 +367,14 @@ textarea:focus,input:focus{
       <div class="numero">
         <div class="n"><span id="ok-n">0</span><span class="orden" id="ok-orden">º</span></div>
         <div class="t" id="ok-n-txt">deseo de la noche</div>
+      </div>
+
+      <div class="regalo" id="regalo" hidden>
+        <div class="regalo-t" id="regalo-t"></div>
+        <button class="alias" id="btn-alias" type="button">
+          <span class="a" id="alias-n"></span>
+          <span class="c" id="alias-c">Tocá para copiarlo</span>
+        </button>
       </div>
 
       <button class="otro" id="btn-otro">Escribir otro</button>
@@ -434,13 +516,15 @@ function pintarTema() {
 function pintarCabecera() {
   const nombre = C.nombre || '';
   document.getElementById('tipo').textContent  = C.tipo || '';
-  document.getElementById('quien').textContent = nombre;
   document.getElementById('pg-title').textContent = nombre ? `Dejale un deseo a ${nombre}` : 'Dejá tu deseo';
 
-  const img = document.getElementById('retrato');
-  const foto = C.foto_splash || C.foto_hashtag || C.foto_hero;
-  if (foto) { img.src = foto; img.alt = nombre; }
-  else { document.getElementById('retrato-caja').remove(); }
+  // La misma foto del splash de la invitación, a lo ancho de la pantalla.
+  // ⚠️ Los clientes suben fotos VERTICALES de celular: recortada a una
+  // franja apaisada, el centro cae en el torso. El punto de mira va al
+  // 25%, igual que el hero de la invitación.
+  const foto = C.foto_splash || C.foto_hero || C.foto_hashtag;
+  if (foto) document.querySelector('#foto > i').style.backgroundImage = `url("${foto}")`;
+  else      document.getElementById('portada').classList.add('sin-foto');
 
   // Una PREGUNTA, no "dejá tu mensaje". A una caja vacía la gente le
   // escribe "felicidades!!"; a una pregunta le contesta de verdad.
@@ -448,22 +532,58 @@ function pintarCabecera() {
   // se lee mal y es lo primero que nota un cliente.
   const plural  = (params.get('t') || '').toLowerCase() === 'p' || /\s(&|y)\s/i.test(nombre);
   const leen    = plural ? 'van' : 'va';
+  const le      = plural ? 'les' : 'le';
   const escribi = plural ? 'Escribiles' : 'Escribile';
 
   document.getElementById('pregunta').textContent =
-    nombre ? `¿Qué le deseás a ${nombre}?` : '¿Qué le deseás?';
+    nombre ? `¿Qué ${le} deseás a ${nombre}?` : '¿Qué deseás para ellos?';
+  // La promesa de privacidad se dice UNA vez, y acá: antes de escribir es
+  // cuando saca la duda. Repetida abajo del botón solo ocupaba lugar.
   document.getElementById('ayuda').textContent =
     nombre ? `${escribi} unas líneas. Nadie más las lee: ${leen} directo a ${nombre}.`
            : 'Escribí unas líneas. Nadie más las lee.';
 
-  // El buzón privado, dicho como lo que es: una ventaja para quien escribe.
-  document.getElementById('privado').textContent =
-    nombre ? `Tu deseo no se publica en ningún lado. Lo lee ${nombre} y nadie más — escribí tranquilo.`
-           : 'Tu deseo no se publica en ningún lado.';
-
   document.getElementById('ok-texto').textContent =
     nombre ? `${nombre} lo ${leen} a leer después de la fiesta, con todos los demás.`
            : `Lo ${leen} a leer después de la fiesta.`;
+}
+
+/* El recordatorio del alias. Muchos invitados recibieron la invitación
+   meses antes y para la noche de la fiesta ya no la tienen a mano.
+   ⚠️ Con `modo_regalo: 'sobres'` NO va: en esa fiesta no hay nada que
+   transferir y mandaría a la gente a buscar un alias que no existe. */
+function pintarRegalo() {
+  const alias = (C.alias_pago || '').trim();
+  if (!alias || C.modo_regalo === 'sobres') return;
+
+  const nombre = C.nombre || '';
+  const plural = (params.get('t') || '').toLowerCase() === 'p' || /\s(&|y)\s/i.test(nombre);
+  document.getElementById('regalo-t').textContent = plural
+    ? '¿Ya les hiciste tu regalo? Este es el alias, por si no tenés la invitación a mano.'
+    : `¿Ya le hiciste tu regalo? Este es el alias de ${nombre || 'la fiesta'}, por si no tenés la invitación a mano.`;
+  document.getElementById('alias-n').textContent = alias;
+  document.getElementById('regalo').hidden = false;
+
+  const et = document.getElementById('alias-c');
+  let volver;
+  document.getElementById('btn-alias').onclick = async () => {
+    try { await navigator.clipboard.writeText(alias); }
+    catch (e) {
+      // Sin portapapeles (un navegador viejo, o el WebView de una app):
+      // se selecciona el texto para que lo copie a mano en vez de dejarlo
+      // tocando un botón que no hace nada.
+      const r = document.createRange();
+      r.selectNodeContents(document.getElementById('alias-n'));
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      et.textContent = 'Mantené apretado para copiar';
+      clearTimeout(volver);
+      volver = setTimeout(() => { et.textContent = 'Tocá para copiarlo'; }, 4000);
+      return;
+    }
+    et.textContent = 'Copiado ✓';
+    clearTimeout(volver);
+    volver = setTimeout(() => { et.textContent = 'Tocá para copiarlo'; }, 2600);
+  };
 }
 
 // La última frase que puso un disparador. ⚠️ Sin esto no se puede
@@ -504,7 +624,7 @@ function pintarChips() {
 const ta = document.getElementById('texto');
 function crecer() {
   ta.style.height = 'auto';
-  ta.style.height = Math.max(132, ta.scrollHeight) + 'px';
+  ta.style.height = Math.max(104, ta.scrollHeight) + 'px';
   const q = document.getElementById('cuenta');
   const quedan = 600 - ta.value.length;
   q.textContent = quedan + ' caracteres';
@@ -522,6 +642,9 @@ function mostrar(id) {
   ['paso-escribir','paso-listo'].forEach(p => {
     document.getElementById(p).hidden = (p !== id);
   });
+  // Ya contestó: la portada se achica y la pregunta se guarda. Preguntarle
+  // de nuevo "¿qué le deseás?" arriba de "quedó guardado" se contradice.
+  document.body.classList.toggle('compacta', id === 'paso-listo');
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
@@ -612,10 +735,18 @@ document.getElementById('btn-otro').addEventListener('click', () => {
 // está activo es la peor forma de decirlo.
 function cerrado(txt) {
   document.getElementById('paso-escribir').hidden = true;
+  // ⚠️ La pregunta vive en la portada, FUERA de los dos pasos. Sin esto,
+  // el libro cerrado pregunta "¿qué le deseás?" y abajo avisa que no se
+  // puede contestar.
+  document.getElementById('pregunta').remove();
+  document.body.classList.add('compacta');
   const s = document.getElementById('paso-listo');
   s.hidden = false;
   s.querySelector('.sobre').remove();
   s.querySelector('.numero').remove();
+  // ⚠️ Y el alias también: una fiesta pausada o inexistente no tiene que
+  // mandar a nadie a transferirle plata a nadie.
+  s.querySelector('.regalo').remove();
   document.getElementById('btn-otro').remove();
   document.getElementById('ok-titulo').textContent = 'El libro está cerrado';
   document.getElementById('ok-texto').textContent = txt;
@@ -626,6 +757,7 @@ function cerrado(txt) {
   C = (data && data.config) || {};
   pintarTema();
   pintarCabecera();
+  pintarRegalo();
   pintarChips();
   crecer();
 
