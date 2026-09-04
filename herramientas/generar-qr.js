@@ -40,7 +40,15 @@ const R_INT = R_EXT - 92;
    Por eso van DOS verdes: el código en `color` (profundo, el que se lee)
    y el anillo, el centro y los adornos en `acento` (el pistacho que se
    quería). La pieza se ve pistacho y el código funciona. */
-function pieza({ url, etiqueta, centro, color, acento, tinta, nombre }) {
+/* `fondo`:
+     'blanco'       — la lámina entera blanca (la de siempre, para imprimir)
+     'transparente' — sin nada atrás. ⚠️ El "blanco" del código pasa a ser
+                      lo que haya abajo: sobre fondo claro y liso se lee,
+                      sobre una foto NO.
+     'disco'        — transparente afuera del círculo, blanco adentro. Es
+                      el único que funciona apoyado sobre cualquier cosa. */
+function pieza({ url, etiqueta, centro, color, acento, tinta, nombre, fondo = 'blanco' }) {
+  const transparente = fondo !== 'blanco';
   const q = qrcode(0, 'H');
   q.addData(url); q.make();
   const n = q.getModuleCount();
@@ -85,7 +93,8 @@ function pieza({ url, etiqueta, centro, color, acento, tinta, nombre }) {
     <path id="ar" d="${arco(true)}"/>
     <path id="ab" d="${arco(false)}"/>
   </defs>
-  <rect width="${L}" height="${L}" fill="#ffffff"/>
+  ${fondo === 'blanco' ? `<rect width="${L}" height="${L}" fill="#ffffff"/>` : ''}
+  ${fondo === 'disco'  ? `<circle cx="${CENTRO}" cy="${CENTRO}" r="${R_EXT + 8}" fill="#ffffff"/>` : ''}
 
   <circle cx="${CENTRO}" cy="${CENTRO}" r="${R_EXT}" fill="none" stroke="${color}" stroke-width="2.5" opacity=".5"/>
   <circle cx="${CENTRO}" cy="${CENTRO}" r="${R_EXT-14}" fill="none" stroke="${acento}" stroke-width="13"/>
@@ -103,9 +112,9 @@ function pieza({ url, etiqueta, centro, color, acento, tinta, nombre }) {
   <g fill="${color}">${d}</g>
   ${marco(0,0)}${marco(0,n-7)}${marco(n-7,0)}
 
-  <circle cx="${CENTRO}" cy="${CENTRO}" r="${rHueco.toFixed(1)}" fill="#ffffff"/>
-  <circle cx="${CENTRO}" cy="${CENTRO}" r="${(rHueco*.88).toFixed(1)}" fill="${acento}"/>
-  <circle cx="${CENTRO}" cy="${CENTRO}" r="${(rHueco*.88).toFixed(1)}" fill="none" stroke="${color}" stroke-width="3"/>
+  ${transparente ? '' : `<circle cx="${CENTRO}" cy="${CENTRO}" r="${rHueco.toFixed(1)}" fill="#ffffff"/>`}
+  <circle cx="${CENTRO}" cy="${CENTRO}" r="${(rHueco*(transparente ? 1 : .88)).toFixed(1)}" fill="${acento}"/>
+  <circle cx="${CENTRO}" cy="${CENTRO}" r="${(rHueco*(transparente ? 1 : .88)).toFixed(1)}" fill="none" stroke="${color}" stroke-width="3"/>
   <text x="${CENTRO}" y="${CENTRO}" text-anchor="middle" dominant-baseline="central"
         font-family="Fraunces, Georgia, serif" font-weight="700"
         font-size="${(rHueco*1.02).toFixed(0)}" fill="${color}">${centro}</text>
@@ -114,12 +123,19 @@ function pieza({ url, etiqueta, centro, color, acento, tinta, nombre }) {
 
 module.exports = { pieza };
 
-// Uso directo: node qr-final.js <color> <carpeta> [mesas]
+/* Uso: node generar-qr.js <color> <acento> <carpeta> [mesas] [transparente]
+
+   ⚠️⚠️ TRANSPARENTE NO ES UN DETALLE DE FORMATO. El "blanco" del código
+   pasa a ser lo que haya atrás: sobre un fondo claro se lee igual que
+   antes, sobre una foto o un fondo medio oscuro NO SE LEE. El pistacho
+   sobre papel es 4,85:1; sobre una foto de fondo puede ser 1,2:1. Antes
+   de imprimir, se compone contra el fondo REAL y se lee con jsQR. */
 if (require.main === module) {
   const color  = process.argv[2] || '#5d7a42';   // el codigo: tiene que leerse
   const acento = process.argv[3] || '#b5d99c';   // los adornos: el pistacho
   const salida = process.argv[4];
   const mesas  = parseInt(process.argv[5] || '12');
+  const fondo  = process.argv[6] || 'blanco';   // blanco | transparente | disco
   const EVENTO = 'almamia15', NOMBRE = 'ALMA';
   const BASE = 'https://www.invitacionesdigitalesoficial.com/deseos';
 
@@ -127,10 +143,10 @@ if (require.main === module) {
   for (let m = 1; m <= mesas; m++) {
     fs.writeFileSync(path.join(salida, `qr-mesa-${String(m).padStart(2,'0')}.svg`),
       pieza({ url: `${BASE}?evento=${EVENTO}&mesa=${m}`, etiqueta: `MESA ${m}`,
-              centro: m, color, acento, tinta: '#1a1a1a', nombre: NOMBRE }));
+              centro: m, color, acento, tinta: '#1a1a1a', nombre: NOMBRE, fondo }));
   }
   fs.writeFileSync(path.join(salida, 'qr-mesa-principal.svg'),
     pieza({ url: `${BASE}?evento=${EVENTO}&mesa=0`, etiqueta: 'MESA PRINCIPAL',
-            centro: '★', color, acento, tinta: '#1a1a1a', nombre: NOMBRE }));
-  console.log((mesas + 1) + ' piezas en ' + salida);
+            centro: '★', color, acento, tinta: '#1a1a1a', nombre: NOMBRE, fondo }));
+  console.log(`${mesas + 1} piezas (fondo ${fondo}) en ${salida}`);
 }

@@ -965,6 +965,30 @@ apoyan contra la línea.
 **Cada pieza se verifica leyéndola con jsQR a cuatro tamaños**, desde el que va a tener
 impresa en la mesa. Un QR lindo que no se lee es un cartel inútil impreso trece veces.
 
+### Fondo transparente (04/09/2026)
+
+`node herramientas/generar-qr.js <color> <acento> <carpeta> [mesas] [fondo]`, donde `fondo` es
+`blanco` (por defecto) · `transparente` · `disco`.
+
+⚠️⚠️ **Transparente no es un detalle de formato: es un riesgo.** El blanco del código deja de
+existir y pasa a ser lo que haya atrás. Medido con jsQR al tamaño impreso, los 13 de Alma:
+
+| atrás | resultado |
+|---|---|
+| blanco, cremas, pistacho claro, gris claro | leen los 13 |
+| **más oscuro que `#a5a5a5`** | **no lee ninguno** |
+| **una foto** | **no lee ninguno** |
+
+Por eso existe **`disco`**: transparente afuera del círculo y blanco adentro. Es el único que
+funciona apoyado sobre cualquier cosa — verificado sobre la foto de Alma, 13 de 13.
+
+⚠️ **Sin el círculo blanco del centro asoman pedacitos de código.** No era decorativo: tapaba
+los módulos que sobresalen por los costados del hueco cuadrado. En transparente se resuelve
+agrandando el medallón de color hasta el mismo radio, no borrándolo.
+
+⚠️ El texto curvo de arriba va en tinta `#1a1a1a`: en la versión transparente, sobre un fondo
+oscuro desaparece aunque el código todavía se lea.
+
 ### Riesgo aceptado
 
 Quien sepa el slug del evento puede escribir un deseo, igual que puede confirmar asistencia.
