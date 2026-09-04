@@ -677,6 +677,21 @@ así que se persigue el fantasma equivocado**. Si las capas de papel son
 `position:fixed/absolute` con z-index, el contenido no necesita z-index
 propio: queda en el flujo y el papel le pasa por encima igual.
 
+⚠️⚠️ **Y `perspective` rompe el multiply igual que un `z-index`.** La
+portada de la etiqueta se voltea, y para voltearse necesita
+`perspective` + `transform-style: preserve-3d`: los dos abren un
+*stacking context*, así que el `mix-blend-mode` del hijo se mezcla
+contra ESE contexto —transparente— en vez de contra el papel, y vuelve
+el rectángulo blanco. Adentro de algo que gira, **el multiply no se
+puede usar**: va un PNG sin fondo.
+
+⚠️ **El fondo NO se saca borrando lo claro**, porque el interior de la
+etiqueta es casi tan claro como el papel y se borraría entero. Va un
+**relleno desde los bordes**: lo que no se alcanza caminando desde
+afuera, es la ilustración. Después, alfa según cuánto se despega cada
+píxel del fondo. Queda 88% transparente con el borde de acuarela
+intacto — `herramientas/portada-mock.py`.
+
 **Y también vienen con mucho margen de papel.** En una grilla los motivos
 se ven diminutos dentro de un rectángulo casi vacío. Se recortan al
 contenido comparando cada píxel contra el color de la esquina
