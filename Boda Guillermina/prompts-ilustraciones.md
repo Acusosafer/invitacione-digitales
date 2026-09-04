@@ -278,6 +278,58 @@ teniendo las sillas y las luces.
 
 ---
 
+## B5 · La etiqueta de valija — la portada → `etiqueta.png`
+
+Es lo primero que ve el invitado: cuelga en el medio del papel, se mece
+apenas, y al tocarla gira y muestra la fecha y el lugar.
+
+⚠️ **La etiqueta tiene que quedar VACÍA adentro.** Los nombres van
+escritos encima, en la caligrafía, desde la web. Si viene con manchas o
+con dibujos en el medio, no sirve — hay que quedarse con la variante de
+interior más limpio.
+
+⚠️ **Con una alcanza.** El dorso es la misma etiqueta espejada por CSS,
+no hace falta generar una segunda.
+
+```
+Delicate hand-painted watercolour illustration on clean white paper,
+in the style of fine wedding stationery. Loose transparent washes with
+visible brush strokes and soft bleeding edges that fade into the white
+background. No outlines, no photorealism, no digital gradients. Warm
+citrus palette: bright orange (#E07A1F), burnt terracotta (#A84F2A),
+deep olive green (#435F3A), soft sage green (#A3B18A), warm oat beige
+(#D7C3A1), on cream white paper (#F6F2E8). Single isolated subject,
+centred, with generous white space all around. Part of a matching set
+of wedding illustrations. Absolutely no text, no lettering, no words,
+no borders, no frame.
+
+Subject: a single blank luggage tag hanging from a short piece of
+twine, seen straight on and perfectly vertical, no perspective and no
+3D. The tag is a tall rectangle with its two upper corners clipped at
+an angle and a small round reinforced eyelet near the top. A slender
+natural twine passes through the eyelet and is knotted above it,
+forming a small loop that ends inside the frame. The tag is painted in
+soft warm oat beige, with a fine hand-painted burnt terracotta rule
+running just inside the outline of the tag, the way a real luggage tag
+is printed. The middle of the tag is left almost empty and very pale,
+with only the faintest wash, so that handwriting could sit on it. A
+tiny sprig of orange blossom with two small green leaves rests against
+the knot. A soft watercolour shadow under the tag. Nothing else in the
+image.
+```
+
+⚠️ Pedí **3 o 4 variantes**. Al elegir mirá, en este orden:
+
+1. **Que el medio esté vacío.** Es donde van los nombres.
+2. **Que la etiqueta esté derecha**, no en diagonal ni en perspectiva:
+   se va a mecer con CSS y una etiqueta ya inclinada se mece torcida.
+3. Que el cordel termine adentro de la imagen, no cortado en el borde.
+4. Que no haya venido una línea alrededor de TODA la ilustración. Si
+   pasa, sacá del prompt lo de "a fine hand-painted burnt terracotta
+   rule" y volvé a pedirla.
+
+---
+
 # SET C — El mapa
 
 ⚠️ NO va dibujado a línea. Va como **acuarela aérea**, igual que las
