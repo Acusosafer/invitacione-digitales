@@ -21,14 +21,24 @@ body.adentro{overflow:auto}
    de la pantalla. Nada de dibujarle una soga con CSS: el empalme se ve
    siempre, por mejor que se elija el color. */
 .portada{position:fixed;inset:0;z-index:4;background:var(--papel);
-  transition:opacity 900ms var(--ease);}
+  transition:opacity 600ms linear}
 .portada.ida{opacity:0;pointer-events:none}
 
 .colgante{position:absolute;left:50%;top:-42px;width:246px;margin-left:-123px;
   transform-origin:50% 0;animation:mecer 7s ease-in-out infinite}
 @keyframes mecer{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1deg)}}
-.colgante.sube{animation:none;transform:translateY(-130%) rotate(-2deg);
-  opacity:0;transition:transform 1000ms var(--ease),opacity 800ms 200ms linear}
+/* ⚠️ La etiqueta NO se desvanece mientras sube. Antes se iba en opacidad
+   al mismo tiempo que el papel de la portada, así que se apagaba en el
+   lugar y el viaje no se veía NUNCA. Sube entera, y el papel recién se
+   apaga cuando ya salió de la pantalla.
+   Y arranca con una caidita: es alguien tirando del cordel, y una soga
+   de verdad cede un instante antes de levantar. */
+.colgante.sube{animation:levantar 1150ms cubic-bezier(.5,0,.75,.35) forwards}
+@keyframes levantar{
+  0%  {transform:translateY(0) rotate(0)}
+  9%  {transform:translateY(11px) rotate(.6deg)}
+  100%{transform:translateY(-155%) rotate(-2.5deg)}
+}
 
 /* Pantalla corta (un SE, o cualquier celular con la barra del navegador
    comiendose 120px): la etiqueta pisaba el pie. */
@@ -96,7 +106,7 @@ body.adentro{overflow:auto}
           <div class="nom n2">Sebasti&aacute;n</div>
         </div>
         <div class="escrito dorso">
-          <div class="dat">S&aacute;bado<span class="g">3 &middot; IV &middot; 2027</span>
+          <div class="dat">S&aacute;bado<span class="g">03 &middot; IV &middot; 2027</span>
             Finca<br>La Josefina<br>Berisso</div>
         </div>
       </div>
@@ -139,7 +149,15 @@ for(let i=0;i<11;i++){
 /* UN SOLO TOQUE: gira, deja leer la fecha, y se va.
    ⚠️ La música tiene que arrancar ACÁ ADENTRO, en el gesto. Llamar a
    play() desde el setTimeout es llamarlo sin gesto, y el navegador lo
-   bloquea. */
+   bloquea.
+
+   Los tiempos, en orden y sin pisarse:
+     0      toque · empieza a girar
+     900    terminó de girar · empieza a leerse la fecha
+     3400   sube — 2,5 segundos de lectura contados desde que quedó dada
+            vuelta, NO desde el toque
+     4290   ya salió de la pantalla: recién ahí se apaga el papel */
+const GIRO=900, LEER=2500, SUBE=1150;
 let abierto=false;
 document.getElementById('eti').onclick=()=>{
   if(abierto) return; abierto=true;
@@ -148,9 +166,11 @@ document.getElementById('eti').onclick=()=>{
   document.getElementById('pie').classList.add('ida');
   setTimeout(()=>{
     document.getElementById('colgante').classList.add('sube');
+  }, GIRO+LEER);
+  setTimeout(()=>{
     document.getElementById('portada').classList.add('ida');
     document.body.classList.add('adentro');
-  },2300);
+  }, GIRO+LEER+SUBE-260);
 };
 // Un empujoncito a los 6 segundos, una sola vez.
 setTimeout(()=>{ if(!abierto) document.getElementById('toca').classList.add('avisa'); },6000);
