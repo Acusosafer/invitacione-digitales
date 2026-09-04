@@ -241,10 +241,10 @@ h2{font-family:'Marcellus',serif; font-weight:400; font-size:1.15rem;
     <div class="n">Segundo</div>
     <h2>El pelo</h2>
     <p>
-      Hecho: él un poco más oscuro, ella un poco más largo. <b>No volví a
-      generar el dibujo</b> — lo retoqué. Si lo generaba de nuevo cambiaba
-      la escena entera: otro atardecer, otro muelle, otras sillas. Lo que
-      les gustó es este dibujo, así que se tocó el pelo y nada más.
+      Hecho: él más oscuro, ella más largo. <b>No es un dibujo nuevo</b>
+      — es el mismo, editado. El atardecer, el muelle, las sillas y las
+      luces son exactamente los que ya había: cambió el 2,5% de la
+      imagen, y todo ese 2,5% es pelo.
     </p>
     <div class="par">
       <figure><img src="__ANTES__" alt="El pelo como estaba">
@@ -257,9 +257,10 @@ h2{font-family:'Marcellus',serif; font-weight:400; font-size:1.15rem;
       <figcaption>Y así queda el dibujo entero — lo demás no se tocó</figcaption>
     </figure>
     <p style="margin-top:16px">
-      Si quieren más —el pelo bastante más largo, o él bastante más
-      oscuro— díganmelo y lo empujo un poco más. Preferí quedarme corto:
-      es más fácil agregar que volver atrás.
+      Un aviso honesto: al alargarlo, el pelo de ella también quedó con
+      <b>más volumen y un poco más rubio</b> que antes. A mí me gusta
+      así, pero si lo quieren igual de largo y más pegado, o del castaño
+      de antes, se ajusta. Y lo mismo con él, si quedó demasiado oscuro.
     </p>
   </section>
 
