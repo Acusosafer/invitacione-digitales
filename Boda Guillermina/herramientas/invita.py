@@ -78,15 +78,15 @@ print('imágenes:')
 IM = {
   'etiqueta': webp('etiqueta-lista.png'),
   'ellos':    jpg('ellos-tono.jpg', 720, 80, limpiar=False),
-  'altar':    jpg('vista-altar-acuarela.jpg', 560),
+  'altar':    jpg('gemini-generated-image-fp6fmkfp6fmkfp6f.jpg', 700),
   'mapa':     jpg('mapa.jpg', 780, 76, limpiar=False),
   'luces':    jpg('guirnalda-de-luces.jpg', 620),
   'vela':     jpg('vela.jpg', 300),
   'ramo':     jpg('ramo-con-naranjas.jpg', 380),
   'olivo':    jpg('olivo.jpg', 420),
-  'naranjas': jpg('medias-naranja.jpg', 300),
-  'copas':    jpg('copas-brindis.jpg', 300),
-  'ramo2':    jpg('ramo.jpg', 260),
+  'naranjas': jpg('medias-naranja.jpg', 420),
+  'aperol':   jpg('aperol.jpg', 240),
+  'copas':    jpg('copas-solas.jpg', 460),
 }
 VB_ESC, T_ESC = trazos('escena')
 VB_CAR, T_CAR = trazos('cartel')
@@ -245,6 +245,14 @@ h1,h2{font-family:'Marcellus',Georgia,serif;font-weight:400;line-height:1.18;
   background:var(--terracota);transform:scaleX(0);transform-origin:center;
   transition:transform 1.1s var(--ease) 200ms}
 .acto.on h2::after{transform:scaleX(1)}
+/* El contador. Un número grande y nada más: la cuenta de los días es
+   el dato, no un cartel. */
+.cuenta{margin-top:34px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.cuenta .n{font-family:'Marcellus',serif;font-size:3.1rem;line-height:1;
+  color:var(--hondo);font-variant-numeric:tabular-nums}
+.cuenta .t{font-family:'Marcellus',serif;font-size:.62rem;letter-spacing:.32em;
+  text-transform:uppercase;color:var(--tinta-2)}
+
 .dato{margin-top:26px}
 .dato .hora{font-family:'Marcellus',serif;font-size:2.4rem;color:var(--hondo);line-height:1}
 .dato .donde{margin-top:8px;font-size:.95rem;color:var(--tinta-2)}
@@ -354,10 +362,22 @@ footer a{color:var(--hondo);text-decoration:none}
     <p class="rot rev" style="margin-top:20px">S&aacute;bado 3 de abril de 2027</p>
     <p class="rev" style="margin-top:6px;color:var(--tinta-2);font-size:.95rem">
       Finca La Josefina &middot; Berisso</p>
+
+    <!-- El cartel de la entrada, dibujándose EN BUCLE. Es lo que ven al
+         llegar, y acá abajo de la fecha hace de firma del lugar.
+         ⚠️ El bucle se apaga cuando el cartel sale de la pantalla: si no
+         sigue redibujándose para nadie, gastando batería. -->
+    <svg class="dibujo rev bucle" id="dib-cartel" viewBox="__VB_CAR__"
+         style="width:100%;max-width:330px;margin-top:34px" aria-hidden="true">__T_CAR__</svg>
+
+    <div class="cuenta rev" id="cuenta" hidden>
+      <span class="n" id="cuenta-n">—</span>
+      <span class="t" id="cuenta-t">d&iacute;as</span>
+    </div>
   </div>
 </section>
 
-<img class="sep rev" src="__NARANJAS__" alt="" aria-hidden="true">
+<img class="sep rev" src="__APEROL__" alt="" aria-hidden="true" style="width:56px">
 
 <!-- ══════════ 2 · LA CEREMONIA ══════════ -->
 <section class="acto junto" id="ceremonia" style="position:relative;overflow:hidden">
@@ -380,12 +400,7 @@ footer a{color:var(--hondo);text-decoration:none}
 <!-- ══════════ 3 · CÓMO LLEGAR ══════════ -->
 <section class="acto junto" id="mapa-sec">
   <div class="wrap">
-    <!-- El cartel de la entrada, dibujándose. Es lo primero que ven
-         cuando llegan, así que es lo primero de esta sección. Va como
-         línea y sin acuarela abajo: un cartel ES una línea. -->
-    <svg class="dibujo rev" id="dib-cartel" viewBox="__VB_CAR__"
-         style="width:100%;max-width:380px" aria-hidden="true">__T_CAR__</svg>
-    <p class="rot rev" style="margin-top:20px">C&oacute;mo llegar</p>
+    <p class="rot rev">C&oacute;mo llegar</p>
     <!-- El cartel ya dice "Finca La Josefina": repetirlo abajo en el
          titulo es decir dos veces lo mismo. Ac&aacute; va el dato que falta. -->
     <h2 class="rev">Berisso, <em>Buenos Aires</em></h2>
@@ -403,32 +418,19 @@ footer a{color:var(--hondo);text-decoration:none}
   </div>
 </section>
 
-<img class="sep rev" src="__COPAS__" alt="" aria-hidden="true" style="width:96px">
+
 
 <!-- ══════════ 4 · LA FIESTA ══════════ -->
 <section class="acto" id="fiesta">
   <div class="wrap">
-    <!-- La copa, con los hielos que CAEN adentro cuando terminó de
-         dibujarse. No todo tiene que dibujarse: cada cosa se comporta
-         como se comportaría de verdad. -->
-    <svg class="dibujo rev" id="dib-copa" viewBox="0 0 100 128"
-         style="width:104px" aria-hidden="true">
-      <path class="trazo" d="M26 34 C26 28.5 74 28.5 74 34 C74 39.5 26 39.5 26 34"/>
-      <path class="trazo" d="M27.5 36 C25.5 54 34.5 70.5 50 70.5 C65.5 70.5 74.5 54 72.5 36"/>
-      <path class="trazo fino suave" d="M29.5 45 C38 49.5 62 49.5 70.5 45"/>
-      <path class="trazo fino cae" style="--retraso:.15s" d="M34.5 54 L43 51 L45.5 58.5 L37 61.5 Z"/>
-      <path class="trazo fino cae" style="--retraso:.38s" d="M51.5 59 L59.5 56 L62 63 L54 66 Z"/>
-      <path class="trazo" d="M50 71 L50 104"/>
-      <path class="trazo" d="M34 108 C34 103 66 103 66 108 C66 112.5 34 112.5 34 108"/>
-      <path class="trazo suave" d="M61 23 C61 17 66 12.5 72 12.5 C78 12.5 83 17 83 23 C83 29 78 33.5 72 33.5 C66 33.5 61 29 61 23"/>
-      <path class="trazo fino suave" d="M72 23 L72 13"/>
-      <path class="trazo fino suave" d="M72 23 L81.5 19.5"/>
-      <path class="trazo fino suave" d="M72 23 L80.5 30"/>
-      <path class="trazo fino suave" d="M72 23 L63.5 29.5"/>
-      <path class="trazo fino suave" d="M72 23 L62.5 19"/>
-      <path class="trazo fino" d="M57 32 L64.5 12"/>
-    </svg>
-    <img class="acuarela rev" src="__LUCES__" style="max-width:460px;margin-top:22px" alt="">
+    <!-- ⚠️ Acá había una copa dibujada a línea con hielos que caían.
+         Se sacó a pedido de Fer: con la acuarela de las copas al lado
+         eran dos copas seguidas diciendo lo mismo.
+         ⚠️ Se saca ENTERA, no con `hidden`: la regla del navegador
+         `[hidden]{display:none}` pierde contra `.dibujo{display:block}`
+         y la copa se seguía viendo igual. -->
+    <img class="acuarela rev" src="__COPAS__" style="max-width:300px;margin:0 auto" alt="">
+    <img class="acuarela rev" src="__LUCES__" style="max-width:460px;margin-top:26px" alt="">
     <p class="rot rev" style="margin-top:22px">La fiesta</p>
     <h2 class="rev">En el mismo <em>lugar</em></h2>
     <div class="dato rev">
@@ -441,7 +443,8 @@ footer a{color:var(--hondo);text-decoration:none}
 <!-- ══════════ 5 · DRESS CODE ══════════ -->
 <section class="acto junto" id="vestimenta">
   <div class="wrap">
-    <img class="motivo rev" src="__VELA__" style="width:96px" alt="">
+    <!-- ⚠️ Acá iba la vela y no tenía nada que ver con el dress code.
+         Falta la ilustración nueva: una flor de ojal con su alfiler. -->
     <p class="rot rev">Dress code</p>
     <h2 class="rev"><em>Elegante</em></h2>
   </div>
@@ -450,8 +453,8 @@ footer a{color:var(--hondo);text-decoration:none}
 <!-- ══════════ 6 · REGALOS ══════════ -->
 <section class="acto junto" id="regalos">
   <div class="wrap">
-    <img class="motivo rev" src="__RAMO__" style="width:130px" alt="">
-    <p class="rot rev">Si quer&eacute;s hacernos un regalo</p>
+    <img class="motivo rev" src="__NARANJAS__" style="width:180px" alt="">
+    <p class="rot rev" style="margin-top:8px">Si quer&eacute;s hacernos un regalo</p>
     <h2 class="rev">Ac&aacute; est&aacute; el <em>alias</em></h2>
     <div class="alias rev">
       <span id="alias" data-falta>guille.seba.boda</span>
@@ -460,19 +463,13 @@ footer a{color:var(--hondo);text-decoration:none}
   </div>
 </section>
 
-<img class="sep rev" src="__RAMO2__" alt="" aria-hidden="true" style="width:64px">
+<img class="sep rev" src="__RAMO__" alt="" aria-hidden="true" style="width:82px">
 
 <!-- ══════════ 7 · CONFIRMAR ══════════ -->
 <section class="acto junto" id="rsvp">
   <div class="wrap">
-    <svg class="dibujo rev" id="dib-naranja" viewBox="0 0 100 108"
-         style="width:80px" aria-hidden="true">
-      <path class="trazo" d="M50 30 C68 29 81 43 80 60 C79 77 66 89 49 89 C32 89 20 75 20.5 58 C21 41 33 30.5 50 30"/>
-      <path class="trazo fino" d="M50 30 C49 25 47.5 21 46 18.5"/>
-      <path class="trazo hoja" d="M46 18.5 C52 10.5 65 10 70 16.5 C64 24 52 24.5 46 18.5"/>
-      <path class="trazo hoja fino" d="M48.5 18.2 C55 17 62.5 16.6 68.5 17.2"/>
-    </svg>
-    <p class="rot rev" style="margin-top:18px">Queremos contar con vos</p>
+    <img class="motivo rev" src="__OLIVO__" style="width:150px" alt="">
+    <p class="rot rev">Queremos contar con vos</p>
     <h2 class="rev">Confirm&aacute; tu <em>lugar</em></h2>
     <p class="rev" style="margin-top:16px;color:var(--tinta-2);font-size:.95rem">
       Antes del 18 de febrero de 2027</p>
@@ -541,6 +538,7 @@ function abrir(){
     document.getElementById('portada').classList.add('ida');
     document.body.classList.add('adentro');
     window.scrollTo(0,0);
+    arrancarSecciones();          // ⚠️ recién acá, con la portada fuera
   }, GIRO+LEER+SUBE-260);
 }
 const eti=document.getElementById('eti');
@@ -599,6 +597,23 @@ function dibujar(caja, demora, duracion){
 const RITMO={'esc-ellos':[13,480],'dib-cartel':[15,520],
              'dib-copa':[95,900],'dib-naranja':[130,1100]};
 
+/* ── El contador de días ──────────────────────────────────────────
+   ⚠️ La fecha se arma con el huso de Argentina escrito a mano (-03:00),
+   no con new Date('2027-04-03T18:00'): sin huso, cada navegador la lee
+   en el suyo y a un invitado en Madrid le faltarían días distintos. */
+(function(){
+  const BODA = new Date('2027-04-03T18:00:00-03:00');
+  const dia = 86400000;
+  const hoy = new Date();
+  const faltan = Math.ceil((BODA - hoy) / dia);
+  const c = document.getElementById('cuenta');
+  if (faltan < 0) return;                       // ya pasó: no se muestra
+  document.getElementById('cuenta-n').textContent = faltan;
+  document.getElementById('cuenta-t').textContent =
+    faltan === 0 ? 'es hoy' : faltan === 1 ? 'día' : 'días';
+  c.hidden = false;
+})();
+
 /* ── Cada sección aparece al entrar en pantalla ──────────────────── */
 const ojo=new IntersectionObserver(es=>{
   es.forEach(e=>{ if(e.isIntersecting){
@@ -617,14 +632,40 @@ const ojo=new IntersectionObserver(es=>{
     ojo.unobserve(e.target);
   }});
 },{threshold:.16});
-document.querySelectorAll('.acto').forEach(s=>ojo.observe(s));
+/* ⚠️⚠️ Los observadores NO arrancan hasta que la portada se fue. La
+   primera sección está abajo de la etiqueta, así que se cruzaba con la
+   pantalla desde el primer instante: los 201 trazos de la acuarela
+   principal se dibujaban enteros DETRÁS de la portada y, cuando la
+   etiqueta subía, ya estaba todo pintado. El efecto existía y no lo
+   veía nadie. */
+function arrancarSecciones(){
+  document.querySelectorAll('.acto').forEach(s=>ojo.observe(s));
+  document.querySelectorAll('.sep').forEach(x=>ojoSep.observe(x));
+}
+
+/* ── El cartel, dibujándose una y otra vez ────────────────────────
+   ⚠️ El bucle se apaga cuando el cartel sale de la pantalla. Si no,
+   sigue redibujándose para nadie: gasta batería y, con la pestaña en
+   segundo plano, los timers se acumulan. */
+(function(){
+  const c = document.querySelector('.bucle');
+  if(!c) return;
+  const [dem,dur] = RITMO[c.id] || [15,520];
+  const vuelta = c.querySelectorAll('.trazo').length*dem + dur + 3400;
+  let reloj = null;
+  new IntersectionObserver(es=>es.forEach(e=>{
+    if(e.isIntersecting){
+      if(reloj) return;
+      reloj = setInterval(()=>dibujar(c,dem,dur), vuelta);
+    } else { clearInterval(reloj); reloj = null; }
+  }),{threshold:.25}).observe(c);
+})();
 /* ⚠️ Los separadores viven ENTRE las secciones, no adentro: el
    observador de `.acto` no los alcanza y se quedaban invisibles para
    siempre, en opacidad 0. Van con su propio observador. */
 const ojoSep=new IntersectionObserver(es=>es.forEach(e=>{
   if(e.isIntersecting){ e.target.classList.add('on'); ojoSep.unobserve(e.target); }
 }),{threshold:.5});
-document.querySelectorAll('.sep').forEach(x=>ojoSep.observe(x));
 new IntersectionObserver(es=>es.forEach(e=>{
   if(e.isIntersecting){ e.target.classList.add('on'); }
 }),{threshold:.3}).observe(document.getElementById('mapa'));
@@ -646,7 +687,7 @@ document.getElementById('copiar').onclick=async function(){
 
 CLAVES = {'etiqueta':'ETIQUETA','ellos':'ELLOS','altar':'ALTAR','mapa':'MAPA',
           'luces':'LUCES','vela':'VELA','ramo':'RAMO','olivo':'OLIVO',
-          'naranjas':'NARANJAS','copas':'COPAS','ramo2':'RAMO2'}
+          'naranjas':'NARANJAS','copas':'COPAS','aperol':'APEROL'}
 for k, v in IM.items():
     HTML = HTML.replace('__' + CLAVES[k] + '__', v)
 HTML = (HTML.replace('__VB_ESC__', VB_ESC).replace('__T_ESC__', T_ESC)

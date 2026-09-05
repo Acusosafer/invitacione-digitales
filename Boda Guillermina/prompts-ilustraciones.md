@@ -330,6 +330,37 @@ image.
 
 ---
 
+## B6 · La flor de ojal — el dress code → `ojal.png`
+
+La vela que estaba ahí no tiene nada que ver con cómo vestirse. Una
+**flor de ojal** sí: es la única prenda de una boda que además es
+botánica, así que entra en el set sin desentonar.
+
+```
+Delicate hand-painted watercolour illustration on clean white paper,
+in the style of fine wedding stationery. Loose transparent washes with
+visible brush strokes and soft bleeding edges that fade into the white
+background. No outlines, no photorealism, no digital gradients. Warm
+citrus palette: bright orange (#E07A1F), burnt terracotta (#A84F2A),
+deep olive green (#435F3A), soft sage green (#A3B18A), warm oat beige
+(#D7C3A1), on cream white paper (#F6F2E8). Single isolated subject,
+centred, with generous white space all around. Part of a matching set
+of wedding illustrations. Absolutely no text, no lettering, no words,
+no borders, no frame.
+
+Subject: a small wedding boutonnière lying flat, seen from above: one
+open orange garden rose with two smaller buds, three or four olive and
+eucalyptus leaves behind it, the stems bound together with a short
+length of natural twine tied in a simple knot, and a slender pearl-
+headed pin crossing the stems at an angle. Nothing else in the image.
+```
+
+⚠️ Al elegir la variante: que la flor esté **acostada y de frente**, no
+prendida a una solapa. Un saco dibujado atrás la saca del set — todas
+las otras once son objetos sueltos sobre papel blanco.
+
+---
+
 # SET C — El mapa
 
 ⚠️ NO va dibujado a línea. Va como **acuarela aérea**, igual que las
