@@ -86,7 +86,8 @@ IM = {
   'olivo':    jpg('olivo.jpg', 420),
   'naranjas': jpg('medias-naranja.jpg', 420),
   'aperol':   jpg('aperol.jpg', 240),
-  'copas':    jpg('copas-solas.jpg', 460),
+  'olivo2':   jpg('olivo.jpg', 300),
+  'copas':    jpg('copas-brindis.jpg', 640),
 }
 VB_ESC, T_ESC = trazos('escena')
 VB_CAR, T_CAR = trazos('cartel')
@@ -117,7 +118,7 @@ HTML = r'''<!DOCTYPE html>
 :root{
   --naranja:#E07A1F; --hondo:#A0451A; --terracota:#A84F2A;
   --oliva:#435F3A; --avena:#D7C3A1;
-  --papel:#F6F2E8; --tinta:#3A302A; --tinta-2:#6B5D51;
+  --papel:#F6F2E8; --papel-hondo:#EFE8D8; --tinta:#3A302A; --tinta-2:#6B5D51;
   --ease:cubic-bezier(.22,.61,.36,1);
 }
 *{box-sizing:border-box;margin:0}
@@ -143,6 +144,43 @@ h1,h2{font-family:'Marcellus',Georgia,serif;font-weight:400;line-height:1.18;
    multiply se mezcla contra ese contexto y vuelve el rectángulo blanco. */
 .acuarela{width:100%;height:auto;display:block;mix-blend-mode:multiply}
 .motivo{margin:0 auto;mix-blend-mode:multiply;display:block}
+/* ══════════ PROFUNDIDAD ══════════
+   Tres cosas que hacen que una invitación ilustrada no se lea plana, y
+   que no teníamos:
+
+   1 · ACUARELAS DE BORDE A BORDE. Una ilustración con aire a los cuatro
+       lados es una foto pegada en una hoja. La misma tocando los bordes
+       ES la hoja, y el texto queda apoyado sobre ella.
+   2 · MOTIVOS ANCLADOS AL MARGEN, entrando desde afuera. Un elemento
+       cortado por el borde obliga a imaginar lo que sigue: eso es
+       profundidad, y es gratis.
+   3 · UNA BANDA DE COLOR detrás de una sección. Rompe la monotonía de
+       un solo papel de punta a punta.
+   ⚠️ Las tres, con medida: la referencia que mandó Fer usa las tres y
+   además se le va la mano. Acá van una vez cada una. */
+/* ⚠️ NO se hace con `width:100vw` + márgenes negativos: 100vw incluye
+   la barra de scroll y en cualquier navegador que la dibuje encima del
+   contenido la página se va 28px a la derecha. Se hace por estructura:
+   estos bloques viven FUERA de `.wrap`, como hijos directos de la
+   sección, que no tiene padding lateral. Medido: 390 de ancho, 390 de
+   documento. */
+.sangra{width:100%;max-width:none;margin-left:0;margin-right:0}
+.sangra img{border-radius:0}
+
+.banda{position:relative;background:var(--papel-hondo)}
+.banda::before,.banda::after{content:'';position:absolute;left:0;right:0;
+  height:34px;pointer-events:none}
+.banda::before{top:-33px;background:linear-gradient(to bottom,transparent,var(--papel-hondo))}
+.banda::after{bottom:-33px;background:linear-gradient(to top,transparent,var(--papel-hondo))}
+
+/* El motivo que entra desde el margen. Se esconde en pantallas angostas:
+   con 390px de ancho no hay margen del que colgarlo. */
+.margen{position:absolute;pointer-events:none;mix-blend-mode:multiply;
+  opacity:.85;display:none}
+@media (min-width:820px){ .margen{display:block} }
+.margen.izq{left:calc(50% - 470px);width:150px}
+.margen.der{right:calc(50% - 470px);width:130px}
+
 /* Los separadores: los motivos sueltos, chiquitos, entre sección y
    sección. Es para lo que se dibujaron. */
 .sep{width:74px;margin:0 auto;display:block;mix-blend-mode:multiply;opacity:.9}
@@ -245,13 +283,20 @@ h1,h2{font-family:'Marcellus',Georgia,serif;font-weight:400;line-height:1.18;
   background:var(--terracota);transform:scaleX(0);transform-origin:center;
   transition:transform 1.1s var(--ease) 200ms}
 .acto.on h2::after{transform:scaleX(1)}
-/* El contador. Un número grande y nada más: la cuenta de los días es
-   el dato, no un cartel. */
-.cuenta{margin-top:34px;display:flex;flex-direction:column;align-items:center;gap:2px}
-.cuenta .n{font-family:'Marcellus',serif;font-size:3.1rem;line-height:1;
+/* El contador. Cuatro casillas: días, horas, minutos, segundos.
+   ⚠️ `tabular-nums` no es un detalle: sin eso, el 1 es más angosto que
+   el 8 y los números bailan de izquierda a derecha cada segundo. */
+.cuenta{margin-top:34px;display:flex;justify-content:center;align-items:flex-start;
+  gap:4px}
+.cuenta .c{display:flex;flex-direction:column;align-items:center;gap:3px;
+  min-width:62px}
+.cuenta .n{font-family:'Marcellus',serif;font-size:2.1rem;line-height:1;
   color:var(--hondo);font-variant-numeric:tabular-nums}
-.cuenta .t{font-family:'Marcellus',serif;font-size:.62rem;letter-spacing:.32em;
+.cuenta .t{font-family:'Marcellus',serif;font-size:.54rem;letter-spacing:.24em;
   text-transform:uppercase;color:var(--tinta-2)}
+.cuenta .dp{font-family:'Marcellus',serif;font-size:1.5rem;line-height:1.35;
+  color:var(--terracota);opacity:.45}
+@media (max-width:359px){ .cuenta .c{min-width:52px} .cuenta .n{font-size:1.8rem} }
 
 .dato{margin-top:26px}
 .dato .hora{font-family:'Marcellus',serif;font-size:2.4rem;color:var(--hondo);line-height:1}
@@ -352,12 +397,13 @@ footer a{color:var(--hondo);text-decoration:none}
 <!-- ══════════ 1 · ELLOS ══════════
      Sin relato: la acuarela, los nombres y la fecha. Nada más. -->
 <section class="acto" id="arriba">
+  <!-- De borde a borde: fuera de `.wrap`, que es quien pone el margen. -->
+  <div class="escena rev sangra" id="esc-ellos">
+    <img class="acuarela" src="__ELLOS__"
+         alt="Guillermina y Sebasti&aacute;n de espaldas frente al lago, al atardecer">
+    <svg viewBox="__VB_ESC__" aria-hidden="true">__T_ESC__</svg>
+  </div>
   <div class="wrap">
-    <div class="escena rev" id="esc-ellos">
-      <img class="acuarela" src="__ELLOS__"
-           alt="Guillermina y Sebasti&aacute;n de espaldas frente al lago, al atardecer">
-      <svg viewBox="__VB_ESC__" aria-hidden="true">__T_ESC__</svg>
-    </div>
     <h2 class="rev" style="margin-top:26px"><em>Guillermina y Sebasti&aacute;n</em></h2>
     <p class="rot rev" style="margin-top:20px">S&aacute;bado 3 de abril de 2027</p>
     <p class="rev" style="margin-top:6px;color:var(--tinta-2);font-size:.95rem">
@@ -371,8 +417,13 @@ footer a{color:var(--hondo);text-decoration:none}
          style="width:100%;max-width:330px;margin-top:34px" aria-hidden="true">__T_CAR__</svg>
 
     <div class="cuenta rev" id="cuenta" hidden>
-      <span class="n" id="cuenta-n">—</span>
-      <span class="t" id="cuenta-t">d&iacute;as</span>
+      <div class="c"><span class="n" id="cd">—</span><span class="t">d&iacute;as</span></div>
+      <span class="dp">:</span>
+      <div class="c"><span class="n" id="ch">—</span><span class="t">horas</span></div>
+      <span class="dp">:</span>
+      <div class="c"><span class="n" id="cm">—</span><span class="t">min</span></div>
+      <span class="dp">:</span>
+      <div class="c"><span class="n" id="cs">—</span><span class="t">seg</span></div>
     </div>
   </div>
 </section>
@@ -381,6 +432,8 @@ footer a{color:var(--hondo);text-decoration:none}
 
 <!-- ══════════ 2 · LA CEREMONIA ══════════ -->
 <section class="acto junto" id="ceremonia" style="position:relative;overflow:hidden">
+  <img class="margen izq rev" src="__OLIVO2__" alt="" aria-hidden="true"
+       style="top:14%;transform:rotate(-8deg)">
   <!-- ⚠️ Los pétalos van ENCIMA de la sección, no en un bloque aparte:
        suelto abajo dejaba 180px de papel vacío con un pétalo perdido,
        que se lee como un error y no como un efecto. -->
@@ -404,7 +457,8 @@ footer a{color:var(--hondo);text-decoration:none}
     <!-- El cartel ya dice "Finca La Josefina": repetirlo abajo en el
          titulo es decir dos veces lo mismo. Ac&aacute; va el dato que falta. -->
     <h2 class="rev">Berisso, <em>Buenos Aires</em></h2>
-    <div class="mapa rev" id="mapa">
+  </div>
+  <div class="mapa rev sangra" id="mapa">
       <img src="__MAPA__" alt="Mapa de la finca: la entrada, el estacionamiento, el sal&oacute;n y el altar sobre el lago">
       <svg class="capa" viewBox="0 0 1000 758" preserveAspectRatio="none" aria-hidden="true">
         <path class="ruta" d="M170 700 C240 690 300 660 360 620 C420 582 470 566 512 560
@@ -412,7 +466,8 @@ footer a{color:var(--hondo);text-decoration:none}
                               C630 416 660 386 672 344 C682 310 700 290 726 280"/>
         <path class="punta" d="M706 292 L728 276 L732 302"/>
       </svg>
-    </div>
+  </div>
+  <div class="wrap">
     <a class="btn rev" href="https://maps.google.com/?q=Finca+La+Josefina+Berisso"
        target="_blank" rel="noopener">Abrir en el mapa</a>
   </div>
@@ -429,7 +484,7 @@ footer a{color:var(--hondo);text-decoration:none}
          ⚠️ Se saca ENTERA, no con `hidden`: la regla del navegador
          `[hidden]{display:none}` pierde contra `.dibujo{display:block}`
          y la copa se seguía viendo igual. -->
-    <img class="acuarela rev" src="__COPAS__" style="max-width:300px;margin:0 auto" alt="">
+    <img class="acuarela rev" src="__COPAS__" alt="">
     <img class="acuarela rev" src="__LUCES__" style="max-width:460px;margin-top:26px" alt="">
     <p class="rot rev" style="margin-top:22px">La fiesta</p>
     <h2 class="rev">En el mismo <em>lugar</em></h2>
@@ -451,7 +506,7 @@ footer a{color:var(--hondo);text-decoration:none}
 </section>
 
 <!-- ══════════ 6 · REGALOS ══════════ -->
-<section class="acto junto" id="regalos">
+<section class="acto junto banda" id="regalos">
   <div class="wrap">
     <img class="motivo rev" src="__NARANJAS__" style="width:180px" alt="">
     <p class="rot rev" style="margin-top:8px">Si quer&eacute;s hacernos un regalo</p>
@@ -603,15 +658,30 @@ const RITMO={'esc-ellos':[13,480],'dib-cartel':[15,520],
    en el suyo y a un invitado en Madrid le faltarían días distintos. */
 (function(){
   const BODA = new Date('2027-04-03T18:00:00-03:00');
-  const dia = 86400000;
-  const hoy = new Date();
-  const faltan = Math.ceil((BODA - hoy) / dia);
-  const c = document.getElementById('cuenta');
-  if (faltan < 0) return;                       // ya pasó: no se muestra
-  document.getElementById('cuenta-n').textContent = faltan;
-  document.getElementById('cuenta-t').textContent =
-    faltan === 0 ? 'es hoy' : faltan === 1 ? 'día' : 'días';
-  c.hidden = false;
+  const caja = document.getElementById('cuenta');
+  const el = {d:document.getElementById('cd'), h:document.getElementById('ch'),
+              m:document.getElementById('cm'), s:document.getElementById('cs')};
+  const dos = n => String(n).padStart(2,'0');
+  let reloj = null;
+  function tic(){
+    const falta = BODA - new Date();
+    if (falta <= 0){ clearInterval(reloj); caja.hidden = true; return; }
+    const seg = Math.floor(falta/1000);
+    el.d.textContent = Math.floor(seg/86400);
+    el.h.textContent = dos(Math.floor(seg/3600) % 24);
+    el.m.textContent = dos(Math.floor(seg/60) % 60);
+    el.s.textContent = dos(seg % 60);
+    caja.hidden = false;
+  }
+  tic();
+  /* ⚠️ El tictac corre SÓLO mientras el contador está a la vista. Un
+     setInterval de un segundo que sigue con la pestaña en el bolsillo
+     es batería tirada, y al volver el navegador dispara todos los
+     ciclos atrasados de una. */
+  new IntersectionObserver(es=>es.forEach(e=>{
+    if (e.isIntersecting){ if(!reloj){ tic(); reloj = setInterval(tic,1000); } }
+    else { clearInterval(reloj); reloj = null; }
+  }),{threshold:.2}).observe(caja);
 })();
 
 /* ── Cada sección aparece al entrar en pantalla ──────────────────── */
@@ -687,7 +757,8 @@ document.getElementById('copiar').onclick=async function(){
 
 CLAVES = {'etiqueta':'ETIQUETA','ellos':'ELLOS','altar':'ALTAR','mapa':'MAPA',
           'luces':'LUCES','vela':'VELA','ramo':'RAMO','olivo':'OLIVO',
-          'naranjas':'NARANJAS','copas':'COPAS','aperol':'APEROL'}
+          'naranjas':'NARANJAS','copas':'COPAS','aperol':'APEROL',
+          'olivo2':'OLIVO2'}
 for k, v in IM.items():
     HTML = HTML.replace('__' + CLAVES[k] + '__', v)
 HTML = (HTML.replace('__VB_ESC__', VB_ESC).replace('__T_ESC__', T_ESC)
