@@ -25,8 +25,8 @@ body.adentro{overflow:auto}
 .portada.ida{opacity:0;pointer-events:none}
 
 .colgante{position:absolute;left:50%;top:-42px;width:246px;margin-left:-123px;
-  transform-origin:50% 0;animation:mecer 7s ease-in-out infinite}
-@keyframes mecer{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1deg)}}
+  transform-origin:50% 0;animation:mecer 5.4s ease-in-out infinite}
+@keyframes mecer{0%,100%{transform:rotate(-2.6deg)}50%{transform:rotate(2.6deg)}}
 /* ⚠️ La etiqueta NO se desvanece mientras sube. Antes se iba en opacidad
    al mismo tiempo que el papel de la portada, así que se apagaba en el
    lugar y el viaje no se veía NUNCA. Sube entera, y el papel recién se
@@ -78,7 +78,10 @@ body.adentro{overflow:auto}
 .petalos{position:absolute;inset:0;pointer-events:none;z-index:-1}
 .p{position:absolute;top:-10%;animation:caer linear infinite}
 @keyframes caer{0%{transform:translate3d(0,-40px,0) rotate(0);opacity:0}
-  12%{opacity:.8}85%{opacity:.65}
+  12%{opacity:.8}
+  33%{transform:translate3d(calc(var(--dx) * -.6),34vh,0) rotate(calc(var(--giro) * .3))}
+  66%{transform:translate3d(calc(var(--dx) * .85),69vh,0) rotate(calc(var(--giro) * .68))}
+  85%{opacity:.65}
   100%{transform:translate3d(var(--dx),105vh,0) rotate(var(--giro));opacity:0}}
 
 /* ── LO QUE HAY ABAJO (acto 1, sólo para ver el pase) ─────────────── */
@@ -131,16 +134,16 @@ body.adentro{overflow:auto}
 <script>
 const c=document.getElementById('petalos');
 const COL=['#E07A1F','#A84F2A','#D7C3A1','#A0451A','#C98B5A'];
-for(let i=0;i<11;i++){
+for(let i=0;i<14;i++){
   const s=document.createElementNS('http://www.w3.org/2000/svg','svg');
   const w=7+Math.random()*8;
   s.setAttribute('viewBox','0 0 20 26');s.setAttribute('width',w);s.setAttribute('height',w*1.3);
   s.innerHTML='<path d="M10 0C15.5 6 19 13 16.5 19.5C14.6 24.4 11.8 26 10 26C8.2 26 5.4 24.4 3.5 19.5C1 13 4.5 6 10 0Z"/>';
   s.style.fill=COL[i%COL.length];s.classList.add('p');
   s.style.left=(Math.random()*94)+'%';
-  s.style.setProperty('--dx',(Math.random()*90-45)+'px');
-  s.style.setProperty('--giro',(Math.random()*540-270)+'deg');
-  s.style.animationDuration=(9+Math.random()*8).toFixed(1)+'s';
+  s.style.setProperty('--dx',(Math.random()*170-85)+'px');
+  s.style.setProperty('--giro',(Math.random()*840-420)+'deg');
+  s.style.animationDuration=(8+Math.random()*6).toFixed(1)+'s';
   s.style.animationDelay=(-Math.random()*15).toFixed(1)+'s';
   s.style.opacity=(.3+Math.random()*.3).toFixed(2);
   c.appendChild(s);

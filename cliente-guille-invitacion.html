@@ -127,8 +127,11 @@ h1,h2{font-family:'Marcellus',Georgia,serif;font-weight:400;line-height:1.18;
   transition:opacity 600ms linear}
 .portada.ida{opacity:0;pointer-events:none}
 .colgante{position:absolute;left:50%;top:-42px;width:246px;margin-left:-123px;
-  transform-origin:50% 0;animation:mecer 7s ease-in-out infinite}
-@keyframes mecer{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1deg)}}
+  transform-origin:50% 0;animation:mecer 5.4s ease-in-out infinite}
+/* ⚠ El giro es chico en grados pero la etiqueta cuelga de arriba: a
+   2,6° la punta de abajo se corre ~17px. A 1° se corría 6 y no se veía
+   colgar de nada. */
+@keyframes mecer{0%,100%{transform:rotate(-2.6deg)}50%{transform:rotate(2.6deg)}}
 /* ⚠️ Sube ENTERA, sin tocarle la opacidad: apagándola a la vez que el
    papel, el viaje no se ve nunca. Y arranca con una caidita, porque una
    soga de verdad cede un instante antes de levantar. */
@@ -172,9 +175,18 @@ h1,h2{font-family:'Marcellus',Georgia,serif;font-weight:400;line-height:1.18;
    ningún otro lado. */
 .petalos{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .p{position:absolute;top:-10%;animation:caer linear infinite}
+/* ⚠⚠ El 110% de un translate se mide contra EL PROPIO PÉTALO, no contra
+   la pantalla: un pétalo de 13px caía 14px y se apagaba ahí arriba. La
+   caída entera va en --caida, que cada contenedor fija según su alto.
+   Y el camino zigzaguea: una hoja que cae no baja en línea recta. */
 @keyframes caer{0%{transform:translate3d(0,-40px,0) rotate(0);opacity:0}
-  12%{opacity:.8}85%{opacity:.65}
-  100%{transform:translate3d(var(--dx),110%,0) rotate(var(--giro));opacity:0}}
+  12%{opacity:.8}
+  33%{transform:translate3d(calc(var(--dx) * -.6),calc(var(--caida) * .32),0)
+      rotate(calc(var(--giro) * .3))}
+  66%{transform:translate3d(calc(var(--dx) * .85),calc(var(--caida) * .66),0)
+      rotate(calc(var(--giro) * .68))}
+  85%{opacity:.65}
+  100%{transform:translate3d(var(--dx),var(--caida),0) rotate(var(--giro));opacity:0}}
 
 /* ══════════ SECCIONES ══════════ */
 .acto{padding:86px 0;text-align:center}
@@ -457,7 +469,7 @@ footer a{color:var(--hondo);text-decoration:none}
 <script>
 /* ── Los pétalos ─────────────────────────────────────────────────── */
 const COL=['#E07A1F','#A84F2A','#D7C3A1','#A0451A','#C98B5A'];
-function petalos(cont,n){
+function petalos(cont,n,caida){
   for(let i=0;i<n;i++){
     const s=document.createElementNS('http://www.w3.org/2000/svg','svg');
     const w=7+Math.random()*8;
@@ -466,15 +478,16 @@ function petalos(cont,n){
     s.innerHTML='<path d="M10 0C15.5 6 19 13 16.5 19.5C14.6 24.4 11.8 26 10 26C8.2 26 5.4 24.4 3.5 19.5C1 13 4.5 6 10 0Z"/>';
     s.style.fill=COL[i%COL.length]; s.classList.add('p');
     s.style.left=(Math.random()*94)+'%';
-    s.style.setProperty('--dx',(Math.random()*90-45)+'px');
-    s.style.setProperty('--giro',(Math.random()*540-270)+'deg');
-    s.style.animationDuration=(9+Math.random()*8).toFixed(1)+'s';
+    s.style.setProperty('--dx',(Math.random()*170-85)+'px');
+    s.style.setProperty('--giro',(Math.random()*840-420)+'deg');
+    s.style.setProperty('--caida',caida||'105vh');
+    s.style.animationDuration=(8+Math.random()*6).toFixed(1)+'s';
     s.style.animationDelay=(-Math.random()*15).toFixed(1)+'s';
     s.style.opacity=(.3+Math.random()*.3).toFixed(2);
     cont.appendChild(s);
   }
 }
-petalos(document.getElementById('petalos-portada'),11);
+petalos(document.getElementById('petalos-portada'),14);
 
 /* ── La entrada. UN SOLO TOQUE ────────────────────────────────────
    ⚠️ La música arranca ACÁ ADENTRO, en el gesto. Desde el setTimeout
@@ -596,7 +609,9 @@ const ojo=new IntersectionObserver(es=>{
       setTimeout(()=>el.classList.add('on'), i*130));
     if(e.target.id==='ceremonia'){
       const c=document.getElementById('petalos-ceremonia');
-      if(!c.childElementCount) petalos(c,9);
+      /* Acá la caída es el alto de la sección, no el de la pantalla:
+         con 105vh los pétalos se los coma el overflow a mitad de camino. */
+      if(!c.childElementCount) petalos(c,11,c.offsetHeight+60+'px');
     }
     // Los dibujos de esta sección arrancan cuando la sección entra.
     e.target.querySelectorAll('[id^="esc-"],[id^="dib-"]').forEach(d=>{
