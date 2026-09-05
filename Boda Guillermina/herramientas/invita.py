@@ -86,7 +86,6 @@ IM = {
   'olivo':    jpg('olivo.jpg', 420),
   'naranjas': jpg('medias-naranja.jpg', 420),
   'aperol':   jpg('aperol.jpg', 240),
-  'olivo2':   jpg('olivo.jpg', 300),
   'copas':    jpg('copas-brindis.jpg', 640),
 }
 VB_ESC, T_ESC = trazos('escena')
@@ -173,13 +172,13 @@ h1,h2{font-family:'Marcellus',Georgia,serif;font-weight:400;line-height:1.18;
 .banda::before{top:-33px;background:linear-gradient(to bottom,transparent,var(--papel-hondo))}
 .banda::after{bottom:-33px;background:linear-gradient(to top,transparent,var(--papel-hondo))}
 
-/* El motivo que entra desde el margen. Se esconde en pantallas angostas:
-   con 390px de ancho no hay margen del que colgarlo. */
-.margen{position:absolute;pointer-events:none;mix-blend-mode:multiply;
-  opacity:.85;display:none}
-@media (min-width:820px){ .margen{display:block} }
-.margen.izq{left:calc(50% - 470px);width:150px}
-.margen.der{right:calc(50% - 470px);width:130px}
+/* ⚠️ Acá había un motivo anclado al margen, entrando desde afuera. Se
+   sacó: colgado solo en medio del papel no daba profundidad, se veía
+   olvidado. El truco funciona cuando el elemento ESTÁ CORTADO por el
+   borde de la pantalla —la referencia lo hace con una pared de flores
+   entera—, no con un dibujito chico flotando lejos del texto. De las
+   tres cosas que dan profundidad quedan las otras dos: las acuarelas
+   de borde a borde y la banda de color. */
 
 /* Los separadores: los motivos sueltos, chiquitos, entre sección y
    sección. Es para lo que se dibujaron. */
@@ -432,8 +431,6 @@ footer a{color:var(--hondo);text-decoration:none}
 
 <!-- ══════════ 2 · LA CEREMONIA ══════════ -->
 <section class="acto junto" id="ceremonia" style="position:relative;overflow:hidden">
-  <img class="margen izq rev" src="__OLIVO2__" alt="" aria-hidden="true"
-       style="top:14%;transform:rotate(-8deg)">
   <!-- ⚠️ Los pétalos van ENCIMA de la sección, no en un bloque aparte:
        suelto abajo dejaba 180px de papel vacío con un pétalo perdido,
        que se lee como un error y no como un efecto. -->
@@ -442,7 +439,7 @@ footer a{color:var(--hondo);text-decoration:none}
     <img class="acuarela rev" src="__ALTAR__" style="max-width:420px"
          alt="El altar sobre el pico que entra al lago" >
     <p class="rot rev" style="margin-top:22px">La ceremonia</p>
-    <h2 class="rev">Sobre el <em>pico</em>, frente al agua</h2>
+    <h2 class="rev">Sobre el <em>pico</em>, frente al lago</h2>
     <div class="dato rev">
       <p class="hora">18:00</p>
       <p class="donde">Finca La Josefina &middot; Berisso</p>
@@ -757,8 +754,7 @@ document.getElementById('copiar').onclick=async function(){
 
 CLAVES = {'etiqueta':'ETIQUETA','ellos':'ELLOS','altar':'ALTAR','mapa':'MAPA',
           'luces':'LUCES','vela':'VELA','ramo':'RAMO','olivo':'OLIVO',
-          'naranjas':'NARANJAS','copas':'COPAS','aperol':'APEROL',
-          'olivo2':'OLIVO2'}
+          'naranjas':'NARANJAS','copas':'COPAS','aperol':'APEROL'}
 for k, v in IM.items():
     HTML = HTML.replace('__' + CLAVES[k] + '__', v)
 HTML = (HTML.replace('__VB_ESC__', VB_ESC).replace('__T_ESC__', T_ESC)
