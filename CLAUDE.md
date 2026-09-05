@@ -750,12 +750,30 @@ prensada en frío). Con multiply oscurecen las fibras; con opacidad sobre
 blanco solo agrisan la página. Son dos SVG embebidos, no baja ninguna
 imagen.
 
-### Tres actos, no una lista de secciones
+### El orden de la invitación (lo pidió Fer, 05/09/2026)
 
-1. **Emoción** — ellos de espaldas frente al lago. **Todavía no dice dónde
-   es.** Se vende el sueño; el dato se descubre bajando.
-2. **El momento** — el mensaje íntimo, la ceremonia, el mapa.
-3. **La fiesta** — el brindis, los regalos, las fotos, confirmar.
+Los tres actos narrativos **se cayeron**: la clienta no quiere frases ni
+relato, "que tenga la info importante y ya". El orden de hoy:
+
+```
+portada (la etiqueta que cuelga)
+acuarela de ellos, A TODO EL ANCHO Y PEGADA ARRIBA
+nombres · contador · fecha · el cartel de la finca
+cómo llegar (el mapa)
+la ceremonia (18:00) · la fiesta (20:00) · dress code · regalos · confirmar
+```
+
+⚠️ **El nombre de la finca va en DOS lugares y no más**: el dorso de la
+etiqueta (que es una etiqueta de valija — ahí el destino corresponde) y el
+cartel dibujado. Estaba escrito cuatro veces y le quitaba peso justo al
+cartel, que es el que lo dice dibujado a mano. La ceremonia dice la hora y
+nada más: para cuando se llega, el lugar ya lo dijeron el cartel y el mapa.
+
+⚠️ **`.acto .acuarela{max-width:520px}` le gana a `.sangra`**, así que la
+acuarela de la portada nunca llegó al borde arriba de 520px: quedaba una
+estampita centrada mientras el trazo de encima —que sí abarcaba la sección
+entera— se dibujaba corrido. Se arregla en el elemento (`#esc-ellos
+.acuarela{max-width:none}`), no en `.sangra`.
 
 El hilo es **viajar**: ella siempre buscando un destino nuevo, él
 descubriendo el mundo al lado de ella, y la boda como el próximo destino.
