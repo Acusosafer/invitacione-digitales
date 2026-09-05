@@ -63,17 +63,33 @@ def webp(ruta, q=88):
     print(f'  etiqueta                   {len(b.getvalue())//1024:4} KB')
     return 'data:image/webp;base64,' + base64.b64encode(b.getvalue()).decode()
 
+# Los dos dibujos de línea, trazados de una foto y de la acuarela.
+# ⚠️ Vienen con class="t" del generador; acá la clase es .trazo.
+def trazos(clave):
+    d = io.open(f'svg-{clave}.txt', encoding='utf-8').read().split(chr(10), 1)
+    n = d[1].count('<path')
+    print(f'  {clave:26} {n:4} trazos {len(d[1])//1024:3} KB')
+    return d[0], d[1].replace('class="t"', 'class="trazo"')
+
+# El audio va como archivo aparte, NO embebido: `preload="none"` sólo
+# funciona si el navegador puede decidir no bajarlo, y un data URI ya
+# está adentro del HTML. Son 539 KB que nadie paga hasta tocar.
 print('imágenes:')
 IM = {
   'etiqueta': webp('etiqueta-lista.png'),
-  'ellos':    jpg('pelo mas largo.jpg', 720, 80, limpiar=False),
+  'ellos':    jpg('ellos-tono.jpg', 720, 80, limpiar=False),
   'altar':    jpg('vista-altar-acuarela.jpg', 560),
   'mapa':     jpg('mapa.jpg', 780, 76, limpiar=False),
   'luces':    jpg('guirnalda-de-luces.jpg', 620),
   'vela':     jpg('vela.jpg', 300),
   'ramo':     jpg('ramo-con-naranjas.jpg', 380),
   'olivo':    jpg('olivo.jpg', 420),
+  'naranjas': jpg('medias-naranja.jpg', 300),
+  'copas':    jpg('copas-brindis.jpg', 300),
+  'ramo2':    jpg('ramo.jpg', 260),
 }
+VB_ESC, T_ESC = trazos('escena')
+VB_CAR, T_CAR = trazos('cartel')
 
 HTML = r'''<!DOCTYPE html>
 <html lang="es-AR">
@@ -127,6 +143,37 @@ h1,h2{font-family:'Marcellus',Georgia,serif;font-weight:400;line-height:1.18;
    multiply se mezcla contra ese contexto y vuelve el rectángulo blanco. */
 .acuarela{width:100%;height:auto;display:block;mix-blend-mode:multiply}
 .motivo{margin:0 auto;mix-blend-mode:multiply;display:block}
+/* Los separadores: los motivos sueltos, chiquitos, entre sección y
+   sección. Es para lo que se dibujaron. */
+.sep{width:74px;margin:0 auto;display:block;mix-blend-mode:multiply;opacity:.9}
+
+/* ══════════ EL DIBUJO QUE SE PINTA SOLO ══════════
+   El papel arranca en blanco, la línea se dibuja, y cuando termina la
+   acuarela aparece por debajo mientras el trazo se apaga.
+   ⚠️ NO va el trazo ENCIMA de la acuarela terminada: la acuarela ya es
+   rica y doscientas líneas arriba se leen como un garabato. Y el
+   trazado salió de la acuarela vieja, así que el contorno del pelo no
+   coincide — en esta forma nunca conviven y no se nota. */
+.escena{position:relative}
+.escena .acuarela{opacity:0;transition:opacity 1.5s var(--ease)}
+.escena.pintada .acuarela{opacity:1}
+.escena svg{position:absolute;inset:0;width:100%;height:100%}
+.escena.pintada svg{opacity:0;transition:opacity 1.7s var(--ease) .5s}
+.trazo{fill:none;stroke:var(--terracota);stroke-width:1.1;
+  stroke-linecap:round;stroke-linejoin:round}
+.trazo.fino{stroke-width:.9}
+.trazo.hoja{stroke:var(--oliva)}
+.trazo.suave{stroke:#C08A5E}
+/* Un dibujo suelto (el cartel, la copa): sin acuarela abajo, queda la línea. */
+.dibujo{margin:0 auto;display:block}
+/* Los hielos no se dibujan: CAEN adentro del vaso cuando la copa
+   terminó. Un rebote corto — eso es lo que hace que se sienta un peso
+   cayendo y no una caja deslizándose. */
+.cae{opacity:0;transform:translateY(-34px) rotate(-14deg);
+  transform-box:fill-box;transform-origin:center}
+.cae.cayendo{opacity:1;transform:none;
+  transition:transform .72s cubic-bezier(.34,1.42,.64,1) var(--retraso,0s),
+             opacity .18s ease var(--retraso,0s)}
 
 /* ══════════ LA PORTADA — la etiqueta ══════════
    ⚠️ La imagen va anclada ARRIBA DE TODO: su corte de soga queda fuera
@@ -257,6 +304,10 @@ footer a{color:var(--hondo);text-decoration:none}
   html{scroll-behavior:auto}
   .rev{opacity:1;transform:none;transition:none}
   .p{display:none}
+  .trazo{stroke-dashoffset:0 !important;transition:none !important}
+  .escena .acuarela{opacity:1}
+  .escena svg{display:none}
+  .cae{opacity:1 !important;transform:none !important}
   .acto h2::after{transform:scaleX(1);transition:none}
   .ruta{opacity:.9 !important}
 }
@@ -294,14 +345,19 @@ footer a{color:var(--hondo);text-decoration:none}
      Sin relato: la acuarela, los nombres y la fecha. Nada más. -->
 <section class="acto" id="arriba">
   <div class="wrap">
-    <img class="acuarela rev" src="__ELLOS__"
-         alt="Guillermina y Sebasti&aacute;n de espaldas frente al lago, al atardecer">
+    <div class="escena rev" id="esc-ellos">
+      <img class="acuarela" src="__ELLOS__"
+           alt="Guillermina y Sebasti&aacute;n de espaldas frente al lago, al atardecer">
+      <svg viewBox="__VB_ESC__" aria-hidden="true">__T_ESC__</svg>
+    </div>
     <h2 class="rev" style="margin-top:26px"><em>Guillermina y Sebasti&aacute;n</em></h2>
     <p class="rot rev" style="margin-top:20px">S&aacute;bado 3 de abril de 2027</p>
     <p class="rev" style="margin-top:6px;color:var(--tinta-2);font-size:.95rem">
       Finca La Josefina &middot; Berisso</p>
   </div>
 </section>
+
+<img class="sep rev" src="__NARANJAS__" alt="" aria-hidden="true">
 
 <!-- ══════════ 2 · LA CEREMONIA ══════════ -->
 <section class="acto junto" id="ceremonia" style="position:relative;overflow:hidden">
@@ -324,8 +380,15 @@ footer a{color:var(--hondo);text-decoration:none}
 <!-- ══════════ 3 · CÓMO LLEGAR ══════════ -->
 <section class="acto junto" id="mapa-sec">
   <div class="wrap">
-    <p class="rot rev">C&oacute;mo llegar</p>
-    <h2 class="rev">Finca <em>La Josefina</em></h2>
+    <!-- El cartel de la entrada, dibujándose. Es lo primero que ven
+         cuando llegan, así que es lo primero de esta sección. Va como
+         línea y sin acuarela abajo: un cartel ES una línea. -->
+    <svg class="dibujo rev" id="dib-cartel" viewBox="__VB_CAR__"
+         style="width:100%;max-width:380px" aria-hidden="true">__T_CAR__</svg>
+    <p class="rot rev" style="margin-top:20px">C&oacute;mo llegar</p>
+    <!-- El cartel ya dice "Finca La Josefina": repetirlo abajo en el
+         titulo es decir dos veces lo mismo. Ac&aacute; va el dato que falta. -->
+    <h2 class="rev">Berisso, <em>Buenos Aires</em></h2>
     <div class="mapa rev" id="mapa">
       <img src="__MAPA__" alt="Mapa de la finca: la entrada, el estacionamiento, el sal&oacute;n y el altar sobre el lago">
       <svg class="capa" viewBox="0 0 1000 758" preserveAspectRatio="none" aria-hidden="true">
@@ -340,10 +403,32 @@ footer a{color:var(--hondo);text-decoration:none}
   </div>
 </section>
 
+<img class="sep rev" src="__COPAS__" alt="" aria-hidden="true" style="width:96px">
+
 <!-- ══════════ 4 · LA FIESTA ══════════ -->
 <section class="acto" id="fiesta">
   <div class="wrap">
-    <img class="acuarela rev" src="__LUCES__" style="max-width:460px" alt="">
+    <!-- La copa, con los hielos que CAEN adentro cuando terminó de
+         dibujarse. No todo tiene que dibujarse: cada cosa se comporta
+         como se comportaría de verdad. -->
+    <svg class="dibujo rev" id="dib-copa" viewBox="0 0 100 128"
+         style="width:104px" aria-hidden="true">
+      <path class="trazo" d="M26 34 C26 28.5 74 28.5 74 34 C74 39.5 26 39.5 26 34"/>
+      <path class="trazo" d="M27.5 36 C25.5 54 34.5 70.5 50 70.5 C65.5 70.5 74.5 54 72.5 36"/>
+      <path class="trazo fino suave" d="M29.5 45 C38 49.5 62 49.5 70.5 45"/>
+      <path class="trazo fino cae" style="--retraso:.15s" d="M34.5 54 L43 51 L45.5 58.5 L37 61.5 Z"/>
+      <path class="trazo fino cae" style="--retraso:.38s" d="M51.5 59 L59.5 56 L62 63 L54 66 Z"/>
+      <path class="trazo" d="M50 71 L50 104"/>
+      <path class="trazo" d="M34 108 C34 103 66 103 66 108 C66 112.5 34 112.5 34 108"/>
+      <path class="trazo suave" d="M61 23 C61 17 66 12.5 72 12.5 C78 12.5 83 17 83 23 C83 29 78 33.5 72 33.5 C66 33.5 61 29 61 23"/>
+      <path class="trazo fino suave" d="M72 23 L72 13"/>
+      <path class="trazo fino suave" d="M72 23 L81.5 19.5"/>
+      <path class="trazo fino suave" d="M72 23 L80.5 30"/>
+      <path class="trazo fino suave" d="M72 23 L63.5 29.5"/>
+      <path class="trazo fino suave" d="M72 23 L62.5 19"/>
+      <path class="trazo fino" d="M57 32 L64.5 12"/>
+    </svg>
+    <img class="acuarela rev" src="__LUCES__" style="max-width:460px;margin-top:22px" alt="">
     <p class="rot rev" style="margin-top:22px">La fiesta</p>
     <h2 class="rev">En el mismo <em>lugar</em></h2>
     <div class="dato rev">
@@ -358,9 +443,7 @@ footer a{color:var(--hondo);text-decoration:none}
   <div class="wrap">
     <img class="motivo rev" src="__VELA__" style="width:96px" alt="">
     <p class="rot rev">Dress code</p>
-    <h2 class="rev" data-falta><em>Elegante</em></h2>
-    <p class="rev" style="margin-top:16px;color:var(--tinta-2);font-size:.95rem"
-       data-falta>A confirmar con ellos</p>
+    <h2 class="rev"><em>Elegante</em></h2>
   </div>
 </section>
 
@@ -377,14 +460,22 @@ footer a{color:var(--hondo);text-decoration:none}
   </div>
 </section>
 
+<img class="sep rev" src="__RAMO2__" alt="" aria-hidden="true" style="width:64px">
+
 <!-- ══════════ 7 · CONFIRMAR ══════════ -->
 <section class="acto junto" id="rsvp">
   <div class="wrap">
-    <img class="motivo rev" src="__OLIVO__" style="width:150px" alt="">
-    <p class="rot rev">Queremos contar con vos</p>
+    <svg class="dibujo rev" id="dib-naranja" viewBox="0 0 100 108"
+         style="width:80px" aria-hidden="true">
+      <path class="trazo" d="M50 30 C68 29 81 43 80 60 C79 77 66 89 49 89 C32 89 20 75 20.5 58 C21 41 33 30.5 50 30"/>
+      <path class="trazo fino" d="M50 30 C49 25 47.5 21 46 18.5"/>
+      <path class="trazo hoja" d="M46 18.5 C52 10.5 65 10 70 16.5 C64 24 52 24.5 46 18.5"/>
+      <path class="trazo hoja fino" d="M48.5 18.2 C55 17 62.5 16.6 68.5 17.2"/>
+    </svg>
+    <p class="rot rev" style="margin-top:18px">Queremos contar con vos</p>
     <h2 class="rev">Confirm&aacute; tu <em>lugar</em></h2>
-    <p class="rev" style="margin-top:16px;color:var(--tinta-2);font-size:.95rem"
-       data-falta>Antes del 3 de marzo de 2027</p>
+    <p class="rev" style="margin-top:16px;color:var(--tinta-2);font-size:.95rem">
+      Antes del 18 de febrero de 2027</p>
     <a class="btn lleno rev" id="btn-rsvp" href="#" data-falta>Confirmar asistencia</a>
   </div>
 </section>
@@ -395,11 +486,14 @@ footer a{color:var(--hondo);text-decoration:none}
      target="_blank" rel="noopener">Invitaciones Digitales Oficial</a>
 </footer>
 
-<!-- ⚠️ FALTA EL AUDIO. Va un fragmento de 40-60s de "Sarà perché ti amo"
-     (versión piano), en mp3 y por debajo de 1 MB: se abre con datos
-     móviles. Un link de Spotify NO sirve — no se puede reproducir
-     embebido sin que la persona tenga cuenta e inicie sesión. -->
-<audio id="audio" loop preload="none"><source src="" type="audio/mpeg"></audio>
+<!-- "Sarà perché ti amo" — 46s desde el 0:28, mono, 96 kbps, 539 KB.
+     ⚠️ La canción entera pesaba 4,3 MB: nadie con datos móviles en el
+     medio del campo baja eso. Y un link de Spotify no sirve — no se
+     reproduce embebido sin cuenta y sesión iniciada.
+     ⚠️ `preload="none"` y archivo aparte, NO data URI: embebido ya está
+     adentro del HTML y el "none" no sirve de nada. -->
+<audio id="audio" loop preload="none">
+  <source src="/guille-musica.mp3" type="audio/mpeg"></audio>
 <button class="musica" id="musica" type="button" aria-label="Pausar la m&uacute;sica">
   <span class="barra"></span><span class="barra"></span><span class="barra"></span>
 </button>
@@ -459,6 +553,52 @@ btnMus.onclick=()=>{
   else { audio.pause(); btnMus.classList.remove('sonando'); }
 };
 
+/* ── Los dibujos que se dibujan solos ─────────────────────────────
+   ⚠️⚠️ "El primer trazo no se dibuja" volvió TRES veces y cada vez la
+   causa fue otra. Esta es la versión que funciona, y las tres cosas
+   son necesarias:
+     1 · UNA sola función para arrancar. Siempre.
+     2 · Leer getComputedStyle(t).strokeDashoffset de CADA trazo y
+         arrancar adentro de un DOBLE requestAnimationFrame. Leer
+         offsetWidth fuerza el layout, y stroke-dashoffset es una
+         propiedad de PINTADO: el navegador puede saltearse el recálculo.
+     3 · transition:'none' EXPLÍCITO al preparar. transition-property
+         vale 'all' por defecto, así que el transitionDuration que dejó
+         el ciclo anterior sobrevive y el reset a "escondido" también
+         transiciona: el trazo nunca llega a estar vacío.
+   Y esto sólo se ve MIDIENDO el dashoffset: en una captura, un trazo
+   que salta y uno que se dibuja rápido se ven igual. */
+function dibujar(caja, demora, duracion){
+  const t = [...caja.querySelectorAll('.trazo')];
+  if(!t.length) return;
+  caja.classList.remove('pintada');
+  t.forEach(x=>{
+    x.style.transition='none';
+    const L=x.getTotalLength();
+    x.style.strokeDasharray=L; x.style.strokeDashoffset=L;
+  });
+  t.forEach(x=>getComputedStyle(x).strokeDashoffset);       // ⚠️ no sacar
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    t.forEach((x,i)=>{
+      x.style.transition='';
+      x.style.transitionProperty='stroke-dashoffset';
+      x.style.transitionTimingFunction='cubic-bezier(.22,.61,.36,1)';
+      x.style.transitionDuration=duracion+'ms';
+      setTimeout(()=>{x.style.strokeDashoffset='0';}, i*demora);
+    });
+    const fin = t.length*demora + duracion;
+    // Los hielos caen DESPUÉS de que la copa terminó de dibujarse.
+    caja.querySelectorAll('.cae').forEach(h=>
+      setTimeout(()=>h.classList.add('cayendo'), fin));
+    // Y la acuarela aparece por debajo, si esta caja tiene una.
+    setTimeout(()=>caja.classList.add('pintada'), fin+200);
+  }));
+}
+/* Cada dibujo con su ritmo: la escena tiene 201 trazos y va rápido o
+   tarda medio minuto; la copa tiene 14 y puede darse el lujo. */
+const RITMO={'esc-ellos':[13,480],'dib-cartel':[15,520],
+             'dib-copa':[95,900],'dib-naranja':[130,1100]};
+
 /* ── Cada sección aparece al entrar en pantalla ──────────────────── */
 const ojo=new IntersectionObserver(es=>{
   es.forEach(e=>{ if(e.isIntersecting){
@@ -469,10 +609,22 @@ const ojo=new IntersectionObserver(es=>{
       const c=document.getElementById('petalos-ceremonia');
       if(!c.childElementCount) petalos(c,9);
     }
+    // Los dibujos de esta sección arrancan cuando la sección entra.
+    e.target.querySelectorAll('[id^="esc-"],[id^="dib-"]').forEach(d=>{
+      const [dem,dur]=RITMO[d.id]||[40,700];
+      setTimeout(()=>dibujar(d,dem,dur), 320);
+    });
     ojo.unobserve(e.target);
   }});
 },{threshold:.16});
 document.querySelectorAll('.acto').forEach(s=>ojo.observe(s));
+/* ⚠️ Los separadores viven ENTRE las secciones, no adentro: el
+   observador de `.acto` no los alcanza y se quedaban invisibles para
+   siempre, en opacidad 0. Van con su propio observador. */
+const ojoSep=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){ e.target.classList.add('on'); ojoSep.unobserve(e.target); }
+}),{threshold:.5});
+document.querySelectorAll('.sep').forEach(x=>ojoSep.observe(x));
 new IntersectionObserver(es=>es.forEach(e=>{
   if(e.isIntersecting){ e.target.classList.add('on'); }
 }),{threshold:.3}).observe(document.getElementById('mapa'));
@@ -492,10 +644,15 @@ document.getElementById('copiar').onclick=async function(){
 </html>
 '''
 
+CLAVES = {'etiqueta':'ETIQUETA','ellos':'ELLOS','altar':'ALTAR','mapa':'MAPA',
+          'luces':'LUCES','vela':'VELA','ramo':'RAMO','olivo':'OLIVO',
+          'naranjas':'NARANJAS','copas':'COPAS','ramo2':'RAMO2'}
 for k, v in IM.items():
-    HTML = HTML.replace('__' + {'etiqueta':'ETIQUETA','ellos':'ELLOS','altar':'ALTAR',
-        'mapa':'MAPA','luces':'LUCES','vela':'VELA','ramo':'RAMO',
-        'olivo':'OLIVO'}[k] + '__', v)
+    HTML = HTML.replace('__' + CLAVES[k] + '__', v)
+HTML = (HTML.replace('__VB_ESC__', VB_ESC).replace('__T_ESC__', T_ESC)
+            .replace('__VB_CAR__', VB_CAR).replace('__T_CAR__', T_CAR))
+sobran = [c for c in CLAVES.values() if '__'+c+'__' in HTML]
+if sobran: print('⚠️ marcadores sin usar:', sobran)
 
 io.open(f"{BASE}/cliente-guille-invitacion.html", 'w', encoding='utf-8').write(HTML)
 print('\ncliente-guille-invitacion.html', len(HTML)//1024, 'KB')
