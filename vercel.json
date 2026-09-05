@@ -29,6 +29,10 @@
       "destination": "/cliente-guille-dibujos.html"
     },
     {
+      "source": "/guille-invitacion",
+      "destination": "/cliente-guille-invitacion.html"
+    },
+    {
       "source": "/guille-portada",
       "destination": "/cliente-guille-portada.html"
     },
