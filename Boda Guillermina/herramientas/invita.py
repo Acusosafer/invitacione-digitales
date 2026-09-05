@@ -82,8 +82,7 @@ IM = {
   'mapa':     jpg('mapa.jpg', 780, 76, limpiar=False),
   'luces':    jpg('guirnalda-de-luces.jpg', 620),
   'vela':     jpg('vela.jpg', 300),
-  'ramo':     jpg('ramo-con-naranjas.jpg', 380),
-  'olivo':    jpg('olivo.jpg', 420),
+  'pareja':   jpg('ellos-acuarela.jpg', 720, 80),
   'naranjas': jpg('medias-naranja.jpg', 420),
   'aperol':   jpg('aperol.jpg', 240),
   'copas':    jpg('copas-brindis.jpg', 640),
@@ -220,8 +219,11 @@ h1,h2{font-family:'Marcellus',Georgia,serif;font-weight:400;line-height:1.18;
   transition:opacity 600ms linear}
 .portada.ida{opacity:0;pointer-events:none}
 .colgante{position:absolute;left:50%;top:-42px;width:246px;margin-left:-123px;
-  transform-origin:50% 0;animation:mecer 7s ease-in-out infinite}
-@keyframes mecer{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1deg)}}
+  transform-origin:50% 0;animation:mecer 5.4s ease-in-out infinite}
+/* ⚠ El giro es chico en grados pero la etiqueta cuelga de arriba: a
+   2,6° la punta de abajo se corre ~17px. A 1° se corría 6 y no se veía
+   colgar de nada. */
+@keyframes mecer{0%,100%{transform:rotate(-2.6deg)}50%{transform:rotate(2.6deg)}}
 /* ⚠️ Sube ENTERA, sin tocarle la opacidad: apagándola a la vez que el
    papel, el viaje no se ve nunca. Y arranca con una caidita, porque una
    soga de verdad cede un instante antes de levantar. */
@@ -265,13 +267,32 @@ h1,h2{font-family:'Marcellus',Georgia,serif;font-weight:400;line-height:1.18;
    ningún otro lado. */
 .petalos{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .p{position:absolute;top:-10%;animation:caer linear infinite}
+/* ⚠⚠ El 110% de un translate se mide contra EL PROPIO PÉTALO, no contra
+   la pantalla: un pétalo de 13px caía 14px y se apagaba ahí arriba. La
+   caída entera va en --caida, que cada contenedor fija según su alto.
+   Y el camino zigzaguea: una hoja que cae no baja en línea recta. */
 @keyframes caer{0%{transform:translate3d(0,-40px,0) rotate(0);opacity:0}
-  12%{opacity:.8}85%{opacity:.65}
-  100%{transform:translate3d(var(--dx),110%,0) rotate(var(--giro));opacity:0}}
+  12%{opacity:.8}
+  33%{transform:translate3d(calc(var(--dx) * -.6),calc(var(--caida) * .32),0)
+      rotate(calc(var(--giro) * .3))}
+  66%{transform:translate3d(calc(var(--dx) * .85),calc(var(--caida) * .66),0)
+      rotate(calc(var(--giro) * .68))}
+  85%{opacity:.65}
+  100%{transform:translate3d(var(--dx),var(--caida),0) rotate(var(--giro));opacity:0}}
 
 /* ══════════ SECCIONES ══════════ */
 .acto{padding:86px 0;text-align:center}
 .acto.junto{padding-top:0}
+/* ⚠ La primera sección arranca PEGADA al borde de arriba: los 86px de
+   papel en blanco entre la etiqueta que sube y la acuarela rompían la
+   entrada. La acuarela es la portada, y una portada no tiene margen. */
+#arriba{padding-top:0}
+/* ⚠ Y va de borde a borde de verdad. `.acto .acuarela` la limitaba a
+   520px, así que arriba de esa medida quedaba una estampita centrada
+   mientras el trazo de encima (que sí abarcaba la sección entera) se
+   dibujaba corrido. La acuarela mide 720px: en un monitor grande se
+   agranda y se ablanda un poco, que es el precio de que llegue al borde. */
+#esc-ellos .acuarela{max-width:none;margin:0}
 .rot{font-family:'Marcellus',serif;font-size:.66rem;letter-spacing:.32em;
   text-transform:uppercase;color:var(--hondo)}
 .acto h2{font-size:clamp(1.7rem,6vw,2.3rem);margin-top:14px}
@@ -404,17 +425,10 @@ footer a{color:var(--hondo);text-decoration:none}
   </div>
   <div class="wrap">
     <h2 class="rev" style="margin-top:26px"><em>Guillermina y Sebasti&aacute;n</em></h2>
-    <p class="rot rev" style="margin-top:20px">S&aacute;bado 3 de abril de 2027</p>
-    <p class="rev" style="margin-top:6px;color:var(--tinta-2);font-size:.95rem">
-      Finca La Josefina &middot; Berisso</p>
 
-    <!-- El cartel de la entrada, dibujándose EN BUCLE. Es lo que ven al
-         llegar, y acá abajo de la fecha hace de firma del lugar.
-         ⚠️ El bucle se apaga cuando el cartel sale de la pantalla: si no
-         sigue redibujándose para nadie, gastando batería. -->
-    <svg class="dibujo rev bucle" id="dib-cartel" viewBox="__VB_CAR__"
-         style="width:100%;max-width:330px;margin-top:34px" aria-hidden="true">__T_CAR__</svg>
-
+    <!-- El contador va PEGADO a los nombres, a pedido de Fer. Es lo
+         primero que se mira en una invitación que llega con un año de
+         anticipación: cuánto falta. -->
     <div class="cuenta rev" id="cuenta" hidden>
       <div class="c"><span class="n" id="cd">—</span><span class="t">d&iacute;as</span></div>
       <span class="dp">:</span>
@@ -424,30 +438,25 @@ footer a{color:var(--hondo);text-decoration:none}
       <span class="dp">:</span>
       <div class="c"><span class="n" id="cs">—</span><span class="t">seg</span></div>
     </div>
+
+    <p class="rot rev" style="margin-top:36px">S&aacute;bado 3 de abril de 2027</p>
+
+    <!-- ⚠ EL CARTEL ES EL ÚNICO LUGAR DEL CUERPO DONDE SE NOMBRA LA
+         FINCA. Estaba escrita cuatro veces —abajo de la fecha, en el
+         cartel, en la ceremonia y en el dorso de la etiqueta— y le
+         quitaba peso justo al cartel, que es el que la dice dibujada.
+         Queda acá y en el dorso de la etiqueta, que es una etiqueta de
+         valija: ahí el destino corresponde.
+         ⚠ El bucle se apaga cuando el cartel sale de la pantalla: si no
+         sigue redibujándose para nadie, gastando batería. -->
+    <svg class="dibujo rev bucle" id="dib-cartel" viewBox="__VB_CAR__"
+         style="width:100%;max-width:330px;margin-top:30px" aria-hidden="true">__T_CAR__</svg>
   </div>
 </section>
 
 <img class="sep rev" src="__APEROL__" alt="" aria-hidden="true" style="width:56px">
 
-<!-- ══════════ 2 · LA CEREMONIA ══════════ -->
-<section class="acto junto" id="ceremonia" style="position:relative;overflow:hidden">
-  <!-- ⚠️ Los pétalos van ENCIMA de la sección, no en un bloque aparte:
-       suelto abajo dejaba 180px de papel vacío con un pétalo perdido,
-       que se lee como un error y no como un efecto. -->
-  <div class="petalos" id="petalos-ceremonia" aria-hidden="true"></div>
-  <div class="wrap">
-    <img class="acuarela rev" src="__ALTAR__" style="max-width:420px"
-         alt="El altar sobre el pico que entra al lago" >
-    <p class="rot rev" style="margin-top:22px">La ceremonia</p>
-    <h2 class="rev">Sobre el <em>pico</em>, frente al lago</h2>
-    <div class="dato rev">
-      <p class="hora">18:00</p>
-      <p class="donde">Finca La Josefina &middot; Berisso</p>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════ 3 · CÓMO LLEGAR ══════════ -->
+<!-- ══════════ 2 · CÓMO LLEGAR ══════════ -->
 <section class="acto junto" id="mapa-sec">
   <div class="wrap">
     <p class="rot rev">C&oacute;mo llegar</p>
@@ -471,6 +480,25 @@ footer a{color:var(--hondo);text-decoration:none}
 </section>
 
 
+
+<!-- ══════════ 3 · LA CEREMONIA ══════════
+     Va DESPUÉS del mapa: el lugar ya quedó dicho por el cartel y por
+     el recorrido, así que acá sólo hace falta la hora. -->
+<section class="acto junto" id="ceremonia" style="position:relative;overflow:hidden">
+  <!-- ⚠️ Los pétalos van ENCIMA de la sección, no en un bloque aparte:
+       suelto abajo dejaba 180px de papel vacío con un pétalo perdido,
+       que se lee como un error y no como un efecto. -->
+  <div class="petalos" id="petalos-ceremonia" aria-hidden="true"></div>
+  <div class="wrap">
+    <img class="acuarela rev" src="__ALTAR__" style="max-width:420px"
+         alt="El altar sobre el pico que entra al lago" >
+    <p class="rot rev" style="margin-top:22px">La ceremonia</p>
+    <h2 class="rev">Sobre el <em>pico</em>, frente al lago</h2>
+    <div class="dato rev">
+      <p class="hora">18:00</p>
+    </div>
+  </div>
+</section>
 
 <!-- ══════════ 4 · LA FIESTA ══════════ -->
 <section class="acto" id="fiesta">
@@ -506,8 +534,11 @@ footer a{color:var(--hondo);text-decoration:none}
 <section class="acto junto banda" id="regalos">
   <div class="wrap">
     <img class="motivo rev" src="__NARANJAS__" style="width:180px" alt="">
-    <p class="rot rev" style="margin-top:8px">Si quer&eacute;s hacernos un regalo</p>
-    <h2 class="rev">Ac&aacute; est&aacute; el <em>alias</em></h2>
+    <p class="rot rev" style="margin-top:8px">Regalos</p>
+    <h2 class="rev">Nuestro mayor regalo es <em>compartir este d&iacute;a</em></h2>
+    <p class="rev" style="margin-top:18px;color:var(--tinta-2);font-size:.95rem;
+       max-width:30em;margin-left:auto;margin-right:auto">
+      Pero si quer&eacute;s colaborar con nuestra luna de miel, pod&eacute;s hacerlo en la cuenta:</p>
     <div class="alias rev">
       <span id="alias" data-falta>guille.seba.boda</span>
       <button id="copiar" type="button">Copiar</button>
@@ -515,12 +546,15 @@ footer a{color:var(--hondo);text-decoration:none}
   </div>
 </section>
 
-<img class="sep rev" src="__RAMO__" alt="" aria-hidden="true" style="width:82px">
-
 <!-- ══════════ 7 · CONFIRMAR ══════════ -->
 <section class="acto junto" id="rsvp">
   <div class="wrap">
-    <img class="motivo rev" src="__OLIVO__" style="width:150px" alt="">
+    <!-- ⚠ Acá había DOS motivos sueltos, uno arriba del otro: el ramo de
+         naranjas y la rama de olivo. Dos adornos seguidos no dicen nada;
+         ellos mirándose sí, y es el último dibujo antes de pedirle al
+         invitado que confirme. -->
+    <img class="acuarela rev" src="__PAREJA__"
+         alt="Guillermina y Sebasti&aacute;n mir&aacute;ndose, frente al lago">
     <p class="rot rev">Queremos contar con vos</p>
     <h2 class="rev">Confirm&aacute; tu <em>lugar</em></h2>
     <p class="rev" style="margin-top:16px;color:var(--tinta-2);font-size:.95rem">
@@ -550,7 +584,7 @@ footer a{color:var(--hondo);text-decoration:none}
 <script>
 /* ── Los pétalos ─────────────────────────────────────────────────── */
 const COL=['#E07A1F','#A84F2A','#D7C3A1','#A0451A','#C98B5A'];
-function petalos(cont,n){
+function petalos(cont,n,caida){
   for(let i=0;i<n;i++){
     const s=document.createElementNS('http://www.w3.org/2000/svg','svg');
     const w=7+Math.random()*8;
@@ -559,15 +593,16 @@ function petalos(cont,n){
     s.innerHTML='<path d="M10 0C15.5 6 19 13 16.5 19.5C14.6 24.4 11.8 26 10 26C8.2 26 5.4 24.4 3.5 19.5C1 13 4.5 6 10 0Z"/>';
     s.style.fill=COL[i%COL.length]; s.classList.add('p');
     s.style.left=(Math.random()*94)+'%';
-    s.style.setProperty('--dx',(Math.random()*90-45)+'px');
-    s.style.setProperty('--giro',(Math.random()*540-270)+'deg');
-    s.style.animationDuration=(9+Math.random()*8).toFixed(1)+'s';
+    s.style.setProperty('--dx',(Math.random()*170-85)+'px');
+    s.style.setProperty('--giro',(Math.random()*840-420)+'deg');
+    s.style.setProperty('--caida',caida||'105vh');
+    s.style.animationDuration=(8+Math.random()*6).toFixed(1)+'s';
     s.style.animationDelay=(-Math.random()*15).toFixed(1)+'s';
     s.style.opacity=(.3+Math.random()*.3).toFixed(2);
     cont.appendChild(s);
   }
 }
-petalos(document.getElementById('petalos-portada'),11);
+petalos(document.getElementById('petalos-portada'),14);
 
 /* ── La entrada. UN SOLO TOQUE ────────────────────────────────────
    ⚠️ La música arranca ACÁ ADENTRO, en el gesto. Desde el setTimeout
@@ -689,7 +724,9 @@ const ojo=new IntersectionObserver(es=>{
       setTimeout(()=>el.classList.add('on'), i*130));
     if(e.target.id==='ceremonia'){
       const c=document.getElementById('petalos-ceremonia');
-      if(!c.childElementCount) petalos(c,9);
+      /* Acá la caída es el alto de la sección, no el de la pantalla:
+         con 105vh los pétalos se los coma el overflow a mitad de camino. */
+      if(!c.childElementCount) petalos(c,11,c.offsetHeight+60+'px');
     }
     // Los dibujos de esta sección arrancan cuando la sección entra.
     e.target.querySelectorAll('[id^="esc-"],[id^="dib-"]').forEach(d=>{
@@ -753,7 +790,7 @@ document.getElementById('copiar').onclick=async function(){
 '''
 
 CLAVES = {'etiqueta':'ETIQUETA','ellos':'ELLOS','altar':'ALTAR','mapa':'MAPA',
-          'luces':'LUCES','vela':'VELA','ramo':'RAMO','olivo':'OLIVO',
+          'luces':'LUCES','vela':'VELA','pareja':'PAREJA',
           'naranjas':'NARANJAS','copas':'COPAS','aperol':'APEROL'}
 for k, v in IM.items():
     HTML = HTML.replace('__' + CLAVES[k] + '__', v)
