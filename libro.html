@@ -205,6 +205,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
   font-size:clamp(1.9rem,8vw,2.6rem);line-height:1.12}
 .pag .nota{margin-top:14px;color:var(--ink-soft);font-size:.95rem;
   max-width:32ch;margin-inline:auto}
+.aviso-muestra{margin-top:12px;font-size:.68rem;font-size:.72rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--oro-texto,var(--oro))}
 .ornamento{margin:0 auto 18px;display:block;width:76px;height:76px}
 .ornamento path{fill:none;stroke:var(--oro);stroke-width:1.5;
   stroke-linecap:round;stroke-linejoin:round}
@@ -436,39 +438,78 @@ function pintarTema() {
      ⚠️ Con hoja ilustrada NO se dibuja el marco SVG: la imagen ya trae el
      suyo y quedarían dos marcos, uno adentro del otro. El trazo que se
      dibuja solo pasa a ser la ramita de al lado de la firma. */
-  /* `libro_hojas` puede ser UNA hoja o VARIAS: con varias se van
-     alternando página por página, así treinta y cuatro deseos no se leen
-     como la misma estampita repetida treinta y cuatro veces.
-     ⚠️ Se precargan TODAS antes de usar ninguna. Si una entra recién
-     cuando el invitado ya está en esa página, se ve el salto. */
-  HOJAS = [].concat(C.libro_hojas || C.libro_hoja || []).filter(Boolean);
+  /* ── LAS HOJAS ────────────────────────────────────────────────────
+     `libro_hojas` es una lista. Cada hoja puede ser una URL suelta o un
+     objeto con SU PROPIA zona de escritura:
+        { u:'…jpg', rol:'portada'|'cierre'|'deseo', t:9, r:13, b:21, l:13 }
+
+     ⚠️⚠️ LA ZONA VA POR HOJA, NO GLOBAL. Cada ilustración tiene el marco
+     y las flores en otro lado: en las cinco de Alma el alto útil va del
+     27% al 70%. Un padding único deja el texto encima del marco en unas
+     y perdido en el centro en otras. Los números salen de MEDIR la
+     imagen —hasta dónde llega la franja sin nada oscuro—, no de mirarla.
+
+     ⚠️ Se precargan TODAS antes de usar ninguna: si una entra recién
+     cuando la persona ya está en esa página, se ve el salto. */
+  HOJAS = [].concat(C.libro_hojas || C.libro_hoja || [])
+            .filter(Boolean)
+            .map(h => typeof h === 'string' ? { u: h } : h)
+            .filter(h => h.u);
   if (HOJAS.length) {
-    const z = C.libro_zona || {};
-    const lado = (k, def) => raiz.setProperty('--zona-' + k,
-      (z[k] != null ? z[k] : def) + (typeof (z[k] != null ? z[k] : def) === 'number' ? '%' : ''));
-    lado('t', 17); lado('r', 15); lado('b', 26); lado('l', 15);
     let listas = 0;
-    HOJAS.forEach(u => {
+    HOJAS.forEach(h => {
       const img = new Image();
       img.onload = img.onerror = () => {
         if (++listas === HOJAS.length) { hojasListas = true; ponerHoja(); }
       };
-      img.src = u;
+      img.src = h.u;
     });
   }
 }
 
-/* Qué hoja le toca a la página actual. La portada y el cierre llevan la
-   primera —que es la más trabajada—, y los deseos van rotando entre las
-   demás si hay más de una. */
 let HOJAS = [], hojasListas = false;
+const altoUtil = h => 100 - (h.t != null ? h.t : 17) - (h.b != null ? h.b : 26);
+
+/* Qué hoja le toca a esta página.
+   ⚠️ Un deseo largo NO puede caer en la hoja más cargada: en la del
+   puente rojo queda un 27% de alto y el texto tendría que achicarse
+   hasta no leerse. Los largos van a las hojas con más aire; los cortos
+   rotan entre todas, para que treinta deseos no se lean como la misma
+   estampita repetida treinta veces. */
+function hojaDe(pag) {
+  if (!HOJAS.length) return null;
+  const rol = r => HOJAS.filter(h => h.rol === r);
+  if (pag === 0) return (rol('portada')[0] || HOJAS[0]);
+  if (pag > deseos.length) return (rol('cierre')[0] || HOJAS[HOJAS.length - 1]);
+
+  let libres = HOJAS.filter(h => !h.rol || h.rol === 'deseo');
+  if (!libres.length) libres = HOJAS.slice();
+  libres = libres.slice().sort((a, b) => altoUtil(b) - altoUtil(a));
+
+  const d = deseos[pag - 1] || {};
+  const largo = (d.deseo || '').length;
+  if (largo > 200) {
+    const holgadas = libres.filter(h => altoUtil(h) >= 50);
+    if (holgadas.length) return holgadas[(pag - 1) % holgadas.length];
+    return libres[0];                  // la que más aire tenga
+  }
+  return libres[(pag - 1) % libres.length];
+}
+
 function ponerHoja() {
   const p = document.querySelector('.papel');
-  if (!p || !hojasListas || !HOJAS.length) return;
-  const k = (i === 0 || i > deseos.length || HOJAS.length === 1)
-    ? 0 : 1 + ((i - 1) % (HOJAS.length - 1));
-  p.style.backgroundImage = 'url("' + HOJAS[k] + '")';
+  if (!p || !hojasListas) return;
+  const h = hojaDe(i);
+  if (!h) return;
+  p.style.backgroundImage = 'url("' + h.u + '")';
   p.classList.add('ilustrada');
+  const raiz = document.documentElement.style;
+  const z = C.libro_zona || {};
+  const pon = (k, def) => {
+    const v = h[k] != null ? h[k] : (z[k] != null ? z[k] : def);
+    raiz.setProperty('--zona-' + k, typeof v === 'number' ? v + '%' : v);
+  };
+  pon('t', 17); pon('r', 15); pon('b', 26); pon('l', 15);
 }
 
 /* El agua dibujada: bandas suaves y, con la temática del sapo, nenúfares
@@ -667,7 +708,13 @@ function pintarPagina(dir) {
       n === 0 ? 'Todavía no escribió nadie.'
         : n === 1 ? 'Una persona te dejó un mensaje esa noche.'
           : n + ' personas te dejaron un mensaje esa noche.'));
-    if (n) p.appendChild(el('p', 'nota', 'Tocá para empezar a leerlos.'));
+    /* ⚠️ Que quede claro que es una muestra. Que alguien crea que está
+       leyendo los mensajes de verdad sería peor que cualquier demo.
+       Y reemplaza al "tocá para empezar" en vez de sumarse: los dos
+       juntos empujaban el bloque por encima del marco de la hoja. */
+    if (MUESTRA) p.appendChild(el('p', 'aviso-muestra',
+      'Muestra · los mensajes son inventados'));
+    else if (n) p.appendChild(el('p', 'nota', 'Tocá para empezar a leerlos.'));
   } else if (i <= deseos.length) {
     const d = deseos[i - 1];
     p.appendChild(el('div', 'kicker', 'Deseo ' + i + ' de ' + deseos.length));
@@ -795,7 +842,53 @@ async function abrir() {
   if (!HOJAS.length) dibujar(document.getElementById('marco'), 90, 900);
 }
 
+/* ── LA MUESTRA ───────────────────────────────────────────────────────
+   `/libro?muestra=1` abre el libro con deseos INVENTADOS y las hojas ya
+   cargadas: sirve para verlo en el celular sin tener que configurar
+   nada, y para mostrárselo a una clienta nueva.
+
+   ⚠️ NO pide clave y NO llama a `admin_deseos`: no puede mostrar un
+   deseo real ni por accidente. Y avisa que es una muestra, porque si
+   alguien cree que está viendo los mensajes de verdad, es peor que
+   cualquier demo. */
+/* ⚠️⚠️ UNA RUTA LIMPIA DEJA location.search VACÍO. `/libro-muestra`
+   reescribe a `/libro.html?muestra=1`, pero eso lo resuelve Vercel del
+   lado del servidor sirviendo un archivo estático: la barra de
+   direcciones sigue diciendo /libro-muestra y el JS no ve ninguna query.
+   Es la misma trampa de `/muestra`, que en su momento abrió la
+   invitación del evento equivocado con el RSVP vivo. Acá se resuelve
+   mirando también la RUTA. */
+const MUESTRA = QS.get('muestra') === '1' || /\/libro-muestra\/?$/.test(location.pathname);
+const HOJAS_MUESTRA = [
+  { u: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_portada_1788805780.jpg', rol:'portada', t:8,  r:13, b:46, l:13 },
+  { u: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_hoja1_1788805780.jpg',   t:9,  r:13, b:21, l:13 },
+  { u: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_hoja2_1788805780.jpg',   t:16, r:13, b:24, l:13 },
+  { u: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_hoja3_1788805780.jpg',   t:38, r:13, b:25, l:13 },
+  { u: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_cierre_1788805780.jpg',  rol:'cierre', t:32, r:13, b:41, l:13 }
+];
+const DESEOS_MUESTRA = [
+  { nombre:'La tía Marta', mesa:3, deseo:'Que la vida te sorprenda siempre para el lado bueno, y que nunca se te apague esa risa que tenés desde chiquita.' },
+  { nombre:'Juli', mesa:7, deseo:'Nos conocimos en primer grado y ya pasaron diez años. Prometo estar en todos los que vengan.' },
+  { nombre:'Abuela Nélida', mesa:0, deseo:'Mi amor, hoy te veo grande y me acuerdo del día que naciste. Sé buena y sé feliz, que es lo único que importa.' },
+  { nombre:'Fran', mesa:null, deseo:'Un consejo: no le hagas caso a nadie que te diga que no podés.' },
+  { nombre:'Los primos', mesa:5, deseo:'Que este año te traiga viajes, amigos nuevos, y que nunca te falte con quién bailar hasta que cierren el salón. Te queremos muchísimo y estamos orgullosos de la persona en la que te estás convirtiendo, aunque de vez en cuando te hagamos renegar un poco. Feliz quince.' }
+];
+
 async function arrancar() {
+  if (MUESTRA) {
+    C = { nombre:'Alma', fecha_texto:'11 de septiembre, 2026',
+          libro_tema:'sapo', libro_hojas: HOJAS_MUESTRA };
+    pintarTema(); soltarBichos();
+    deseos = DESEOS_MUESTRA.map((d, k) => ({ ...d, id: k, created_at: '' }));
+    document.getElementById('pg-title').textContent = 'El libro de deseos · muestra';
+    $('pantalla-puerta').hidden = true;
+    $('pantalla-puerta').style.display = 'none';
+    $('libro').hidden = false;
+    $('cab-quien').textContent = 'Alma';
+    $('cab-fecha').textContent = 'muestra';
+    i = 0; pintarPagina(1);
+    return;
+  }
   if (!eventoId) {
     $('puerta-titulo').textContent = 'Falta el evento';
     $('puerta-bajada').textContent = 'Este link tiene que decir a qué fiesta pertenece.';

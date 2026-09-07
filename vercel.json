@@ -17,6 +17,10 @@
       "destination": "/libro.html"
     },
     {
+      "source": "/libro-muestra",
+      "destination": "/libro.html?muestra=1"
+    },
+    {
       "source": "/a-medida",
       "destination": "/servicio-a-medida.html"
     },
