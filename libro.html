@@ -88,8 +88,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
    pared de papel de deseos.html. */
 .velo{position:absolute;inset:0;
       background:linear-gradient(to bottom,
-        rgba(18,26,18,.72) 0%, rgba(18,26,18,.34) 9%, rgba(18,26,18,0) 17%,
-        rgba(18,26,18,0) 83%, rgba(18,26,18,.34) 92%, rgba(18,26,18,.72) 100%)}
+        rgba(18,26,18,.34) 0%, rgba(18,26,18,.14) 7%, rgba(18,26,18,0) 14%,
+        rgba(18,26,18,0) 86%, rgba(18,26,18,.14) 93%, rgba(18,26,18,.34) 100%)}
 /* El agua dibujada: es lo que se ve mientras no haya imagen, y también
    por debajo de ella. */
 .agua{position:absolute;inset:0;opacity:.9}
@@ -143,16 +143,33 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
    tapa —el papel arriba, la silueta abajo— y la tapa parecía flotando
    sobre la hoja. Mientras está cerrado sólo se ve la tapa, apoyada
    sobre el ambiente. */
+/* ⚠️⚠️ EL ENCABEZADO Y LA BARRA SE TRAEN SU PROPIO PISO. Con el
+   ambiente del jardín —acuarela clarísima, brillo 232 de 255— el nombre
+   quedaba en 3,47:1 con el velo suave, y para llegar a 4,5 había que
+   oscurecer tanto la franja que se perdía el jardín. Pelear con la
+   opacidad del velo es el camino equivocado: la imagen la elige el
+   cliente y puede ser un estanque de noche o un mediodía. Cada franja
+   con texto trae su propio degradado y el velo vuelve a ser un toque.
+   Es la misma solución que la pared de papel de deseos.html. */
+.encabezado{background:linear-gradient(to bottom,
+   rgba(14,22,15,.80) 0%, rgba(14,22,15,.72) 45%, rgba(14,22,15,0) 100%);
+   padding-bottom:20px}
+.barra{background:linear-gradient(to top,
+   rgba(14,22,15,.80) 0%, rgba(14,22,15,.72) 45%, rgba(14,22,15,0) 100%);
+   padding-top:22px}
 body.cerrado .encabezado,
 body.cerrado .barra,
 body.cerrado .hoja{opacity:0;pointer-events:none;transition:opacity .4s var(--suave)}
 .encabezado,.barra{transition:opacity .5s var(--suave) .5s}
 .hoja{transition:opacity .55s var(--suave)}
 .encabezado{display:flex;align-items:center;justify-content:space-between;
-  gap:12px;padding:14px 18px calc(6px);color:rgba(244,236,216,.72);
+  /* ⚠️ Color SÓLIDO, no rgba con opacidad: un crema al 72% sobre un
+     ambiente claro se cae a 4,28:1 y no hay velo que lo salve. La
+     opacidad en un texto es lo que lo vuelve frágil. */
+  gap:12px;padding:14px 18px calc(6px);color:#ece4d0;
   font-size:.72rem;letter-spacing:.18em;text-transform:uppercase}
 .encabezado .quien{font-family:var(--font-titulo);letter-spacing:.06em;
-  text-transform:none;font-size:.95rem;color:#f4ecd8}
+  text-transform:none;font-size:.95rem;color:#f7f1e2}
 
 /* La hoja de papel donde se escribe. Es el único fondo claro, y por eso
    el texto siempre se lee, tenga la imagen que tenga atrás. */
@@ -236,9 +253,16 @@ body.cerrado .hoja{opacity:0;pointer-events:none;transition:opacity .4s var(--su
   background:linear-gradient(to right, rgba(0,0,0,.34), rgba(0,0,0,0));
   opacity:0;transition:opacity .5s var(--suave) .2s;pointer-events:none}
 #tapa.abriendo .tapa-lomo{opacity:1}
+/* ⚠️ Lleva SU PROPIO fondo, no una sombra de texto. Sobre el ambiente
+   nuevo —un jardín de acuarela clarísimo, brillo 232 de 255— quedaba en
+   3,23:1: la sombra ayuda a la vista pero no al contraste medido. Y la
+   imagen la elige el cliente, así que no hay una opacidad de velo que
+   sirva para todas. Es la misma solución que la pared de papel de
+   deseos.html: el texto se trae su propio piso. */
 .tocar{position:absolute;bottom:5%;left:50%;transform:translateX(-50%);
   font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;
-  color:#f4ecd8;text-shadow:0 1px 8px rgba(0,0,0,.7);
+  color:#f7f2e4;background:rgba(16,26,18,.62);
+  padding:8px 18px;border-radius:99px;white-space:nowrap;
   animation:respira 2.6s ease-in-out infinite}
 @keyframes respira{0%,100%{opacity:.55}50%{opacity:1}}
 #tapa.abriendo .tocar{opacity:0;animation:none;transition:opacity .25s}
@@ -336,13 +360,25 @@ body.cerrado .hoja{opacity:0;pointer-events:none;transition:opacity .4s var(--su
 .paso[disabled]{opacity:.3;cursor:default}
 .paso svg{width:19px;height:19px;fill:none;stroke:currentColor;
   stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.cuenta{min-width:104px;text-align:center;color:rgba(244,236,216,.72);
+.cuenta{min-width:104px;text-align:center;color:#ece4d0;
   font-size:.78rem;letter-spacing:.1em;font-variant-numeric:tabular-nums}
 
 /* La mitad izquierda/derecha del papel también pasa de página: en un
-   celular es el gesto natural y no hay que apuntarle a un botón. */
+   celular es el gesto natural y no hay que apuntarle a un botón.
+
+   ⚠️⚠️ SIN ANILLO DE FOCO. Son botones que ocupan el 38% del papel: al
+   hacerles clic con el mouse, el navegador les dibuja el foco y aparece
+   un RECTÁNGULO NEGRO de arriba abajo de la hoja, con su borde justo en
+   el 62% del ancho. Fer lo vio y parecía una raya en la ilustración —
+   en el navegador sin ventana no sale, así que no aparece en ninguna
+   captura de prueba.
+
+   ⚠️ Y por eso mismo van con `tabindex="-1"` y `aria-hidden`: son un
+   atajo para el dedo, no un control. Pasar de página con el teclado ya
+   está cubierto por los botones ‹ › de abajo y por las flechas. */
 .mitad{position:absolute;top:0;bottom:0;width:38%;z-index:3;
-  background:none;border:none}
+  background:none;border:none;outline:none;-webkit-tap-highlight-color:transparent}
+.mitad:focus,.mitad:focus-visible{outline:none;box-shadow:none}
 .mitad.izq{left:0}.mitad.der{right:0}
 
 @media (min-width:820px){
@@ -400,8 +436,8 @@ body.cerrado .hoja{opacity:0;pointer-events:none;transition:opacity .4s var(--su
   <div class="hoja">
     <div class="papel">
       <svg class="marco" id="marco" aria-hidden="true"></svg>
-      <button class="mitad izq" id="mitad-izq" aria-label="Página anterior"></button>
-      <button class="mitad der" id="mitad-der" aria-label="Página siguiente"></button>
+      <button class="mitad izq" id="mitad-izq" tabindex="-1" aria-hidden="true"></button>
+      <button class="mitad der" id="mitad-der" tabindex="-1" aria-hidden="true"></button>
       <div class="vida" id="vida" aria-hidden="true"></div>
       <img class="silueta" id="silueta" alt="" hidden>
       <div class="pag" id="pag"></div>
@@ -1088,6 +1124,7 @@ async function arrancar() {
   if (MUESTRA) {
     C = { nombre:'Alma', fecha_texto:'11 de septiembre, 2026',
           libro_tema:'sapo', libro_hojas: HOJAS_MUESTRA,
+          libro_fondo: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_ambiente_1788819524.jpg',
           libro_tapa: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_tapa_1788817090.jpg',
           libro_silueta: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_silueta_1788815690.png' };
     pintarTema(); soltarBichos();

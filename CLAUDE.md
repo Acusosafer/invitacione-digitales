@@ -1126,6 +1126,33 @@ deseo con su zona ya medida.
 Verificado con **70 deseos** de todos los largos: 71 páginas, ninguna desborda, los 70 se
 escriben completos, las cuatro hojas rotan (21/21/14/14) y el cierre sale una sola vez.
 
+### ⚠️ La raya negra que no salía en ninguna prueba
+
+Las dos mitades del papel que pasan de página son `<button>`. Al hacerles clic **con el mouse**,
+el navegador les dibuja el anillo de foco: aparece un **rectángulo negro de arriba abajo de la
+hoja**, con su borde justo en el 62% del ancho, y parece una raya en la ilustración. En el
+navegador sin ventana no se dibuja, así que **no sale en ninguna captura de prueba** — se
+reprodujo forzando `.focus()`.
+
+Van con `outline:none`, `tabindex="-1"` y `aria-hidden`: son un atajo para el dedo, no un
+control. El teclado ya está cubierto por los botones ‹ › y las flechas.
+
+### ⚠️⚠️ Cada franja con texto se trae SU PROPIO PISO
+
+El ambiente de Alma es una acuarela clarísima (brillo **232 de 255**). Con el velo suave el
+nombre de arriba quedaba en **3,47:1**, y para llegar a 4,5 había que oscurecer tanto la franja
+que se perdía el jardín. **Pelear con la opacidad del velo es el camino equivocado**: la imagen
+la elige el cliente y puede ser un estanque de noche o un mediodía.
+
+Hoy el velo es un toque, y el encabezado, la barra y el "Tocá para abrir" traen su propio
+degradado. Es la misma solución que la pared de papel de `deseos.html`.
+
+⚠️ **Y el texto del encabezado va en color SÓLIDO, no en `rgba` con opacidad**: un crema al 72%
+sobre un fondo claro se cae solo, y no hay velo que lo salve. La opacidad en un texto es lo que
+lo vuelve frágil.
+
+Medido por píxel con el ambiente puesto: **5,81 · 6,46 · 8,62**.
+
 ### La tapa que se abre (07/09/2026)
 
 `config.libro_tapa`. El libro se ve **cerrado**, se toca, y la tapa gira sobre el lomo hasta
