@@ -4132,7 +4132,13 @@ function exportarMesasPDF() {
          en blanco: por defecto descarta los fondos. Y el papel es un
          crema muy claro justamente para que, impreso, no se coma media
          cinta de tinta. */
-      @page { size: A4; margin: 0 }
+      /* ⚠️⚠️ SIN "size", A PROPÓSITO. Con size:A4 declarado, la página
+         mide 297mm pase lo que pase — y si la impresora tiene cargado
+         otro papel (Carta son 279mm, 18 menos), cada página entra en DOS
+         hojas: la segunda, en blanco. Le pasó a Fer con la EPSON: 4
+         hojas de papel para 2 hojas de listado. Sin "size", la página es
+         la que el usuario tenga puesta y la hoja se adapta. */
+      @page { margin: 0 }
       * { box-sizing: border-box; margin: 0; padding: 0;
           -webkit-print-color-adjust: exact; print-color-adjust: exact }
       :root { --papel:#FBF6EC; --tinta:#241d16; --oro:#8A5F17;
@@ -4143,15 +4149,16 @@ function exportarMesasPDF() {
       body { font-family:'Instrument Sans',system-ui,sans-serif; color:var(--tinta);
              font-size:11.5px; line-height:1.35 }
 
-      /* ⚠️⚠️ NI EL ALTO NI EL ANCHO PUEDEN SER LOS DE LA HOJA EXACTOS.
-         Con 210×297mm clavados, en headless salían 2 páginas y en el
-         Chrome de verdad salían 4: la mitad, en blanco. La impresora
-         redondea la caja de la página a SUS píxeles (una EPSON imprime a
-         360 dpi, no a 96), y un píxel de más manda la hoja entera a la
-         página siguiente. El ancho lo da la página —por eso va en auto— y el
-         alto lleva 8mm de colchón que nadie ve, porque el papel ya es
-         crema. */
-      .hoja { width:auto; height:289mm; padding:11mm 11mm 8mm;
+      /* ⚠️⚠️ EL ALTO TIENE QUE ENTRAR EN CUALQUIER PAPEL, NO EN UNA A4.
+         La hoja mide 260mm: entra en A4 (297) y también en Carta (279),
+         que es el papel que puede tener cargado la impresora del
+         cliente. Con 297mm clavados salían DOS hojas de papel por hoja
+         de listado, la segunda en blanco.
+         ⚠️ El ancho va en "auto": lo da la página. Fijarlo en 210mm es
+         el mismo error, del otro lado.
+         ⚠️ Lo que sobra abajo NO se ve: el crema lo pinta "html", así que
+         el papel sale parejo hasta el borde. */
+      .hoja { width:auto; height:260mm; padding:9mm 10mm 6mm;
               overflow:hidden;
               display:flex; flex-direction:column;
               page-break-after:always; break-after:page }
@@ -4161,14 +4168,17 @@ function exportarMesasPDF() {
       @media screen { body { background:#e9e3d8 } }
 
       /* Encabezado de la primera hoja */
-      .cab { border-bottom:1.5px solid var(--oro); padding-bottom:9px; margin-bottom:11px }
+      /* ⚠️ Cada píxel de acá sale de la primera hoja. Bajar 12px el
+         encabezado es media fila más por columna, y ese medio decide si
+         120 invitados entran en dos hojas o en tres. */
+      .cab { border-bottom:1.5px solid var(--oro); padding-bottom:7px; margin-bottom:9px }
       .marca { font-size:9px; letter-spacing:.22em; text-transform:uppercase;
                color:var(--oro); font-weight:600 }
       .marca span { opacity:.55 }
-      h1 { font-family:'Fraunces',Georgia,serif; font-weight:700; font-size:23px;
-           line-height:1.15; margin:5px 0 2px }
+      h1 { font-family:'Fraunces',Georgia,serif; font-weight:700; font-size:21px;
+           line-height:1.12; margin:3px 0 1px }
       .quien { font-size:12px; color:var(--vago) }
-      .cuenta { margin-top:7px; font-size:11px; color:var(--vago) }
+      .cuenta { margin-top:5px; font-size:11px; color:var(--vago) }
       .cuenta b { font-family:'Fraunces',Georgia,serif; color:var(--oro); font-size:13px }
       .cuenta i { display:inline-block; width:1px; height:9px; margin:0 9px -1px;
                   background:var(--linea) }
@@ -4196,7 +4206,7 @@ function exportarMesasPDF() {
            letter-spacing:.13em; text-transform:uppercase;
            text-align:left; padding:4px 7px }
       th em { font-style:normal; opacity:.72; letter-spacing:.04em }
-      td { padding:3.5px 7px; border-bottom:.5px solid var(--linea);
+      td { padding:3px 7px; border-bottom:.5px solid var(--linea);
            word-break:break-word }
       tbody tr:nth-child(even) td { background:rgba(255,255,255,.62) }
       /* ⚠️ Los anchos son fijos a propósito. Con la mesa en 30% el nombre
@@ -4214,7 +4224,7 @@ function exportarMesasPDF() {
          necesita ver. */
       .vago { color:var(--vago); font-weight:400 }
 
-      .pie { margin-top:8px; padding-top:6px; border-top:1px solid var(--linea);
+      .pie { margin-top:6px; padding-top:5px; border-top:1px solid var(--linea);
              display:flex; justify-content:space-between;
              font-size:9px; letter-spacing:.05em; color:var(--vago) }
   </style></head><body>${cuerpo}
@@ -4222,6 +4232,7 @@ function exportarMesasPDF() {
     var CAB = ${JSON.stringify(encabezado)};
     var FRANJA = ${JSON.stringify(franja)};
     var TABLA = ${JSON.stringify(TABLA)};
+    var PIE = ${JSON.stringify(escapeHtml(eventoId) + ' · invitacionesdigitalesoficial.com')};
 
     /* Reparte las filas midiendo: mete una, mira si la columna pasó el
        fondo de la hoja, y si lo pasó la saca y la manda a la columna o a
@@ -4247,7 +4258,7 @@ function exportarMesasPDF() {
         hoja.className = 'hoja';
         hoja.innerHTML = (hojas.length ? FRANJA : CAB) +
           '<div class="cols">' + TABLA + TABLA + '</div>' +
-          '<footer class="pie"><span>invitacionesdigitalesoficial.com</span>' +
+          '<footer class="pie"><span>' + PIE + '<\\/span>' +
           '<span class="nro"><\\/span><\\/footer>';
         salida.appendChild(hoja);
         hojas.push(hoja);

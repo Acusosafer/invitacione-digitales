@@ -532,17 +532,31 @@ sabe es el navegador. La hoja se arma vacía y se le meten filas hasta que
 **mide** más que una A4; ahí se pasa a la otra columna, y después a otra
 hoja. Verificado con 0, 8, 45, 124 y 300 invitados: ninguna hoja se pasa.
 
-⚠️⚠️ **NI EL ALTO NI EL ANCHO DE LA HOJA PUEDEN SER LOS DE UNA A4
-EXACTOS.** Con `210mm × 297mm` clavados, en el navegador sin ventana
-salían 2 páginas y **en el Chrome de Fer salieron 4, la mitad en
-blanco**. La impresora redondea la caja de la página a SUS píxeles (una
-EPSON imprime a 360 dpi, no a 96) y un píxel de más manda la hoja entera
-a la página siguiente. Hoy el ancho lo da la página (`width:auto`) y el
-alto es `289mm`: 8mm de colchón que no se ven, porque el crema lo pinta
-`html` y el papel sale parejo hasta el borde. **Verificar contando las
-páginas del PDF, no mirando la vista previa**: A4, Letter, con `@page` y
-con la casilla de fondos apagada — las cinco pruebas tienen que dar
-tantas páginas como hojas.
+⚠️⚠️ **LA HOJA NO PUEDE MEDIR UNA A4, NI EL `@page` PUEDE DECIR
+`size:A4`.** A Fer le salieron **4 hojas de papel para 2 hojas de
+listado**, una sí y una en blanco, y **el navegador sin ventana decía 2**:
+por eso el primer arreglo (bajar de 297 a 289mm) no alcanzó. La causa
+verdadera es el papel: con `size:A4` la página mide 297mm pase lo que
+pase, y si la impresora tiene cargado otro tamaño —Carta son **279mm**,
+18 menos— cada página entra en dos hojas.
+
+Hoy: **`@page { margin:0 }` sin `size`**, el ancho lo da la página
+(`width:auto`) y la hoja mide **260mm**, que entra en A4 y en Carta. Lo
+que sobra abajo no se ve porque el crema lo pinta `html`.
+
+⚠️ Los 29mm que se perdieron se recuperaron **apretando el contenedor, no
+la letra**: padding de la hoja, alto del encabezado y padding de las
+celdas. 124 invitados volvieron de tres hojas a dos, con lugar para 14
+filas más. Bajar el cuerpo de 11,5px es la salida fácil y la equivocada:
+esto se lee en un salón, de noche.
+
+⚠️ **Verificar contando las páginas del PDF, no mirando la vista
+previa**: A4, Carta, Legal, con `@page`, al 96% de escala y con los
+fondos apagados. En los seis, páginas = hojas.
+
+⚠️ **El pie lleva el slug del evento a la izquierda.** Es la forma de
+saber, mirando una impresión, si salió de la versión nueva o de una
+pestaña vieja que quedó abierta con el JS anterior en memoria.
 
 ⚠️ **El paginador tampoco compara contra milímetros**, compara contra el
 borde de abajo de `.cols` (que no crece gracias a `min-height:0` +
