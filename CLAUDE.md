@@ -515,6 +515,26 @@ confirmó de verdad **nunca** se sigue llamando "Familia X".
 - Capacidad dinámica: si se asignan más de 10 a una mesa, la mesa escala.
 - Exporta PDF de distribución de salón ordenado por apellido.
 
+### El PDF del salón y el del DJ salen del MISMO motor (07/09/2026)
+
+`armarHojas({titulo, cuentas, columnas, filas})` es de los dos. Se entregan la misma noche a
+dos personas distintas y eran dos diseños que no se parecían en nada: uno en papel crema a dos
+columnas con paginado medido, y el otro en blanco, a una columna y con el encabezado repetido.
+
+Lo que cambia por hoja es sólo el título, las cuentas del encabezado y las columnas. Si hace
+falta una tercera —los regalos, los que no contestaron— sale de ahí y ya nace igual. **Todo lo
+que sigue vale para las dos, porque es el mismo código.**
+
+⚠️ La lista del DJ va **sin rango de letras** arriba de la columna: está ordenada por cuántos
+pidieron cada tema, no por abecedario, y un "A–D" ahí mentiría.
+
+⚠️ **Temas y pedidos no son lo mismo** y el encabezado muestra los dos: si tres personas piden
+el mismo tema, son 1 tema y 3 pedidos. Con un solo número el DJ cree que la lista está
+incompleta.
+
+⚠️ El color va en el `td`, no en la clase: puesto en `.dj-n` a secas, el `<th>` con el "#"
+heredaba el gris y quedaba en **1,01:1** sobre el dorado del encabezado.
+
 ### El PDF del salón (rehecho el 07/09/2026)
 
 Dos columnas por hoja, filas compactas y el papel crema de la marca de
@@ -593,8 +613,12 @@ por la mesa, y recién ahí se le saca el prefijo.
 volver a medir**: si una sola fila no entrara ni en una hoja vacía,
 medir de nuevo la sacaría otra vez y el bucle no terminaría nunca.
 
-Contraste medido sobre el crema: texto 15,4:1 · "sin asignar" 5,3:1 ·
-encabezado blanco sobre el oro 5,6:1 · número de mesa 5,2:1.
+⚠️⚠️ **El contraste de estas hojas se mide POR PIXEL**, con una captura del mismo documento
+sin texto: el papel tiene franjas alternas y sombras, y sacarlo del árbol CSS da otro número.
+Medido así aparecieron tres textos entre 4,41 y 4,47:1 que la cuenta teórica daba en 5,30 —
+por eso el gris pasó a `#655c4f` y el dorado a `#7D5614`.
+
+Contraste medido por pixel, las dos hojas: lo peor **5,12:1**.
 
 ## Identidad — una sola marca, dos dorados
 

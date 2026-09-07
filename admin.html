@@ -2813,47 +2813,33 @@ function abrirParaImprimir(titulo, css, cuerpo) {
 
 function imprimirListaDJ() {
   const temas = listaDJ();
-  const evento = currentConfig?.nombre || eventoId;
-  const filas = temas.map((t, i) => `<tr>
-      <td class="n">${i + 1}</td>
-      <td><strong>${escapeHtml(t.cancion)}</strong>${
-        t.quienes.length > 1
-          ? `<div class="q">La pidieron ${t.quienes.length}: ${escapeHtml(t.quienes.join(', '))}</div>`
-          : `<div class="q">${escapeHtml(t.quienes[0])}</div>`}</td>
-    </tr>`).join('');
+  const pedidos = temas.reduce((n, t) => n + t.quienes.length, 0);
 
-  const html = `<html><head><meta charset="utf-8"><title>Música pedida — ${escapeHtml(evento)}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..700&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    @media print { body { margin:0; padding:20px } }
-    body{font-family:'Instrument Sans',system-ui,sans-serif;background:#fff;color:#1f2937;margin:40px}
-    .header{text-align:center;margin-bottom:34px;border-bottom:2px solid #f3f4f6;padding-bottom:26px}
-    .logo{font-family:'Fraunces',Georgia,serif;font-weight:800;font-size:30px;color:#8A5F17}
-    .sub{font-weight:800;font-size:13px;letter-spacing:6px;text-transform:uppercase;color:#8A5F17;margin-top:3px}
-    h1{font-family:'Fraunces',Georgia,serif;font-size:23px;margin:16px 0 4px}
-    .ev{font-size:14px;color:#6b7280}
-    table{border-collapse:collapse;width:100%}
-    td{padding:11px 14px;border-bottom:1px solid #f3f4f6;font-size:13px;vertical-align:top}
-    tr:nth-child(even) td{background:#fcfcfc}
-    .n{width:34px;color:#9ca3af;font-family:'Fraunces',Georgia,serif;font-weight:700}
-    .q{font-size:11px;color:#9ca3af;margin-top:3px}
-    .pie{margin-top:40px;text-align:center;font-size:11px;color:#9ca3af;
-         border-top:1px solid #f3f4f6;padding-top:18px}
-  </style></head><body>
-  <div class="header">
-    <div class="logo">Invitaciones Digitales</div><div class="sub">OFICIAL</div>
-    <h1>Música pedida por los invitados</h1>
-    <div class="ev">${escapeHtml(evento)}${
-      currentConfig?.fecha_texto ? ' · ' + escapeHtml(currentConfig.fecha_texto) : ''} · ${temas.length} temas</div>
-  </div>
-  <table>${filas}</table>
-  <div class="pie">Generado por Invitaciones Digitales Oficial</div>
-  </body></html>`;
+  /* ⚠️ Los nombres y las canciones los escribieron invitados: van con
+     escapeHtml. Y la canción va primero y en negrita — el DJ busca el
+     tema, no la persona. */
+  const fila = (t, k) => `<tr>
+        <td class="dj-n">${k + 1}</td>
+        <td><strong>${escapeHtml(t.cancion)}</strong>
+          <span class="vago">${escapeHtml(t.quienes.join(' · '))}</span></td>
+        <td class="col-m">${t.quienes.length > 1
+          ? '<span class="chip">' + t.quienes.length + '</span>'
+          : '<span class="vago">1</span>'}</td>
+      </tr>`;
 
-  const v = window.open();
-  v.document.write(html);
-  v.document.close();
-  v.print();
+  armarHojas({
+    titulo: 'Música pedida por los invitados',
+    /* ⚠️ Temas y pedidos NO son lo mismo: si tres personas piden el
+       mismo tema, son 1 tema y 3 pedidos. Mostrar sólo uno de los dos
+       hace que el DJ crea que la lista está incompleta. */
+    cuentas: [{ n: temas.length, txt: temas.length === 1 ? 'tema' : 'temas' },
+              { n: pedidos, txt: pedidos === 1 ? 'pedido' : 'pedidos' }],
+    /* Sin `rango`: esta hoja va ordenada por cuántos la pidieron, no
+       por abecedario, así que un "A–D" arriba de la columna mentiría. */
+    columnas: [{ th: '#', clase: 'dj-n' }, { th: 'Canción' },
+               { th: 'Pidieron', clase: 'col-m' }],
+    filas: temas.map(fila)
+  });
 }
 
 async function loadData() {
@@ -4051,105 +4037,57 @@ function escapeHtml(str) {
   });
 }
 
-function exportarMesasPDF() {
-  const lista = mesasInvitados.map(inv => {
-    // Cuando el apellido hay que sacarlo de la última palabra del nombre,
-    // esa palabra NO se repite en la columna de al lado: el salón no
-    // necesita leer "Quiroga · Marisa Beatriz Quiroga".
-    // ⚠️ Sólo si el nombre tiene dos palabras o más. Con "Ines" a secas,
-    // sacarle la última palabra lo deja sin nombre.
-    const ape = esLugarReservado(inv) ? '' : apellidoReal(inv);
-    const partes = (inv.nombre || '').trim().split(/\s+/);
-    const derivado = !ape && !esLugarReservado(inv) && partes.length > 1;
-    return {
-    nombre: derivado ? partes.slice(0, -1).join(' ') : inv.nombre,
-    // ⚠️ `inv.apellido` puede ser la etiqueta de la pre-alta ("de Familia
-    // Álvarez"). Si lo es, el apellido sale de la última palabra del
-    // nombre, que es lo que escribió la persona al confirmar.
-    // ⚠️ De un lugar reservado NO se saca apellido: extraerApellido de
-    // "Acompañante 2" devuelve "2", y el salón lee un invitado apellidado
-    // 2. Va sin apellido y con el grupo al lado del nombre.
-    apellido: esLugarReservado(inv) ? '' : (ape || extraerApellido(inv.nombre)),
-    grupo: esLugarReservado(inv) ? (inv.invitado_url || '') : '',
-    reservado: esLugarReservado(inv),
-    // ⚠️ `inv.mesa ? ... : ''` acá borraba la MESA PRINCIPAL: es la 0, y el
-    // 0 es falso en JavaScript. Los padres desaparecían del listado que se
-    // le entrega al salón.
-    mesa: tieneMesa(inv) ? String(inv.mesa).trim() : ''
-    };
-  });
-  
-  /* Los lugares reservados van al final y no mezclados entre la gente:
-     el salón cuenta cubiertos con esta hoja, y "Acompañante 2" archivado
-     entre los apellidos con D se lee como una persona más. */
-  lista.sort((a,b) => (a.reservado - b.reservado) || a.apellido.localeCompare(b.apellido));
-  /* ── LA HOJA QUE SE LE ENTREGA AL SALÓN ────────────────────────────
-     Dos columnas por hoja y filas compactas: 120 invitados entraban en
-     diez hojas y entran en dos. El salón busca un apellido en una hoja
-     apoyada sobre una mesa — cuantas menos hojas, menos se pierde.
+/* ── EL MOTOR DE LAS HOJAS QUE SE ENTREGAN ────────────────────────────
+   Lo comparten el LISTADO DEL SALÓN y la LISTA DEL DJ. Las dos se
+   entregan la misma noche, a dos personas distintas, y hasta el
+   07/09/2026 eran dos diseños que no se parecían en nada: una en papel
+   crema con dos columnas y paginado medido, y la otra en blanco, a una
+   sola columna y con el encabezado repetido.
 
-     ⚠️⚠️ LA PAGINACIÓN SE MIDE, NO SE CUENTA. La primera versión repartía
-     un número fijo de filas por columna, y con nombres largos ("María de
-     los Ángeles Rodríguez") la fila se parte en dos renglones y empuja
-     todo: de 120 invitados salían TRES hojas, la última con una fila
-     sola. Cuántas filas entran depende de los nombres de cada clienta,
-     así que el único que lo sabe es el navegador. La hoja se arma vacía
-     y se le van metiendo filas hasta que MIDE más que una A4; ahí se
-     pasa a la otra columna, y después a otra hoja.
+   Acá viven el papel, la paginación que se mide, el rango de letras y
+   el pie. Lo que cambia por hoja es sólo el título, las cuentas del
+   encabezado y las columnas. Si mañana hace falta una tercera hoja
+   —los regalos, los que no contestaron— sale de acá y ya nace igual.
 
-     ⚠️ Por eso también se espera a que bajen las fuentes antes de
-     paginar: con la letra del sistema, que es más ancha, la cuenta da
-     otra cosa. */
-  const inicial = it => (it.apellido || it.nombre || '?').trim().charAt(0).toUpperCase();
+   ⚠️ Todo lo documentado del PDF del salón vale igual para el del DJ,
+   porque es el mismo código: la hoja no puede medir una A4 exacta, el
+   @page va sin `size`, la paginación se mide contra el borde de las
+   columnas y no contra milímetros, y sin print-color-adjust el crema no
+   se imprime.
 
-  /* ⚠️ El chip lleva sólo el número ("7", "Principal"), no "Mesa 7": la
-     columna se llama Mesa y repetirlo 120 veces le come el ancho a los
-     nombres, que es justo lo que los parte en dos renglones.
-     ⚠️ El texto sale igual de nombreMesa() —la única forma correcta de
-     preguntar por la mesa, porque la Principal es el 0 y el 0 es falso
-     en JavaScript— y recién ahí se le saca el prefijo. */
-  const chipMesa = m => escapeHtml(nombreMesa(m).replace(/^Mesa\s+/i, ''));
-
-  /* ⚠️ Un lugar sin nombre no aporta letra al rango de la columna:
-     "Acompañante 2" daría una A y la columna diría "V–A". */
-  const fila = it => `<tr data-i="${it.reservado ? '' : escapeHtml(inicial(it))}">
-        <td class="ape">${it.apellido ? escapeHtml(it.apellido) : '<span class="vago">—</span>'}</td>
-        <td>${escapeHtml(it.nombre)}${it.grupo ? '<span class="vago"> · ' + escapeHtml(it.grupo) + '</span>' : ''}</td>
-        <td class="col-m">${it.mesa !== '' ? '<span class="chip">' + chipMesa(it.mesa) + '</span>' : '<span class="vago">sin asignar</span>'}</td>
-      </tr>`;
-
-  const TABLA = `<table>
-      <thead><tr><th>Apellido <em class="rango"></em></th><th>Nombre</th><th class="col-m">Mesa</th></tr></thead>
-      <tbody></tbody></table>`;
-
-  const sinMesa   = lista.filter(i => i.mesa === '').length;
-  const personas  = lista.filter(i => !i.reservado).length;
-  const reservados = lista.filter(i => i.reservado).length;
+   o = { titulo, cuentas:[{n,txt}], columnas:[{th,clase,rango}], filas:[html] }
+*/
+function armarHojas(o) {
   const hoy = new Date().toLocaleString('es-AR', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', hour12: false });
 
   const encabezado = `<header class="cab">
         <div class="marca">Invitaciones Digitales <span>Oficial</span></div>
-        <h1>Distribución de salón</h1>
+        <h1>${escapeHtml(o.titulo)}</h1>
         <div class="quien">${escapeHtml(currentConfig.nombre || '')}${currentConfig.nombre ? ' · ' : ''}${escapeHtml(eventoId.toUpperCase())}</div>
         <div class="cuenta">
-          <b>${lista.length}</b> cubiertos${reservados ? `<i></i><b>${personas}</b> con nombre<i></i><b>${reservados}</b> lugares sin nombre` : ''}<i></i>
-          <b>${sinMesa}</b> sin mesa
+          ${o.cuentas.map(c => `<b>${c.n}</b> ${escapeHtml(c.txt)}`).join('<i></i>')}
           <i></i><span class="vago">al ${hoy} hs</span>
         </div>
       </header>`;
 
   const franja = `<header class="franja">
-        <span>Distribución de salón · ${escapeHtml(currentConfig.nombre || eventoId)}</span>
+        <span>${escapeHtml(o.titulo)} · ${escapeHtml(currentConfig.nombre || eventoId)}</span>
         <span class="vago">continúa</span>
       </header>`;
 
-  const cuerpo = `<div id="deposito"><table><tbody>${lista.map(fila).join('')}</tbody></table></div>
+  const cuerpo = `<div id="deposito"><table><tbody>${o.filas.join('')}</tbody></table></div>
   <div id="salida"></div>`;
 
+  const TABLA = `<table>
+      <thead><tr>${o.columnas.map(c =>
+        `<th${c.clase ? ' class="' + c.clase + '"' : ''}>${escapeHtml(c.th)}` +
+        `${c.rango ? ' <em class="rango"></em>' : ''}</th>`).join('')}</tr></thead>
+      <tbody></tbody></table>`;
+
   const html = `<!DOCTYPE html><html lang="es-AR"><head><meta charset="utf-8">
-  <title>Distribución de salón · ${escapeHtml(eventoId.toUpperCase())}</title>
+  <title>${escapeHtml(o.titulo)} · ${escapeHtml(eventoId.toUpperCase())}</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
       /* ⚠️ Sin print-color-adjust:exact el navegador imprime la hoja
@@ -4165,8 +4103,12 @@ function exportarMesasPDF() {
       @page { margin: 0 }
       * { box-sizing: border-box; margin: 0; padding: 0;
           -webkit-print-color-adjust: exact; print-color-adjust: exact }
-      :root { --papel:#FBF6EC; --tinta:#241d16; --oro:#8A5F17;
-              --linea:rgba(138,95,23,.20); --vago:#6f6558 }
+      /* ⚠️ El dorado se oscureció de #8A5F17 a #7D5614: medido por
+         pixel, la marca de arriba daba 4,41:1 sobre el crema. Como el
+         mismo dorado es el FONDO del encabezado de la tabla, oscurecerlo
+         mejora también el blanco que va encima. */
+      :root { --papel:#FBF6EC; --tinta:#241d16; --oro:#7D5614;
+              --linea:rgba(138,95,23,.20); --vago:#655c4f }
       /* El crema lo pone la página entera, no la hoja: así el papel sale
          parejo hasta el borde aunque la hoja mida menos que una A4. */
       html { background:var(--papel) }
@@ -4239,6 +4181,18 @@ function exportarMesasPDF() {
          Con el chip mostrando sólo el número, la mesa no necesita más
          de 17%. */
       .ape { width:36%; font-weight:600 }
+      /* La lista del DJ: el número de orden y, debajo de cada tema,
+         quién lo pidió. */
+      /* ⚠️ 8% partía el número en dos renglones ("2 0" en vez de "20"):
+         con table-layout:fixed la celda no se estira y word-break parte
+         hasta un número. Va con ancho suficiente y sin partir. */
+      /* ⚠️ El color va sólo en el TD. Puesto en la clase, el <th> con
+         el "#" heredaba el gris y quedaba en 1,01:1 sobre el dorado del
+         encabezado: invisible. */
+      th.dj-n { width:11% }
+      td.dj-n { width:11%; color:var(--vago); white-space:nowrap;
+                font-family:'Fraunces',Georgia,serif; font-weight:700 }
+      td .vago { display:block; font-size:9.5px; margin-top:1px }
       .col-m { width:17%; text-align:right }
       .chip { display:inline-block; font-weight:600; font-size:10px; color:var(--oro);
               background:rgba(138,95,23,.09); border:.5px solid var(--linea);
@@ -4373,8 +4327,99 @@ function exportarMesasPDF() {
   <\/script>
   </body></html>`;
   const ventana = window.open();
+  if (!ventana) { toast('El navegador bloqueó la ventana. Permitila y probá de nuevo.'); return; }
   ventana.document.write(html);
   ventana.document.close();
+}
+
+function exportarMesasPDF() {
+  const lista = mesasInvitados.map(inv => {
+    // Cuando el apellido hay que sacarlo de la última palabra del nombre,
+    // esa palabra NO se repite en la columna de al lado: el salón no
+    // necesita leer "Quiroga · Marisa Beatriz Quiroga".
+    // ⚠️ Sólo si el nombre tiene dos palabras o más. Con "Ines" a secas,
+    // sacarle la última palabra lo deja sin nombre.
+    const ape = esLugarReservado(inv) ? '' : apellidoReal(inv);
+    const partes = (inv.nombre || '').trim().split(/\s+/);
+    const derivado = !ape && !esLugarReservado(inv) && partes.length > 1;
+    return {
+    nombre: derivado ? partes.slice(0, -1).join(' ') : inv.nombre,
+    // ⚠️ `inv.apellido` puede ser la etiqueta de la pre-alta ("de Familia
+    // Álvarez"). Si lo es, el apellido sale de la última palabra del
+    // nombre, que es lo que escribió la persona al confirmar.
+    // ⚠️ De un lugar reservado NO se saca apellido: extraerApellido de
+    // "Acompañante 2" devuelve "2", y el salón lee un invitado apellidado
+    // 2. Va sin apellido y con el grupo al lado del nombre.
+    apellido: esLugarReservado(inv) ? '' : (ape || extraerApellido(inv.nombre)),
+    grupo: esLugarReservado(inv) ? (inv.invitado_url || '') : '',
+    reservado: esLugarReservado(inv),
+    // ⚠️ `inv.mesa ? ... : ''` acá borraba la MESA PRINCIPAL: es la 0, y el
+    // 0 es falso en JavaScript. Los padres desaparecían del listado que se
+    // le entrega al salón.
+    mesa: tieneMesa(inv) ? String(inv.mesa).trim() : ''
+    };
+  });
+  
+  /* Los lugares reservados van al final y no mezclados entre la gente:
+     el salón cuenta cubiertos con esta hoja, y "Acompañante 2" archivado
+     entre los apellidos con D se lee como una persona más. */
+  lista.sort((a,b) => (a.reservado - b.reservado) || a.apellido.localeCompare(b.apellido));
+  /* ── LA HOJA QUE SE LE ENTREGA AL SALÓN ────────────────────────────
+     Dos columnas por hoja y filas compactas: 120 invitados entraban en
+     diez hojas y entran en dos. El salón busca un apellido en una hoja
+     apoyada sobre una mesa — cuantas menos hojas, menos se pierde.
+
+     ⚠️⚠️ LA PAGINACIÓN SE MIDE, NO SE CUENTA. La primera versión repartía
+     un número fijo de filas por columna, y con nombres largos ("María de
+     los Ángeles Rodríguez") la fila se parte en dos renglones y empuja
+     todo: de 120 invitados salían TRES hojas, la última con una fila
+     sola. Cuántas filas entran depende de los nombres de cada clienta,
+     así que el único que lo sabe es el navegador. La hoja se arma vacía
+     y se le van metiendo filas hasta que MIDE más que una A4; ahí se
+     pasa a la otra columna, y después a otra hoja.
+
+     ⚠️ Por eso también se espera a que bajen las fuentes antes de
+     paginar: con la letra del sistema, que es más ancha, la cuenta da
+     otra cosa. */
+  const inicial = it => (it.apellido || it.nombre || '?').trim().charAt(0).toUpperCase();
+
+  /* ⚠️ El chip lleva sólo el número ("7", "Principal"), no "Mesa 7": la
+     columna se llama Mesa y repetirlo 120 veces le come el ancho a los
+     nombres, que es justo lo que los parte en dos renglones.
+     ⚠️ El texto sale igual de nombreMesa() —la única forma correcta de
+     preguntar por la mesa, porque la Principal es el 0 y el 0 es falso
+     en JavaScript— y recién ahí se le saca el prefijo. */
+  const chipMesa = m => escapeHtml(nombreMesa(m).replace(/^Mesa\s+/i, ''));
+
+  /* ⚠️ Un lugar sin nombre no aporta letra al rango de la columna:
+     "Acompañante 2" daría una A y la columna diría "V–A". */
+  const fila = it => `<tr data-i="${it.reservado ? '' : escapeHtml(inicial(it))}">
+        <td class="ape">${it.apellido ? escapeHtml(it.apellido) : '<span class="vago">—</span>'}</td>
+        <td>${escapeHtml(it.nombre)}${it.grupo ? '<span class="vago"> · ' + escapeHtml(it.grupo) + '</span>' : ''}</td>
+        <td class="col-m">${it.mesa !== '' ? '<span class="chip">' + chipMesa(it.mesa) + '</span>' : '<span class="vago">sin asignar</span>'}</td>
+      </tr>`;
+
+  const TABLA = `<table>
+      <thead><tr><th>Apellido <em class="rango"></em></th><th>Nombre</th><th class="col-m">Mesa</th></tr></thead>
+      <tbody></tbody></table>`;
+
+  const sinMesa   = lista.filter(i => i.mesa === '').length;
+  const personas  = lista.filter(i => !i.reservado).length;
+  const reservados = lista.filter(i => i.reservado).length;
+  const hoy = new Date().toLocaleString('es-AR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: false });
+
+  armarHojas({
+    titulo: 'Distribución de salón',
+    cuentas: [{ n: lista.length, txt: 'cubiertos' }].concat(
+      reservados ? [{ n: personas, txt: 'con nombre' },
+                    { n: reservados, txt: 'lugares sin nombre' }] : [],
+      [{ n: sinMesa, txt: 'sin mesa' }]),
+    columnas: [{ th: 'Apellido', rango: true }, { th: 'Nombre' },
+               { th: 'Mesa', clase: 'col-m' }],
+    filas: lista.map(fila)
+  });
 }
 
 // getMesaLocal/setMesaLocal eliminadas junto con el fallback de mesas.
