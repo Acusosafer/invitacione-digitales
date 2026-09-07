@@ -446,6 +446,69 @@ mide 54px. La pista del título se esconde abajo de 860px — no entra al lado y
 segundo renglón, dejando el chevron descolgado. Después de cargar a alguien **queda abierta**:
 los papás, los hermanos y la agasajada se cargan de a varios seguidos.
 
+### Corregir el nombre de un invitado (`admin_renombrar_fila`, sql/008)
+
+El ✏️ al lado de cada nombre en la tabla de Invitados. Hace falta en dos
+casos que pasan en toda fiesta: un link llamado "Familia Ferron" cuando
+quien viene es Tomás Ferron, y un grupo que **avisa por WhatsApp** que va
+y hay que pasarle las filas de `pendiente` a confirmadas con sus nombres.
+
+⚠️ Corregir es mucho mejor que borrar y volver a cargar: borrando se
+pierde el link del grupo, se pierden la dieta y la canción, y si uno se
+distrae quedan las dos cosas y **el salón cobra los cubiertos dos veces**.
+
+⚠️ Va como función NUEVA y no como parámetros agregados a
+`admin_actualizar_fila`: cambiarle la cantidad de parámetros a una
+función obliga a borrarla y recrearla, y el drop se lleva puesto el
+grant. Con una fiesta encima eso es dejar el panel roto.
+
+### ⚠️ La pre-alta INVENTA un apellido
+
+`admin_prealta` crea las filas de los acompañantes con
+`nombre = 'Acompañante 2'` y `apellido = 'de ' || <nombre del link>`. Es
+una etiqueta para saber de qué grupo son, **no un apellido** — pero el
+listado que se le entrega al salón **se ordena por apellido**, así que
+todos los acompañantes pendientes de todas las familias quedaban
+archivados juntos bajo la "d". Y si alguien escribe el nombre completo en
+el campo del nombre y no toca el otro, el salón lee *"Marisa Beatriz
+Quiroga, de apellido de Familia Álvarez"*.
+
+Se arregla con `apellidoReal()` / `esLugarReservado()`, **filtros de
+lectura** como `cancionReal()`: limpian la vista sin tocar una fila de la
+base de una clienta en plena fiesta.
+
+- ⚠️ Un apellido de verdad que empieza con "de" **se conserva**: sólo se
+  descartan `de <link>` y `de Familia|Flia|Fam …`. Verificado con
+  "de la Fuente".
+- ⚠️ De un lugar reservado **no se saca apellido**: `extraerApellido` de
+  "Acompañante 2" devuelve **"2"**, y el salón lee un invitado apellidado
+  2. Van sin apellido, con el grupo al lado, y **al final de la hoja**.
+- Cuando el apellido sale de la última palabra del nombre, esa palabra no
+  se repite al lado. Sólo si el nombre tiene dos palabras o más: con
+  "Ines" a secas, sacarle la última lo deja sin nombre.
+
+### Un grupo mitad confirmado y mitad pendiente
+
+**El sistema no puede dejar esa mezcla solo.** `rsvp_enviar` borra
+**todas** las filas de ese `invitado_url` —no sólo las pendientes— y
+reinserta las que mandó el invitado. Si la mezcla existe es por una de
+dos:
+
+1. **Se volvió a generar el link después de que confirmaran**:
+   `admin_prealta` borra sólo las pendientes, así que las confirmadas
+   sobreviven y aparecen pendientes de más. Esas filas **inflan la cuenta
+   del salón**.
+2. **Alguien cambió el estado a mano** desde el desplegable del panel.
+
+Se distinguen por la **fecha de alta**, que ahora se muestra al lado del
+nombre del link (`created_at` ya venía: `admin_invitados` devuelve la
+fila entera). Si la pendiente entró **después**, es sobrante. Si entraron
+**en el mismo segundo**, salieron juntas del mismo link y lo que cambió
+fue el estado a mano — y se confirma mirando el nombre: una fila que
+confirmó de verdad **nunca** se sigue llamando "Familia X".
+
+⚠️ `hour12:false` en la fecha: sin eso Chrome escribe "06:08 p. m.".
+
 ### Mesas
 
 - La columna `mesa` existe siempre. **Se eliminó el fallback a `localStorage`**: guardaba la mesa solo en ESE navegador, así que el plano del salón salía distinto según desde dónde se abriera.
@@ -749,6 +812,85 @@ algodón) y la **nube** (manchas grandes, la irregularidad de una hoja
 prensada en frío). Con multiply oscurecen las fibras; con opacidad sobre
 blanco solo agrisan la página. Son dos SVG embebidos, no baja ninguna
 imagen.
+
+### Las rutas y lo decidido con la clienta
+
+Todas con `noindex`: `/guille` · `/guille-fecha` · `/guille-dibujos` ·
+`/guille-letras` · `/guille-color` · `/guille-portada` · `/guille-trazo` ·
+`/guille-invitacion`. Se generan con `Boda Guillermina/herramientas/*.py`;
+los cambios a mano se pisan.
+
+Letra **Parisienne**, nombres en **terracota `#A84F2A`** y el resto en
+tinta. Ceremonia 18:00, fiesta 20:00, dress code Elegante, confirmar antes
+del **18 de febrero de 2027**. Música: *Sarà perché ti amo* — 46s, mono,
+96 kbps, **539 KB**, archivo aparte con `preload="none"` (embebida como
+data URI el "none" no sirve de nada; la canción entera pesaba 4,3 MB).
+
+**Faltan**: el alias de verdad, a dónde va el botón de confirmar, la flor
+de ojal del dress code (prompt B6), y preguntarle si hace falta transporte
+y alojamiento.
+
+### La portada: la etiqueta que cuelga
+
+Cuelga de una soga, se mece, y **a un solo toque** gira, deja leer la
+fecha 2,5 segundos, sube y se va.
+
+⚠️ **La imagen va anclada arriba de todo, con su corte de soga fuera de la
+pantalla.** Dibujarle la continuación con CSS deja un empalme visible por
+mejor que se elija el color: se ve una soga que pasa a ser dos.
+⚠️ **Sube ENTERA, sin tocarle la opacidad.** Apagándola a la vez que el
+papel se apaga en el lugar y el viaje no se ve nunca — parece que pasa
+directo a la otra pantalla.
+⚠️ Los 2,5 segundos de lectura se cuentan **desde que terminó de girar**,
+no desde el toque: los 0,9 del giro adentro dejaban 1,4 de lectura.
+⚠️ **La música arranca DENTRO del manejador del toque**, no en el
+`setTimeout`: el permiso viene del gesto, no del reloj.
+
+### Los dibujos que se dibujan, adentro de la invitación
+
+⚠️ **Los observadores no arrancan hasta que la portada se fue.** La
+primera sección se cruza con la pantalla desde el primer instante, así que
+los 201 trazos se dibujaban enteros **detrás de la portada** y, cuando la
+etiqueta subía, ya estaba todo pintado. El efecto existía y no lo veía
+nadie.
+
+⚠️ **El trazo NO va encima de la acuarela terminada.** Se lee como un
+garabato, y además el trazado salió de la acuarela vieja: el contorno del
+pelo corto queda arriba del pelo largo. Va **primero el trazo sobre papel
+en blanco y después el color**, con la acuarela apareciendo por debajo
+mientras la línea se apaga.
+
+**Cuatro dibujos en toda la invitación, no uno por sección** — uno por
+sección la convierte en dibujo animado y el efecto se gasta.
+
+⚠️ **`hidden` no alcanza para esconder un dibujo**: la regla del navegador
+`[hidden]{display:none}` pierde contra `.dibujo{display:block}`. Se saca
+el elemento.
+
+### El color y el peso de las acuarelas
+
+⚠️ **Cada acuarela dejaba un RECTÁNGULO.** `multiply` funde el fondo sólo
+si es blanco, y el crema de estas ilustraciones (247) es más oscuro que el
+papel: multiplicado da una caja más oscura. Se les blanquea el papel
+escalando los canales hasta que el borde cae en 255.
+
+⚠️ **El tono de la acuarela de ellos se CORRIGIÓ, no se regeneró** —
+regenerarla perdía el pelo que acabábamos de arreglar. Transferencia en
+Lab (media y desvío por canal) contra la del altar, **al 82%**: al 100%
+matchea exacto pero destiñe los verdes del pasto.
+
+### Profundidad (comparando con otra invitación, 05/09/2026)
+
+Lo que hace que una invitación ilustrada no se lea plana no son mejores
+dibujos: son **las acuarelas de borde a borde** y **una banda de color**
+detrás de una sección.
+
+⚠️ La sangría **no** con `width:100vw` y márgenes negativos: 100vw incluye
+la barra de scroll y mete scroll horizontal en toda la página (418px de
+documento sobre 390 de viewport). Va **por estructura**, con esos bloques
+fuera de `.wrap`, que es quien pone el margen.
+⚠️ Un motivo anclado al margen **no funciona si no está cortado por el
+borde**: colgado solo en medio del papel se ve olvidado, no profundo.
 
 ### El orden de la invitación (lo pidió Fer, 05/09/2026)
 

@@ -3978,8 +3978,10 @@ function cuandoEntro(inv) {
   if (!inv?.created_at) return '';
   const d = new Date(inv.created_at);
   if (isNaN(d)) return '';
+  // ⚠️ hour12:false. Sin eso Chrome escribe "06:08 p. m.": tres caracteres
+  // más y una lectura que en Argentina nadie usa.
   return d.toLocaleString('es-AR', { day:'numeric', month:'short',
-                                     hour:'2-digit', minute:'2-digit' });
+                                     hour:'2-digit', minute:'2-digit', hour12:false });
 }
 
 /* ⚠️ UN GRUPO NO PUEDE QUEDAR MITAD CONFIRMADO Y MITAD PENDIENTE POR SÍ
