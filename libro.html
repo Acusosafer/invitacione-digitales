@@ -143,10 +143,14 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
   padding:0 14px calc(10px + env(safe-area-inset-bottom));
   display:flex;flex-direction:column}
 .papel{position:relative;flex:1;min-height:0;border-radius:18px;
-  background:var(--papel);
+  background:var(--papel) center/cover no-repeat;
   box-shadow:0 24px 60px rgba(0,0,0,.45), 0 2px 0 rgba(255,255,255,.25) inset;
   padding:clamp(22px,6vw,40px);
   display:flex;flex-direction:column;overflow:hidden}
+/* Con hoja ilustrada, el texto se corre para adentro del marco que la
+   propia imagen ya trae, y para arriba de la silueta de abajo. Los
+   valores salen de `config.libro_zona` — cada hoja tiene su margen. */
+.papel.ilustrada{padding:var(--zona-t,17%) var(--zona-r,15%) var(--zona-b,26%) var(--zona-l,15%)}
 /* El marco que se dibuja solo, por dentro del papel.
    ⚠️ El ancho y el alto van EXPLÍCITOS. Un <svg> es un elemento
    reemplazado: con `inset:10px` a secas se estira a lo ancho pero toma su
@@ -180,6 +184,9 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .firma{margin-top:22px;font-family:var(--mano);font-size:1.65rem;
   color:var(--tinta);opacity:0;transition:opacity .7s var(--suave)}
 .firma.puesta{opacity:1}
+.rama{display:block;width:120px;max-width:52%;height:auto;margin:10px auto 0}
+.rama path{fill:none;stroke:var(--oro);stroke-width:1.3;
+  stroke-linecap:round;stroke-linejoin:round;opacity:.85}
 .mesa{margin-top:2px;font-size:.72rem;letter-spacing:.14em;
   text-transform:uppercase;color:var(--ink-soft);opacity:0;
   transition:opacity .7s var(--suave) .1s}
@@ -396,6 +403,36 @@ function pintarTema() {
     };
     img.src = C.libro_fondo;   // si no carga, queda el agua dibujada
   }
+
+  /* ── LA HOJA ILUSTRADA ────────────────────────────────────────────────
+     `libro_hoja` es la página en sí: la acuarela con su marco dorado,
+     donde el texto se escribe adentro. Es distinta de `libro_fondo`, que
+     es el ambiente de atrás. Las dos son opcionales y se combinan:
+       fondo  → la escena oscura que rodea
+       hoja   → el papel ilustrado donde se lee
+
+     ⚠️ La imagen se carga ANTES de ponerla. Si se pone directo y la
+     imagen tarda o falla, el texto queda un rato sobre el papel liso y
+     después salta — o peor, sobre nada. Si falla, se queda el crema y la
+     pantalla funciona igual.
+
+     ⚠️ Con hoja ilustrada NO se dibuja el marco SVG: la imagen ya trae el
+     suyo y quedarían dos marcos, uno adentro del otro. El trazo que se
+     dibuja solo pasa a ser la ramita de al lado de la firma. */
+  if (C.libro_hoja) {
+    const img = new Image();
+    img.onload = () => {
+      const p = document.querySelector('.papel');
+      if (!p) return;
+      p.style.backgroundImage = 'url("' + C.libro_hoja + '")';
+      p.classList.add('ilustrada');
+      const z = C.libro_zona || {};
+      const lado = (k, def) => raiz.setProperty('--zona-' + k,
+        (z[k] != null ? z[k] : def) + (typeof (z[k] != null ? z[k] : def) === 'number' ? '%' : ''));
+      lado('t', 17); lado('r', 15); lado('b', 26); lado('l', 15);
+    };
+    img.src = C.libro_hoja;
+  }
 }
 
 /* El agua dibujada: bandas suaves y, con la temática del sapo, nenúfares
@@ -548,6 +585,25 @@ const el = (tag, clase, texto) => {
 
 const total = () => deseos.length + 2;        // portada + deseos + cierre
 
+/* Una ramita de tres hojas, del ancho de la firma. Se dibuja de una
+   punta a la otra, como si alguien la trazara al terminar de escribir. */
+function ramita() {
+  const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  s.setAttribute('viewBox', '0 0 120 26');
+  s.setAttribute('class', 'rama');
+  s.setAttribute('aria-hidden', 'true');
+  const p = d => {
+    const e = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    e.setAttribute('d', d); e.classList.add('trazo'); s.appendChild(e);
+  };
+  /* Un filete con dos hojas opuestas. El primer intento tenía las dos
+     hojas del mismo lado y encimadas: se leía como un moñito. */
+  p('M12 13 H108');                                        // el tallo
+  p('M60 13 C64 5, 76 3, 83 8 C77 13, 66 17, 60 13 Z');    // la hoja de arriba
+  p('M54 13 C50 19, 39 21, 33 17 C40 13, 49 10, 54 13 Z'); // la de abajo, del otro lado
+  return s;
+}
+
 function ornamento() {
   const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   s.setAttribute('viewBox', '0 0 76 76');
@@ -589,11 +645,17 @@ function pintarPagina(dir) {
     p.appendChild(texto);
     const firma = el('p', 'firma', d.nombre || '');
     p.appendChild(firma);
+    const rama = ramita();
+    p.appendChild(rama);
     const mesa = el('p', 'mesa', mesaTexto(d.mesa));
     p.appendChild(mesa);
     maquina(texto, d.deseo || '', () => {
       firma.classList.add('puesta');
       mesa.classList.add('puesta');
+      /* El trazo que se dibuja solo, cuando el deseo termina de
+         escribirse. Con hoja ilustrada este es el único trazo animado
+         que queda: el marco lo trae la imagen. */
+      dibujar(rama, 90, 620);
     });
   } else {
     p.appendChild(ornamento());
@@ -688,10 +750,12 @@ async function abrir() {
   $('libro').hidden = false;
   $('cab-quien').textContent = C.nombre || '';
   $('cab-fecha').textContent = C.fecha_texto || '';
-  pintarMarco();
+  /* ⚠️ Con hoja ilustrada el marco NO se dibuja: la imagen ya trae el
+     suyo y quedarían dos, uno adentro del otro. */
+  if (!C.libro_hoja) { pintarMarco(); }
   i = 0;
   pintarPagina(1);
-  dibujar(document.getElementById('marco'), 90, 900);
+  if (!C.libro_hoja) dibujar(document.getElementById('marco'), 90, 900);
 }
 
 async function arrancar() {
@@ -726,6 +790,7 @@ let reMarco;
 addEventListener('resize', () => {
   if ($('libro').hidden) return;
   clearTimeout(reMarco);
+  if (C.libro_hoja) return;
   reMarco = setTimeout(() => { pintarMarco(); dibujar($('marco'), 40, 500); }, 220);
 });
 addEventListener('keydown', e => {
