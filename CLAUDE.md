@@ -1111,6 +1111,43 @@ papel, y como `pintarMarco()` mide la caja para armar el viewBox, medía esos 15
 `preserveAspectRatio="none"`: estirado, las volutas de las esquinas se aplastan y el trazo
 cambia de grosor según el lado. Por lo mismo se rehace al girar el teléfono.
 
+### La tapa que se abre (07/09/2026)
+
+`config.libro_tapa`. El libro se ve **cerrado**, se toca, y la tapa gira sobre el lomo hasta
+abrirse: abajo ya está la primera página. Es la primera impresión del regalo.
+
+⚠️ **La tapa lleva el nombre de la clienta pintado adentro.** Rompe a propósito la regla de que
+las imágenes no llevan texto —una tapa de libro con el nombre grabado es lo que la hace un
+regalo— pero significa que **sirve para Alma y para nadie más**: la de la próxima hay que
+generarla de nuevo. Las hojas de adentro, en cambio, se reusan.
+
+⚠️ **Con el libro cerrado, la hoja se esconde.** La primera página asomaba por detrás de la
+tapa —el papel arriba, la silueta abajo— y la tapa parecía flotando sobre la página. Se revela
+a los 300ms de empezar el giro: junto con el primer grado se ve el corte.
+
+⚠️ **La tapa se APAGA mientras termina de girar.** Pasada la mitad queda casi de canto y la
+perspectiva la estira: se veía como un velo verde tapando la página entera.
+
+⚠️ **`perspective` abre un stacking context, igual que un `z-index`.** Acá no rompe nada porque
+adentro no hay ningún `mix-blend-mode` — pero si algún día se le mete una acuarela con
+multiply, va a aparecer recortada en un rectángulo blanco y va a parecer otro problema. Es lo
+que pasó en la portada de la boda de Guillermina.
+
+⚠️ Que la tapa gire **no se ve en una captura**: una transición que el navegador descartó se ve
+igual que una que no arrancó. Se mide el `transform` computado cada 150ms — 0 → 9 → 42 → 148 →
+158 grados.
+
+### El texto que sobra en una imagen generada
+
+Gemini armó la tapa a partir de una captura de pantalla del libro y **copió adentro dos líneas
+que eran de la interfaz** ("5 personas te dejaron un mensaje", "MUESTRA · LOS MENSAJES SON
+INVENTADOS"). Se borraron con `herramientas/` — el rectángulo **no se eligió a ojo**: los
+renglones se ubicaron midiendo el perfil de píxeles oscuros fila por fila, y los bordes se
+recortaron para no comerse la mariposa que empieza en x 240.
+
+El relleno es interpolación vertical del papel limpio de arriba y de abajo **más el grano
+medido** de una zona limpia: un relleno plano sobre un papel con textura se nota como un parche.
+
 ### Las micro animaciones (07/09/2026)
 
 ⚠️⚠️ **Las mariposas y las flores de la ilustración son PÍXELES.** Están adentro del JPEG de la

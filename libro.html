@@ -139,6 +139,15 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
    Es el mismo error que ya pasó con los dibujos de la invitación. */
 #libro[hidden]{display:none}
 
+/* ⚠️ Con el libro cerrado la primera página asomaba por detrás de la
+   tapa —el papel arriba, la silueta abajo— y la tapa parecía flotando
+   sobre la hoja. Mientras está cerrado sólo se ve la tapa, apoyada
+   sobre el ambiente. */
+body.cerrado .encabezado,
+body.cerrado .barra,
+body.cerrado .hoja{opacity:0;pointer-events:none;transition:opacity .4s var(--suave)}
+.encabezado,.barra{transition:opacity .5s var(--suave) .5s}
+.hoja{transition:opacity .55s var(--suave)}
 .encabezado{display:flex;align-items:center;justify-content:space-between;
   gap:12px;padding:14px 18px calc(6px);color:rgba(244,236,216,.72);
   font-size:.72rem;letter-spacing:.18em;text-transform:uppercase}
@@ -192,6 +201,51 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .firma{margin-top:22px;font-family:var(--mano);font-size:1.65rem;
   color:var(--tinta);opacity:0;transition:opacity .7s var(--suave)}
 .firma.puesta{opacity:1}
+/* ── LA TAPA QUE SE ABRE ──────────────────────────────────────────────
+   `config.libro_tapa` es la tapa del libro. Se ve entera, se toca, y
+   gira sobre el lomo hasta abrirse: abajo ya está la primera página.
+
+   ⚠️ La tapa lleva el nombre de la clienta PINTADO ADENTRO. Eso rompe la
+   regla de que las imágenes no llevan texto, y es a propósito: una tapa
+   de libro con el nombre grabado es justamente lo que la hace un regalo.
+   Pero significa que **esta tapa sirve para Alma y para nadie más**: la
+   de la próxima clienta hay que generarla de nuevo.
+
+   ⚠️ `perspective` abre un stacking context, igual que un z-index. Acá
+   no hay ningún mix-blend-mode adentro y por eso no rompe nada — pero si
+   algún día se le mete una acuarela con multiply, va a aparecer
+   recortada en un rectángulo blanco y va a parecer otro problema. */
+#tapa{position:absolute;inset:0;z-index:5;display:grid;place-items:center;
+  perspective:1500px;cursor:pointer;background:transparent;
+  transition:opacity .5s var(--suave)}
+#tapa[hidden]{display:none}
+#tapa.ida{opacity:0;pointer-events:none}
+.tapa-img{max-width:96%;max-height:100%;display:block;
+  border-radius:2px 9px 9px 2px;
+  box-shadow:0 22px 50px rgba(0,0,0,.45), 0 2px 0 rgba(255,255,255,.3) inset;
+  transform-origin:left center;backface-visibility:hidden;
+  transition:transform 1.25s cubic-bezier(.36,.02,.2,1),
+             opacity .5s var(--suave) .55s}
+/* ⚠️ La tapa se APAGA mientras termina de girar. Pasada la mitad del
+   recorrido queda casi de canto y la perspectiva la estira: se veía como
+   un velo verde tapando la página entera. Apagándola sobre el final, el
+   ojo ve la tapa levantarse y la página quedar. */
+#tapa.abriendo .tapa-img{transform:rotateY(-158deg);opacity:0}
+/* El lomo: la sombra que queda del lado del pliegue mientras gira */
+.tapa-lomo{position:absolute;top:0;bottom:0;width:14px;
+  background:linear-gradient(to right, rgba(0,0,0,.34), rgba(0,0,0,0));
+  opacity:0;transition:opacity .5s var(--suave) .2s;pointer-events:none}
+#tapa.abriendo .tapa-lomo{opacity:1}
+.tocar{position:absolute;bottom:5%;left:50%;transform:translateX(-50%);
+  font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;
+  color:#f4ecd8;text-shadow:0 1px 8px rgba(0,0,0,.7);
+  animation:respira 2.6s ease-in-out infinite}
+@keyframes respira{0%,100%{opacity:.55}50%{opacity:1}}
+#tapa.abriendo .tocar{opacity:0;animation:none;transition:opacity .25s}
+@media (prefers-reduced-motion:reduce){
+  .tapa-img{transition:none}
+  .tocar{animation:none;opacity:.9}
+}
 /* ── LA VIDA DE LA HOJA ───────────────────────────────────────────────
    ⚠️⚠️ LAS MARIPOSAS Y LAS FLORES DE LA ILUSTRACIÓN SON PÍXELES. Están
    adentro del JPEG de la hoja: no se pueden mover por separado, ni una
@@ -335,6 +389,12 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
   <div class="encabezado">
     <span class="quien" id="cab-quien"></span>
     <span id="cab-fecha"></span>
+  </div>
+
+  <div id="tapa" hidden>
+    <span class="tapa-lomo"></span>
+    <img class="tapa-img" id="tapa-img" alt="">
+    <span class="tocar">Tocá para abrir</span>
   </div>
 
   <div class="hoja">
@@ -565,6 +625,32 @@ function hojaDe(pag) {
    las animaciones y se ve el salto.
    ⚠️ Tres mariposas, no más. Con seis la hoja deja de ser una hoja. */
 let vidaLista = false;
+/* La apertura. ⚠️ El encabezado y los botones se esconden mientras la
+   tapa está cerrada: un libro cerrado con "1 / 7" abajo no es un libro
+   cerrado. */
+function mostrarTapa() {
+  const t = document.getElementById('tapa');
+  if (!C.libro_tapa || !t) return false;
+  document.getElementById('tapa-img').src = C.libro_tapa;
+  t.hidden = false;
+  document.body.classList.add('cerrado');
+  const abrir1 = () => {
+    if (t.classList.contains('abriendo')) return;
+    t.classList.add('abriendo');
+    /* ⚠️ La hoja se revela a los 300ms, no al instante: si aparece junto
+       con el primer grado de giro, se ve el corte de la tapa despegando
+       de una página que ya estaba ahí. */
+    setTimeout(() => document.body.classList.remove('cerrado'), 300);
+    /* La tapa se saca DESPUÉS de que terminó de girar. Sacarla antes se
+       ve como un corte; dejarla puesta le come los toques a la primera
+       página. */
+    setTimeout(() => t.classList.add('ida'), 900);
+    setTimeout(() => { t.hidden = true; t.classList.remove('abriendo', 'ida'); }, 1650);
+  };
+  t.addEventListener('click', abrir1);
+  return true;
+}
+
 function ponerVida() {
   const caja = document.getElementById('vida');
   if (!caja) return;
@@ -969,6 +1055,7 @@ async function abrir() {
   if (!HOJAS.length) { pintarMarco(); }
   i = 0;
   pintarPagina(1);
+  mostrarTapa();
   if (!HOJAS.length) dibujar(document.getElementById('marco'), 90, 900);
 }
 
@@ -1008,6 +1095,7 @@ async function arrancar() {
   if (MUESTRA) {
     C = { nombre:'Alma', fecha_texto:'11 de septiembre, 2026',
           libro_tema:'sapo', libro_hojas: HOJAS_MUESTRA,
+          libro_tapa: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_tapa_1788817090.jpg',
           libro_silueta: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_silueta_1788815690.png' };
     pintarTema(); soltarBichos();
     deseos = DESEOS_MUESTRA.map((d, k) => ({ ...d, id: k, created_at: '' }));
@@ -1018,6 +1106,7 @@ async function arrancar() {
     $('cab-quien').textContent = 'Alma';
     $('cab-fecha').textContent = 'muestra';
     i = 0; pintarPagina(1);
+    mostrarTapa();
     return;
   }
   if (!eventoId) {
