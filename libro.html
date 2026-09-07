@@ -192,6 +192,19 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .firma{margin-top:22px;font-family:var(--mano);font-size:1.65rem;
   color:var(--tinta);opacity:0;transition:opacity .7s var(--suave)}
 .firma.puesta{opacity:1}
+/* La silueta de Alma. Va SÓLO en la portada y en el cierre, apoyada en
+   el borde de abajo y POR DEBAJO del texto: una silueta que compite con
+   el deseo lo arruina, una que se apoya abajo lo enmarca.
+   ⚠️ pointer-events:none, o se come los toques de "página siguiente". */
+/* ⚠️ Al 46% de alto y centrada se comía el texto: la cabeza llegaba
+   justo donde termina el último renglón. Va más chica y corrida al
+   borde — un motivo anclado al margen se lee como profundidad; en el
+   medio de la hoja se lee como un sticker. */
+.silueta{position:absolute;right:-3%;bottom:0;height:38%;width:auto;
+  z-index:0;pointer-events:none;
+  opacity:0;transition:opacity 1.1s var(--suave) .3s}
+.silueta.puesta{opacity:1}
+.pag{z-index:1}
 .rama{display:block;width:120px;max-width:52%;height:auto;margin:10px auto 0}
 .rama path{fill:none;stroke:var(--oro);stroke-width:1.3;
   stroke-linecap:round;stroke-linejoin:round;opacity:.85}
@@ -282,6 +295,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
       <svg class="marco" id="marco" aria-hidden="true"></svg>
       <button class="mitad izq" id="mitad-izq" aria-label="Página anterior"></button>
       <button class="mitad der" id="mitad-der" aria-label="Página siguiente"></button>
+      <img class="silueta" id="silueta" alt="" hidden>
       <div class="pag" id="pag"></div>
     </div>
 
@@ -494,6 +508,18 @@ function hojaDe(pag) {
     return libres[0];                  // la que más aire tenga
   }
   return libres[(pag - 1) % libres.length];
+}
+
+/* La silueta sólo en la portada y en el cierre. En una página de deseo
+   le saca aire al texto, que es lo único que importa ahí. */
+function ponerSilueta() {
+  const el = document.getElementById('silueta');
+  if (!el) return;
+  const va = C.libro_silueta && (i === 0 || i > deseos.length);
+  if (!va) { el.hidden = true; el.classList.remove('puesta'); return; }
+  if (el.getAttribute('src') !== C.libro_silueta) el.src = C.libro_silueta;
+  el.hidden = false;
+  requestAnimationFrame(() => el.classList.add('puesta'));
 }
 
 function ponerHoja() {
@@ -749,6 +775,7 @@ function pintarPagina(dir) {
   }
 
   ponerHoja();
+  ponerSilueta();
   requestAnimationFrame(() => requestAnimationFrame(() => p.classList.remove('viniendo')));
   $('cuenta').textContent = (i + 1) + ' / ' + total();
   $('btn-ant').disabled = i === 0;
@@ -877,7 +904,8 @@ const DESEOS_MUESTRA = [
 async function arrancar() {
   if (MUESTRA) {
     C = { nombre:'Alma', fecha_texto:'11 de septiembre, 2026',
-          libro_tema:'sapo', libro_hojas: HOJAS_MUESTRA };
+          libro_tema:'sapo', libro_hojas: HOJAS_MUESTRA,
+          libro_silueta: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_silueta_1788815690.png' };
     pintarTema(); soltarBichos();
     deseos = DESEOS_MUESTRA.map((d, k) => ({ ...d, id: k, created_at: '' }));
     document.getElementById('pg-title').textContent = 'El libro de deseos · muestra';

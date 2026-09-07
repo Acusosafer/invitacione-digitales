@@ -104,7 +104,32 @@ cherry blossoms`.
 
 ---
 
-## La silueta de Alma
+## La silueta — ya está hecha
+
+Vive en el Storage y el libro la usa en la portada y en el cierre, apoyada
+en el borde de abajo y por debajo del texto.
+
+### ⚠️⚠️ Vino como `.jpg`, y el JPEG NO TIENE CANAL ALFA. NUNCA.
+
+Lo que parecía transparencia eran **los cuadraditos del editor pintados
+encima**: una captura de pantalla. Es exactamente lo que pasó con el cofre
+de la demo de Enredados.
+
+Se arregló porque la figura era verde sólido y el damero gris claro, así
+que se pudo separar por color. **Pero no siempre se puede.** Cuando pidas
+un recorte, pedilo en **PNG**, y antes de mandármelo mirá si el fondo son
+cuadraditos o es realmente nada.
+
+⚠️ **El damero también estaba ADENTRO de la figura** — en el escote, entre
+el brazo y el cuerpo, en la tiara. Esos son huecos del dibujo: sacar sólo
+el fondo de afuera deja los cuadraditos puestos donde más se ven.
+
+⚠️ Va **al 38% de alto y corrida al borde**. Al 46% y centrada, la cabeza
+llegaba justo donde termina el último renglón. Un motivo anclado al margen
+se lee como profundidad; en el medio de la hoja se lee como un sticker.
+Verificado midiendo: no toca ni una letra.
+
+## Si alguna vez hay que hacer otra
 
 En la hoja que hiciste te gustó la silueta. Se puede hacer **con su foto
 de verdad**: su vestido, su falda de tul, su pose, recortada y rellena en
