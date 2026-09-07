@@ -79,9 +79,17 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .fondo{position:absolute;inset:-2%;background-size:cover;background-position:center;
        transform:scale(1.04);opacity:0;transition:opacity 1.6s var(--suave)}
 .fondo.puesto{opacity:1}
+/* ⚠️⚠️ EL VELO ES UNA FRANJA ARRIBA Y ABAJO, NO UNA VIÑETA SUAVE. El
+   encabezado y los botones se apoyan sobre la imagen de ambiente, y esa
+   imagen la elige el cliente: puede ser un estanque de noche o un jardín
+   de mediodía. No existe una opacidad que sirva para las dos. La franja
+   oscura garantiza el contraste justo donde hay texto, y deja el centro
+   —donde está la hoja— limpio y luminoso. Es la misma solución que la
+   pared de papel de deseos.html. */
 .velo{position:absolute;inset:0;
-      background:radial-gradient(120% 90% at 50% 40%,
-                 rgba(0,0,0,.10) 0%, rgba(0,0,0,.55) 100%)}
+      background:linear-gradient(to bottom,
+        rgba(18,26,18,.72) 0%, rgba(18,26,18,.34) 9%, rgba(18,26,18,0) 17%,
+        rgba(18,26,18,0) 83%, rgba(18,26,18,.34) 92%, rgba(18,26,18,.72) 100%)}
 /* El agua dibujada: es lo que se ve mientras no haya imagen, y también
    por debajo de ella. */
 .agua{position:absolute;inset:0;opacity:.9}
@@ -333,8 +341,8 @@ const contrasteSobre = f => razon('#ffffff', f) >= razon('#000000', f) ? '#fffff
 const TEMAS = {
   /* La Princesa y el Sapo: agua de noche, jade y dorado. */
   sapo: {
-    hondo:'#0b241f', papel:'#f6efdc', tinta:'#1e332c', oro:'#c9a24a',
-    agua:['#0b241f','#123b32','#1d5a49'], nenufar:true
+    hondo:'#8ea87d', papel:'#f7f3e6', tinta:'#26372a', oro:'#a8842f',
+    agua:['#d3e3ba','#aec792','#87a66e'], nenufar:true
   },
   /* El que sale cuando el evento no eligió temática: su propio papel. */
   papel: {
@@ -367,8 +375,17 @@ function pintarTema() {
   /* El texto secundario es la mezcla MÁS suave que todavía llega a 4,5:1
      sobre el papel: un 62% fijo se lee sobre blanco y desaparece sobre un
      papel de color. */
+  /* ⚠️⚠️ EL PEOR FONDO NO ES EL PAPEL LIMPIO. Una hoja ilustrada trae
+     manchas de acuarela, y ahí abajo el papel es más oscuro: para una
+     tinta oscura, cuanto más oscuro el fondo, MENOS contraste. (Calcular
+     contra blanco es el error opuesto y da todavía peor: sobre blanco
+     todo contrasta de más, así que el bucle corta antes de tiempo.)
+     Se calcula contra el papel manchado con un 12% de tinta, que es lo
+     que se mide por píxel debajo de una acuarela suave. Misma idea que
+     en deseos.html, donde se mide contra el velo y no contra el papel. */
+  const peor = mezclar(tinta, t.papel, .12);
   let suave = mezclar(tinta, t.papel, .62);
-  for (let p = .62; p <= 1.001 && razon(suave, t.papel) < 4.5; p += .04) {
+  for (let p = .62; p <= 1.001 && razon(suave, peor) < 4.5; p += .04) {
     suave = mezclar(tinta, t.papel, Math.min(1, p));
   }
   raiz.setProperty('--ink-soft', suave);
@@ -380,7 +397,7 @@ function pintarTema() {
      para las líneas y los adornos, y `--oro-texto` para cualquier COSA
      ESCRITA, oscurecido con la tinta hasta llegar a 4,5:1 sobre el papel. */
   let oroTexto = t.oro;
-  for (let p = 0; p <= 1.001 && razon(oroTexto, t.papel) < 4.5; p += .04) {
+  for (let p = 0; p <= 1.001 && razon(oroTexto, peor) < 4.5; p += .04) {
     oroTexto = mezclar(tinta, t.oro, p);
   }
   raiz.setProperty('--oro-texto', oroTexto);
@@ -419,20 +436,39 @@ function pintarTema() {
      ⚠️ Con hoja ilustrada NO se dibuja el marco SVG: la imagen ya trae el
      suyo y quedarían dos marcos, uno adentro del otro. El trazo que se
      dibuja solo pasa a ser la ramita de al lado de la firma. */
-  if (C.libro_hoja) {
-    const img = new Image();
-    img.onload = () => {
-      const p = document.querySelector('.papel');
-      if (!p) return;
-      p.style.backgroundImage = 'url("' + C.libro_hoja + '")';
-      p.classList.add('ilustrada');
-      const z = C.libro_zona || {};
-      const lado = (k, def) => raiz.setProperty('--zona-' + k,
-        (z[k] != null ? z[k] : def) + (typeof (z[k] != null ? z[k] : def) === 'number' ? '%' : ''));
-      lado('t', 17); lado('r', 15); lado('b', 26); lado('l', 15);
-    };
-    img.src = C.libro_hoja;
+  /* `libro_hojas` puede ser UNA hoja o VARIAS: con varias se van
+     alternando página por página, así treinta y cuatro deseos no se leen
+     como la misma estampita repetida treinta y cuatro veces.
+     ⚠️ Se precargan TODAS antes de usar ninguna. Si una entra recién
+     cuando el invitado ya está en esa página, se ve el salto. */
+  HOJAS = [].concat(C.libro_hojas || C.libro_hoja || []).filter(Boolean);
+  if (HOJAS.length) {
+    const z = C.libro_zona || {};
+    const lado = (k, def) => raiz.setProperty('--zona-' + k,
+      (z[k] != null ? z[k] : def) + (typeof (z[k] != null ? z[k] : def) === 'number' ? '%' : ''));
+    lado('t', 17); lado('r', 15); lado('b', 26); lado('l', 15);
+    let listas = 0;
+    HOJAS.forEach(u => {
+      const img = new Image();
+      img.onload = img.onerror = () => {
+        if (++listas === HOJAS.length) { hojasListas = true; ponerHoja(); }
+      };
+      img.src = u;
+    });
   }
+}
+
+/* Qué hoja le toca a la página actual. La portada y el cierre llevan la
+   primera —que es la más trabajada—, y los deseos van rotando entre las
+   demás si hay más de una. */
+let HOJAS = [], hojasListas = false;
+function ponerHoja() {
+  const p = document.querySelector('.papel');
+  if (!p || !hojasListas || !HOJAS.length) return;
+  const k = (i === 0 || i > deseos.length || HOJAS.length === 1)
+    ? 0 : 1 + ((i - 1) % (HOJAS.length - 1));
+  p.style.backgroundImage = 'url("' + HOJAS[k] + '")';
+  p.classList.add('ilustrada');
 }
 
 /* El agua dibujada: bandas suaves y, con la temática del sapo, nenúfares
@@ -665,6 +701,7 @@ function pintarPagina(dir) {
       ', para cuando quieras volver a leerlos.'));
   }
 
+  ponerHoja();
   requestAnimationFrame(() => requestAnimationFrame(() => p.classList.remove('viniendo')));
   $('cuenta').textContent = (i + 1) + ' / ' + total();
   $('btn-ant').disabled = i === 0;
@@ -752,10 +789,10 @@ async function abrir() {
   $('cab-fecha').textContent = C.fecha_texto || '';
   /* ⚠️ Con hoja ilustrada el marco NO se dibuja: la imagen ya trae el
      suyo y quedarían dos, uno adentro del otro. */
-  if (!C.libro_hoja) { pintarMarco(); }
+  if (!HOJAS.length) { pintarMarco(); }
   i = 0;
   pintarPagina(1);
-  if (!C.libro_hoja) dibujar(document.getElementById('marco'), 90, 900);
+  if (!HOJAS.length) dibujar(document.getElementById('marco'), 90, 900);
 }
 
 async function arrancar() {
@@ -790,7 +827,7 @@ let reMarco;
 addEventListener('resize', () => {
   if ($('libro').hidden) return;
   clearTimeout(reMarco);
-  if (C.libro_hoja) return;
+  if (HOJAS.length) return;
   reMarco = setTimeout(() => { pintarMarco(); dibujar($('marco'), 40, 500); }, 220);
 });
 addEventListener('keydown', e => {

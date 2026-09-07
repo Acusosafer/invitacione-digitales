@@ -31,3 +31,6 @@ publicidad/reel-*.mp4
 
 # Material de una clienta: lleva su nombre
 QR Alma/
+
+# Fotos de una clienta menor de edad. Nunca al repo ni al deploy.
+[Ff]otos [Aa]lma/

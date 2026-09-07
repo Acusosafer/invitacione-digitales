@@ -1,53 +1,122 @@
-# El fondo del libro de deseos
+# Las imágenes del libro de deseos
 
-El libro (`/libro?evento=...`) funciona **sin imagen**: la escena se dibuja
-sola en SVG. La imagen es un extra que lo levanta mucho, y va en
-`config.libro_fondo` (una URL del Storage — se sube desde el admin igual
-que cualquier foto).
+El libro (`/libro?evento=...`) **funciona sin ninguna imagen**: la escena se
+dibuja sola en SVG. Las imágenes son lo que lo levanta de "lindo" a
+"hecho para ella".
 
-## Qué tiene que ser esa imagen
+## Lo que se sacó de las fotos de Alma
 
-Es **ambiente, no protagonista**. Arriba se apoya el papel crema donde se
-lee, así que la imagen se ve por los costados y por detrás, con un velo
-oscuro encima. Si tiene una figura grande en el centro, no se va a ver.
+Mirando `fotos alma/`, la fiesta no es un pantano de noche — es esto:
 
-- **Formato vertical, 1080 × 1920.** Se recorta a lo ancho en pantallas
-  anchas, así que lo importante va en la franja central.
-- **Oscura y de poco contraste.** Es el fondo de una escena de noche.
-- **Sin texto de ningún tipo.**
-- **Los bordes de arriba y de abajo, casi negros**, para que el
-  encabezado ("Alma · 11 de septiembre") y los botones se lean encima.
+- **Vestido verde menta / agua**, corset bordado en plata, falda de tul.
+- **Jardín japonés**: puente rojo lacado, glicinas lilas colgando,
+  estanque, juncos, cerezos.
+- **De día y luminoso.** Nada oscuro.
 
-## El prompt
+Así que la paleta es: **pistacho y menta**, crema, **dorado suave**, con el
+lila de las glicinas de acento y el rojo del puente como toque puntual —
+un toque, no un protagonista.
 
-> Vertical 9:16 illustration of a still bayou pond at night, seen from
-> slightly above. Dark jade and deep teal water with soft golden
-> reflections. Large lily pads scattered across the surface, a few white
-> water lilies half open. Tall reeds and hanging spanish moss framing the
-> left and right edges only, leaving the centre open and calm. Warm golden
-> fireflies floating over the water as small soft points of light. Painted
-> in delicate watercolour with visible paper grain, muted and low
-> contrast, cinematic and quiet. The top and bottom of the image fade to
-> near black. No text, no characters, no people, no frogs.
+## Son dos cosas distintas, no una
 
-**Variante más cálida** (si el jade queda muy frío al lado del pistacho de
-Alma): cambiar `dark jade and deep teal` por `dark moss green and warm
-olive`, y `golden` por `amber`.
+| Campo | Qué es | Cuántas |
+|---|---|---|
+| `libro_fondo` | el **ambiente** que rodea la hoja, se ve por los costados | 1 |
+| `libro_hojas` | la **página** donde se escribe, con su marco | 1 a 5 |
 
-## ⚠️ Dos cuidados
+Con varias hojas, el libro **las va alternando** página por página: treinta
+deseos no se leen como la misma estampita repetida treinta veces.
 
-1. **Nada de Tiana ni del sapo de la película.** El ambiente —los
-   nenúfares, las luciérnagas, el pantano, el verde y el dorado— dice
-   "Princesa y el Sapo" sin usar un personaje que es de Disney. Esto es
-   material por el que se cobra, y en `demo-enredados` ya nos pasó que un
-   PNG "suelto" traía la firma de otro autor.
-2. **Revisá las esquinas antes de subirla.** Los generadores meten marcas
-   de agua abajo a la derecha, y acá esa esquina se ve.
+---
 
-## Cómo se prueba antes de dársela a la clienta
+## Reglas que valen para TODAS
 
-Abrir `/libro?evento=almamia15` y mirar que:
-- el nombre de arriba y la fecha se sigan leyendo sobre la imagen;
-- el papel crema no se pierda contra el fondo;
-- en un celular real, no aparezca una franja clara justo detrás de los
-  botones de abajo.
+1. **Formato vertical.** El 768 × 1376 que te da Gemini está perfecto.
+2. **Sin una sola letra.** El nombre de Alma, "El libro de deseos" y el
+   número de página los escribe la web encima, con la tipografía del
+   evento. Si el texto viene quemado en la imagen no se puede cambiar, no
+   sirve para la próxima clienta, y encima queda dos veces.
+3. **El centro tiene que quedar LIMPIO.** Ahí va el deseo. Todo lo
+   ilustrado va en los bordes: arriba, abajo y los costados.
+4. **Claro y de poco contraste en el medio.** El texto va oscuro encima.
+5. **Nada de Tiana, ni el sapo, ni castillos.** El ambiente ya dice la
+   temática; el personaje es de Disney y esto se cobra.
+6. **Mirá las cuatro esquinas antes de subirla.** Los generadores meten
+   marcas de agua abajo a la derecha, y ahí es donde se ve.
+
+---
+
+## 1 · La portada
+
+> Vertical 9:16 watercolour illustration on warm cream paper. An elegant
+> thin gold double frame with soft art-nouveau corners, leaving a large
+> clean empty area in the centre. Around the frame: pale pistachio and
+> mint green watercolour washes, white water lilies, delicate reeds, and a
+> few hanging wisteria branches in soft lilac at the top corners. Small
+> gold dots and tiny butterflies scattered. Very light, airy and luminous,
+> visible paper grain, muted pastel palette, generous white space in the
+> middle. No text, no characters, no people.
+
+## 2 · Hoja A — para las páginas
+
+> Vertical 9:16 watercolour illustration on warm cream paper. Soft
+> pistachio and mint green watercolour washes in the upper left corner and
+> the lower right corner, with white water lilies, lily pads and slender
+> reeds. A thin gold line frame, simple and geometric. The entire centre
+> of the image is clean cream paper with nothing on it. Delicate, airy,
+> low contrast, visible paper grain. No text, no characters, no people.
+
+## 3 · Hoja B — la misma idea, espejada
+
+Igual que la A, pero: `upper right corner and the lower left corner`, y
+cambiá `water lilies` por `hanging wisteria in soft lilac and small
+cherry blossoms`.
+
+## 4 · Hoja C — más suelta
+
+> Vertical 9:16 watercolour illustration on warm cream paper. A tall
+> cluster of slender green reeds and cattails rising along the left edge
+> only, with two dragonflies and a few floating gold specks. A very thin
+> gold vertical line down the right side. The centre and the whole right
+> half are clean cream paper. Extremely minimal, pale pistachio and sage
+> palette, visible paper grain. No text, no characters, no people.
+
+## 5 · La hoja del cierre
+
+> Vertical 9:16 watercolour illustration on warm cream paper. A calm pond
+> painted across the bottom third: still pale green water, lily pads,
+> three open white water lilies, soft reflections. A thin gold frame line.
+> The upper two thirds are clean cream paper with only a few tiny gold
+> dots. Pale pistachio, mint and cream palette, luminous and airy,
+> visible paper grain. No text, no characters, no people.
+
+## 6 · El ambiente de atrás (`libro_fondo`)
+
+⚠️ Este reemplaza al estanque de noche. Va **claro**, como la fiesta.
+
+> Vertical 9:16 watercolour illustration of a serene japanese garden pond
+> in soft daylight. Pale mint and pistachio green water with gentle
+> reflections, lily pads and white water lilies, tall reeds at the edges,
+> hanging wisteria in soft lilac, and a hint of a red lacquered bridge in
+> the distance. Delicate, luminous and low contrast, painted in light
+> watercolour with visible paper grain. Nothing important in the centre of
+> the frame. No text, no characters, no people.
+
+---
+
+## La silueta de Alma
+
+En la hoja que hiciste te gustó la silueta. Se puede hacer **con su foto
+de verdad**: su vestido, su falda de tul, su pose, recortada y rellena en
+un solo tono verde profundo o dorado. No se le ve la cara y sin embargo
+es ella, no una ilustración de banco.
+
+Sirven las de `fotos alma/` donde está de cuerpo entero y bien separada
+del fondo. Decime cuál te gusta y la recorto.
+
+## Cuando las tengas
+
+Dejámelas en la carpeta y yo las optimizo (una hoja no puede pesar más de
+~250 KB: son cinco y el libro se abre con datos móviles), las subo al
+Storage y las cargo en el evento. Después te paso el link para que lo
+mires en el celular.
