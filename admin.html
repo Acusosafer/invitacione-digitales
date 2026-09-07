@@ -4059,71 +4059,250 @@ function exportarMesasPDF() {
      el salón cuenta cubiertos con esta hoja, y "Acompañante 2" archivado
      entre los apellidos con D se lee como una persona más. */
   lista.sort((a,b) => (a.reservado - b.reservado) || a.apellido.localeCompare(b.apellido));
-  let html = `<html><head><title>Lista de invitados por mesa</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..700&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-      @media print {
-        body { margin: 0; padding: 20px; }
-        .no-print { display: none; }
-      }
-      body { font-family: 'Instrument Sans',system-ui,sans-serif; background: #fff; color: #1f2937; margin: 40px; }
-      .header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 40px; border-bottom: 2px solid #f3f4f6; padding-bottom: 30px; }
-      .logo-text { font-family: 'Fraunces',Georgia,serif; font-weight: 800; font-size: 32px; background: linear-gradient(135deg, #A8761F, #6E4A0E); -webkit-background-clip: text; color: transparent; margin-bottom: 5px; }
-      .logo-sub { font-family: 'Instrument Sans',system-ui,sans-serif; font-weight: 800; font-size: 14px; letter-spacing: 6px; text-transform: uppercase; color: #8A5F17; margin-bottom: 15px; }
-      .title { font-family: 'Fraunces',Georgia,serif; font-size: 24px; font-weight: 800; color: #111827; margin: 10px 0 5px 0; }
-      .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 20px; }
-      
-      .stats-bar { display: flex; justify-content: center; gap: 40px; margin-bottom: 30px; background: #fafafa; border: 1px solid #f3f4f6; padding: 15px 30px; border-radius: 12px; }
-      .stat-item { text-align: center; }
-      .stat-val { font-family: 'Fraunces',Georgia,serif; font-size: 20px; font-weight: 800; color: #8A5F17; }
-      .stat-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; margin-top: 2px; }
+  /* ── LA HOJA QUE SE LE ENTREGA AL SALÓN ────────────────────────────
+     Dos columnas por hoja y filas compactas: 120 invitados entraban en
+     diez hojas y entran en dos. El salón busca un apellido en una hoja
+     apoyada sobre una mesa — cuantas menos hojas, menos se pierde.
 
-      table { border-collapse: collapse; width: 100%; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border-radius: 8px; overflow: hidden; }
-      th, td { padding: 12px 16px; text-align: left; }
-      th { background-color: #8A5F17; color: #fff; font-family: 'Fraunces',Georgia,serif; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
-      td { border-bottom: 1px solid #f3f4f6; font-size: 13px; color: #374151; }
-      tr:nth-child(even) td { background-color: #fcfcfc; }
-      tr:hover td { background-color: #fafafa; }
-      .mesa-badge { background: rgba(138,95,23, 0.08); color: #8A5F17; font-weight: 700; padding: 4px 10px; border-radius: 20px; font-size: 11px; border: 1px solid rgba(138,95,23, 0.22); display: inline-block; }
-      .no-mesa { color: #9ca3af; font-style: italic; }
-      
-      .footer { margin-top: 50px; text-align: center; font-size: 11px; color: #9ca3af; border-top: 1px solid #f3f4f6; padding-top: 20px; }
-      .footer a { color: #F7CE84; text-decoration: none; font-weight: 600; }
-  </style>
-  </head><body>
-  <div class="header">
-      <div class="logo-text">Invitaciones Digitales</div>
-      <div class="logo-sub">OFICIAL</div>
-      <div class="title">Distribución Definitiva de Salón</div>
-      <div class="subtitle">Evento: ${eventoId.toUpperCase()} | Protagonista: ${currentConfig.nombre || ''}</div>
-  </div>
-  
-  <div class="stats-bar">
-      <div class="stat-item"><div class="stat-val">${lista.filter(i => !i.reservado).length}</div><div class="stat-lbl">Invitados</div></div>
-      <div class="stat-item"><div class="stat-val">${lista.filter(i => i.reservado).length}</div><div class="stat-lbl">Lugares sin nombre</div></div>
-      <div class="stat-item"><div class="stat-val">${lista.filter(i => i.mesa !== '').length}</div><div class="stat-lbl">Asignados</div></div>
-      <div class="stat-item"><div class="stat-val">${lista.filter(i => i.mesa === '').length}</div><div class="stat-lbl">Sin Mesa</div></div>
-  </div>
+     ⚠️⚠️ LA PAGINACIÓN SE MIDE, NO SE CUENTA. La primera versión repartía
+     un número fijo de filas por columna, y con nombres largos ("María de
+     los Ángeles Rodríguez") la fila se parte en dos renglones y empuja
+     todo: de 120 invitados salían TRES hojas, la última con una fila
+     sola. Cuántas filas entran depende de los nombres de cada clienta,
+     así que el único que lo sabe es el navegador. La hoja se arma vacía
+     y se le van metiendo filas hasta que MIDE más que una A4; ahí se
+     pasa a la otra columna, y después a otra hoja.
 
-  <table>
-      <thead><tr><th>Apellido</th><th>Nombre</th><th>Mesa Asignada</th></tr></thead>
-      <tbody>`;
-  lista.forEach(item => {
-      html += `<tr>
-          <td><strong>${item.apellido ? escapeHtml(item.apellido) : '<span class="no-mesa">—</span>'}</strong></td>
-          <td>${escapeHtml(item.nombre)}${item.grupo ? ' <span class="no-mesa">· ' + escapeHtml(item.grupo) + '</span>' : ''}</td>
-          <td>${item.mesa !== '' ? '<span class="mesa-badge">' + nombreMesa(item.mesa) + '</span>' : '<span class="no-mesa">— Sin asignar</span>'}</td>
+     ⚠️ Por eso también se espera a que bajen las fuentes antes de
+     paginar: con la letra del sistema, que es más ancha, la cuenta da
+     otra cosa. */
+  const inicial = it => (it.apellido || it.nombre || '?').trim().charAt(0).toUpperCase();
+
+  /* ⚠️ El chip lleva sólo el número ("7", "Principal"), no "Mesa 7": la
+     columna se llama Mesa y repetirlo 120 veces le come el ancho a los
+     nombres, que es justo lo que los parte en dos renglones.
+     ⚠️ El texto sale igual de nombreMesa() —la única forma correcta de
+     preguntar por la mesa, porque la Principal es el 0 y el 0 es falso
+     en JavaScript— y recién ahí se le saca el prefijo. */
+  const chipMesa = m => escapeHtml(nombreMesa(m).replace(/^Mesa\s+/i, ''));
+
+  /* ⚠️ Un lugar sin nombre no aporta letra al rango de la columna:
+     "Acompañante 2" daría una A y la columna diría "V–A". */
+  const fila = it => `<tr data-i="${it.reservado ? '' : escapeHtml(inicial(it))}">
+        <td class="ape">${it.apellido ? escapeHtml(it.apellido) : '<span class="vago">—</span>'}</td>
+        <td>${escapeHtml(it.nombre)}${it.grupo ? '<span class="vago"> · ' + escapeHtml(it.grupo) + '</span>' : ''}</td>
+        <td class="col-m">${it.mesa !== '' ? '<span class="chip">' + chipMesa(it.mesa) + '</span>' : '<span class="vago">sin asignar</span>'}</td>
       </tr>`;
-  });
-  html += `</tbody></table>
-  <div class="footer">
-      Documento generado automáticamente por <a href="https://invitacionesdigitalesoficial.com" target="_blank">Invitaciones Digitales Oficial</a>
-  </div>
+
+  const TABLA = `<table>
+      <thead><tr><th>Apellido <em class="rango"></em></th><th>Nombre</th><th class="col-m">Mesa</th></tr></thead>
+      <tbody></tbody></table>`;
+
+  const sinMesa   = lista.filter(i => i.mesa === '').length;
+  const personas  = lista.filter(i => !i.reservado).length;
+  const reservados = lista.filter(i => i.reservado).length;
+  const hoy = new Date().toLocaleString('es-AR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: false });
+
+  const encabezado = `<header class="cab">
+        <div class="marca">Invitaciones Digitales <span>Oficial</span></div>
+        <h1>Distribución de salón</h1>
+        <div class="quien">${escapeHtml(currentConfig.nombre || '')}${currentConfig.nombre ? ' · ' : ''}${escapeHtml(eventoId.toUpperCase())}</div>
+        <div class="cuenta">
+          <b>${lista.length}</b> cubiertos${reservados ? `<i></i><b>${personas}</b> con nombre<i></i><b>${reservados}</b> lugares sin nombre` : ''}<i></i>
+          <b>${sinMesa}</b> sin mesa
+          <i></i><span class="vago">al ${hoy} hs</span>
+        </div>
+      </header>`;
+
+  const franja = `<header class="franja">
+        <span>Distribución de salón · ${escapeHtml(currentConfig.nombre || eventoId)}</span>
+        <span class="vago">continúa</span>
+      </header>`;
+
+  const cuerpo = `<div id="deposito"><table><tbody>${lista.map(fila).join('')}</tbody></table></div>
+  <div id="salida"></div>`;
+
+  const html = `<!DOCTYPE html><html lang="es-AR"><head><meta charset="utf-8">
+  <title>Distribución de salón · ${escapeHtml(eventoId.toUpperCase())}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+      /* ⚠️ Sin print-color-adjust:exact el navegador imprime la hoja
+         en blanco: por defecto descarta los fondos. Y el papel es un
+         crema muy claro justamente para que, impreso, no se coma media
+         cinta de tinta. */
+      @page { size: A4; margin: 0 }
+      * { box-sizing: border-box; margin: 0; padding: 0;
+          -webkit-print-color-adjust: exact; print-color-adjust: exact }
+      :root { --papel:#FBF6EC; --tinta:#241d16; --oro:#8A5F17;
+              --linea:rgba(138,95,23,.20); --vago:#6f6558 }
+      body { font-family:'Instrument Sans',system-ui,sans-serif; color:var(--tinta);
+             background:#e9e3d8; font-size:11.5px; line-height:1.35 }
+
+      .hoja { width:210mm; min-height:297mm; padding:12mm 11mm 9mm;
+              background:var(--papel); margin:0 auto;
+              display:flex; flex-direction:column;
+              page-break-after:always; break-after:page }
+      .hoja:last-child { page-break-after:auto; break-after:auto }
+      @media screen { .hoja { margin:14px auto; box-shadow:0 6px 26px rgba(0,0,0,.14) } }
+
+      /* Encabezado de la primera hoja */
+      .cab { border-bottom:1.5px solid var(--oro); padding-bottom:9px; margin-bottom:11px }
+      .marca { font-size:9px; letter-spacing:.22em; text-transform:uppercase;
+               color:var(--oro); font-weight:600 }
+      .marca span { opacity:.55 }
+      h1 { font-family:'Fraunces',Georgia,serif; font-weight:700; font-size:23px;
+           line-height:1.15; margin:5px 0 2px }
+      .quien { font-size:12px; color:var(--vago) }
+      .cuenta { margin-top:7px; font-size:11px; color:var(--vago) }
+      .cuenta b { font-family:'Fraunces',Georgia,serif; color:var(--oro); font-size:13px }
+      .cuenta i { display:inline-block; width:1px; height:9px; margin:0 9px -1px;
+                  background:var(--linea) }
+
+      /* Franja de las hojas siguientes */
+      .franja { display:flex; justify-content:space-between; align-items:baseline;
+                border-bottom:1px solid var(--linea); padding-bottom:5px; margin-bottom:9px;
+                font-size:10px; letter-spacing:.05em; color:var(--oro) }
+
+      .cols { flex:1; display:flex; gap:7mm; align-items:flex-start }
+      .cols > * { flex:1 1 50%; min-width:0 }
+      /* El depósito de filas mientras el paginador reparte. Si el
+         paginador se cayera, se muestra igual — antes que una hoja en
+         blanco, la lista sin repartir. */
+      #deposito { display:none }
+      #deposito.a-mano { display:block; padding:12mm }
+      .nada { color:var(--vago); font-size:12px; padding:18px 0 }
+
+      table { width:100%; border-collapse:collapse; table-layout:fixed }
+      th { background:var(--oro); color:#fff; font-size:8.5px; font-weight:600;
+           letter-spacing:.13em; text-transform:uppercase;
+           text-align:left; padding:4px 7px }
+      th em { font-style:normal; opacity:.72; letter-spacing:.04em }
+      td { padding:3.5px 7px; border-bottom:.5px solid var(--linea);
+           word-break:break-word }
+      tbody tr:nth-child(even) td { background:rgba(255,255,255,.62) }
+      /* ⚠️ Los anchos son fijos a propósito. Con la mesa en 30% el nombre
+         quedaba en 120px y "María de los Ángeles" se partía en dos
+         renglones: la fila crecía 14px y empujaba filas a otra hoja.
+         Con el chip mostrando sólo el número, la mesa no necesita más
+         de 17%. */
+      .ape { width:36%; font-weight:600 }
+      .col-m { width:17%; text-align:right }
+      .chip { display:inline-block; font-weight:600; font-size:10px; color:var(--oro);
+              background:rgba(138,95,23,.09); border:.5px solid var(--linea);
+              border-radius:99px; padding:1px 7px; white-space:nowrap }
+      /* ⚠️ 5,0:1 sobre el papel. Un gris más claro se lee en pantalla y
+         desaparece impreso — y "sin asignar" es justo lo que el salón
+         necesita ver. */
+      .vago { color:var(--vago); font-weight:400 }
+
+      .pie { margin-top:8px; padding-top:6px; border-top:1px solid var(--linea);
+             display:flex; justify-content:space-between;
+             font-size:9px; letter-spacing:.05em; color:var(--vago) }
+  </style></head><body>${cuerpo}
+  <script>
+    var CAB = ${JSON.stringify(encabezado)};
+    var FRANJA = ${JSON.stringify(franja)};
+    var TABLA = ${JSON.stringify(TABLA)};
+
+    /* Reparte las filas midiendo: mete una, mira si la hoja creció más
+       que una A4, y si creció la saca y la manda a la columna o a la
+       hoja siguiente. */
+    function paginar() {
+      var LIMITE = 297 * 96 / 25.4;          // una A4 de alto, en px
+      var salida = document.getElementById('salida');
+      var deposito = document.getElementById('deposito');
+      var filas = [].slice.call(deposito.querySelectorAll('tbody tr'));
+      var hojas = [], hoja = null, cuerpo = null, columna = 0;
+
+      function nuevaHoja() {
+        hoja = document.createElement('section');
+        hoja.className = 'hoja';
+        hoja.innerHTML = (hojas.length ? FRANJA : CAB) +
+          '<div class="cols">' + TABLA + TABLA + '</div>' +
+          '<footer class="pie"><span>invitacionesdigitalesoficial.com</span>' +
+          '<span class="nro"><\\/span><\\/footer>';
+        salida.appendChild(hoja);
+        hojas.push(hoja);
+        columna = 0;
+        cuerpo = hoja.querySelectorAll('tbody')[0];
+      }
+      function otraColumna() {
+        if (columna === 1) return false;
+        columna = 1;
+        cuerpo = hoja.querySelectorAll('tbody')[1];
+        return true;
+      }
+
+      nuevaHoja();
+      if (!filas.length) {
+        /* Sin esto, exportar antes de cargar a nadie da una hoja con el
+           encabezado y nada más, y parece que el PDF salió roto. */
+        var vacio = hoja.querySelector('.cols');
+        vacio.innerHTML = '';
+        var nada = document.createElement('p');
+        nada.className = 'nada';
+        nada.textContent = 'Todavía no hay invitados confirmados.';
+        vacio.appendChild(nada);
+      }
+      for (var i = 0; i < filas.length; i++) {
+        cuerpo.appendChild(filas[i]);
+        if (hoja.getBoundingClientRect().height > LIMITE + 0.5) {
+          cuerpo.removeChild(filas[i]);
+          if (!otraColumna()) nuevaHoja();
+          /* ⚠️ Acá se mete SIN volver a medir. Si una sola fila no
+             entrara ni en una hoja vacía, medir de nuevo la sacaría
+             otra vez y el bucle no terminaría nunca. */
+          cuerpo.appendChild(filas[i]);
+        }
+      }
+
+      /* La última hoja se empareja: sin esto quedaba la columna
+         izquierda llena y la derecha con cuatro nombres. */
+      if (hojas.length) {
+        var ult = hojas[hojas.length - 1].querySelectorAll('tbody');
+        var todas = [].slice.call(ult[0].children).concat([].slice.call(ult[1].children));
+        var corte = Math.ceil(todas.length / 2);
+        todas.forEach(function (tr, n) { ult[n < corte ? 0 : 1].appendChild(tr); });
+      }
+
+      hojas.forEach(function (h, n) {
+        h.querySelector('.nro').textContent = 'Hoja ' + (n + 1) + ' de ' + hojas.length;
+        [].forEach.call(h.querySelectorAll('.cols > table'), function (t) {
+          var todas = t.querySelectorAll('tbody tr');
+          /* Una columna vacía se esconde pero sigue ocupando su mitad:
+             si se sacara, la otra se estiraría a la hoja entera y la
+             última hoja tendría otro ancho que las demás. */
+          if (!todas.length) { t.style.visibility = 'hidden'; return; }
+          var f = [].filter.call(todas, function (tr) { return tr.getAttribute('data-i'); });
+          if (!f.length) return;
+          var a = f[0].getAttribute('data-i'), b = f[f.length - 1].getAttribute('data-i');
+          t.querySelector('.rango').textContent = a === b ? a : a + '\\u2013' + b;
+        });
+      });
+      deposito.parentNode.removeChild(deposito);
+    }
+
+    /* ⚠️ Paginar antes de que bajen las fuentes da otra cuenta: la letra
+       del sistema es más ancha y parte en dos renglones nombres que con
+       la fuente buena entran en uno. */
+    var yaFue = false;
+    function arrancar() {
+      if (yaFue) return; yaFue = true;
+      try { paginar(); }
+      catch (e) { document.getElementById('deposito').className = 'a-mano'; }
+      setTimeout(function () { window.print(); }, 200);
+    }
+    window.addEventListener('load', function () {
+      (document.fonts ? document.fonts.ready : Promise.resolve()).then(arrancar);
+    });
+    setTimeout(arrancar, 5000);   // por si las fuentes nunca llegan
+  <\/script>
   </body></html>`;
   const ventana = window.open();
   ventana.document.write(html);
   ventana.document.close();
-  ventana.print();
 }
 
 // getMesaLocal/setMesaLocal eliminadas junto con el fallback de mesas.

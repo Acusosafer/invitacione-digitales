@@ -515,6 +515,49 @@ confirmó de verdad **nunca** se sigue llamando "Familia X".
 - Capacidad dinámica: si se asignan más de 10 a una mesa, la mesa escala.
 - Exporta PDF de distribución de salón ordenado por apellido.
 
+### El PDF del salón (rehecho el 07/09/2026)
+
+Dos columnas por hoja, filas compactas y el papel crema de la marca de
+fondo. **120 invitados pasaron de diez hojas a dos.** El salón busca un
+apellido en una hoja apoyada sobre una mesa: cuantas menos hojas, menos
+se pierde. Arriba de cada columna dice qué letras trae (`A–D`), abajo
+"Hoja 1 de 2", y el encabezado completo va sólo en la primera.
+
+⚠️⚠️ **La paginación se MIDE, no se cuenta.** La primera versión repartía
+un número fijo de filas por columna y con nombres largos ("María de los
+Ángeles Rodríguez") la fila se parte en dos renglones y empuja todo: de
+120 salían **tres** hojas, la última con una fila sola. Cuántas filas
+entran depende de los nombres de cada clienta, así que el único que lo
+sabe es el navegador. La hoja se arma vacía y se le meten filas hasta que
+**mide** más que una A4; ahí se pasa a la otra columna, y después a otra
+hoja. Verificado con 0, 8, 45, 124 y 300 invitados: ninguna hoja se pasa.
+
+⚠️ **Por eso se espera a `document.fonts.ready` antes de paginar.** Con
+la letra del sistema, que es más ancha, la cuenta da otra cosa. Y si
+Google Fonts no contesta, se pagina igual con la letra que haya — bien
+medida.
+
+⚠️ **`print-color-adjust: exact` es lo que hace que el crema se imprima**
+aunque el salón tenga apagados los "gráficos de fondo" del navegador.
+Comprobado contra un control sin esa propiedad: el control sale en
+blanco. El crema es `#FBF6EC`, casi papel, para no comerse la tinta.
+
+⚠️ **El chip de mesa muestra sólo el número** ("7", "Principal"), no
+"Mesa 7": la columna ya se llama Mesa, y repetirlo 120 veces le comía el
+ancho a los nombres — que es justo lo que los partía en dos renglones. El
+texto igual sale de `nombreMesa()`, la única forma correcta de preguntar
+por la mesa, y recién ahí se le saca el prefijo.
+
+⚠️ Un lugar sin nombre **no aporta letra al rango** de la columna:
+"Acompañante 2" daría una A y la columna diría "V–A".
+
+⚠️ El paginador mete la fila que no entró en la columna siguiente **sin
+volver a medir**: si una sola fila no entrara ni en una hoja vacía,
+medir de nuevo la sacaría otra vez y el bucle no terminaría nunca.
+
+Contraste medido sobre el crema: texto 15,4:1 · "sin asignar" 5,3:1 ·
+encabezado blanco sobre el oro 5,6:1 · número de mesa 5,2:1.
+
 ## Identidad — una sola marca, dos dorados
 
 Hasta el 06/08/2026 el panel y el logo eran rosa `#ff3b6f` y la web marfil y dorada: se
