@@ -3521,7 +3521,9 @@ function pintarNombre(td, inv) {
   linea.style.cssText = 'display:flex;align-items:center;gap:7px;flex-wrap:wrap';
 
   const fuerte = document.createElement('strong');
-  fuerte.textContent = `${inv.nombre} ${inv.apellido || ''}`.trim();
+  // El apellido inventado por la pre-alta no se muestra: abajo ya está
+  // el nombre del link, que dice de qué grupo es y no miente.
+  fuerte.textContent = `${inv.nombre} ${apellidoReal(inv)}`.trim();
   linea.appendChild(fuerte);
 
   const lapiz = document.createElement('button');
@@ -3555,7 +3557,7 @@ function editarNombre(td, inv) {
     return i;
   };
   const iNom = campo(inv.nombre, 'Nombre');
-  const iApe = campo(inv.apellido, 'Apellido');
+  const iApe = campo(apellidoReal(inv), 'Apellido');
   caja.append(iNom, iApe);
 
   const fila = document.createElement('div');
@@ -3584,7 +3586,7 @@ function editarNombre(td, inv) {
   bOk.onclick = async () => {
     const nom = iNom.value.trim(), ape = iApe.value.trim();
     if (!nom || !ape) { toast('❌ Hacen falta el nombre y el apellido'); return; }
-    if (nom === inv.nombre && ape === (inv.apellido || '')) { pintarNombre(td, inv); return; }
+    if (nom === inv.nombre && ape === apellidoReal(inv)) { pintarNombre(td, inv); return; }
     // ⚠️ Se bloquea ANTES de la llamada: dos toques seguidos mandan dos
     // veces, y con mala señal la respuesta tarda.
     bOk.disabled = true; bOk.textContent = 'Guardando…';
@@ -3617,7 +3619,7 @@ function renderizarMesasTabla() {
   tbody.innerHTML = '';
   
   const filtrados = mesasInvitados.filter(inv => {
-    const fullName = `${inv.nombre} ${inv.apellido || ''}`.toLowerCase();
+    const fullName = `${inv.nombre} ${apellidoReal(inv)} ${inv.invitado_url || ''}`.toLowerCase();
     const matchTexto = fullName.includes(mesasFiltroTexto);
     const matchEstado = mesasFiltroEstado === 'todos' || inv.asiste === mesasFiltroEstado;
     // Una mesa cargada con espacios en blanco no es una mesa.
@@ -3929,6 +3931,38 @@ function contarUbicados() {
   }
 }
 
+/* ⚠️ LA PRE-ALTA INVENTA UN APELLIDO. `admin_prealta` crea las filas de
+   los acompañantes con nombre "Acompañante 2" y apellido "de Familia
+   Álvarez": es una etiqueta para saber de qué grupo son, no un apellido.
+
+   Pero el listado que se le entrega al salón SE ORDENA POR APELLIDO, así
+   que todos los acompañantes pendientes de todas las familias quedaban
+   archivados juntos bajo la letra "d", y peor: si alguien escribe el
+   nombre completo en el campo de nombre y no toca el otro, el salón lee
+   "Marisa Beatriz Quiroga, de apellido de Familia Álvarez".
+
+   Esto es un filtro DE LECTURA, igual que `cancionReal()`: limpia la
+   vista sin tocar una sola fila de la base de un cliente con la fiesta
+   encima. Las filas siguen como están y se arreglan solas cuando el
+   grupo confirma. */
+const APELLIDO_INVENTADO = /^de\s+/i;
+function apellidoReal(inv) {
+  const ape = (inv?.apellido || '').trim();
+  if (!ape) return '';
+  // "de <nombre del link>" es la etiqueta de la pre-alta, no un apellido.
+  const link = (inv?.invitado_url || '').trim();
+  if (link && ape.toLowerCase() === ('de ' + link).toLowerCase()) return '';
+  // Y si empieza con "de " y lo que sigue arranca con "familia", tampoco:
+  // "de Familia Álvarez" no es el apellido de nadie.
+  if (APELLIDO_INVENTADO.test(ape) && /^de\s+(familia|flia|fam)/i.test(ape)) return '';
+  return ape;
+}
+/* Un nombre "Acompañante 2" tampoco es un nombre: es un lugar reservado. */
+const NOMBRE_INVENTADO = /^acompa(ñ|n)ante\s*\d*$/i;
+function esLugarReservado(inv) {
+  return NOMBRE_INVENTADO.test((inv?.nombre || '').trim()) && !apellidoReal(inv);
+}
+
 function extraerApellido(nombreCompleto) {
   const partes = nombreCompleto.trim().split(/\s+/);
   if (partes.length === 1) return partes[0];
@@ -3945,16 +3979,37 @@ function escapeHtml(str) {
 }
 
 function exportarMesasPDF() {
-  const lista = mesasInvitados.map(inv => ({
-    nombre: inv.nombre,
-    apellido: inv.apellido || extraerApellido(inv.nombre),
+  const lista = mesasInvitados.map(inv => {
+    // Cuando el apellido hay que sacarlo de la última palabra del nombre,
+    // esa palabra NO se repite en la columna de al lado: el salón no
+    // necesita leer "Quiroga · Marisa Beatriz Quiroga".
+    // ⚠️ Sólo si el nombre tiene dos palabras o más. Con "Ines" a secas,
+    // sacarle la última palabra lo deja sin nombre.
+    const ape = esLugarReservado(inv) ? '' : apellidoReal(inv);
+    const partes = (inv.nombre || '').trim().split(/\s+/);
+    const derivado = !ape && !esLugarReservado(inv) && partes.length > 1;
+    return {
+    nombre: derivado ? partes.slice(0, -1).join(' ') : inv.nombre,
+    // ⚠️ `inv.apellido` puede ser la etiqueta de la pre-alta ("de Familia
+    // Álvarez"). Si lo es, el apellido sale de la última palabra del
+    // nombre, que es lo que escribió la persona al confirmar.
+    // ⚠️ De un lugar reservado NO se saca apellido: extraerApellido de
+    // "Acompañante 2" devuelve "2", y el salón lee un invitado apellidado
+    // 2. Va sin apellido y con el grupo al lado del nombre.
+    apellido: esLugarReservado(inv) ? '' : (ape || extraerApellido(inv.nombre)),
+    grupo: esLugarReservado(inv) ? (inv.invitado_url || '') : '',
+    reservado: esLugarReservado(inv),
     // ⚠️ `inv.mesa ? ... : ''` acá borraba la MESA PRINCIPAL: es la 0, y el
     // 0 es falso en JavaScript. Los padres desaparecían del listado que se
     // le entrega al salón.
     mesa: tieneMesa(inv) ? String(inv.mesa).trim() : ''
-  }));
+    };
+  });
   
-  lista.sort((a,b) => a.apellido.localeCompare(b.apellido));
+  /* Los lugares reservados van al final y no mezclados entre la gente:
+     el salón cuenta cubiertos con esta hoja, y "Acompañante 2" archivado
+     entre los apellidos con D se lee como una persona más. */
+  lista.sort((a,b) => (a.reservado - b.reservado) || a.apellido.localeCompare(b.apellido));
   let html = `<html><head><title>Lista de invitados por mesa</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..700&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
   <style>
@@ -3995,7 +4050,8 @@ function exportarMesasPDF() {
   </div>
   
   <div class="stats-bar">
-      <div class="stat-item"><div class="stat-val">${lista.length}</div><div class="stat-lbl">Invitados Totales</div></div>
+      <div class="stat-item"><div class="stat-val">${lista.filter(i => !i.reservado).length}</div><div class="stat-lbl">Invitados</div></div>
+      <div class="stat-item"><div class="stat-val">${lista.filter(i => i.reservado).length}</div><div class="stat-lbl">Lugares sin nombre</div></div>
       <div class="stat-item"><div class="stat-val">${lista.filter(i => i.mesa !== '').length}</div><div class="stat-lbl">Asignados</div></div>
       <div class="stat-item"><div class="stat-val">${lista.filter(i => i.mesa === '').length}</div><div class="stat-lbl">Sin Mesa</div></div>
   </div>
@@ -4005,8 +4061,8 @@ function exportarMesasPDF() {
       <tbody>`;
   lista.forEach(item => {
       html += `<tr>
-          <td><strong>${escapeHtml(item.apellido)}</strong></td>
-          <td>${escapeHtml(item.nombre)}</td>
+          <td><strong>${item.apellido ? escapeHtml(item.apellido) : '<span class="no-mesa">—</span>'}</strong></td>
+          <td>${escapeHtml(item.nombre)}${item.grupo ? ' <span class="no-mesa">· ' + escapeHtml(item.grupo) + '</span>' : ''}</td>
           <td>${item.mesa !== '' ? '<span class="mesa-badge">' + nombreMesa(item.mesa) + '</span>' : '<span class="no-mesa">— Sin asignar</span>'}</td>
       </tr>`;
   });
