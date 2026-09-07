@@ -31,6 +31,9 @@ que siga siéndolo.
 | `sql/005_telefono_links.sql` | La tabla `links` y el teléfono del generador |
 | `sql/006_deseos.sql` | El libro de deseos: tabla, funciones y permisos |
 | `sql/007_invitado_a_mano.sql` | Cargar invitados sin link (la familia, la agasajada) |
+| `sql/008_renombrar_invitado.sql` | Corregir el nombre de un invitado ya cargado |
+| `sql/009_libro_alma.sql` | Deja el evento de Alma listo para el libro animado |
+| `libro.html` | **El libro animado** — el regalo de después, ruta `/libro` |
 | `logo.png` / `logo-og.png` | Marca. El `-og` es el respaldo de vista previa (1200×630, fondo oscuro) |
 | `publicidad/agosto-a.html` | Placa de la campaña (1080×1080) |
 | `publicidad/instagram.md` | Perfil, bio y prompts de las piezas. No se publica |
@@ -1110,6 +1113,18 @@ papel, y como `pintarMarco()` mide la caja para armar el viewBox, medía esos 15
 ⚠️ **El marco se arma con el tamaño REAL del papel**, no con un viewBox fijo estirado con
 `preserveAspectRatio="none"`: estirado, las volutas de las esquinas se aplastan y el trazo
 cambia de grosor según el lado. Por lo mismo se rehace al girar el teléfono.
+
+### ⚠️ NO hay portada adentro del libro
+
+La **tapa** ya dice "El libro de deseos · Alma". Una portada igual apenas se abre son dos
+portadas seguidas. **La primera página es el primer mensaje**, y la cuenta de cuántos
+escribieron se dice al final, que es donde cierra. `total()` es `deseos.length + 1`.
+
+La hoja que se había pensado como portada no se descartó: entró al reparto de las páginas de
+deseo con su zona ya medida.
+
+Verificado con **70 deseos** de todos los largos: 71 páginas, ninguna desborda, los 70 se
+escriben completos, las cuatro hojas rotan (21/21/14/14) y el cierre sale una sola vez.
 
 ### La tapa que se abre (07/09/2026)
 

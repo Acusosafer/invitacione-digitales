@@ -601,21 +601,20 @@ const altoUtil = h => 100 - (h.t != null ? h.t : 17) - (h.b != null ? h.b : 26);
 function hojaDe(pag) {
   if (!HOJAS.length) return null;
   const rol = r => HOJAS.filter(h => h.rol === r);
-  if (pag === 0) return (rol('portada')[0] || HOJAS[0]);
-  if (pag > deseos.length) return (rol('cierre')[0] || HOJAS[HOJAS.length - 1]);
+  if (pag >= deseos.length) return (rol('cierre')[0] || HOJAS[HOJAS.length - 1]);
 
-  let libres = HOJAS.filter(h => !h.rol || h.rol === 'deseo');
+  let libres = HOJAS.filter(h => h.rol !== 'cierre');
   if (!libres.length) libres = HOJAS.slice();
   libres = libres.slice().sort((a, b) => altoUtil(b) - altoUtil(a));
 
-  const d = deseos[pag - 1] || {};
+  const d = deseos[pag] || {};
   const largo = (d.deseo || '').length;
   if (largo > 200) {
     const holgadas = libres.filter(h => altoUtil(h) >= 50);
-    if (holgadas.length) return holgadas[(pag - 1) % holgadas.length];
+    if (holgadas.length) return holgadas[pag % holgadas.length];
     return libres[0];                  // la que más aire tenga
   }
-  return libres[(pag - 1) % libres.length];
+  return libres[pag % libres.length];
 }
 
 /* La silueta sólo en la portada y en el cierre. En una página de deseo
@@ -698,11 +697,11 @@ function ponerVida() {
 function ponerSilueta() {
   const el = document.getElementById('silueta');
   if (!el) return;
-  const va = C.libro_silueta && (i === 0 || i > deseos.length);
+  const va = C.libro_silueta && i >= deseos.length && deseos.length > 0;
   if (!va) { el.hidden = true; el.classList.remove('puesta'); return; }
   if (el.getAttribute('src') !== C.libro_silueta) el.src = C.libro_silueta;
   el.hidden = false;
-  el.classList.toggle('centro', i > deseos.length);   // en el cierre, al medio
+  el.classList.add('centro');   // el cierre la lleva centrada
   requestAnimationFrame(() => el.classList.add('puesta'));
 }
 
@@ -874,7 +873,11 @@ const el = (tag, clase, texto) => {
   return e;
 };
 
-const total = () => deseos.length + 2;        // portada + deseos + cierre
+/* ⚠️ NO hay portada adentro del libro: la TAPA ya dice "El libro de
+   deseos · Alma", y una portada igual apenas se abre son dos portadas
+   seguidas. La primera página es el primer mensaje. La cuenta de cuántos
+   escribieron se dice al final, que es donde cierra. */
+const total = () => deseos.length + 1;        // los deseos + el cierre
 
 /* Una ramita de tres hojas, del ancho de la firma. Se dibuja de una
    punta a la otra, como si alguien la trazara al terminar de escribir. */
@@ -913,25 +916,13 @@ function pintarPagina(dir) {
   p.classList.remove('yendose');
   p.classList.add('viniendo');
 
-  if (i === 0) {
+  if (!deseos.length) {
     p.appendChild(ornamento());
-    p.appendChild(el('div', 'kicker', 'El libro de deseos'));
     p.appendChild(el('h2', null, C.nombre || 'Tu fiesta'));
-    const n = deseos.length;
-    p.appendChild(el('p', 'nota',
-      n === 0 ? 'Todavía no escribió nadie.'
-        : n === 1 ? 'Una persona te dejó un mensaje esa noche.'
-          : n + ' personas te dejaron un mensaje esa noche.'));
-    /* ⚠️ Que quede claro que es una muestra. Que alguien crea que está
-       leyendo los mensajes de verdad sería peor que cualquier demo.
-       Y reemplaza al "tocá para empezar" en vez de sumarse: los dos
-       juntos empujaban el bloque por encima del marco de la hoja. */
-    if (MUESTRA) p.appendChild(el('p', 'aviso-muestra',
-      'Muestra · los mensajes son inventados'));
-    else if (n) p.appendChild(el('p', 'nota', 'Tocá para empezar a leerlos.'));
-  } else if (i <= deseos.length) {
-    const d = deseos[i - 1];
-    p.appendChild(el('div', 'kicker', 'Deseo ' + i + ' de ' + deseos.length));
+    p.appendChild(el('p', 'nota', 'Todavía no escribió nadie.'));
+  } else if (i < deseos.length) {
+    const d = deseos[i];
+    p.appendChild(el('div', 'kicker', 'Deseo ' + (i + 1) + ' de ' + deseos.length));
     const texto = el('p', 'deseo');
     /* ⚠️ El cuerpo se achica con los deseos largos: uno de 400 caracteres
        a 1,85rem no entra en un celular y aparece scroll adentro del
@@ -958,8 +949,10 @@ function pintarPagina(dir) {
     p.appendChild(ornamento());
     p.appendChild(el('h2', null, 'Y eso fue todo'));
     p.appendChild(el('p', 'nota',
-      deseos.length + (deseos.length === 1 ? ' mensaje guardado' : ' mensajes guardados') +
-      ', para cuando quieras volver a leerlos.'));
+      deseos.length + (deseos.length === 1 ? ' persona te escribió' : ' personas te escribieron')
+      + ' esa noche. Quedan guardados para cuando quieras volver a leerlos.'));
+    if (MUESTRA) p.appendChild(el('p', 'aviso-muestra',
+      'Muestra · los mensajes son inventados'));
   }
 
   ponerHoja();
@@ -1077,7 +1070,7 @@ async function abrir() {
    mirando también la RUTA. */
 const MUESTRA = QS.get('muestra') === '1' || /\/libro-muestra\/?$/.test(location.pathname);
 const HOJAS_MUESTRA = [
-  { u: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_portada_1788805780.jpg', rol:'portada', t:8,  r:13, b:46, l:13, agua:44 },
+  { u: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_portada_1788805780.jpg', t:8,  r:13, b:46, l:13, agua:44 },
   { u: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_hoja1_1788805780.jpg',   t:9,  r:13, b:21, l:13 },
   { u: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_hoja2_1788805780.jpg',   t:16, r:13, b:24, l:13 },
   { u: 'https://ldvosdztnhrvrqxnjuco.supabase.co/storage/v1/object/public/invitaciones/almamia15/libro_hoja3_1788805780.jpg',   t:38, r:13, b:25, l:13 },
