@@ -1111,6 +1111,34 @@ papel, y como `pintarMarco()` mide la caja para armar el viewBox, medía esos 15
 `preserveAspectRatio="none"`: estirado, las volutas de las esquinas se aplastan y el trazo
 cambia de grosor según el lado. Por lo mismo se rehace al girar el teléfono.
 
+### Las micro animaciones (07/09/2026)
+
+⚠️⚠️ **Las mariposas y las flores de la ilustración son PÍXELES.** Están adentro del JPEG de la
+hoja: no se pueden mover por separado por más que se vean como elementos sueltos. Lo que sí se
+puede es poner **encima** mariposas dibujadas que vuelen de verdad, y un brillo que cruce el
+agua. Eso es lo que hay.
+
+- **Tres mariposas**, en SVG, con vuelo curvo y aleteo propio. Van por los **márgenes**: al 34%
+  y al 58% de alto cruzaban el texto y —aunque queden detrás— una mariposa pasando abajo de un
+  renglón lo hace tropezar. Verificado en 240 mediciones sobre cuatro páginas: **cero** cruces.
+- **El brillo del agua** sólo en las hojas que tienen agua dibujada (`agua: <alto en %>` en la
+  hoja) y sólo sobre esa franja: un destello cruzando papel en blanco se lee como un error. No
+  distorsiona la ilustración —eso pediría un filtro y se come la batería—, la sugiere.
+- ⚠️ **Con hoja ilustrada, las luciérnagas del fondo se apagan.** Si no, son dos enjambres a la
+  vez. La regla de una sola cosa animada por pantalla se aflojó a pedido de Fer, pero a cambio
+  no puede haber tres capas moviéndose.
+- Todo en `transform` y `opacity`, y todo apagado con `prefers-reduced-motion`.
+
+⚠️ **Que se muevan no se comprueba mirando una captura**: una animación que el navegador
+descartó se ve igual que una quieta. Se registra la posición cada 900ms y se mide cuánto se
+alejó cada una. Las tres recorren entre 45 y 60px.
+
+### La silueta
+
+Va en la **portada** (corrida al borde, al 38% de alto) y en el **cierre** (centrada: ahí no hay
+texto abajo que esquivar y cierra el libro como una foto de despedida). Nunca en una página de
+deseo, donde le sacaría aire a lo único que importa.
+
 ### La máquina de escribir
 
 Se escribe con `textContent`, carácter a carácter. ⚠️ **Y se puede saltear**: el primer toque
