@@ -3505,6 +3505,113 @@ function filtrarMesasInvitados() {
   renderizarMesasTabla();
 }
 
+/* Corregir el nombre de un invitado.
+
+   Hace falta en dos casos que pasan en toda fiesta: un link que se llamó
+   "Familia Ferron" cuando quien viene es Tomás Ferron, y un grupo que
+   avisa por WhatsApp que va y hay que pasarle las filas de `pendiente` a
+   confirmadas con sus nombres de verdad.
+
+   ⚠️ Corregir es MUCHO mejor que borrar y volver a cargar: borrando se
+   pierde el link del grupo, se pierde la dieta y la canción, y si uno se
+   distrae quedan las dos cosas y el salón cobra los cubiertos dos veces. */
+function pintarNombre(td, inv) {
+  td.textContent = '';
+  const linea = document.createElement('div');
+  linea.style.cssText = 'display:flex;align-items:center;gap:7px;flex-wrap:wrap';
+
+  const fuerte = document.createElement('strong');
+  fuerte.textContent = `${inv.nombre} ${inv.apellido || ''}`.trim();
+  linea.appendChild(fuerte);
+
+  const lapiz = document.createElement('button');
+  lapiz.type = 'button';
+  lapiz.textContent = '✏️';
+  lapiz.title = 'Corregir el nombre';
+  lapiz.setAttribute('aria-label', 'Corregir el nombre');
+  lapiz.style.cssText = 'background:none;border:0;cursor:pointer;font-size:.85rem;'
+    + 'line-height:1;padding:6px;min-width:32px;min-height:32px;opacity:.55';
+  lapiz.onclick = () => editarNombre(td, inv);
+  linea.appendChild(lapiz);
+  td.appendChild(linea);
+
+  const chico = document.createElement('small');
+  chico.style.color = 'var(--tx3)';
+  chico.textContent = inv.invitado_url || 'general';
+  td.appendChild(chico);
+}
+
+function editarNombre(td, inv) {
+  td.textContent = '';
+  const caja = document.createElement('div');
+  caja.style.cssText = 'display:flex;flex-direction:column;gap:6px;min-width:150px';
+
+  const campo = (val, ph) => {
+    const i = document.createElement('input');
+    i.type = 'text'; i.value = val || ''; i.placeholder = ph;
+    i.maxLength = 80;
+    i.style.cssText = 'width:100%;padding:8px 10px;font-size:.82rem;border-radius:8px;'
+      + 'background:rgba(255,255,255,0.05);border:1px solid var(--bdr);color:var(--tx)';
+    return i;
+  };
+  const iNom = campo(inv.nombre, 'Nombre');
+  const iApe = campo(inv.apellido, 'Apellido');
+  caja.append(iNom, iApe);
+
+  const fila = document.createElement('div');
+  fila.style.cssText = 'display:flex;gap:6px';
+  const btn = (txt, primario) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = txt;
+    b.style.cssText = 'flex:1;padding:8px 10px;font-size:.74rem;border-radius:20px;'
+      + 'cursor:pointer;min-height:34px;border:1px solid var(--bdr);'
+      + (primario ? 'background:var(--oro2);color:#1a1200;border-color:transparent;font-weight:600'
+                  : 'background:transparent;color:var(--tx2)');
+    return b;
+  };
+  const bOk = btn('Guardar', true), bNo = btn('Cancelar', false);
+  fila.append(bOk, bNo);
+  caja.appendChild(fila);
+  td.appendChild(caja);
+  iNom.focus(); iNom.select();
+
+  bNo.onclick = () => pintarNombre(td, inv);
+  iNom.onkeydown = iApe.onkeydown = e => {
+    if (e.key === 'Enter') { e.preventDefault(); bOk.click(); }
+    if (e.key === 'Escape') { e.preventDefault(); bNo.click(); }
+  };
+
+  bOk.onclick = async () => {
+    const nom = iNom.value.trim(), ape = iApe.value.trim();
+    if (!nom || !ape) { toast('❌ Hacen falta el nombre y el apellido'); return; }
+    if (nom === inv.nombre && ape === (inv.apellido || '')) { pintarNombre(td, inv); return; }
+    // ⚠️ Se bloquea ANTES de la llamada: dos toques seguidos mandan dos
+    // veces, y con mala señal la respuesta tarda.
+    bOk.disabled = true; bOk.textContent = 'Guardando…';
+
+    const { error } = await sb.rpc('admin_renombrar_fila', {
+      p_evento: eventoId, p_clave: adminClave, p_id: inv.id,
+      p_nombre: nom, p_apellido: ape
+    });
+    if (error) {
+      bOk.disabled = false; bOk.textContent = 'Guardar';
+      // ⚠️ Si la migración 008 no se corrió, PostgREST no conoce la
+      // función y da 404. Decirlo con todas las letras: "error al
+      // guardar" manda a buscar el problema donde no está.
+      toast(esFuncionVieja(error)
+        ? '❌ Falta correr sql/008_renombrar_invitado.sql en Supabase'
+        : '❌ No se pudo guardar el nombre');
+      return;
+    }
+    inv.nombre = nom; inv.apellido = ape;
+    pintarNombre(td, inv);
+    toast('🟢 Nombre corregido');
+    // El listado del salón se ordena por apellido: hay que rearmarlo.
+    reconstruirMesasAsientos();
+    renderizarMesasVisuales();
+  };
+}
+
 function renderizarMesasTabla() {
   const tbody = document.getElementById('mesas-invitados-rows');
   tbody.innerHTML = '';
@@ -3532,9 +3639,12 @@ function renderizarMesasTabla() {
   filtrados.forEach(inv => {
     const tr = document.createElement('tr');
     
-    // Nombre
+    // Nombre — se puede corregir tocándolo.
+    // ⚠️ Se arma con DOM, NO con innerHTML: el nombre lo escribe el
+    // invitado en el formulario y termina acá, en la pantalla del
+    // cliente. Antes entraba como HTML.
     const tdNombre = document.createElement('td');
-    tdNombre.innerHTML = `<strong>${inv.nombre} ${inv.apellido || ''}</strong><br><small style="color:var(--tx3)">${inv.invitado_url || 'general'}</small>`;
+    pintarNombre(tdNombre, inv);
     
     // Estado (select editable)
     const tdEstado = document.createElement('td');
