@@ -1238,12 +1238,43 @@ existir y pasa a ser lo que haya atrás. Medido con jsQR al tamaño impreso, los
 Por eso existe **`disco`**: transparente afuera del círculo y blanco adentro. Es el único que
 funciona apoyado sobre cualquier cosa — verificado sobre la foto de Alma, 13 de 13.
 
-⚠️ **Sin el círculo blanco del centro asoman pedacitos de código.** No era decorativo: tapaba
-los módulos que sobresalen por los costados del hueco cuadrado. En transparente se resuelve
-agrandando el medallón de color hasta el mismo radio, no borrándolo.
+⚠️ **Sin el círculo del centro asoman pedacitos de código.** No es decorativo: tapa los módulos
+que rodean el hueco. En transparente se resuelve agrandando el medallón de color hasta el mismo
+radio, no borrándolo.
 
 ⚠️ El texto curvo de arriba va en tinta `#1a1a1a`: en la versión transparente, sobre un fondo
 oscuro desaparece aunque el código todavía se lea.
+
+### Sin anillo ni texto: `estilo desnudo` (07/09/2026)
+
+`node herramientas/generar-qr.js <color> <acento> <carpeta> [mesas] [fondo] [estilo]`, donde
+`estilo` es `anillo` (por defecto) · `desnudo` — sólo el código y el número en el centro.
+
+Sin el aro, el código **deja de estar inscripto en el círculo y ocupa el lienzo entero**: al
+mismo tamaño de papel cada módulo mide un 54% más de superficie, y los 13 pasan a leerse
+**desde 22 mm** (con anillo hacía falta bastante más). Lo pidió Fer para pegarlos sueltos.
+
+⚠️ Lo único que no se puede sacar es el margen: un QR necesita **4 módulos de aire** alrededor
+o el lector no encuentra dónde termina. De ahí el `lado = L · n / (n + 8)`.
+
+⚠️ En desnudo, la placa de `disco` es un **cuadrado redondeado**, no un círculo: un círculo del
+ancho del código le corta las cuatro esquinas, que es justo donde están dos de los tres ojos.
+
+⚠️ **El desnudo transparente aguanta menos fondo que el del anillo** — falla ya sobre gris
+medio, no sobre gris oscuro. Más superficie del código depende del fondo. Para apoyarlo sobre
+cualquier cosa está `desnudo` + `disco`: verificado 13/13 sobre negro.
+
+### ⚠️⚠️ El hueco del centro es REDONDO, y eso arregló un número corrido
+
+Era un cuadrado de módulos enteros. Con **65 módulos** —los que usa la URL de los deseos— el
+centro de la grilla cae en 32,5, así que el hueco quedaba **medio módulo corrido** respecto al
+medallón, que se dibuja en el centro del lienzo. En las trece piezas el número se veía corrido
+hacia un costado, y **a ojo parecía un problema del texto**: se persigue el fantasma
+equivocado. Redondo, el hueco se calcula desde `n/2` igual que el medallón — no hay paridad que
+valga— y encima el disco lo tapa exacto, sin dejar las esquinas del cuadrado a la vista.
+
+Se mide comparando el centroide del medallón contra el rectángulo que ocupa el código: hoy el
+peor desvío es **0,16% del lado**. Estaba en las cuatro variantes; las cuatro se regeneraron.
 
 ### Riesgo aceptado
 

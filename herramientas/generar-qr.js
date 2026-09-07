@@ -47,20 +47,46 @@ const R_INT = R_EXT - 92;
                       sobre una foto NO.
      'disco'        — transparente afuera del círculo, blanco adentro. Es
                       el único que funciona apoyado sobre cualquier cosa. */
-function pieza({ url, etiqueta, centro, color, acento, tinta, nombre, fondo = 'blanco' }) {
+/* `estilo`:
+     'anillo'  — la pieza circular completa: aro, texto curvo y número.
+     'desnudo' — sólo el código y el número en el centro. Sin aro y sin
+                 texto, el código puede ocupar TODO el lienzo en vez de
+                 quedar inscripto en el círculo: al mismo tamaño de
+                 papel, cada módulo mide un 40% más y se lee de más
+                 lejos. ⚠️ Lo que NO se puede sacar es el margen: un QR
+                 necesita 4 módulos de aire alrededor o el lector no
+                 encuentra dónde termina. */
+function pieza({ url, etiqueta, centro, color, acento, tinta, nombre,
+                 fondo = 'blanco', estilo = 'anillo' }) {
   const transparente = fondo !== 'blanco';
+  const desnudo = estilo === 'desnudo';
   const q = qrcode(0, 'H');
   q.addData(url); q.make();
   const n = q.getModuleCount();
 
-  const lado = Math.floor(R_INT * 2 * 0.707);
+  /* Con aro, el código va inscripto en el círculo interior (de ahí el
+     0,707 = raíz de 2 sobre 2). Sin aro, ocupa el lienzo menos los 4
+     módulos de zona quieta de cada lado — de ahí el n/(n+8). */
+  const lado = desnudo ? Math.floor(L * n / (n + 8))
+                       : Math.floor(R_INT * 2 * 0.707);
   const paso = lado / n;
   const x0 = CENTRO - lado / 2, y0 = CENTRO - lado / 2;
 
   const esOjo = (r, c) => (r < 7 && c < 7) || (r < 7 && c >= n - 7) || (r >= n - 7 && c < 7);
-  const h = Math.round(n * 0.22);
-  const h0 = Math.floor((n - h) / 2), h1 = h0 + h;
-  const enHueco = (r, c) => r >= h0 && r < h1 && c >= h0 && c < h1;
+
+  /* ⚠️⚠️ EL HUECO DEL CENTRO ES REDONDO, NO CUADRADO — y no por gusto.
+     Cuadrado, sus bordes caían en módulos enteros: con 65 módulos (que
+     son los que usa esta URL) el centro de la grilla está en 32,5 y el
+     hueco terminaba corrido MEDIO MÓDULO respecto al medallón, que se
+     dibuja en el centro del lienzo. En las trece piezas el número se
+     veía corrido hacia un costado, y a ojo parecía un problema del
+     texto. Redondo, el hueco se calcula desde n/2 igual que el
+     medallón: no hay paridad que valga y encima el disco lo tapa
+     exacto, sin dejar las cuatro esquinas del cuadrado a la vista. */
+  const h = Math.round(n * 0.24);          // el diámetro del hueco, en módulos
+  const rMod = h / 2;
+  const enHueco = (r, c) =>
+    Math.hypot(r + 0.5 - n / 2, c + 0.5 - n / 2) <= rMod;
   const pinta = (r, c) => r >= 0 && r < n && c >= 0 && c < n
     && q.isDark(r, c) && !esOjo(r, c) && !enHueco(r, c);
 
@@ -86,16 +112,23 @@ function pieza({ url, etiqueta, centro, color, acento, tinta, nombre, fondo = 'b
 
   const rTxt = R_EXT - 52;
   const arco = (arriba) => `M ${CENTRO} ${CENTRO} m ${-rTxt} 0 a ${rTxt} ${rTxt} 0 1 ${arriba ? 1 : 0} ${rTxt*2} 0`;
-  const rHueco = h * paso * 0.56;
+  const rHueco = rMod * paso;   // el mismo disco que se dejó sin pintar
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${L}" height="${L}" viewBox="0 0 ${L} ${L}">
-  <defs>
-    <path id="ar" d="${arco(true)}"/>
-    <path id="ab" d="${arco(false)}"/>
-  </defs>
-  ${fondo === 'blanco' ? `<rect width="${L}" height="${L}" fill="#ffffff"/>` : ''}
-  ${fondo === 'disco'  ? `<circle cx="${CENTRO}" cy="${CENTRO}" r="${R_EXT + 8}" fill="#ffffff"/>` : ''}
+  /* La placa de atrás. Con aro es un círculo; sin aro tiene que ser un
+     cuadrado —redondeado— que cubra el código MÁS su zona quieta: un
+     círculo del ancho del código le corta las cuatro esquinas, que es
+     justo donde están dos de los tres ojos. */
+  const placa = fondo === 'blanco'
+    ? `<rect width="${L}" height="${L}" fill="#ffffff"/>`
+    : fondo === 'disco'
+      ? (desnudo
+          ? `<rect x="${(CENTRO-lado/2-paso*4).toFixed(1)}" y="${(CENTRO-lado/2-paso*4).toFixed(1)}"
+                 width="${(lado+paso*8).toFixed(1)}" height="${(lado+paso*8).toFixed(1)}"
+                 rx="${(paso*3).toFixed(1)}" fill="#ffffff"/>`
+          : `<circle cx="${CENTRO}" cy="${CENTRO}" r="${R_EXT + 8}" fill="#ffffff"/>`)
+      : '';
 
+  const aro = desnudo ? '' : `
   <circle cx="${CENTRO}" cy="${CENTRO}" r="${R_EXT}" fill="none" stroke="${color}" stroke-width="2.5" opacity=".5"/>
   <circle cx="${CENTRO}" cy="${CENTRO}" r="${R_EXT-14}" fill="none" stroke="${acento}" stroke-width="13"/>
   <circle cx="${CENTRO}" cy="${CENTRO}" r="${R_EXT-14}" fill="none" stroke="${color}" stroke-width="1.5" opacity=".45"/>
@@ -107,14 +140,28 @@ function pieza({ url, etiqueta, centro, color, acento, tinta, nombre, fondo = 'b
   <text font-family="Fraunces, Georgia, serif" font-size="31" font-weight="600"
         fill="${color}" letter-spacing="9">
     <textPath href="#ab" startOffset="50%" text-anchor="middle">${etiqueta}</textPath>
-  </text>
+  </text>`;
+
+  /* ⚠️ El medallón del centro NO es decorativo: tapa los módulos que
+     sobresalen por los costados del hueco cuadrado. En transparente no
+     hay blanco abajo, así que se agranda el de color hasta el mismo
+     radio en vez de apoyarse sobre uno blanco. */
+  const rMed = rHueco * (transparente ? 1 : 0.88);
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${L}" height="${L}" viewBox="0 0 ${L} ${L}">
+  <defs>
+    <path id="ar" d="${arco(true)}"/>
+    <path id="ab" d="${arco(false)}"/>
+  </defs>
+  ${placa}
+  ${aro}
 
   <g fill="${color}">${d}</g>
   ${marco(0,0)}${marco(0,n-7)}${marco(n-7,0)}
 
   ${transparente ? '' : `<circle cx="${CENTRO}" cy="${CENTRO}" r="${rHueco.toFixed(1)}" fill="#ffffff"/>`}
-  <circle cx="${CENTRO}" cy="${CENTRO}" r="${(rHueco*(transparente ? 1 : .88)).toFixed(1)}" fill="${acento}"/>
-  <circle cx="${CENTRO}" cy="${CENTRO}" r="${(rHueco*(transparente ? 1 : .88)).toFixed(1)}" fill="none" stroke="${color}" stroke-width="3"/>
+  <circle cx="${CENTRO}" cy="${CENTRO}" r="${rMed.toFixed(1)}" fill="${acento}"/>
+  <circle cx="${CENTRO}" cy="${CENTRO}" r="${rMed.toFixed(1)}" fill="none" stroke="${color}" stroke-width="3"/>
   <text x="${CENTRO}" y="${CENTRO}" text-anchor="middle" dominant-baseline="central"
         font-family="Fraunces, Georgia, serif" font-weight="700"
         font-size="${(rHueco*1.02).toFixed(0)}" fill="${color}">${centro}</text>
@@ -123,7 +170,9 @@ function pieza({ url, etiqueta, centro, color, acento, tinta, nombre, fondo = 'b
 
 module.exports = { pieza };
 
-/* Uso: node generar-qr.js <color> <acento> <carpeta> [mesas] [transparente]
+/* Uso: node generar-qr.js <color> <acento> <carpeta> [mesas] [fondo] [estilo]
+     fondo:  blanco | transparente | disco
+     estilo: anillo | desnudo   (desnudo = sólo el código y el número)
 
    ⚠️⚠️ TRANSPARENTE NO ES UN DETALLE DE FORMATO. El "blanco" del código
    pasa a ser lo que haya atrás: sobre un fondo claro se lee igual que
@@ -136,6 +185,7 @@ if (require.main === module) {
   const salida = process.argv[4];
   const mesas  = parseInt(process.argv[5] || '12');
   const fondo  = process.argv[6] || 'blanco';   // blanco | transparente | disco
+  const estilo = process.argv[7] || 'anillo';   // anillo | desnudo
   const EVENTO = 'almamia15', NOMBRE = 'ALMA';
   const BASE = 'https://www.invitacionesdigitalesoficial.com/deseos';
 
@@ -143,10 +193,10 @@ if (require.main === module) {
   for (let m = 1; m <= mesas; m++) {
     fs.writeFileSync(path.join(salida, `qr-mesa-${String(m).padStart(2,'0')}.svg`),
       pieza({ url: `${BASE}?evento=${EVENTO}&mesa=${m}`, etiqueta: `MESA ${m}`,
-              centro: m, color, acento, tinta: '#1a1a1a', nombre: NOMBRE, fondo }));
+              centro: m, color, acento, tinta: '#1a1a1a', nombre: NOMBRE, fondo, estilo }));
   }
   fs.writeFileSync(path.join(salida, 'qr-mesa-principal.svg'),
     pieza({ url: `${BASE}?evento=${EVENTO}&mesa=0`, etiqueta: 'MESA PRINCIPAL',
-            centro: '★', color, acento, tinta: '#1a1a1a', nombre: NOMBRE, fondo }));
-  console.log(`${mesas + 1} piezas (fondo ${fondo}) en ${salida}`);
+            centro: '★', color, acento, tinta: '#1a1a1a', nombre: NOMBRE, fondo, estilo }));
+  console.log(`${mesas + 1} piezas (${estilo}, fondo ${fondo}) en ${salida}`);
 }
