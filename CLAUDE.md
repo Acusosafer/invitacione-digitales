@@ -532,6 +532,30 @@ sabe es el navegador. La hoja se arma vacía y se le meten filas hasta que
 **mide** más que una A4; ahí se pasa a la otra columna, y después a otra
 hoja. Verificado con 0, 8, 45, 124 y 300 invitados: ninguna hoja se pasa.
 
+⚠️⚠️ **NI EL ALTO NI EL ANCHO DE LA HOJA PUEDEN SER LOS DE UNA A4
+EXACTOS.** Con `210mm × 297mm` clavados, en el navegador sin ventana
+salían 2 páginas y **en el Chrome de Fer salieron 4, la mitad en
+blanco**. La impresora redondea la caja de la página a SUS píxeles (una
+EPSON imprime a 360 dpi, no a 96) y un píxel de más manda la hoja entera
+a la página siguiente. Hoy el ancho lo da la página (`width:auto`) y el
+alto es `289mm`: 8mm de colchón que no se ven, porque el crema lo pinta
+`html` y el papel sale parejo hasta el borde. **Verificar contando las
+páginas del PDF, no mirando la vista previa**: A4, Letter, con `@page` y
+con la casilla de fondos apagada — las cinco pruebas tienen que dar
+tantas páginas como hojas.
+
+⚠️ **El paginador tampoco compara contra milímetros**, compara contra el
+borde de abajo de `.cols` (que no crece gracias a `min-height:0` +
+`overflow:hidden`). Un número obliga a suponer el papel, el margen y el
+alto del encabezado; la caja ya sabe los tres.
+
+⚠️ **Con la lista vacía el paginador sale antes de repartir.** Seguía de
+largo y el emparejado de la última hoja buscaba dos `<tbody>` que ya no
+existían: reventaba, caía al plan B —mostrar la tabla sin repartir— y
+salía una hoja de más. El plan B existe para que nunca salga una hoja en
+blanco, pero **si se activa, algo se rompió**: no alcanza con que el PDF
+tenga contenido.
+
 ⚠️ **Por eso se espera a `document.fonts.ready` antes de paginar.** Con
 la letra del sistema, que es más ancha, la cuenta da otra cosa. Y si
 Google Fonts no contesta, se pagina igual con la letra que haya — bien

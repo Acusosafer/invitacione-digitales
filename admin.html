@@ -4137,15 +4137,28 @@ function exportarMesasPDF() {
           -webkit-print-color-adjust: exact; print-color-adjust: exact }
       :root { --papel:#FBF6EC; --tinta:#241d16; --oro:#8A5F17;
               --linea:rgba(138,95,23,.20); --vago:#6f6558 }
+      /* El crema lo pone la página entera, no la hoja: así el papel sale
+         parejo hasta el borde aunque la hoja mida menos que una A4. */
+      html { background:var(--papel) }
       body { font-family:'Instrument Sans',system-ui,sans-serif; color:var(--tinta);
-             background:#e9e3d8; font-size:11.5px; line-height:1.35 }
+             font-size:11.5px; line-height:1.35 }
 
-      .hoja { width:210mm; min-height:297mm; padding:12mm 11mm 9mm;
-              background:var(--papel); margin:0 auto;
+      /* ⚠️⚠️ NI EL ALTO NI EL ANCHO PUEDEN SER LOS DE LA HOJA EXACTOS.
+         Con 210×297mm clavados, en headless salían 2 páginas y en el
+         Chrome de verdad salían 4: la mitad, en blanco. La impresora
+         redondea la caja de la página a SUS píxeles (una EPSON imprime a
+         360 dpi, no a 96), y un píxel de más manda la hoja entera a la
+         página siguiente. El ancho lo da la página —por eso va en auto— y el
+         alto lleva 8mm de colchón que nadie ve, porque el papel ya es
+         crema. */
+      .hoja { width:auto; height:289mm; padding:11mm 11mm 8mm;
+              overflow:hidden;
               display:flex; flex-direction:column;
               page-break-after:always; break-after:page }
       .hoja:last-child { page-break-after:auto; break-after:auto }
-      @media screen { .hoja { margin:14px auto; box-shadow:0 6px 26px rgba(0,0,0,.14) } }
+      @media screen { .hoja { width:210mm; margin:14px auto;
+                              box-shadow:0 6px 26px rgba(0,0,0,.14) } }
+      @media screen { body { background:#e9e3d8 } }
 
       /* Encabezado de la primera hoja */
       .cab { border-bottom:1.5px solid var(--oro); padding-bottom:9px; margin-bottom:11px }
@@ -4165,7 +4178,11 @@ function exportarMesasPDF() {
                 border-bottom:1px solid var(--linea); padding-bottom:5px; margin-bottom:9px;
                 font-size:10px; letter-spacing:.05em; color:var(--oro) }
 
-      .cols { flex:1; display:flex; gap:7mm; align-items:flex-start }
+      /* min-height:0 + overflow:hidden es lo que hace que .cols NO crezca
+         con el contenido: su borde de abajo es el techo contra el que el
+         paginador compara. Sin esto se estiraría y nada se pasaría nunca. */
+      .cols { flex:1; min-height:0; overflow:hidden;
+              display:flex; gap:7mm; align-items:flex-start }
       .cols > * { flex:1 1 50%; min-width:0 }
       /* El depósito de filas mientras el paginador reparte. Si el
          paginador se cayera, se muestra igual — antes que una hoja en
@@ -4206,15 +4223,24 @@ function exportarMesasPDF() {
     var FRANJA = ${JSON.stringify(franja)};
     var TABLA = ${JSON.stringify(TABLA)};
 
-    /* Reparte las filas midiendo: mete una, mira si la hoja creció más
-       que una A4, y si creció la saca y la manda a la columna o a la
-       hoja siguiente. */
+    /* Reparte las filas midiendo: mete una, mira si la columna pasó el
+       fondo de la hoja, y si lo pasó la saca y la manda a la columna o a
+       la hoja siguiente. */
     function paginar() {
-      var LIMITE = 297 * 96 / 25.4;          // una A4 de alto, en px
       var salida = document.getElementById('salida');
       var deposito = document.getElementById('deposito');
       var filas = [].slice.call(deposito.querySelectorAll('tbody tr'));
-      var hojas = [], hoja = null, cuerpo = null, columna = 0;
+      var hojas = [], hoja = null, cols = null, tabla = null, cuerpo = null, columna = 0;
+
+      /* ⚠️ Se compara contra el borde de abajo de .cols, NO contra un
+         número de milímetros. Un número obliga a suponer el tamaño del
+         papel, el margen y el alto del encabezado; la caja ya sabe todo
+         eso, y sigue sabiéndolo si mañana se cambia cualquiera de los
+         tres. */
+      function entra() {
+        return tabla.getBoundingClientRect().bottom <=
+               cols.getBoundingClientRect().bottom + 0.5;
+      }
 
       function nuevaHoja() {
         hoja = document.createElement('section');
@@ -4225,30 +4251,41 @@ function exportarMesasPDF() {
           '<span class="nro"><\\/span><\\/footer>';
         salida.appendChild(hoja);
         hojas.push(hoja);
+        cols = hoja.querySelector('.cols');
         columna = 0;
+        tabla = hoja.querySelectorAll('.cols > table')[0];
         cuerpo = hoja.querySelectorAll('tbody')[0];
       }
       function otraColumna() {
         if (columna === 1) return false;
         columna = 1;
+        tabla = hoja.querySelectorAll('.cols > table')[1];
         cuerpo = hoja.querySelectorAll('tbody')[1];
         return true;
       }
 
       nuevaHoja();
+
+      /* ⚠️ Con la lista vacía se sale ACÁ. Antes seguía de largo y el
+         emparejado de la última hoja buscaba dos <tbody> que ya no
+         existían: reventaba, caía al plan B y salía una hoja de más.
+         Sin esto, además, exportar antes de cargar a nadie da una hoja
+         con el encabezado y nada más, y parece que el PDF salió roto. */
       if (!filas.length) {
-        /* Sin esto, exportar antes de cargar a nadie da una hoja con el
-           encabezado y nada más, y parece que el PDF salió roto. */
         var vacio = hoja.querySelector('.cols');
         vacio.innerHTML = '';
         var nada = document.createElement('p');
         nada.className = 'nada';
         nada.textContent = 'Todavía no hay invitados confirmados.';
         vacio.appendChild(nada);
+        hoja.querySelector('.nro').textContent = 'Hoja 1 de 1';
+        deposito.parentNode.removeChild(deposito);
+        return;
       }
+
       for (var i = 0; i < filas.length; i++) {
         cuerpo.appendChild(filas[i]);
-        if (hoja.getBoundingClientRect().height > LIMITE + 0.5) {
+        if (!entra()) {
           cuerpo.removeChild(filas[i]);
           if (!otraColumna()) nuevaHoja();
           /* ⚠️ Acá se mete SIN volver a medir. Si una sola fila no
