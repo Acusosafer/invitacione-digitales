@@ -1022,6 +1022,85 @@ SVG. ⚠️ **Lo que no puede faltar es el pico**: la ceremonia es sobre una
 lengua de tierra metida en el lago, con agua por tres lados. Un lago
 ovalado con el altar al costado es cualquier lago del mundo.
 
+## `libro.html` — el libro animado, el regalo de después (07/09/2026)
+
+Ruta corta **`/libro?evento=almamia15`**. Lo que los invitados escribieron en la mesa vuelve
+convertido en un cuento que **se escribe solo**, deseo por deseo, sobre un papel enmarcado con
+un trazo dorado que se dibuja al abrirlo. Es el entregable que cierra el producto: el cliente
+paga una invitación y termina recibiendo un recuerdo.
+
+⚠️⚠️ **Muestra datos de invitados de una clienta.** Todo pasa por `admin_deseos`, que es
+`security definer` y **exige la clave del evento** — la misma del panel. Verificado contra la
+base de producción: clave incorrecta → `42501`, clave nula → `42501`, lectura directa de la
+tabla → `permission denied`, clave correcta → filas. Nunca reemplazarlo por un `.from('deseos')`.
+
+⚠️ Por lo mismo **no lleva GTM, GA4 ni píxel**: la URL de esta pantalla es la lista de invitados
+de la clienta. Y los nombres y mensajes se pintan con `textContent`, nunca con `innerHTML`.
+
+⚠️ **La clave NO viaja en el link.** El panel copia `…/libro?evento=X` y nada más: en la URL
+quedaría en el historial, en la vista previa de WhatsApp y en cualquier reenvío. La clave se
+manda por separado.
+
+### Decidido con Fer
+
+**Lo abre la agasajada después de la fiesta, no se proyecta en el salón.** Proyectarlo
+contradice la decisión del 27/08 —el buzón es privado justo para que un mensaje fuera de lugar
+no termine en una pared— y obligaría a que alguien apruebe cada deseo antes de que salga.
+
+### La temática
+
+`config.libro_tema`: `sapo` (La Princesa y el Sapo — agua, jade y dorado; la eligió Alma) o
+`papel` (el que sale por defecto). `config.libro_fondo` es una imagen de ambiente **opcional**:
+si no está, la escena se dibuja sola en SVG y la pantalla funciona igual. El prompt para
+generarla está en `PROMPT-FONDO-LIBRO.md`.
+
+⚠️ **El texto nunca se apoya sobre la imagen**: va sobre un papel crema opaco. La imagen la
+elige el cliente y puede ser un cielo claro o una noche negra — es la misma razón por la que en
+`deseos.html` sube una pared de papel abajo del título.
+
+⚠️ Nada de Tiana ni del sapo de la película en el fondo: el ambiente ya dice la temática, y el
+personaje es de Disney en un material por el que se cobra.
+
+### ⚠️⚠️ No hay un dorado único — otra vez
+
+El mismo `#c9a24a` que se ve precioso como trazo del marco da **2,09:1 escrito** sobre el papel
+crema: el "Deseo 1 de 5" era invisible. Por eso hay dos variables: **`--oro` para las líneas y
+los adornos, `--oro-texto` para cualquier cosa escrita**, oscurecido con la tinta hasta llegar
+a 4,5:1 sobre el papel. Es la misma lección del PDF de mesas, en otra pantalla.
+
+Medido en los dos temas con las transiciones apagadas: lo peor **4,53:1**, ningún toque menor a
+44px, y el documento mide 390 en un viewport de 390.
+
+### Tres trampas que costaron un rato
+
+⚠️ **`hidden` no esconde el libro**: la regla del navegador `[hidden]{display:none}` pierde
+contra `#libro{display:flex}`, así que el libro entero quedaba renderizado abajo de la puerta —
+el documento medía **1688px sobre 844 de pantalla**. Hace falta `#libro[hidden]{display:none}`.
+Es el mismo error que ya había pasado con los dibujos de la invitación.
+
+⚠️ **Un `<svg>` con `inset` no estira su alto.** Es un elemento reemplazado: se estira a lo
+ancho pero toma su alto intrínseco (150px). El marco salía del tamaño de un sello arriba del
+papel, y como `pintarMarco()` mide la caja para armar el viewBox, medía esos 150. Van `width` y
+`height` explícitos.
+
+⚠️ **El marco se arma con el tamaño REAL del papel**, no con un viewBox fijo estirado con
+`preserveAspectRatio="none"`: estirado, las volutas de las esquinas se aplastan y el trazo
+cambia de grosor según el lado. Por lo mismo se rehace al girar el teléfono.
+
+### La máquina de escribir
+
+Se escribe con `textContent`, carácter a carácter. ⚠️ **Y se puede saltear**: el primer toque
+completa el deseo, el segundo pasa de página. Un mensaje largo tarda, y obligar a esperar es la
+forma más rápida de que alguien cierre la página. Con `prefers-reduced-motion` aparece entero.
+
+⚠️ **El cuerpo se achica con los deseos largos** (uno de 400 caracteres a 1,85rem no entra en un
+celular): si no, aparece scroll adentro del papel, que es lo único que esta pantalla no puede
+tener.
+
+⚠️ El trazo del marco usa la misma función que la boda de Guillermina —una sola función,
+`getComputedStyle` de cada trazo, doble `requestAnimationFrame`, `transition:'none'` explícito
+al preparar—. Verificado midiendo el `strokeDashoffset` cada 90ms, no mirando.
+
 ## `deseos.html` — el libro de deseos
 
 Lo que ve el invitado cuando apoya el celular en el tag NFC de la mesa, o escanea el QR

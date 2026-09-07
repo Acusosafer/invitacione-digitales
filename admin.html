@@ -980,6 +980,10 @@ tr:hover td{background:rgba(255,255,255,0.01);}
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-primary btn-sm" onclick="imprimirCarteles()">🖨️ Carteles para las mesas</button>
         <button class="btn btn-ghost btn-sm" onclick="imprimirDeseos()">📄 Imprimir el libro</button>
+        <!-- El libro animado. Se abre con la clave del evento: el link solo
+             no muestra nada, así que se le puede pasar a la clienta. -->
+        <button class="btn btn-ghost btn-sm" onclick="abrirLibroAnimado()">✨ Ver el libro animado</button>
+        <button class="btn btn-ghost btn-sm" onclick="copiarLibroAnimado()">🔗 Copiar el link para la clienta</button>
       </div>
     </div>
 
@@ -2736,6 +2740,26 @@ async function imprimirCarteles() {
 
 // El libro entero, para imprimir y regalárselo. Es lo que queda de la
 // fiesta cuando pasó todo.
+/* El libro animado — /libro?evento=X
+   Los deseos se leen ahí con `admin_deseos`, o sea que pide la clave del
+   evento igual que este panel. Por eso el link se le puede mandar a la
+   clienta por WhatsApp sin miedo: sin la clave no muestra nada.
+   ⚠️ La clave NO viaja en el link. Ponerla ahí la dejaría en el historial
+   del navegador, en la vista previa de WhatsApp y en cualquier reenvío. */
+const linkLibro = () => `${location.origin}/libro?evento=${encodeURIComponent(eventoId)}`;
+
+function abrirLibroAnimado() { window.open(linkLibro(), '_blank', 'noopener'); }
+
+async function copiarLibroAnimado() {
+  const url = linkLibro();
+  try {
+    await navigator.clipboard.writeText(url);
+    toast('Link copiado. Acordate de pasarle también la clave, por otro lado.');
+  } catch (e) {
+    prompt('Copiá el link:', url);
+  }
+}
+
 function imprimirDeseos() {
   if (!deseosData.length) { toast('Todavía no hay ningún deseo'); return; }
   const evento = currentConfig?.nombre || eventoId;

@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title id="pg-title">El libro de deseos</title>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     EL LIBRO DE DESEOS · el regalo, cuando la fiesta ya pasó
+
+     Ruta corta: /libro?evento=almamia15
+
+     Lo que el invitado escribió en la mesa vuelve acá convertido en un
+     cuento que se escribe solo, deseo por deseo.
+
+     ⚠️⚠️ ESTA PANTALLA MUESTRA DATOS DE INVITADOS DE UNA CLIENTA: nombres
+     y mensajes personales. NO es pública. Todo pasa por `admin_deseos`,
+     que es `security definer` y EXIGE la clave del evento — la misma del
+     panel. Sin clave no viaja un solo deseo al navegador.
+     Nunca reemplazar esa llamada por un `.from('deseos')`: la tabla no
+     tiene un solo grant para `anon` justamente por esto.
+
+     ⚠️ Por lo mismo NO lleva GTM, GA4 ni píxel: mandarle a Google la URL
+     de esta página sería mandarle la lista de invitados de la clienta.
+     Ver la sección de medición en CLAUDE.md.
+
+     ⚠️ Los nombres y los deseos los escribieron invitados en una fiesta y
+     terminan en la pantalla de la clienta: se pintan con textContent,
+     NUNCA con innerHTML.
+
+     ⚠️ Decidido con Fer el 07/09/2026: este libro es para que lo abra la
+     agasajada DESPUÉS de la fiesta. No se proyecta en el salón — el buzón
+     es privado desde el 27/08 justamente para que un mensaje fuera de
+     lugar no termine en una pared.
+
+     LA TEMÁTICA
+     `config.libro_tema` elige la ambientación. Hoy hay dos:
+       'sapo'  — La Princesa y el Sapo: agua, jade y dorado. La eligió Alma.
+       'papel' — el que sale por defecto: el papel y la tinta del evento.
+     ⚠️ Una temática NO puede dejar el texto ilegible: la tinta se valida
+     contra su propio fondo igual que en deseos.html, y si no llega a
+     4,5:1 se cambia por blanco o negro.
+
+     `config.libro_fondo` es una imagen de ambiente opcional (la sube Fer
+     al Storage). Si no está, la escena se dibuja sola con SVG y la página
+     funciona igual — no depende de conseguir una imagen.
+     ══════════════════════════════════════════════════════════════════════ -->
+
+<style>
+:root{
+  --papel:#f6efdc;
+  --tinta:#20302c;
+  --ink-soft:#5b6b65;
+  --oro:#c9a24a;
+  --oro-texto:#7a5f22;   /* el oro ESCRITO: ver pintarTema() */
+  --hondo:#0d2b26;
+  --velo:rgba(0,0,0,.06);
+  --font-titulo:'Cormorant Garamond',Georgia,serif;
+  --font:'Jost',system-ui,sans-serif;
+  --mano:'Caveat',cursive;
+  --suave:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--hondo); color:var(--tinta);
+  font-family:var(--font); line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;                 /* el libro no scrollea: se pasa de página */
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+
+/* ── LA ESCENA ────────────────────────────────────────────────────────
+   Tres capas fijas: la foto de ambiente, un velo que la calma, y el
+   papel donde se lee. El texto NUNCA se apoya directo sobre la imagen:
+   la elige el cliente y puede ser un cielo claro o una noche negra. */
+.escena{position:fixed;inset:0;overflow:hidden;z-index:0}
+.fondo{position:absolute;inset:-2%;background-size:cover;background-position:center;
+       transform:scale(1.04);opacity:0;transition:opacity 1.6s var(--suave)}
+.fondo.puesto{opacity:1}
+.velo{position:absolute;inset:0;
+      background:radial-gradient(120% 90% at 50% 40%,
+                 rgba(0,0,0,.10) 0%, rgba(0,0,0,.55) 100%)}
+/* El agua dibujada: es lo que se ve mientras no haya imagen, y también
+   por debajo de ella. */
+.agua{position:absolute;inset:0;opacity:.9}
+
+/* Las luciérnagas: EL ÚNICO elemento animado en bucle de la pantalla.
+   Dos cosas latiendo a la vez y esto parece una tarjeta de cumpleaños. */
+.bichito{position:absolute;width:5px;height:5px;border-radius:50%;
+  background:var(--oro);box-shadow:0 0 10px 2px rgba(201,162,74,.55);
+  opacity:0;animation:volar var(--dur,14s) ease-in-out var(--esp,0s) infinite}
+@keyframes volar{
+  0%{opacity:0;transform:translate(0,0) scale(.6)}
+  12%{opacity:.85}
+  50%{transform:translate(var(--dx,30px),var(--dy,-46px)) scale(1)}
+  78%{opacity:.6}
+  100%{opacity:0;transform:translate(calc(var(--dx,30px)*1.7),calc(var(--dy,-46px)*2)) scale(.7)}
+}
+
+/* ── LA PUERTA ───────────────────────────────────────────────────────── */
+.centro{position:relative;z-index:2;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:26px 22px calc(22px + env(safe-area-inset-bottom))}
+#puerta{max-width:420px;width:100%;text-align:center;color:#f4ecd8}
+.sello{width:64px;height:64px;margin:0 auto 20px;display:block}
+#puerta h1{font-family:var(--font-titulo);font-weight:500;
+  font-size:clamp(1.85rem,8vw,2.5rem);line-height:1.1;letter-spacing:.01em}
+#puerta .bajada{margin-top:12px;font-size:.94rem;color:rgba(244,236,216,.78);
+  max-width:30ch;margin-inline:auto}
+.campo{margin-top:26px;display:flex;gap:9px}
+.campo input{flex:1;min-width:0;height:52px;padding:0 16px;border-radius:12px;
+  border:1px solid rgba(201,162,74,.45);background:rgba(8,20,18,.55);
+  color:#f4ecd8;font-size:1rem;font-family:var(--font);outline:none;
+  transition:border-color .2s var(--suave)}
+.campo input::placeholder{color:rgba(244,236,216,.45)}
+.campo input:focus{border-color:var(--oro)}
+.abrir{min-height:52px;padding:0 22px;border-radius:12px;font-weight:500;
+  letter-spacing:.02em;background:var(--oro);color:#14231f;
+  transition:transform .16s var(--suave),filter .2s var(--suave)}
+.abrir:active{transform:scale(.97)}
+.abrir[disabled]{filter:saturate(.4) brightness(.8);cursor:default}
+.aviso{margin-top:14px;min-height:20px;font-size:.86rem;color:#f0b8a8}
+
+/* ── EL LIBRO ────────────────────────────────────────────────────────── */
+#libro{position:relative;z-index:2;height:100%;display:flex;flex-direction:column}
+/* ⚠️ `hidden` NO alcanza: la regla del navegador [hidden]{display:none}
+   pierde contra display:flex, y el libro entero quedaba renderizado
+   abajo de la puerta — el documento medía 1688px sobre 844 de pantalla.
+   Es el mismo error que ya pasó con los dibujos de la invitación. */
+#libro[hidden]{display:none}
+
+.encabezado{display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:14px 18px calc(6px);color:rgba(244,236,216,.72);
+  font-size:.72rem;letter-spacing:.18em;text-transform:uppercase}
+.encabezado .quien{font-family:var(--font-titulo);letter-spacing:.06em;
+  text-transform:none;font-size:.95rem;color:#f4ecd8}
+
+/* La hoja de papel donde se escribe. Es el único fondo claro, y por eso
+   el texto siempre se lee, tenga la imagen que tenga atrás. */
+.hoja{flex:1;min-height:0;margin:0 auto;width:100%;max-width:640px;
+  padding:0 14px calc(10px + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column}
+.papel{position:relative;flex:1;min-height:0;border-radius:18px;
+  background:var(--papel);
+  box-shadow:0 24px 60px rgba(0,0,0,.45), 0 2px 0 rgba(255,255,255,.25) inset;
+  padding:clamp(22px,6vw,40px);
+  display:flex;flex-direction:column;overflow:hidden}
+/* El marco que se dibuja solo, por dentro del papel.
+   ⚠️ El ancho y el alto van EXPLÍCITOS. Un <svg> es un elemento
+   reemplazado: con `inset:10px` a secas se estira a lo ancho pero toma su
+   alto intrínseco (150px), así que el marco salía del tamaño de un sello
+   arriba del papel — y como pintarMarco() mide la caja para armar el
+   viewBox, medía esos 150. */
+.marco{position:absolute;top:10px;left:10px;
+  width:calc(100% - 20px);height:calc(100% - 20px);
+  display:block;pointer-events:none}
+.marco path,.marco line,.marco circle{fill:none;stroke:var(--oro);
+  stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+
+.pag{flex:1;min-height:0;display:flex;flex-direction:column;
+  justify-content:center;text-align:center;position:relative;
+  transition:opacity .5s var(--suave),transform .5s var(--suave)}
+.pag.yendose{opacity:0;transform:translateY(-14px)}
+.pag.viniendo{opacity:0;transform:translateY(14px)}
+
+.kicker{font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--oro-texto,var(--oro));margin-bottom:14px}
+.deseo{font-family:var(--font-titulo);font-weight:500;color:var(--tinta);
+  font-size:var(--cuerpo,1.5rem);line-height:1.45;
+  max-width:26ch;margin:0 auto;
+  white-space:pre-wrap;word-break:break-word}
+/* El cursor de la máquina de escribir */
+.deseo::after{content:'';display:inline-block;width:2px;height:1em;
+  margin-left:2px;vertical-align:-.12em;background:var(--oro);
+  opacity:0}
+.deseo.escribiendo::after{opacity:1;animation:latir 1s steps(1) infinite}
+@keyframes latir{50%{opacity:0}}
+.firma{margin-top:22px;font-family:var(--mano);font-size:1.65rem;
+  color:var(--tinta);opacity:0;transition:opacity .7s var(--suave)}
+.firma.puesta{opacity:1}
+.mesa{margin-top:2px;font-size:.72rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-soft);opacity:0;
+  transition:opacity .7s var(--suave) .1s}
+.mesa.puesta{opacity:1}
+
+/* Portada y cierre, dentro del mismo papel */
+.pag h2{font-family:var(--font-titulo);font-weight:500;
+  font-size:clamp(1.9rem,8vw,2.6rem);line-height:1.12}
+.pag .nota{margin-top:14px;color:var(--ink-soft);font-size:.95rem;
+  max-width:32ch;margin-inline:auto}
+.ornamento{margin:0 auto 18px;display:block;width:76px;height:76px}
+.ornamento path{fill:none;stroke:var(--oro);stroke-width:1.5;
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* ── LOS CONTROLES ───────────────────────────────────────────────────── */
+.barra{display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:12px 8px 4px}
+.paso{min-width:48px;min-height:48px;border-radius:50%;
+  display:grid;place-items:center;color:#f4ecd8;
+  border:1px solid rgba(244,236,216,.28);
+  transition:transform .16s var(--suave),background .2s var(--suave)}
+.paso:active{transform:scale(.94)}
+.paso[disabled]{opacity:.3;cursor:default}
+.paso svg{width:19px;height:19px;fill:none;stroke:currentColor;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cuenta{min-width:104px;text-align:center;color:rgba(244,236,216,.72);
+  font-size:.78rem;letter-spacing:.1em;font-variant-numeric:tabular-nums}
+
+/* La mitad izquierda/derecha del papel también pasa de página: en un
+   celular es el gesto natural y no hay que apuntarle a un botón. */
+.mitad{position:absolute;top:0;bottom:0;width:38%;z-index:3;
+  background:none;border:none}
+.mitad.izq{left:0}.mitad.der{right:0}
+
+@media (min-width:820px){
+  .deseo{--cuerpo:1.85rem}
+  .hoja{padding-bottom:18px}
+}
+@media (prefers-reduced-motion:reduce){
+  .bichito{animation:none;opacity:.5}
+  .pag,.firma,.mesa,.fondo{transition:none}
+}
+</style>
+</head>
+<body>
+
+<div class="escena">
+  <div class="fondo" id="fondo"></div>
+  <svg class="agua" id="agua" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+  <div class="velo"></div>
+  <div id="bichos"></div>
+</div>
+
+<div class="centro" id="pantalla-puerta">
+  <div id="puerta">
+    <svg class="sello" viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r="27" fill="none" stroke="#c9a24a" stroke-width="1.4" opacity=".7"/>
+      <circle cx="32" cy="32" r="21" fill="none" stroke="#c9a24a" stroke-width="1" opacity=".45"/>
+      <path d="M32 22c5 4 8 7 8 11a8 8 0 0 1-16 0c0-4 3-7 8-11z" fill="none"
+            stroke="#c9a24a" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M24 40c4 3 12 3 16 0" fill="none" stroke="#c9a24a" stroke-width="1.3"
+            stroke-linecap="round"/>
+    </svg>
+    <h1 id="puerta-titulo">El libro de deseos</h1>
+    <p class="bajada" id="puerta-bajada">Lo que escribieron esa noche, guardado.</p>
+    <div class="campo">
+      <input id="clave" type="password" inputmode="text" autocomplete="off"
+             placeholder="Tu clave" aria-label="Clave del evento">
+      <button class="abrir" id="btn-abrir">Abrir</button>
+    </div>
+    <p class="aviso" id="aviso" role="status" aria-live="polite"></p>
+  </div>
+</div>
+
+<div id="libro" hidden>
+  <div class="encabezado">
+    <span class="quien" id="cab-quien"></span>
+    <span id="cab-fecha"></span>
+  </div>
+
+  <div class="hoja">
+    <div class="papel">
+      <svg class="marco" id="marco" aria-hidden="true"></svg>
+      <button class="mitad izq" id="mitad-izq" aria-label="Página anterior"></button>
+      <button class="mitad der" id="mitad-der" aria-label="Página siguiente"></button>
+      <div class="pag" id="pag"></div>
+    </div>
+
+    <div class="barra">
+      <button class="paso" id="btn-ant" aria-label="Anterior">
+        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <span class="cuenta" id="cuenta"></span>
+      <button class="paso" id="btn-sig" aria-label="Siguiente">
+        <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ⚠️ Esta clave anon la ve cualquiera que abra el código fuente. No es un
+   secreto y no alcanza para leer nada: `deseos` no tiene grants para
+   `anon` y todo pasa por funciones que piden la clave del evento. */
+const SUPA_URL = 'https://ldvosdztnhrvrqxnjuco.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxkdm9zZHp0bmhydnJxeG5qdWNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyOTY1MjAsImV4cCI6MjEwMDg3MjUyMH0.u64wnWOA-Bp0NfOR3tLOAtSkG34P-ApTS00KwTEkGRM';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY, { db: { schema: 'invitaciones' } });
+
+/* ⚠️ Una ruta limpia (/libro) deja location.search VACÍO en el navegador:
+   el rewrite de Vercel le pasa la query al servidor, pero la barra de
+   direcciones sigue diciendo /libro. Ver la sección de /muestra en
+   CLAUDE.md — la primera versión de aquella abrió el evento equivocado. */
+const QS = new URLSearchParams(location.search || window.__QS_SERVIDOR || '');
+const eventoId = (QS.get('evento') || '').trim();
+
+let C = {};            // el config del evento
+let deseos = [];       // ⚠️ sólo se llena DESPUÉS de validar la clave
+let i = 0;             // en qué página estamos (0 = portada)
+let escribiendo = null;
+
+/* ── Color: ninguna temática puede dejar esto ilegible ──────────────── */
+const aRGB = h => {
+  const s = String(h || '').trim();
+  const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(s);
+  if (!m) return [0, 0, 0];
+  let x = m[1];
+  if (x.length === 3) x = x.split('').map(c => c + c).join('');
+  return [0, 2, 4].map(k => parseInt(x.substr(k, 2), 16));
+};
+const lum = c => {
+  const s = c.map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); });
+  return .2126 * s[0] + .7152 * s[1] + .0722 * s[2];
+};
+const razon = (a, b) => {
+  const [x, y] = [lum(aRGB(a)), lum(aRGB(b))].sort((m, n) => n - m);
+  return (x + .05) / (y + .05);
+};
+const hex = c => '#' + c.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+const mezclar = (a, b, p) => hex(aRGB(a).map((v, k) => v * p + aRGB(b)[k] * (1 - p)));
+const contrasteSobre = f => razon('#ffffff', f) >= razon('#000000', f) ? '#ffffff' : '#000000';
+
+/* ── Las temáticas ──────────────────────────────────────────────────── */
+const TEMAS = {
+  /* La Princesa y el Sapo: agua de noche, jade y dorado. */
+  sapo: {
+    hondo:'#0b241f', papel:'#f6efdc', tinta:'#1e332c', oro:'#c9a24a',
+    agua:['#0b241f','#123b32','#1d5a49'], nenufar:true
+  },
+  /* El que sale cuando el evento no eligió temática: su propio papel. */
+  papel: {
+    hondo:'#1a1a1a', papel:'#faf7f0', tinta:'#20201e', oro:'#b99a5b',
+    agua:['#1a1a1a','#242422','#33322e'], nenufar:false
+  }
+};
+
+const DUPLAS = {
+  clasica:{ titulo:"'Cormorant Garamond',Georgia,serif", cuerpo:"'Jost',system-ui,sans-serif",
+            w:['Cormorant+Garamond:wght@300;400;500;600','Jost:wght@300;400;500'] },
+  moderna:{ titulo:"'Playfair Display',Georgia,serif", cuerpo:"'Inter:wght',system-ui,sans-serif",
+            w:['Playfair+Display:wght@400;500;600','Inter:wght@300;400;500'] }
+};
+
+function pintarTema() {
+  const t = TEMAS[C.libro_tema] || TEMAS.papel;
+  const raiz = document.documentElement.style;
+
+  /* ⚠️ Igual que en deseos.html: si la tinta no llega a 4,5:1 sobre su
+     papel, se cambia. Acá el papel lo pone la temática, pero el día que
+     una temática la arme otra persona esto sigue siendo la red. */
+  const tinta = razon(t.tinta, t.papel) >= 4.5 ? t.tinta : contrasteSobre(t.papel);
+
+  raiz.setProperty('--papel', t.papel);
+  raiz.setProperty('--tinta', tinta);
+  raiz.setProperty('--hondo', t.hondo);
+  raiz.setProperty('--oro', t.oro);
+
+  /* El texto secundario es la mezcla MÁS suave que todavía llega a 4,5:1
+     sobre el papel: un 62% fijo se lee sobre blanco y desaparece sobre un
+     papel de color. */
+  let suave = mezclar(tinta, t.papel, .62);
+  for (let p = .62; p <= 1.001 && razon(suave, t.papel) < 4.5; p += .04) {
+    suave = mezclar(tinta, t.papel, Math.min(1, p));
+  }
+  raiz.setProperty('--ink-soft', suave);
+
+  /* ⚠️⚠️ NO HAY UN DORADO ÚNICO. El mismo #c9a24a que se ve precioso como
+     trazo del marco da 2,09:1 escrito sobre el papel crema — el "Deseo 1
+     de 5" no se leía. Es el mismo problema por el que el PDF de mesas usa
+     un dorado más profundo que el de la web. Así que hay dos: `--oro`
+     para las líneas y los adornos, y `--oro-texto` para cualquier COSA
+     ESCRITA, oscurecido con la tinta hasta llegar a 4,5:1 sobre el papel. */
+  let oroTexto = t.oro;
+  for (let p = 0; p <= 1.001 && razon(oroTexto, t.papel) < 4.5; p += .04) {
+    oroTexto = mezclar(tinta, t.oro, p);
+  }
+  raiz.setProperty('--oro-texto', oroTexto);
+
+  const d = DUPLAS[C.fuente] || DUPLAS.clasica;
+  raiz.setProperty('--font-titulo', d.titulo);
+  const l = document.createElement('link');
+  l.rel = 'stylesheet';
+  l.href = 'https://fonts.googleapis.com/css2?' +
+    d.w.concat(['Caveat:wght@400;600']).map(x => 'family=' + x).join('&') + '&display=swap';
+  document.head.appendChild(l);
+
+  pintarAgua(t);
+  if (C.libro_fondo) {
+    const img = new Image();
+    img.onload = () => {
+      const f = document.getElementById('fondo');
+      f.style.backgroundImage = 'url("' + C.libro_fondo + '")';
+      f.classList.add('puesto');
+    };
+    img.src = C.libro_fondo;   // si no carga, queda el agua dibujada
+  }
+}
+
+/* El agua dibujada: bandas suaves y, con la temática del sapo, nenúfares
+   recortados abajo. Es lo que se ve mientras no haya imagen de ambiente —
+   la pantalla nunca depende de conseguir una foto. */
+function pintarAgua(t) {
+  const s = document.getElementById('agua');
+  const ns = 'http://www.w3.org/2000/svg';
+  const g = document.createElementNS(ns, 'defs');
+  g.innerHTML =
+    '<linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0%" stop-color="' + t.agua[0] + '"/>' +
+    '<stop offset="55%" stop-color="' + t.agua[1] + '"/>' +
+    '<stop offset="100%" stop-color="' + t.agua[2] + '"/></linearGradient>';
+  s.appendChild(g);
+  const r = document.createElementNS(ns, 'rect');
+  r.setAttribute('width', '400'); r.setAttribute('height', '800');
+  r.setAttribute('fill', 'url(#ag)');
+  s.appendChild(r);
+
+  // ondas
+  for (let k = 0; k < 7; k++) {
+    const p = document.createElementNS(ns, 'path');
+    const y = 300 + k * 70;
+    p.setAttribute('d', 'M-20 ' + y + ' C 90 ' + (y - 16) + ', 190 ' + (y + 18) + ', 420 ' + (y - 6));
+    p.setAttribute('fill', 'none');
+    p.setAttribute('stroke', 'rgba(255,255,255,.07)');
+    p.setAttribute('stroke-width', 1.2);
+    s.appendChild(p);
+  }
+  if (!t.nenufar) return;
+  /* Nenúfares: un círculo con una cuña sacada, que es lo que los hace
+     leerse como hoja de nenúfar y no como un lunar. La cuña va angosta
+     (35°) y apuntando a distintos lados, o los cuatro parecen el mismo
+     recortado. Van chicos y muchos: grandes se leen como manchas. */
+    [[46, 664, 26, -60], [330, 706, 34, 200], [150, 748, 22, 20],
+     [252, 782, 30, 120], [64, 792, 25, 250], [372, 632, 20, 40]]
+    .forEach(([cx, cy, rr, giro]) => {
+      const a0 = (giro - 17.5) * Math.PI / 180, a1 = (giro + 17.5) * Math.PI / 180;
+      const x0 = cx + rr * Math.cos(a0), y0 = cy + rr * Math.sin(a0);
+      const x1 = cx + rr * Math.cos(a1), y1 = cy + rr * Math.sin(a1);
+      const p = document.createElementNS(ns, 'path');
+      p.setAttribute('d', 'M' + cx.toFixed(1) + ' ' + cy.toFixed(1) +
+        ' L' + x1.toFixed(1) + ' ' + y1.toFixed(1) +
+        ' A' + rr + ' ' + rr + ' 0 1 0 ' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' Z');
+      p.setAttribute('fill', 'rgba(255,255,255,.055)');
+      p.setAttribute('stroke', 'rgba(201,162,74,.22)');
+      p.setAttribute('stroke-width', 1);
+      s.appendChild(p);
+    });
+}
+
+function soltarBichos() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = document.getElementById('bichos');
+  for (let k = 0; k < 9; k++) {
+    const b = document.createElement('div');
+    b.className = 'bichito';
+    b.style.left = (8 + Math.random() * 84) + '%';
+    b.style.top = (46 + Math.random() * 48) + '%';
+    b.style.setProperty('--dx', (Math.random() * 70 - 35).toFixed(0) + 'px');
+    b.style.setProperty('--dy', (-40 - Math.random() * 90).toFixed(0) + 'px');
+    b.style.setProperty('--dur', (12 + Math.random() * 10).toFixed(1) + 's');
+    b.style.setProperty('--esp', (Math.random() * 12).toFixed(1) + 's');
+    c.appendChild(b);
+  }
+}
+
+/* ── El marco que se dibuja solo ────────────────────────────────────────
+   ⚠️⚠️ "El primer trazo no se dibuja" volvió tres veces en la boda de
+   Guillermina y cada vez la causa fue otra. Esta es la versión que
+   funciona, y no conviene tocarla:
+     1 · UNA sola función para arrancar.
+     2 · Leer getComputedStyle(t).strokeDashoffset de CADA trazo — leer
+         offsetWidth fuerza el layout, y stroke-dashoffset es pintado: el
+         navegador puede saltearse el recálculo. Y arrancar adentro de un
+         doble requestAnimationFrame.
+     3 · transition:'none' EXPLÍCITO al preparar: transition-property vale
+         'all', así que el transitionDuration del ciclo anterior sobrevive
+         y el reset a "escondido" también transiciona. */
+function pintarMarco() {
+  const s = document.getElementById('marco');
+  const ns = 'http://www.w3.org/2000/svg';
+  while (s.firstChild) s.removeChild(s.firstChild);
+
+  /* ⚠️ El viewBox se arma con el tamaño REAL del papel, no con uno fijo
+     estirado con preserveAspectRatio="none": estirado, las volutas de las
+     esquinas se aplastan y el trazo cambia de grosor según el lado. Por lo
+     mismo hay que rehacerlo al girar el teléfono. */
+  const caja = s.getBoundingClientRect();
+  const W = Math.max(120, Math.round(caja.width));
+  const H = Math.max(160, Math.round(caja.height));
+  s.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  const m = 8, r = Math.min(26, Math.round(Math.min(W, H) * .09));
+  const linea = d => {
+    const p = document.createElementNS(ns, 'path');
+    p.setAttribute('d', d); p.classList.add('trazo'); s.appendChild(p);
+  };
+  // el rectángulo, en cuatro trazos que arrancan de las esquinas
+  linea(`M${m + r} ${m} H${W - m - r}`);
+  linea(`M${W - m} ${m + r} V${H - m - r}`);
+  linea(`M${W - m - r} ${H - m} H${m + r}`);
+  linea(`M${m} ${H - m - r} V${m + r}`);
+  // las esquinas, con una voluta de junco
+  linea(`M${m + r} ${m} C${m + 8} ${m}, ${m} ${m + 8}, ${m} ${m + r}`);
+  linea(`M${W - m - r} ${m} C${W - m - 8} ${m}, ${W - m} ${m + 8}, ${W - m} ${m + r}`);
+  linea(`M${W - m - r} ${H - m} C${W - m - 8} ${H - m}, ${W - m} ${H - m - 8}, ${W - m} ${H - m - r}`);
+  linea(`M${m + r} ${H - m} C${m + 8} ${H - m}, ${m} ${H - m - 8}, ${m} ${H - m - r}`);
+  /* El remate: una hoja de nenúfar hacia ADENTRO en cada borde corto.
+     El primer intento eran dos arcos hacia afuera y se leían como dos
+     semicírculos sueltos pegados al marco, no como un adorno. */
+  const hoja = (cy, dir) => {
+    const a = 17;                       // medio ancho de la hoja
+    linea(`M${W / 2 - a} ${cy} C${W / 2 - a * .55} ${cy + dir * 13}, ` +
+          `${W / 2 + a * .55} ${cy + dir * 13}, ${W / 2 + a} ${cy}`);
+    linea(`M${W / 2} ${cy} L${W / 2} ${cy + dir * 11}`);
+  };
+  hoja(m, 1);          // la de arriba cuelga hacia adentro
+  hoja(H - m, -1);     // la de abajo sube hacia adentro
+}
+
+function dibujar(caja, demora, duracion) {
+  const t = [...caja.querySelectorAll('.trazo')];
+  t.forEach(x => {
+    x.style.transition = 'none';
+    const L = x.getTotalLength();
+    x.style.strokeDasharray = L; x.style.strokeDashoffset = L;
+  });
+  t.forEach(x => getComputedStyle(x).strokeDashoffset);   // ⚠️ no sacar
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    t.forEach((x, k) => {
+      x.style.transition = '';
+      x.style.transitionProperty = 'stroke-dashoffset';
+      x.style.transitionTimingFunction = 'cubic-bezier(.22,.61,.36,1)';
+      x.style.transitionDuration = duracion + 'ms';
+      setTimeout(() => { x.style.strokeDashoffset = '0'; }, k * demora);
+    });
+  }));
+}
+
+/* ── Las páginas ────────────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+const nada = () => { const p = $('pag'); while (p.firstChild) p.removeChild(p.firstChild); };
+const el = (tag, clase, texto) => {
+  const e = document.createElement(tag);
+  if (clase) e.className = clase;
+  if (texto != null) e.textContent = texto;   // ⚠️ SIEMPRE textContent
+  return e;
+};
+
+const total = () => deseos.length + 2;        // portada + deseos + cierre
+
+function ornamento() {
+  const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  s.setAttribute('viewBox', '0 0 76 76');
+  s.setAttribute('class', 'ornamento');
+  s.setAttribute('aria-hidden', 'true');
+  s.innerHTML =
+    '<path d="M38 14c8 7 13 12 13 19a13 13 0 0 1-26 0c0-7 5-12 13-19z"/>' +
+    '<path d="M22 46c6 6 26 6 32 0"/>' +
+    '<path d="M30 60c5 3 11 3 16 0"/>';
+  return s;
+}
+
+function pintarPagina(dir) {
+  const p = $('pag');
+  nada();
+  p.classList.remove('yendose');
+  p.classList.add('viniendo');
+
+  if (i === 0) {
+    p.appendChild(ornamento());
+    p.appendChild(el('div', 'kicker', 'El libro de deseos'));
+    p.appendChild(el('h2', null, C.nombre || 'Tu fiesta'));
+    const n = deseos.length;
+    p.appendChild(el('p', 'nota',
+      n === 0 ? 'Todavía no escribió nadie.'
+        : n === 1 ? 'Una persona te dejó un mensaje esa noche.'
+          : n + ' personas te dejaron un mensaje esa noche.'));
+    if (n) p.appendChild(el('p', 'nota', 'Tocá para empezar a leerlos.'));
+  } else if (i <= deseos.length) {
+    const d = deseos[i - 1];
+    p.appendChild(el('div', 'kicker', 'Deseo ' + i + ' de ' + deseos.length));
+    const texto = el('p', 'deseo');
+    /* ⚠️ El cuerpo se achica con los deseos largos: uno de 400 caracteres
+       a 1,85rem no entra en un celular y aparece scroll adentro del
+       papel, que es lo único que esta pantalla no puede tener. */
+    const largo = (d.deseo || '').length;
+    texto.style.setProperty('--cuerpo',
+      largo > 320 ? '1.02rem' : largo > 200 ? '1.16rem' : largo > 110 ? '1.32rem' : '');
+    p.appendChild(texto);
+    const firma = el('p', 'firma', d.nombre || '');
+    p.appendChild(firma);
+    const mesa = el('p', 'mesa', mesaTexto(d.mesa));
+    p.appendChild(mesa);
+    maquina(texto, d.deseo || '', () => {
+      firma.classList.add('puesta');
+      mesa.classList.add('puesta');
+    });
+  } else {
+    p.appendChild(ornamento());
+    p.appendChild(el('h2', null, 'Y eso fue todo'));
+    p.appendChild(el('p', 'nota',
+      deseos.length + (deseos.length === 1 ? ' mensaje guardado' : ' mensajes guardados') +
+      ', para cuando quieras volver a leerlos.'));
+  }
+
+  requestAnimationFrame(() => requestAnimationFrame(() => p.classList.remove('viniendo')));
+  $('cuenta').textContent = (i + 1) + ' / ' + total();
+  $('btn-ant').disabled = i === 0;
+  $('btn-sig').disabled = i === total() - 1;
+}
+
+const mesaTexto = m => {
+  const n = Number(m);
+  if (m === null || m === undefined || m === '' || Number.isNaN(n)) return '';
+  return n === 0 ? 'Mesa principal' : 'Mesa ' + n;
+};
+
+/* La máquina de escribir. ⚠️ Se escribe con textContent, carácter a
+   carácter: el texto lo redactó un invitado y no puede entrar como HTML.
+   ⚠️ Y se puede saltear: un deseo largo tarda, y obligar a esperar es la
+   forma más rápida de que alguien cierre la página. */
+function maquina(nodo, texto, alTerminar) {
+  if (escribiendo) { clearInterval(escribiendo.id); escribiendo = null; }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    nodo.textContent = texto; alTerminar(); return;
+  }
+  nodo.classList.add('escribiendo');
+  let k = 0;
+  const paso = texto.length > 220 ? 18 : 34;   // los largos, más rápido
+  const id = setInterval(() => {
+    k += 1;
+    nodo.textContent = texto.slice(0, k);
+    if (k >= texto.length) {
+      clearInterval(id); escribiendo = null;
+      nodo.classList.remove('escribiendo');
+      alTerminar();
+    }
+  }, paso);
+  escribiendo = { id, nodo, texto, alTerminar };
+}
+
+function completarYa() {
+  if (!escribiendo) return false;
+  clearInterval(escribiendo.id);
+  escribiendo.nodo.textContent = escribiendo.texto;
+  escribiendo.nodo.classList.remove('escribiendo');
+  escribiendo.alTerminar();
+  escribiendo = null;
+  return true;
+}
+
+function ir(salto) {
+  /* El primer toque termina de escribir; el segundo pasa de página. */
+  if (salto > 0 && completarYa()) return;
+  const n = Math.min(total() - 1, Math.max(0, i + salto));
+  if (n === i) return;
+  const p = $('pag');
+  if (escribiendo) { clearInterval(escribiendo.id); escribiendo = null; }
+  p.classList.add('yendose');
+  setTimeout(() => { i = n; pintarPagina(salto); }, 260);
+}
+
+/* ── Entrar ─────────────────────────────────────────────────────────── */
+async function abrir() {
+  const clave = $('clave').value.trim();
+  const b = $('btn-abrir');
+  if (!clave) { $('aviso').textContent = 'Poné tu clave.'; return; }
+  /* ⚠️ El botón se bloquea ANTES de la llamada: si la conexión tarda y la
+     persona vuelve a tocar, salen dos consultas y dos libros. */
+  b.disabled = true;
+  $('aviso').textContent = '';
+
+  const { data, error } = await sb.rpc('admin_deseos', { p_evento: eventoId, p_clave: clave });
+  b.disabled = false;
+
+  if (error) {
+    $('aviso').textContent = /privilege|clave/i.test(error.message || '')
+      ? 'Esa clave no es la de este evento.'
+      : 'No se pudo abrir. Probá de nuevo en un momento.';
+    return;
+  }
+
+  deseos = (data || []).slice().sort((a, b2) =>
+    new Date(a.created_at) - new Date(b2.created_at));
+
+  $('pantalla-puerta').hidden = true;
+  $('pantalla-puerta').style.display = 'none';
+  $('libro').hidden = false;
+  $('cab-quien').textContent = C.nombre || '';
+  $('cab-fecha').textContent = C.fecha_texto || '';
+  pintarMarco();
+  i = 0;
+  pintarPagina(1);
+  dibujar(document.getElementById('marco'), 90, 900);
+}
+
+async function arrancar() {
+  if (!eventoId) {
+    $('puerta-titulo').textContent = 'Falta el evento';
+    $('puerta-bajada').textContent = 'Este link tiene que decir a qué fiesta pertenece.';
+    document.querySelector('.campo').style.display = 'none';
+    pintarTema(); soltarBichos();
+    return;
+  }
+  /* ⚠️ `anon` sólo puede leer (id, config) de `eventos` — admin_password
+     queda afuera por GRANT de columna. Un select=* devuelve 42501. */
+  const { data } = await sb.from('eventos').select('id, config').eq('id', eventoId).maybeSingle();
+  C = (data && data.config) || {};
+  pintarTema();
+  soltarBichos();
+  const quien = C.nombre ? ('de ' + C.nombre) : '';
+  document.getElementById('pg-title').textContent = ('El libro de deseos ' + quien).trim();
+  $('puerta-titulo').textContent = 'El libro de deseos';
+  $('puerta-bajada').textContent = C.nombre
+    ? 'Lo que te escribieron esa noche, ' + C.nombre + '. Poné tu clave para abrirlo.'
+    : 'Lo que escribieron esa noche, guardado.';
+}
+
+$('btn-abrir').addEventListener('click', abrir);
+$('clave').addEventListener('keydown', e => { if (e.key === 'Enter') abrir(); });
+$('btn-sig').addEventListener('click', () => ir(1));
+$('btn-ant').addEventListener('click', () => ir(-1));
+$('mitad-der').addEventListener('click', () => ir(1));
+$('mitad-izq').addEventListener('click', () => ir(-1));
+let reMarco;
+addEventListener('resize', () => {
+  if ($('libro').hidden) return;
+  clearTimeout(reMarco);
+  reMarco = setTimeout(() => { pintarMarco(); dibujar($('marco'), 40, 500); }, 220);
+});
+addEventListener('keydown', e => {
+  if ($('libro').hidden) return;
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); ir(1); }
+  if (e.key === 'ArrowLeft') ir(-1);
+});
+/* Deslizar, que en un celular es lo que la mano hace sola */
+let x0 = null;
+addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+addEventListener('touchend', e => {
+  if (x0 === null) return;
+  const dx = e.changedTouches[0].clientX - x0;
+  x0 = null;
+  if (Math.abs(dx) > 55) ir(dx < 0 ? 1 : -1);
+}, { passive: true });
+
+arrancar();
+</script>
+</body>
+</html>
