@@ -3539,8 +3539,19 @@ function pintarNombre(td, inv) {
 
   const chico = document.createElement('small');
   chico.style.color = 'var(--tx3)';
-  chico.textContent = inv.invitado_url || 'general';
+  chico.style.display = 'block';
+  const cuando = cuandoEntro(inv);
+  chico.textContent = (inv.invitado_url || 'general') + (cuando ? ' · ' + cuando : '');
   td.appendChild(chico);
+
+  // La pista que contesta "¿por qué este figura sin confirmar?"
+  if (inv.asiste === 'pendiente' && gruposConfirmados.has(inv.invitado_url)) {
+    const aviso = document.createElement('small');
+    aviso.style.cssText = 'display:block;color:#E8A33D;margin-top:3px;line-height:1.4';
+    aviso.textContent = '⚠️ El resto de este grupo ya confirmó. '
+      + 'Suele ser una fila que quedó de volver a generar el link.';
+    td.appendChild(aviso);
+  }
 }
 
 function editarNombre(td, inv) {
@@ -3614,9 +3625,12 @@ function editarNombre(td, inv) {
   };
 }
 
+let gruposConfirmados = new Set();
+
 function renderizarMesasTabla() {
   const tbody = document.getElementById('mesas-invitados-rows');
   tbody.innerHTML = '';
+  gruposConfirmados = grupoYaConfirmo(mesasInvitados);
   
   const filtrados = mesasInvitados.filter(inv => {
     const fullName = `${inv.nombre} ${apellidoReal(inv)} ${inv.invitado_url || ''}`.toLowerCase();
@@ -3957,6 +3971,39 @@ function apellidoReal(inv) {
   if (APELLIDO_INVENTADO.test(ape) && /^de\s+(familia|flia|fam)/i.test(ape)) return '';
   return ape;
 }
+/* ¿Cuándo entró esta fila? Ya viene de la base — `admin_invitados`
+   devuelve la fila entera — y era lo único que faltaba para poder
+   contestar "¿por qué este figura sin confirmar?". */
+function cuandoEntro(inv) {
+  if (!inv?.created_at) return '';
+  const d = new Date(inv.created_at);
+  if (isNaN(d)) return '';
+  return d.toLocaleString('es-AR', { day:'numeric', month:'short',
+                                     hour:'2-digit', minute:'2-digit' });
+}
+
+/* ⚠️ UN GRUPO NO PUEDE QUEDAR MITAD CONFIRMADO Y MITAD PENDIENTE POR SÍ
+   SOLO. `rsvp_enviar` borra TODAS las filas de ese link y reinserta las
+   que mandó el invitado, así que después de confirmar no puede sobrar
+   una pre-cargada.
+
+   Si la mezcla existe, es por una de dos:
+     · se volvió a generar el link DESPUÉS de que confirmaran —
+       `admin_prealta` borra sólo las pendientes y agrega nuevas, así que
+       las confirmadas sobreviven y aparecen pendientes de más;
+     · o alguien puso esa fila en pendiente a mano desde el panel.
+
+   Importa porque esas filas de más INFLAN LA CUENTA, y el salón cobra
+   por cubierto. */
+function grupoYaConfirmo(invitados) {
+  const con = new Set();
+  invitados.forEach(i => {
+    if (i.asiste === 'si' && i.invitado_url && i.invitado_url !== 'Cargado a mano')
+      con.add(i.invitado_url);
+  });
+  return con;
+}
+
 /* Un nombre "Acompañante 2" tampoco es un nombre: es un lugar reservado. */
 const NOMBRE_INVENTADO = /^acompa(ñ|n)ante\s*\d*$/i;
 function esLugarReservado(inv) {
