@@ -880,6 +880,10 @@ tr:hover td{background:rgba(255,255,255,0.01);}
   <div class="nav-item" id="nav-mesas" onclick="go('tab-mesas',this)">
     <span>🍽️</span> Distribución de Mesas
   </div>
+  <!-- Aparece sólo si el libro de deseos está activo en este evento. -->
+  <div class="nav-item" id="nav-deseos" onclick="go('tab-deseos',this)" style="display:none">
+    <span>💫</span> Libro de deseos
+  </div>
 
   <div class="nav-section">Edición</div>
   <div class="nav-item" id="nav-editor" onclick="go('tab-editor',this)" style="display:none">
@@ -967,26 +971,6 @@ tr:hover td{background:rgba(255,255,255,0.01);}
       <div id="pend-lista" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
 
-    <!-- Los mensajes que dejaron desde las mesas. Buzón PRIVADO: los ve
-         el cliente acá y nadie más. -->
-    <div class="card" id="card-deseos" style="display:none;margin-bottom:18px">
-      <div class="card-head">
-        <span class="card-title">💫 Libro de deseos</span>
-        <span class="badge badge-amber" id="des-total">0</span>
-      </div>
-      <p style="color:var(--tx3);font-size:0.8rem;margin:-4px 0 14px;line-height:1.5"
-         id="des-bajada"></p>
-      <div id="des-lista" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-primary btn-sm" onclick="imprimirCarteles()">🖨️ Carteles para las mesas</button>
-        <button class="btn btn-ghost btn-sm" onclick="imprimirDeseos()">📄 Imprimir el libro</button>
-        <!-- El libro animado. Se abre con la clave del evento: el link solo
-             no muestra nada, así que se le puede pasar a la clienta. -->
-        <button class="btn btn-ghost btn-sm" onclick="abrirLibroAnimado()">✨ Ver el libro animado</button>
-        <button class="btn btn-ghost btn-sm" onclick="copiarLibroAnimado()">🔗 Copiar el link para la clienta</button>
-      </div>
-    </div>
-
     <!-- Lo que pidieron los invitados, listo para mandarle al DJ -->
     <div class="card" id="card-dj" style="display:none;margin-bottom:18px">
       <div class="card-head">
@@ -1057,6 +1041,81 @@ tr:hover td{background:rgba(255,255,255,0.01);}
   </div>
 
   <!-- ══ TAB: MESAS ══ -->
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       LIBRO DE DESEOS · su propia solapa
+
+       Estaba metido abajo de Invitados, con cuatro botones grises
+       seguidos y sin contexto. Fer preguntó, con razón, si al cliente
+       eso le decía algo.
+
+       ⚠️ Las tarjetas están ordenadas POR MOMENTO —lo que se hace antes
+       de la fiesta, lo que llega durante, y lo que queda después— y los
+       textos hablan A LA CLIENTA, que es quien usa este panel. El botón
+       decía "copiar el link para la clienta": estaba escrito desde el
+       lado de Fer.
+       ══════════════════════════════════════════════════════════════════ -->
+  <style>
+    /* ⚠️ Los botones del panel miden 29px de alto. Esta solapa la usa la
+       clienta desde el celular —los carteles se imprimen del teléfono, y
+       el libro se abre del teléfono—, así que acá llegan a los 44px que
+       necesita un dedo. Se acota a esta solapa: el resto del panel ya
+       está en producción y no es el momento de tocarlo entero. */
+    #tab-deseos .btn { min-height:44px; padding-inline:16px }
+    /* ⚠️ Los textos explicativos van más claros que el `--tx3` del panel,
+       que mide 2,38:1 sobre la tarjeta. Acá no son decoración: son lo
+       que le da sentido a cada botón —cuándo se imprime, qué es el
+       link—, y sin ellos el cliente ve cuatro botones y no sabe cuál
+       toca. Sube a 5,3:1. (El resto del panel sigue en 2,38: es un
+       problema aparte, de todas las solapas, y no se arregla acá.) */
+    #tab-deseos .card p { color:#a7a29a !important }
+    #tab-deseos .des-borrar { min-width:44px; min-height:44px }
+  </style>
+  <div id="tab-deseos" class="tab-content">
+
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-head">
+        <span class="card-title">🖨️ Antes de la fiesta</span>
+      </div>
+      <p style="color:var(--tx3);font-size:0.86rem;margin:-4px 0 14px;line-height:1.6">
+        Un cartelito por mesa, cada uno con su código. Los imprimís, los ponés
+        en las mesas, y tus invitados lo escanean con el celular para dejarte
+        un mensaje. No necesitan instalar nada.
+      </p>
+      <button class="btn btn-primary btn-sm" onclick="imprimirCarteles()">Imprimir los carteles</button>
+    </div>
+
+    <div class="card" id="card-deseos" style="margin-bottom:18px">
+      <div class="card-head">
+        <span class="card-title">💫 Los mensajes</span>
+        <span class="badge badge-amber" id="des-total">0</span>
+      </div>
+      <p style="color:var(--tx3);font-size:0.86rem;margin:-4px 0 14px;line-height:1.6"
+         id="des-bajada"></p>
+      <div id="des-lista" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-head">
+        <span class="card-title">📖 Después de la fiesta</span>
+      </div>
+      <p style="color:var(--tx3);font-size:0.86rem;margin:-4px 0 14px;line-height:1.6">
+        Cuando todo haya pasado, esto queda tuyo: los mensajes se leen como
+        un cuento que se va escribiendo solo, uno por uno.
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn btn-primary btn-sm" onclick="abrirLibroAnimado()">✨ Ver tu libro</button>
+        <button class="btn btn-ghost btn-sm" onclick="imprimirDeseos()">📄 Imprimirlo en papel</button>
+        <button class="btn btn-ghost btn-sm" onclick="copiarLibroAnimado()">🔗 Copiar el link</button>
+      </div>
+      <p style="color:var(--tx3);font-size:0.78rem;margin:0;line-height:1.6">
+        El link sirve para abrirlo desde otro teléfono o para guardártelo.
+        Pide esta misma clave, así que podés compartirlo tranquila.
+      </p>
+    </div>
+
+  </div>
+
   <div id="tab-mesas" class="tab-content">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
       <div>
@@ -1601,6 +1660,7 @@ const SECTIONS = [
 
 const TB_TITLES = {
   'tab-stats':'Resumen','tab-invitados':'Invitados','tab-links':'Links','tab-mesas':'Distribución de Mesas',
+  'tab-deseos':'Libro de deseos',
   'tab-editor':'Editor de Franjas','tab-global':'Diseño Global',
   'tab-preview':'Vista Previa','tab-historial':'Historial',
   'tab-ventas':'Mensajes y entrega',
@@ -2619,15 +2679,19 @@ async function loadDeseos() {
 // Se arma con DOM y NO con innerHTML: el texto lo escribe un invitado en
 // una fiesta y termina acá, en la pantalla del cliente.
 function pintarDeseos() {
-  const card = document.getElementById('card-deseos');
+  const nav = document.getElementById('nav-deseos');
   const lista = document.getElementById('des-lista');
-  if (!card || !lista) return;
+  if (!nav || !lista) return;
 
-  // La tarjeta aparece si el libro está activo, aunque todavía no haya
-  // ninguno: si no, el cliente no encuentra dónde bajar los carteles.
-  const activo = currentConfig?.deseos_activo === true;
-  if (!activo && !deseosData.length) { card.style.display = 'none'; return; }
-  card.style.display = 'block';
+  /* La solapa aparece si el libro está activo, aunque todavía no haya
+     ningún mensaje: si no, el cliente no encuentra dónde bajar los
+     carteles —que es justamente lo que hay que hacer ANTES—.
+     ⚠️ El interruptor puede venir como el TEXTO "true": los eventos
+     guardados antes del 28/08/2026 lo tienen así. Ver CLAUDE.md. */
+  const activo = currentConfig?.deseos_activo === true ||
+                 currentConfig?.deseos_activo === 'true';
+  nav.style.display = (activo || deseosData.length) ? '' : 'none';
+  if (!activo && !deseosData.length) return;
 
   const n = deseosData.length;
   document.getElementById('des-total').textContent = n;
@@ -2654,9 +2718,10 @@ function pintarDeseos() {
     firma.textContent = d.nombre + (d.mesa ? ` · mesa ${d.mesa}` : '');
 
     const borrar = document.createElement('button');
-    borrar.className = 'btn btn-ghost btn-sm';
+    borrar.className = 'btn btn-ghost btn-sm des-borrar';
     borrar.textContent = '🗑';
     borrar.title = 'Borrar este mensaje';
+    borrar.setAttribute('aria-label', 'Borrar el mensaje de ' + (d.nombre || ''));
     borrar.onclick = () => borrarDeseo(d.id, d.nombre);
 
     pie.append(firma, borrar);

@@ -1356,6 +1356,29 @@ menor a 44px, sin scroll horizontal.
 ### En el panel
 
 **Editor de Secciones → 💫 Libro de Deseos** lo activa por evento (`config.deseos_activo`).
+
+### Tiene SU PROPIA SOLAPA (07/09/2026)
+
+Estaba metido abajo de Invitados, con cuatro botones grises seguidos. Fer preguntó, con razón,
+si al cliente eso le decía algo. Hoy es una solapa propia con tres tarjetas **ordenadas por
+momento**: lo que se hace **antes** de la fiesta (imprimir los carteles), los **mensajes** que
+van llegando, y lo que queda **después** (ver el libro, imprimirlo, el link).
+
+⚠️ **Los textos le hablan A LA CLIENTA**, que es quien usa el panel. El botón decía "copiar el
+link **para la clienta**": estaba escrito desde el lado de Fer. Cada vez que se agregue algo
+acá, hay que releerlo preguntándose quién lo va a leer.
+
+⚠️ La solapa aparece sólo si el libro está activo — y acepta el interruptor como booleano **o
+como el texto `"true"`**, que es lo que tienen los eventos guardados antes del 28/08/2026.
+
+⚠️ **Los botones del panel miden 29px de alto.** En esta solapa llegan a 44: la clienta imprime
+los carteles y abre el libro desde el celular. Se acotó a esta solapa a propósito — el resto
+del panel ya está en producción.
+
+⚠️⚠️ **Los textos secundarios del panel (`--tx3: #52525b`) miden 2,38:1 sobre la tarjeta.** Acá
+se subieron a 7,24:1 porque son lo que le da sentido a cada botón. **Pero el problema es de
+todas las solapas**, no sólo de esta: está pendiente decidir si `--tx3` se aclara para todo el
+panel.
 Apagado, la pantalla dice que esa fiesta no tiene libro de deseos.
 
 **Invitados → 💫 Libro de deseos** muestra los mensajes y deja borrar el que no corresponda
