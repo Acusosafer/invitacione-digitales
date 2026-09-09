@@ -46,8 +46,32 @@ def blanquear(im):
                          b2[:,:5].reshape(-1,3), b2[:,-5:].reshape(-1,3)])
     return nueva, (bg.mean(), np.median(m2, axis=0).mean())
 
-def jpg(nombre, ancho, q=78, limpiar=True):
+def recortar_al_motivo(im, aire=14):
+    """Le saca el margen de papel que traen las acuarelas generadas.
+
+    ⚠️ Vienen con muchísimo aire: el motivo ocupa un tercio de un
+    rectángulo casi vacío. Puesto en la página con un ancho fijo, lo que
+    se ve es un dibujito diminuto flotando en el medio de la nada — y
+    peor, dos ilustraciones al lado quedan de tamaños distintos según
+    cuánto papel trajo cada una.
+
+    Se compara cada píxel contra el color de la esquina, que es el papel.
+    Lo que se despega, es dibujo."""
+    from PIL import ImageChops
+    fondo = Image.new('RGB', im.size, im.getpixel((2, 2)))
+    caja = ImageChops.difference(im, fondo).convert('L').point(lambda v: 255 if v > 12 else 0).getbbox()
+    if not caja:
+        return im
+    x0, y0, x1, y1 = caja
+    return im.crop((max(0, x0-aire), max(0, y0-aire),
+                    min(im.width, x1+aire), min(im.height, y1+aire)))
+
+def jpg(nombre, ancho, q=78, limpiar=True, recortar=False):
     im = Image.open(f"{W}/{nombre}").convert('RGB')
+    if recortar:
+        antes = im.size
+        im = recortar_al_motivo(im)
+        print(f'    recorte {antes[0]}x{antes[1]} -> {im.width}x{im.height}')
     if im.width > ancho:
         im = im.resize((ancho, round(ancho*im.height/im.width)), Image.LANCZOS)
     if limpiar:
@@ -58,6 +82,17 @@ def jpg(nombre, ancho, q=78, limpiar=True):
     return 'data:image/jpeg;base64,' + base64.b64encode(b.getvalue()).decode()
 
 def webp(ruta, q=88):
+    """⚠️ Si el archivo YA es webp, se embebe tal cual, sin recomprimir.
+
+    La etiqueta es la portada —lo primero que ve el invitado— y se
+    recuperó del HTML publicado (ver `rescatar.py`), o sea que ya pasó
+    por una compresión con pérdida. Volver a comprimirla acá le agrega
+    una segunda vuelta encima, gratis y para siempre: cada vez que se
+    corriera el generador quedaría un poco peor que la anterior."""
+    if ruta.lower().endswith('.webp'):
+        d = open(ruta, 'rb').read()
+        print(f'  etiqueta (tal cual)        {len(d)//1024:4} KB')
+        return 'data:image/webp;base64,' + base64.b64encode(d).decode()
     im = Image.open(ruta)
     b = io.BytesIO(); im.save(b, 'WEBP', quality=q, method=6)
     print(f'  etiqueta                   {len(b.getvalue())//1024:4} KB')
@@ -76,7 +111,7 @@ def trazos(clave):
 # está adentro del HTML. Son 539 KB que nadie paga hasta tocar.
 print('imágenes:')
 IM = {
-  'etiqueta': webp('etiqueta-lista.png'),
+  'etiqueta': webp('etiqueta-lista.webp'),
   'ellos':    jpg('ellos-tono.jpg', 720, 80, limpiar=False),
   'altar':    jpg('gemini-generated-image-fp6fmkfp6fmkfp6f.jpg', 700),
   'mapa':     jpg('mapa.jpg', 780, 76, limpiar=False),
@@ -85,7 +120,20 @@ IM = {
   'pareja':   jpg('ellos-acuarela.jpg', 720, 80),
   'naranjas': jpg('medias-naranja.jpg', 420),
   'aperol':   jpg('aperol.jpg', 240),
-  'copas':    jpg('copas-brindis.jpg', 640),
+  # ⚠️ La torre de copas REEMPLAZA a `copas-brindis.jpg`, que era un plato,
+  # una servilleta y dos copas de vino sobre un mantel: una cena sentada
+  # con lugares asignados, justo la fiesta que NO van a hacer. Lo marcó
+  # Guillermina — es fingerfood, bandejeo y livings.
+  'copas':    jpg('torre-copas.jpg', 560, recortar=True),
+  # Las cinco de setiembre. Todas con `recortar`: vienen con el motivo
+  # chiquito en el medio de un rectángulo casi vacío.
+  'alianzas': jpg('alianzas.jpg', 560, recortar=True),
+  'mascara':  jpg('mascara.jpg', 460, recortar=True),
+  'dresscode':jpg('dresscode.jpg', 620, recortar=True),
+  'eiffel':   jpg('eiffel.jpg', 300, recortar=True),
+  'coliseo':  jpg('coliseo.jpg', 380, recortar=True),
+  'violin':   jpg('violin.jpg', 300, recortar=True),
+  'piano':    jpg('piano.jpg', 340, recortar=True),
 }
 VB_ESC, T_ESC = trazos('escena')
 VB_CAR, T_CAR = trazos('cartel')
@@ -107,6 +155,16 @@ HTML = r'''<!DOCTYPE html>
 
      ⚠️ Se regenera con `herramientas/invita.py`. A mano se pisa.
      ══════════════════════════════════════════════════════════════════ -->
+
+<!-- ⚠️ Estas cuatro etiquetas las REESCRIBE `api/i.js` del lado del
+     servidor, buscándolas POR SU id, para que el link que llega por
+     WhatsApp muestre el nombre del invitado y la foto. No se borran ni
+     se les cambia el id: sin ellas la vista previa sale con el nombre
+     del dominio pelado. -->
+<meta id="og-title" property="og:title" content="Guillermina &amp; Sebasti&aacute;n">
+<meta id="og-desc" property="og:description" content="3 de abril de 2027 &middot; Finca La Josefina, Berisso">
+<meta id="og-img" property="og:image" content="">
+<meta id="og-url" property="og:url" content="">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -341,6 +399,82 @@ h1,h2{font-family:'Marcellus',Georgia,serif;font-weight:400;line-height:1.18;
   transition:transform .16s var(--ease)}
 .alias button:active{transform:scale(.95)}
 
+/* Los dos monumentos de la luna de miel, uno al lado del otro y del
+   mismo alto. ⚠️ El alto se fija acá y no el ancho: son dos dibujos de
+   proporciones distintas, y emparejarlos por ancho deja al Coliseo del
+   doble de alto que la torre. */
+.duo{display:flex;justify-content:center;align-items:flex-end;gap:26px;margin:22px auto 0}
+.duo img{height:104px;width:auto;mix-blend-mode:multiply}
+.duo.chico{gap:18px;margin-top:18px}
+.duo.chico img{height:74px}
+
+/* ══════════════════════════════════════════════════════════════════
+   EL FORMULARIO PARA CONFIRMAR
+
+   ⚠️ NO HAY MESAS EN ESTA FIESTA. Es bandejeo y livings, la gente se
+   sienta donde quiere. Así que acá no se pide mesa, no se muestra
+   mesa y no se guarda mesa — el panel la deja vacía y listo.
+
+   ⚠️ EL APELLIDO SÍ, Y ES OBLIGATORIO. Aunque no haya que armar
+   mesas, el listado que se le entrega al salón se ordena por
+   apellido y el catering cobra por persona: una fila "Juan" suelta
+   no le sirve a nadie. `rsvp_enviar` no lo exige —descarta la fila
+   sólo si falta el nombre—, así que la única defensa es esta
+   validación. Si se afloja, entran filas a medias sin aviso.
+   ══════════════════════════════════════════════════════════════════ */
+.form{max-width:440px;margin:30px auto 0;text-align:left}
+.campo{margin-top:18px}
+.campo label{display:block;font-family:'Marcellus',serif;font-size:.64rem;
+  letter-spacing:.24em;text-transform:uppercase;color:var(--tinta-2);margin-bottom:7px}
+.campo input,.campo textarea{width:100%;font-family:'Jost',sans-serif;font-size:1rem;
+  color:var(--tinta);background:rgba(255,255,255,.5);
+  border:0;border-bottom:1px solid rgba(160,69,26,.35);
+  padding:11px 4px;min-height:46px;transition:border-color .2s,background .2s}
+.campo textarea{border:1px solid rgba(160,69,26,.28);border-radius:8px;
+  resize:vertical;min-height:80px;padding:11px 12px}
+.campo input:focus,.campo textarea:focus{outline:none;border-color:var(--hondo);
+  background:rgba(255,255,255,.85)}
+.campo input::placeholder,.campo textarea::placeholder{color:rgba(107,93,81,.55)}
+.dos{display:flex;gap:14px}
+.dos .campo{flex:1;min-width:0}
+
+/* Los chips de sí/no y de dieta. ⚠️ 46px de alto: se tocan con el dedo. */
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{font-family:'Jost',sans-serif;font-size:.86rem;color:var(--tinta);
+  background:transparent;border:1px solid rgba(160,69,26,.35);border-radius:999px;
+  padding:11px 18px;min-height:46px;cursor:pointer;
+  transition:background .2s,color .2s,border-color .2s,transform .16s var(--ease)}
+.chip:active{transform:scale(.96)}
+/* ⚠️ El elegido va con el fondo HONDO y el texto en papel: es la única
+   combinación que da contraste de sobra sobre el crema. Un chip elegido
+   pintado sólo con el borde no se distingue del que no lo está. */
+.chip.si{background:var(--hondo);color:var(--papel);border-color:var(--hondo)}
+
+/* Cada acompañante, en su propia tarjeta.
+   ⚠️⚠️ LAS TARJETAS SIGUEN A LA VISTA AUNQUE EL TITULAR DIGA QUE NO VA.
+   Un link cubre a todo un grupo y cada uno contesta por su cuenta: el
+   que recibió la invitación no decide por su pareja ni por sus hijos.
+   Esconderlas hacía desaparecer los cupos de los demás, porque
+   `rsvp_enviar` ya borró la pre-alta y esas filas no volvían ni como
+   "no" ni como "pendiente". Le pasó a cuatro grupos en una fiesta. */
+.acomp{margin-top:20px;padding:18px;border:1px solid rgba(160,69,26,.22);
+  border-radius:12px;background:rgba(255,255,255,.38)}
+.acomp .quien{font-family:'Marcellus',serif;font-size:.68rem;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--hondo)}
+.aviso{margin-top:14px;font-size:.9rem;color:var(--tinta-2)}
+/* El cartel de "ya confirmaste" y el de "listo". */
+.cerrado{margin:30px auto 0;max-width:440px;padding:26px 22px;text-align:center;
+  border:1px dashed rgba(160,69,26,.45);border-radius:12px;
+  font-family:'Marcellus',serif;color:var(--tinta);line-height:1.6}
+/* El mensaje flotante de error. ⚠️ Va arriba de todo: abajo lo tapa el
+   teclado del celular justo cuando hace falta leerlo. */
+.globo{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));
+  transform:translate(-50%,-140%);z-index:60;max-width:min(92vw,420px);
+  background:var(--hondo);color:var(--papel);padding:13px 20px;border-radius:10px;
+  font-size:.92rem;line-height:1.45;text-align:center;box-shadow:0 8px 26px rgba(58,48,42,.22);
+  transition:transform .3s var(--ease)}
+.globo.on{transform:translate(-50%,0)}
+
 /* El mapa: la acuarela en planta, y el recorrido animado encima. */
 .mapa{position:relative;margin:26px auto 0;max-width:560px}
 .mapa img{width:100%;display:block;mix-blend-mode:multiply}
@@ -449,8 +583,13 @@ footer a{color:var(--hondo);text-decoration:none}
          valija: ahí el destino corresponde.
          ⚠ El bucle se apaga cuando el cartel sale de la pantalla: si no
          sigue redibujándose para nadie, gastando batería. -->
+    <!-- ⚠️ 330px -> 240px. Guillermina lo pidió y tiene razón: era el
+         dibujo más ancho de toda la invitación, más que los nombres de
+         ellos, así que el cartel de la finca le ganaba en protagonismo a
+         los novios. No se achica el trazo ni se toca el dibujo: se achica
+         la caja, y el SVG escala solo. -->
     <svg class="dibujo rev bucle" id="dib-cartel" viewBox="__VB_CAR__"
-         style="width:100%;max-width:330px;margin-top:30px" aria-hidden="true">__T_CAR__</svg>
+         style="width:100%;max-width:240px;margin-top:30px" aria-hidden="true">__T_CAR__</svg>
   </div>
 </section>
 
@@ -491,12 +630,34 @@ footer a{color:var(--hondo);text-decoration:none}
   <div class="petalos" id="petalos-ceremonia" aria-hidden="true"></div>
   <div class="wrap">
     <img class="acuarela rev" src="__ALTAR__" style="max-width:420px"
-         alt="El altar sobre el pico que entra al lago" >
+         alt="El altar al borde del lago" >
     <p class="rot rev" style="margin-top:22px">La ceremonia</p>
-    <h2 class="rev">Sobre el <em>pico</em>, frente al lago</h2>
+    <!-- ⚠️ Decía "Sobre el PICO, frente al lago". Guillermina avisó que no
+         se entendía, y tiene razón: "pico" es jerga del mapa, no de una
+         invitación. El invitado no tiene que descifrar nada acá. -->
+    <h2 class="rev">Al aire libre, <em>frente al laguito</em></h2>
     <div class="dato rev">
       <p class="hora">18:00</p>
+      <p class="donde">Con viol&iacute;n y piano en vivo</p>
     </div>
+
+    <!-- ⚠️ El violín y el piano van CHIQUITOS y DEBAJO de la línea que
+         habla de la música en vivo: ilustran ese dato, no encabezan la
+         sección. Arriba competirían con el altar, que es la escena.
+         Pareados por ALTO y no por ancho: el piano es apaisado y el
+         violín es vertical, y emparejarlos por ancho deja el violín del
+         doble de alto. -->
+    <div class="duo chico rev">
+      <img src="__VIOLIN__" alt=""><img src="__PIANO__" alt="">
+    </div>
+
+    <!-- Las alianzas cierran la sección. ⚠️ VAN GRANDES A PROPÓSITO: el
+         anillo trae grabado "03 - abr - 2027" y ese grabado mide 110px
+         en una imagen de 1408. A 150px de ancho en la página es una
+         manchita ilegible; a 300px se lee como lo que es. Es el único
+         lugar de la invitación donde la fecha aparece escrita a mano. -->
+    <img class="acuarela rev" src="__ALIANZAS__" style="max-width:300px;margin-top:28px"
+         alt="Las alianzas, con la fecha grabada">
   </div>
 </section>
 
@@ -509,22 +670,51 @@ footer a{color:var(--hondo);text-decoration:none}
          ⚠️ Se saca ENTERA, no con `hidden`: la regla del navegador
          `[hidden]{display:none}` pierde contra `.dibujo{display:block}`
          y la copa se seguía viendo igual. -->
+    <!-- ⚠️⚠️ ESTA ACUARELA SE REEMPLAZA POR LA TORRE DE COPAS (D1).
+         Hoy es `copas-brindis.jpg`: un plato, una servilleta doblada y dos
+         copas de vino sobre un mantel. O sea una CENA SENTADA con lugares
+         asignados — justo la fiesta que NO van a hacer. Guillermina lo
+         marcó ella: es fingerfood, bandejeo, livings y gente parada, y
+         nadie tiene mesa asignada. Una imagen que promete otra cosa es
+         peor que no tener imagen.
+         En cuanto exista `torre-copas.png`, cambiar la entrada 'copas'
+         de la lista IM de arriba. El alt también. -->
     <img class="acuarela rev" src="__COPAS__" alt="">
     <img class="acuarela rev" src="__LUCES__" style="max-width:460px;margin-top:26px" alt="">
     <p class="rot rev" style="margin-top:22px">La fiesta</p>
     <h2 class="rev">En el mismo <em>lugar</em></h2>
     <div class="dato rev">
       <p class="hora">20:00</p>
-      <p class="donde">A unos metros del lago</p>
+      <!-- Lo resumido que pidió ella: transcurre adentro y afuera del
+           salón. Dos datos y se termina — la invitación no explica el
+           catering, lo insinúan la torre de copas y la máscara. -->
+      <p class="donde">Adentro y afuera del sal&oacute;n</p>
     </div>
+
+    <!-- ⚠️ LA MÁSCARA VA ACÁ, AL FINAL DE LA FIESTA, Y NO EN EL DRESS
+         CODE. No es cómo hay que vestirse —el cotillón se reparte en la
+         pista—: es lo que los espera. Y es lo que hace que "se sienta la
+         onda del evento" al abrir la invitación, que es textual lo que
+         pidió ella.
+         ⚠️ Es veneciana, y la luna de miel es en Italia: es el mismo hilo
+         que la etiqueta de valija de la portada. No es un adorno suelto. -->
+    <img class="acuarela rev" src="__MASCARA__" style="max-width:280px;margin-top:30px"
+         alt="Una m&aacute;scara veneciana">
   </div>
 </section>
 
 <!-- ══════════ 5 · DRESS CODE ══════════ -->
 <section class="acto junto" id="vestimenta">
   <div class="wrap">
-    <!-- ⚠️ Acá iba la vela y no tenía nada que ver con el dress code.
-         Falta la ilustración nueva: una flor de ojal con su alfiler. -->
+    <!-- ⚠️ Acá iba la vela y no tenía nada que ver con el dress code. Hoy
+         está el traje y el vestido: prendas solas, sin personas. El
+         invitado la mira y ya sabe qué ponerse, sin leer una palabra.
+         ⚠️⚠️ El vestido es TERRACOTA y nunca claro: es la única imagen de
+         la invitación que se lee como "vestite así", y un vestido crema
+         dibujado acá termina en alguien vestida como la novia. Si algún
+         día se regenera, ese es el primer control. -->
+    <img class="acuarela rev" src="__DRESSCODE__" style="max-width:400px"
+         alt="Un vestido largo terracota y un traje verde oliva">
     <p class="rot rev">Dress code</p>
     <h2 class="rev"><em>Elegante</em></h2>
   </div>
@@ -539,6 +729,16 @@ footer a{color:var(--hondo);text-decoration:none}
     <p class="rev" style="margin-top:18px;color:var(--tinta-2);font-size:.95rem;
        max-width:30em;margin-left:auto;margin-right:auto">
       Pero si quer&eacute;s colaborar con nuestra luna de miel, pod&eacute;s hacerlo en la cuenta:</p>
+
+    <!-- ⚠️ La torre y el Coliseo van JUSTO DEBAJO de la línea de la luna
+         de miel, no arriba del rótulo: la luna de miel es en Francia e
+         Italia, así que acá el dibujo no decora — explica el pedido. Es
+         el mismo hilo que la etiqueta de valija y la máscara veneciana.
+         ⚠️ Pareados por ALTO: la torre es alta y flaca y el Coliseo es
+         ancho y bajo. Por ancho, la torre quedaría del doble de alto. -->
+    <div class="duo rev">
+      <img src="__EIFFEL__" alt=""><img src="__COLISEO__" alt="">
+    </div>
     <div class="alias rev">
       <span id="alias" data-falta>guille.seba.boda</span>
       <button id="copiar" type="button">Copiar</button>
@@ -559,7 +759,54 @@ footer a{color:var(--hondo);text-decoration:none}
     <h2 class="rev">Confirm&aacute; tu <em>lugar</em></h2>
     <p class="rev" style="margin-top:16px;color:var(--tinta-2);font-size:.95rem">
       Antes del 18 de febrero de 2027</p>
-    <a class="btn lleno rev" id="btn-rsvp" href="#" data-falta>Confirmar asistencia</a>
+
+    <!-- El formulario lo arma el JS de abajo, porque depende de a quién
+         está dirigido el link (?invitado= y cuántos cupos tiene). Hasta
+         que contesta Supabase se muestra este cartel: sin él la sección
+         queda como un título suelto y parece que falta algo. -->
+    <div class="cerrado rev" id="rsvp-cargando">Un segundo&hellip;</div>
+    <div class="form" id="rsvp-form" hidden>
+      <div class="dos">
+        <div class="campo"><label for="f-nom">Nombre</label>
+          <input id="f-nom" type="text" autocomplete="given-name" placeholder="Tu nombre"></div>
+        <div class="campo"><label for="f-ape">Apellido</label>
+          <input id="f-ape" type="text" autocomplete="family-name" placeholder="Tu apellido"></div>
+      </div>
+
+      <div class="campo"><label>&iquest;Nos acompa&ntilde;&aacute;s?</label>
+        <div class="chips" id="f-asiste">
+          <button type="button" class="chip si" data-val="si">S&iacute;, ah&iacute; estar&eacute;</button>
+          <button type="button" class="chip" data-val="no">No voy a poder</button>
+        </div>
+      </div>
+
+      <!-- Cuántos son. Sólo aparece si el link trae más de un cupo: a
+           quien viene solo, un desplegable de "1" no le dice nada. -->
+      <div class="campo" id="f-cuantos-caja" hidden>
+        <label>&iquest;Cu&aacute;ntos vienen en total?</label>
+        <div class="chips" id="f-cuantos"></div>
+      </div>
+
+      <!-- ⚠️ La dieta del TITULAR se esconde si dice que no viene; las
+           tarjetas de los acompañantes NO. Ver el comentario del CSS. -->
+      <div class="campo" id="f-dieta-caja"><label>&iquest;Alguna preferencia con la comida?</label>
+        <div class="chips" id="f-dieta">
+          <button type="button" class="chip" data-d="Vegetariano">Vegetariano</button>
+          <button type="button" class="chip" data-d="Vegano">Vegano</button>
+          <button type="button" class="chip" data-d="Cel&iacute;aco">Cel&iacute;aco</button>
+          <button type="button" class="chip" data-d="Sin lactosa">Sin lactosa</button>
+        </div>
+      </div>
+
+      <div id="f-acomps"></div>
+
+      <div class="campo" id="f-cancion-caja"><label for="f-cancion">Un tema que no puede faltar</label>
+        <input id="f-cancion" type="text" placeholder="La canci&oacute;n que te hace bailar"></div>
+
+      <div style="text-align:center">
+        <button class="btn lleno" type="button" id="btn-rsvp">Confirmar asistencia</button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -785,17 +1032,274 @@ document.getElementById('copiar').onclick=async function(){
   setTimeout(()=>{this.textContent='Copiar';},2400);
 };
 </script>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     CONFIRMAR ASISTENCIA — contra NUESTRO panel, el que ya funciona.
+
+     Guillermina y Sebastián administran su fiesta desde
+     `admin.html?evento=guille-sebas`, igual que cualquier cliente:
+     generan los links, ven quién confirmó, bajan el listado para el
+     salón y la lista para el DJ. Esta invitación es a medida en el
+     diseño, no en el sistema.
+
+     ⚠️ NADA DE ESTO TOCA LA BASE DIRECTO. Se llama a `ya_confirmo` y a
+     `rsvp_enviar`, las dos funciones `security definer` de Postgres.
+     La anon key está a la vista de cualquier invitado —es pública por
+     diseño— y no puede leer `confirmaciones`: quien abra el código
+     fuente no ve un solo dato de otro invitado.
+
+     ⚠️ NO HAY MESAS: bandejeo, livings, nadie tiene lugar asignado.
+     `mesa` va vacío y `rsvp_enviar` lo guarda como nulo.
+     ══════════════════════════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+const SUPA_URL='https://ldvosdztnhrvrqxnjuco.supabase.co';
+const SUPA_KEY='__ANON__';
+const EVENTO='__EVENTO__';
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY,{db:{schema:'invitaciones'}});
+
+/* ⚠️ La query puede NO estar en la barra del navegador. Se entra por
+   `/guille-invitacion`, que es una ruta limpia: Vercel le pasa la query
+   a la función pero `location.search` queda VACÍO. `api/i.js` la deja
+   en `window.__QS_SERVIDOR`. Sin esto, un link con ?invitado=Susana
+   abriría el formulario en blanco y la fila se guardaría bajo
+   'general', mezclando a todos los invitados en un solo grupo. */
+const QS=new URLSearchParams(location.search || window.__QS_SERVIDOR || '');
+const INVITADO=(QS.get('invitado')||'').trim();
+const CUPOS=Math.max(1,Math.min(20,parseInt(QS.get('personas')||'1',10)||1));
+
+const $=id=>document.getElementById(id);
+const form=$('rsvp-form'), cargando=$('rsvp-cargando'), btn=$('btn-rsvp');
+
+/* ── El globo de aviso ────────────────────────────────────────────
+   ⚠️ Va con textContent, nunca innerHTML: acá adentro terminan
+   nombres que escribe el invitado. */
+let relojGlobo=null;
+function avisar(txt){
+  let g=document.querySelector('.globo');
+  if(!g){ g=document.createElement('div'); g.className='globo';
+          g.setAttribute('role','alert'); document.body.appendChild(g); }
+  g.textContent=txt;
+  requestAnimationFrame(()=>g.classList.add('on'));
+  clearTimeout(relojGlobo);
+  relojGlobo=setTimeout(()=>g.classList.remove('on'),4200);
+}
+
+/* ── Los chips ────────────────────────────────────────────────────
+   Uno solo elegido en un grupo, o varios si es de dieta. */
+function grupo(caja,unico,alCambiar){
+  caja.addEventListener('click',e=>{
+    const c=e.target.closest('.chip'); if(!c) return;
+    if(unico) caja.querySelectorAll('.chip').forEach(x=>x.classList.remove('si'));
+    c.classList.toggle('si', unico ? true : !c.classList.contains('si'));
+    if(alCambiar) alCambiar();
+  });
+}
+const elegido=caja=>caja.querySelector('.chip.si');
+const dietaDe=caja=>[...caja.querySelectorAll('.chip.si')]
+                      .map(c=>c.textContent.trim()).join(', ');
+
+/* ── El prellenado ────────────────────────────────────────────────
+   ⚠️⚠️ UN LINK NO SE LLAMA "FAMILIA FERREYRA". Partir el nombre en dos
+   dejaba nombre="Familia", apellido="Ferreyra": los DOS campos llenos,
+   o sea que la validación lo aceptaba, y a la fiesta iba a ir alguien
+   llamado "Familia Ferreyra". Si la primera palabra es familia/flia/
+   fam, los campos quedan vacíos y los escribe quien confirma. */
+function prellenar(){
+  if(!INVITADO) return;
+  const p=INVITADO.split(/\s+/);
+  if(/^(familia|familias|flia|fam)\.?$/i.test(p[0])) return;
+  $('f-nom').value=p[0]||'';
+  $('f-ape').value=p.slice(1).join(' ');
+}
+
+/* ── Las tarjetas de los acompañantes ─────────────────────────────
+   ⚠️ Se arman con DOM y no con innerHTML: el nombre del link lo
+   escribe el cliente en su panel y termina acá adentro. */
+function tarjeta(i){
+  const d=document.createElement('div'); d.className='acomp';
+  const t=document.createElement('div'); t.className='quien';
+  t.textContent='Acompañante '+i; d.appendChild(t);
+
+  const dos=document.createElement('div'); dos.className='dos';
+  [['Nombre','a-nom','given-name'],['Apellido','a-ape','family-name']]
+    .forEach(([tit,cls,ac])=>{
+      const c=document.createElement('div'); c.className='campo';
+      const l=document.createElement('label'); l.textContent=tit;
+      const inp=document.createElement('input');
+      inp.type='text'; inp.className=cls; inp.autocomplete=ac;
+      inp.id=cls+'-'+i; l.htmlFor=inp.id;
+      c.append(l,inp); dos.appendChild(c);
+    });
+  d.appendChild(dos);
+
+  const c2=document.createElement('div'); c2.className='campo';
+  const l2=document.createElement('label'); l2.textContent='¿Viene?';
+  const ch=document.createElement('div'); ch.className='chips a-asiste';
+  [['si','Sí'],['no','No puede']].forEach(([v,tx],k)=>{
+    const b=document.createElement('button');
+    b.type='button'; b.className='chip'+(k===0?' si':''); b.dataset.val=v;
+    b.textContent=tx; ch.appendChild(b);
+  });
+  grupo(ch,true); c2.append(l2,ch); d.appendChild(c2);
+
+  const c3=document.createElement('div'); c3.className='campo';
+  const l3=document.createElement('label'); l3.textContent='Preferencia con la comida';
+  const ch3=document.createElement('div'); ch3.className='chips a-dieta';
+  ['Vegetariano','Vegano','Celíaco','Sin lactosa'].forEach(x=>{
+    const b=document.createElement('button');
+    b.type='button'; b.className='chip'; b.textContent=x; ch3.appendChild(b);
+  });
+  grupo(ch3,false); c3.append(l3,ch3); d.appendChild(c3);
+  return d;
+}
+
+function pintarAcomps(n){
+  const caja=$('f-acomps'); caja.textContent='';
+  for(let i=2;i<=n;i++) caja.appendChild(tarjeta(i));
+}
+
+/* ── Arranque ─────────────────────────────────────────────────────── */
+(async function(){
+  /* ⚠️ Se pregunta ANTES de pintar el formulario. Dejar que alguien
+     complete siete campos para avisarle recién al enviar que ya había
+     confirmado es la peor forma posible de decirlo.
+     `ya_confirmo` devuelve un booleano y nada más: ningún dato personal
+     viaja al navegador. */
+  let ya=false;
+  if(INVITADO){
+    try{
+      const {data}=await sb.rpc('ya_confirmo',{p_evento:EVENTO,p_invitado:INVITADO});
+      ya=!!data;
+    }catch(e){ /* si falla, se muestra el formulario: es preferible una
+                  confirmación repetida a un invitado que no puede contestar */ }
+  }
+  if(ya){
+    cargando.textContent='Ya recibimos tu confirmación. ¡Gracias! '
+                        +'Si necesitás cambiar algo, escribinos.';
+    return;
+  }
+  cargando.hidden=true; form.hidden=false;
+  prellenar();
+
+  grupo($('f-asiste'),true,()=>{
+    /* ⚠️ Sólo se esconde la dieta del titular y su canción. Las
+       tarjetas de los acompañantes SIGUEN A LA VISTA: el que dice que
+       no puede ir no contesta por el resto de su grupo. */
+    const va=elegido($('f-asiste')).dataset.val==='si';
+    $('f-dieta-caja').hidden=!va;
+    $('f-cancion-caja').hidden=!va;
+    $('f-cuantos-caja').hidden=!va||CUPOS<2;
+  });
+  grupo($('f-dieta'),false);
+
+  if(CUPOS>1){
+    const caja=$('f-cuantos'); $('f-cuantos-caja').hidden=false;
+    for(let i=1;i<=CUPOS;i++){
+      const b=document.createElement('button');
+      b.type='button'; b.className='chip'+(i===CUPOS?' si':'');
+      b.textContent=String(i); b.dataset.n=String(i); caja.appendChild(b);
+    }
+    grupo(caja,true,()=>pintarAcomps(+elegido(caja).dataset.n));
+    pintarAcomps(CUPOS);
+  }
+})();
+
+/* ── Enviar ───────────────────────────────────────────────────────── */
+btn.addEventListener('click',async function(){
+  const nom=$('f-nom').value.trim(), ape=$('f-ape').value.trim();
+  if(!nom||!ape){ avisar('Completá tu nombre y tu apellido.');
+                  (nom?$('f-ape'):$('f-nom')).focus(); return; }
+
+  const va=elegido($('f-asiste')).dataset.val;
+  const filas=[{nombre:nom,apellido:ape,asiste:va,
+                dieta:va==='si'?dietaDe($('f-dieta')):'',
+                mensaje:va==='si'?$('f-cancion').value.trim():'',
+                mesa:''}];
+
+  /* ⚠️⚠️ LAS FILAS DE LOS ACOMPAÑANTES SE ARMAN SIEMPRE, vaya o no vaya
+     el titular. `rsvp_enviar` borra TODAS las filas de este link antes
+     de insertar: un acompañante que no se manda no queda en "no" ni en
+     "pendiente" — desaparece, y la cuenta del catering da de menos sin
+     que nadie se entere. */
+  const tarjetas=[...document.querySelectorAll('.acomp')];
+  const flojas=tarjetas.filter(t=>{
+    const n=t.querySelector('.a-nom').value.trim();
+    const a=t.querySelector('.a-ape').value.trim();
+    return !n||!a;
+  });
+  if(flojas.length){
+    /* El apellido es obligatorio también acá: el listado del salón se
+       ordena por apellido. Si alguien no viene, se baja el número de
+       arriba en vez de dejar la tarjeta a medias. */
+    flojas[0].scrollIntoView({behavior:'smooth',block:'center'});
+    avisar(flojas.length===1
+      ? 'Falta el nombre y el apellido de un acompañante. '
+        +'Si vienen menos, cambiá el número de arriba.'
+      : 'Faltan los datos de '+flojas.length+' acompañantes. '
+        +'Si vienen menos, cambiá el número de arriba.');
+    return;
+  }
+  tarjetas.forEach(t=>{
+    const cA=t.querySelector('.a-asiste .chip.si').dataset.val;
+    filas.push({nombre:t.querySelector('.a-nom').value.trim(),
+                apellido:t.querySelector('.a-ape').value.trim(),
+                asiste:cA,
+                dieta:cA==='si'?dietaDe(t.querySelector('.a-dieta')):'',
+                mensaje:'', mesa:''});
+  });
+
+  /* ⚠️ El botón se bloquea ANTES de la llamada, no después. En el campo
+     la conexión es mala, la respuesta tarda y el invitado vuelve a
+     tocar: sin esto entra dos veces y el salón sirve el doble. */
+  btn.disabled=true; const antes=btn.textContent; btn.textContent='Enviando…';
+
+  const {error}=await sb.rpc('rsvp_enviar',
+    {p_evento:EVENTO,p_invitado:INVITADO||'general',p_filas:filas});
+
+  if(error){
+    /* ⚠️ NO SE PIERDE NADA de lo que escribió: el formulario queda tal
+       cual y el botón vuelve a habilitarse. Perder los datos que
+       alguien acaba de cargar es lo peor que puede pasar acá. */
+    btn.disabled=false; btn.textContent=antes;
+    avisar('No pudimos guardarlo. Fijate la conexión y probá de nuevo.');
+    return;
+  }
+
+  form.hidden=true; cargando.hidden=false;
+  cargando.textContent=va==='si'
+    ? '¡Listo! Ya te esperamos el 3 de abril.'
+    : 'Gracias por avisarnos. Te vamos a extrañar.';
+})
+})();
+</script>
 </body>
 </html>
 '''
 
 CLAVES = {'etiqueta':'ETIQUETA','ellos':'ELLOS','altar':'ALTAR','mapa':'MAPA',
           'luces':'LUCES','vela':'VELA','pareja':'PAREJA',
-          'naranjas':'NARANJAS','copas':'COPAS','aperol':'APEROL'}
+          'naranjas':'NARANJAS','copas':'COPAS','aperol':'APEROL',
+          'alianzas':'ALIANZAS','mascara':'MASCARA','dresscode':'DRESSCODE',
+          'eiffel':'EIFFEL','coliseo':'COLISEO','violin':'VIOLIN','piano':'PIANO'}
 for k, v in IM.items():
     HTML = HTML.replace('__' + CLAVES[k] + '__', v)
 HTML = (HTML.replace('__VB_ESC__', VB_ESC).replace('__T_ESC__', T_ESC)
             .replace('__VB_CAR__', VB_CAR).replace('__T_CAR__', T_CAR))
+
+# El evento de ellos en NUESTRO panel: admin.html?evento=guille-sebas.
+# La invitación es a medida en el diseño, no en el sistema — los links,
+# el listado del salón y la lista del DJ salen del panel de siempre.
+#
+# La anon key es pública por diseño: viaja en el código de toda
+# invitación y sólo puede leer (id, config) de `eventos`. No alcanza
+# para leer una sola fila de `confirmaciones`.
+EVENTO = 'guille-sebas'
+ANON = ('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxk'
+        'dm9zZHp0bmhydnJxeG5qdWNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyOTY1MjAsImV4c'
+        'CI6MjEwMDg3MjUyMH0.u64wnWOA-Bp0NfOR3tLOAtSkG34P-ApTS00KwTEkGRM')
+HTML = HTML.replace('__EVENTO__', EVENTO).replace('__ANON__', ANON)
 sobran = [c for c in CLAVES.values() if '__'+c+'__' in HTML]
 if sobran: print('⚠️ marcadores sin usar:', sobran)
 

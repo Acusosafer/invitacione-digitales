@@ -330,34 +330,56 @@ image.
 
 ---
 
-## B6 · La flor de ojal — el dress code → `ojal.png`
+## B6 · El traje y el vestido — el dress code → `dresscode.png`
 
-La vela que estaba ahí no tiene nada que ver con cómo vestirse. Una
-**flor de ojal** sí: es la única prenda de una boda que además es
-botánica, así que entra en el set sin desentonar.
+La vela que estaba ahí no tenía nada que ver con cómo vestirse. **Lo
+pidió Fer el 09/09/2026:** un traje y un vestido elegantes, de aire
+italiano, con detalles en naranja. Es lo más directo posible — el
+invitado mira el dibujo y ya sabe qué ponerse, sin leer una palabra.
+
+**Se descartó la flor de ojal** que estaba escrita acá antes. Era linda
+pero sólo le hablaba a los hombres, y encima obliga a saber que una flor
+de ojal implica traje: es un acertijo, no una instrucción.
+
+⚠️⚠️ **EL VESTIDO NO PUEDE SER BLANCO, CREMA, MARFIL NI BEIGE.** Este
+dibujo es la única imagen de la invitación que una invitada puede leer
+como *"vestite así"*. Un vestido claro dibujado en el dress code termina
+en alguien vestida como la novia el día de la boda, y ahí no hay
+arreglo. Va en **terracota o naranja quemado**, que además es la paleta.
+Si una variante viene con el vestido claro, **se descarta aunque sea la
+más linda de las cuatro.**
+
+⚠️ **Van como PRENDAS, no como personas.** Sin caras, sin cuerpos, sin
+cabezas: las prendas solas, como en una vidriera o acostadas. Una pareja
+dibujada acá compite con la acuarela de ellos —que es la imagen que
+tiene que ganar en toda la invitación— y encima obligaría a que se
+parezcan a Guillermina y Sebastián.
 
 ```
-Delicate hand-painted watercolour illustration on clean white paper,
-in the style of fine wedding stationery. Loose transparent washes with
-visible brush strokes and soft bleeding edges that fade into the white
-background. No outlines, no photorealism, no digital gradients. Warm
-citrus palette: bright orange (#E07A1F), burnt terracotta (#A84F2A),
-deep olive green (#435F3A), soft sage green (#A3B18A), warm oat beige
-(#D7C3A1), on cream white paper (#F6F2E8). Single isolated subject,
-centred, with generous white space all around. Part of a matching set
-of wedding illustrations. Absolutely no text, no lettering, no words,
-no borders, no frame.
+[MISMO PRIMER PÁRRAFO]
 
-Subject: a small wedding boutonnière lying flat, seen from above: one
-open orange garden rose with two smaller buds, three or four olive and
-eucalyptus leaves behind it, the stems bound together with a short
-length of natural twine tied in a simple knot, and a slender pearl-
-headed pin crossing the stems at an angle. Nothing else in the image.
+Subject: two elegant garments shown side by side as empty clothing,
+with no people, no heads, no faces and no bodies — the way outfits are
+displayed in a fine tailor's window. On the left, a well-cut Italian
+men's suit: a slim single-breasted jacket in deep olive green with
+narrow lapels, matching trousers below it, a crisp white shirt and a
+folded burnt orange pocket square peeking from the breast pocket. On
+the right, a long flowing evening gown in warm terracotta and burnt
+orange, with soft draped folds falling to the floor and a fine slender
+strap at the shoulders. A small sprig of orange blossom resting on the
+paper between them. Nothing else in the image.
 ```
 
-⚠️ Al elegir la variante: que la flor esté **acostada y de frente**, no
-prendida a una solapa. Un saco dibujado atrás la saca del set — todas
-las otras once son objetos sueltos sobre papel blanco.
+⚠️ Al elegir la variante, en este orden:
+
+1. **¿El vestido es de color?** Si tira a crema o marfil, se descarta.
+2. **¿Hay alguna cara, mano o cabeza?** Se descarta. Los modelos meten
+   una silueta de persona apenas se les nombra ropa.
+3. **¿Los dos están del mismo tamaño y a la misma altura?** Si uno es
+   el doble del otro, parece que uno importa más.
+4. **¿Es acuarela o es figurín de moda?** El set entero es aguada suelta
+   con el borde desvanecido. Un dibujo de modista con línea dura y
+   sombreado prolijo se despega de las otras dieciséis.
 
 ---
 
@@ -468,3 +490,152 @@ pines along the shore behind.
 3. El **mapa** del predio con flechitas.
 4. La tipografía: caja alta espaciada + manuscrita, como el cartel del
    Aperol.
+
+---
+
+# SET D — Lo que pidió Guillermina el 09/09/2026
+
+Salieron de su nota de voz y de lo que decidieron después. **No son
+adornos nuevos: cada uno reemplaza o completa algo que hoy dice otra
+cosa.**
+
+⚠️ **Mismo primer párrafo de siempre.** Es lo único que hace que estas
+cinco parezcan del mismo pincel que las doce anteriores. Si se cambia,
+se despegan del set y se nota a la primera mirada.
+
+⚠️ **Las fotos que mandó la clienta son REFERENCIA, no material.** Las
+máscaras son fotos de producto de un vendedor y las dos de copas están
+en Dreamstime con el copyright a la vista. Ninguna se usa ni se calca:
+sirven para saber **qué forma** tiene el objeto, y el dibujo sale de
+acá, en nuestra acuarela.
+
+---
+
+## D1 · La torre de copas → `torre-copas.png`
+
+**Reemplaza a la mesa tendida (A8) en la ceremonia.** Ella fue clara:
+no hay mesa, es fingerfood, livings y gente parada. Una mesa formal con
+dos copas cuenta otra fiesta.
+
+La copa es **coupe** —ancha y baja, la de la torre— no la flauta.
+
+```
+[MISMO PRIMER PÁRRAFO]
+
+Subject: a small champagne tower of coupe glasses — wide shallow
+saucer-shaped glasses stacked in a pyramid, four across the bottom row,
+then three, then one on top — with pale golden champagne filling the
+upper glasses and a few loose bubbles rising. Two tiny orange blossoms
+resting at the base. Nothing else in the image.
+```
+
+⚠️ Al elegir la variante: que la pirámide esté **derecha y se entienda
+como pirámide**. Los modelos apilan las copas encimadas y sale una
+mancha. Si en tres intentos no sale, pedila con **tres copas apoyadas
+juntas** brindando, que dice lo mismo y es mucho más fácil de dibujar.
+
+---
+
+## D2 · Las alianzas → `alianzas.png`
+
+**Va en la ceremonia**, con la hora. Lo pidió ella y es el objeto que
+mejor dice "ceremonia" sin escribir la palabra.
+
+```
+[MISMO PRIMER PÁRRAFO]
+
+Subject: two plain golden wedding bands lying flat on the paper, one
+resting partly over the other so the circles overlap, seen from
+directly above. A single small sprig of olive with three narrow leaves
+lying beside them. Soft warm shadow under the rings. Nothing else in
+the image.
+```
+
+⚠️ Que sean **lisas**. Una alianza con piedras se lee como anillo de
+compromiso, que es otra cosa y ya pasó.
+
+---
+
+## D3 · La máscara veneciana → `mascara.png`
+
+**El cotillón.** Y no es sólo cotillón: la máscara es **veneciana** y la
+luna de miel es en Italia. Es el mismo hilo que la etiqueta de valija de
+la portada — el próximo destino.
+
+⚠️ **Las fotos que mandó son de strass, plumas y conejos.** Eso no entra
+en un set de acuarela cítrica: sale disfraz de boliche. Va la forma
+clásica veneciana —la de antifaz, con la curva alta a los costados— en
+nuestros colores, que es lo que hace que se sienta la onda sin romper la
+invitación.
+
+```
+[MISMO PRIMER PÁRRAFO]
+
+Subject: a single elegant Venetian carnival eye mask lying flat on the
+paper, seen from directly above — a classic Colombina half-mask shape
+with two eye openings and gently curved points rising at the outer
+corners. Painted in warm terracotta and burnt orange with fine olive
+green scrollwork along the brow, and two slender silk ribbons falling
+loosely from the sides and curling on the paper. Nothing else in the
+image.
+```
+
+⚠️ **Acostada y de frente, nunca puesta en una cara.** Una cara dibujada
+la saca del set: las otras quince son objetos sueltos sobre papel
+blanco. Y que las cintas terminen adentro de la imagen.
+
+---
+
+## D4 · La Torre Eiffel → `eiffel.png`
+
+## D5 · El Coliseo → `coliseo.png`
+
+**Van los dos juntos, chiquitos y en línea, en la sección de Regalos** —
+que es justo donde dice "colaborar con nuestra luna de miel". Ahí el
+dibujo explica el pedido en vez de decorarlo. La luna de miel es en
+**Italia y Francia**.
+
+⚠️ **Uno por imagen, nunca los dos en la misma.** Es la regla de todo el
+set y acá importa doble: se van a poner uno al lado del otro con un
+tamaño igual, y para eso tienen que ser dos archivos.
+
+⚠️ **Tienen que salir del MISMO pincel y del mismo tamaño aparente.**
+Generá las dos seguidas, en la misma sesión, y mirálas una al lado de la
+otra antes de darlas por buenas: si una tiene el doble de detalle que la
+otra, se ven como dos sellos distintos pegados juntos.
+
+```
+[MISMO PRIMER PÁRRAFO]
+
+Subject: the Eiffel Tower painted as a small loose watercolour sketch,
+seen straight on, slender and elegant, with the lattice suggested by
+light brush strokes rather than drawn in detail. A soft wash of warm
+sky behind only the very top. Nothing else in the image.
+```
+
+```
+[MISMO PRIMER PÁRRAFO]
+
+Subject: the Roman Colosseum painted as a small loose watercolour
+sketch, seen from a low three-quarter angle, its arches suggested with
+light brush strokes rather than drawn in detail, the stone in warm oat
+beige and terracotta. Nothing else in the image.
+```
+
+⚠️ Los monumentos son lo que más tienta al modelo a **meter letras**
+("PARIS", "ROMA") y a poner fondo de ciudad. Los dos arruinan el motivo:
+se descarta la variante y se pide otra.
+
+---
+
+# Qué NO se generó, y por qué
+
+**El violín y el piano de la ceremonia.** Hay música en vivo y es un
+dato lindo, pero se dice en **una línea de texto** y se entiende igual.
+Un instrumento más sumaba la ilustración número diecisiete a una
+invitación que ya tiene dieciséis: a partir de cierto punto los dibujos
+dejan de ser un diferencial y pasan a ser un álbum de figuritas.
+
+**Una clave de sol.** Es el símbolo más genérico que existe: podría ser
+de cualquier evento de cualquier rubro. Justo lo contrario de lo que
+hace que esta invitación se note hecha para ellos.

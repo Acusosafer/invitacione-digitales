@@ -20,6 +20,30 @@ const SUPA_URL = 'https://ldvosdztnhrvrqxnjuco.supabase.co';
 // Anon key: es pública por diseño y sólo puede leer (id, config) de eventos.
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxkdm9zZHp0bmhydnJxeG5qdWNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyOTY1MjAsImV4cCI6MjEwMDg3MjUyMH0.u64wnWOA-Bp0NfOR3tLOAtSkG34P-ApTS00KwTEkGRM';
 
+/* ════════════════════════════════════════════════════════════════════
+   LOS EVENTOS QUE NO USAN `invitacion.html`
+
+   Una invitación a medida es una página propia, con su diseño y sus
+   ilustraciones. Pero sus links tienen que salir del MISMO panel que
+   los de todos —`admin.html` arma `/i?evento=…&invitado=…`— y tienen
+   que llegar con la vista previa de WhatsApp como cualquier otra.
+
+   Así que acá se dice, sólo para esos eventos, qué página servir. Todo
+   lo demás —las OG, el saludo con género, la query para las rutas
+   limpias— sigue funcionando igual, porque es esta misma función.
+
+   ⚠️ Sin esto, el link de un cliente a medida abría `invitacion.html`:
+   la invitación GENÉRICA, con los colores por defecto y sin una sola de
+   sus ilustraciones. El invitado veía la invitación de otra persona.
+
+   ⚠️ La clave tiene que ser el id EXACTO del evento en Supabase. Si no
+   coincide, no falla: cae en `invitacion.html` y el error se ve recién
+   cuando alguien abre el link.
+   ════════════════════════════════════════════════════════════════════ */
+const A_MEDIDA = {
+  'guille-sebas': '/cliente-guille-invitacion.html',
+};
+
 /** Escapa para meter texto dentro de un atributo HTML sin romper nada. */
 function esc(s) {
   return String(s == null ? '' : s)
@@ -208,14 +232,16 @@ module.exports = async function handler(req, res) {
   }
 
   // Para personas: la invitación de verdad. No se pasa por /i, no hay bucle.
+  // Los eventos a medida traen su propia página; el resto, la de siempre.
+  const pagina = A_MEDIDA[evento] || '/invitacion.html';
   let html;
   try {
-    const r = await fetch(`${base}/invitacion.html`);
+    const r = await fetch(base + pagina);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     html = await r.text();
   } catch (e) {
     res.statusCode = 302;
-    res.setHeader('Location', '/invitacion.html' + qs);
+    res.setHeader('Location', pagina + qs);
     return res.end();
   }
 
