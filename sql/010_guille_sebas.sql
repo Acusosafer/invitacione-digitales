@@ -46,8 +46,20 @@ values (
     -- y poner acá su URL: la de la invitación está embebida como data
     -- URI adentro del HTML y un data URI no le sirve a ningún robot.
   ),
-  'admin123'   -- ⚠️⚠️ CAMBIALA
+  'PONER-LA-CLAVE-ACA'   -- ⚠️⚠️ Se escribe al pegar, NO se guarda acá.
 )
+-- ⚠️⚠️ LA CLAVE NUNCA SE ESCRIBE EN ESTE ARCHIVO. `sql/` está en
+-- .vercelignore, o sea que no se publica en la web — pero SÍ va al repo
+-- de GitHub, y esta clave abre la lista completa de invitados de la
+-- clienta: nombres, apellidos y quién es celíaco. Se reemplaza el
+-- placeholder en el SQL Editor, al momento de pegar, y se le manda a
+-- ella por separado.
+--
+-- Ya corrido el 09/09/2026. Para cambiarla más adelante, sin volver a
+-- correr todo esto:
+--   update invitaciones.eventos
+--      set admin_password = 'la-nueva'
+--    where id = 'guille-sebas';
 on conflict (id) do update
   set config = excluded.config,
       updated_at = now();
