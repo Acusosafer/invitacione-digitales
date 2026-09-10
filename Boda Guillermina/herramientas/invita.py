@@ -98,6 +98,68 @@ def webp(ruta, q=88):
     print(f'  etiqueta                   {len(b.getvalue())//1024:4} KB')
     return 'data:image/webp;base64,' + base64.b64encode(b.getvalue()).decode()
 
+def bombitas(nombre):
+    """Encuentra las luces naranjas de la guirnalda y arma el halo que late.
+
+    ⚠️⚠️ LAS BOMBITAS SON PÍXELES adentro del JPEG. Se ven como siete
+    elementos sueltos pero son una sola imagen: no hay forma de
+    encenderlas y apagarlas por separado. Lo que sí se puede es ponerles
+    un halo dibujado ENCIMA, y para eso hay que saber dónde está cada
+    una.
+
+    ⚠️ Las posiciones NO se eligen a ojo. Se buscan acá, midiendo las
+    manchas naranjas saturadas del propio archivo: si algún día se
+    cambia la ilustración, los halos se mudan solos en vez de quedar
+    flotando al lado de las luces.
+
+    Devuelve el viewBox y los círculos, en coordenadas de la imagen."""
+    import numpy as np
+    from collections import deque
+    im = Image.open(f"{W}/{nombre}").convert('RGB')
+    a = np.asarray(im, np.float32); H, AN = a.shape[:2]
+    r, g, b = a[...,0], a[...,1], a[...,2]
+    mx, mn = a.max(2), a.min(2)
+    sat = np.where(mx > 0, (mx-mn)/np.maximum(mx, 1), 0)
+    m = (sat > .32) & (r > 135) & (b < r*.72) & (g < r*.92) & (g > r*.30)
+
+    visto = np.zeros_like(m); luces = []
+    for y0 in range(H):
+        for x0 in range(AN):
+            if not m[y0, x0] or visto[y0, x0]:
+                continue
+            q = deque([(y0, x0)]); visto[y0, x0] = True; pts = []
+            while q:
+                y, x = q.popleft(); pts.append((y, x))
+                for dy, dx in ((1,0),(-1,0),(0,1),(0,-1),(1,1),(1,-1),(-1,1),(-1,-1)):
+                    ny, nx = y+dy, x+dx
+                    if 0 <= ny < H and 0 <= nx < AN and m[ny, nx] and not visto[ny, nx]:
+                        visto[ny, nx] = True; q.append((ny, nx))
+            # ⚠️ El piso de 150 píxeles saca las motitas naranjas sueltas
+            # de la acuarela. Sin él aparecían dos "bombitas" de 10px
+            # latiendo en el aire, al lado de la soga y de una hoja.
+            if len(pts) < 150:
+                continue
+            ys = np.array([p[0] for p in pts]); xs = np.array([p[1] for p in pts])
+            luces.append((xs.mean(), ys.mean(), max(np.ptp(xs), np.ptp(ys))/2 + 1))
+    luces.sort()
+
+    # Cada una con su propio ritmo y su propio arranque: en unísono no
+    # parecen luces, parecen un cartel de neón.
+    ritmos = [(2.6, 0), (3.4, .7), (2.9, 1.5), (3.8, .3), (3.1, 1.1),
+              (2.7, 1.9), (3.5, .9)]
+    c = []
+    for i, (x, y, rad) in enumerate(luces):
+        dur, esp = ritmos[i % len(ritmos)]
+        c.append(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{rad*2.1:.0f}" '
+                 f'fill="url(#halo)" style="--dur:{dur}s;--esp:{esp}s"/>')
+    print(f'  {nombre:26} {len(luces)} bombitas')
+    return (f'0 0 {AN} {H}',
+            '<defs><radialGradient id="halo">'
+            '<stop offset="0%" stop-color="#FFC46B" stop-opacity=".95"/>'
+            '<stop offset="45%" stop-color="#E07A1F" stop-opacity=".45"/>'
+            '<stop offset="100%" stop-color="#E07A1F" stop-opacity="0"/>'
+            '</radialGradient></defs>' + ''.join(c))
+
 # Los dos dibujos de línea, trazados de una foto y de la acuarela.
 # ⚠️ Vienen con class="t" del generador; acá la clase es .trazo.
 def trazos(clave):
@@ -137,6 +199,7 @@ IM = {
 }
 VB_ESC, T_ESC = trazos('escena')
 VB_CAR, T_CAR = trazos('cartel')
+VB_LUZ, T_LUZ = bombitas('guirnalda-de-luces.jpg')
 
 HTML = r'''<!DOCTYPE html>
 <html lang="es-AR">
@@ -379,6 +442,48 @@ h1,h2{font-family:'Marcellus',Georgia,serif;font-weight:400;line-height:1.18;
 .dato{margin-top:26px}
 .dato .hora{font-family:'Marcellus',serif;font-size:2.4rem;color:var(--hondo);line-height:1}
 .dato .donde{margin-top:8px;font-size:.95rem;color:var(--tinta-2)}
+
+/* ══════════ EL HORARIO, FLANQUEADO ══════════
+   Un dibujo de cada lado de la hora, con la hora en el medio: el violín
+   y el piano en la ceremonia, la copita de Aperol y la máscara en la
+   fiesta. Lo pidió Fer, y tiene un motivo de composición: apilados
+   debajo empujaban las alianzas fuera del centro de la sección.
+
+   ⚠️ SE EMPAREJAN POR ALTO, NO POR ANCHO. La máscara es apaisada y la
+   copita es alta y flaca: al mismo ancho, la copa queda del doble de
+   alto que la máscara y el renglón se ve desbalanceado. Igual la
+   máscara lleva su propio tope de ancho, porque aun a la misma altura
+   ocupa mucho más renglón.
+
+   ⚠️ La línea de abajo ("Con violín y piano en vivo") NO entra en el
+   renglón: a 390px quedan ~110px libres entre los dos dibujos y ahí
+   sólo cabe la hora. Va debajo, a todo el ancho. */
+.flanco{display:flex;align-items:center;justify-content:center;gap:16px}
+.flanco .hora{flex:0 0 auto}
+.flanco .ala{height:86px;width:auto;max-width:104px;object-fit:contain;
+  flex:0 0 auto;mix-blend-mode:multiply}
+/* La máscara: más chica que su par, a pedido de Fer. Aun emparejada por
+   alto, un antifaz ocupa mucho más renglón que una copa. */
+.flanco .ala.angosta{height:72px;max-width:104px}
+
+/* ══════════ LA GUIRNALDA QUE TITILA ══════════
+   ⚠️⚠️ LAS BOMBITAS SON PÍXELES adentro del JPEG: no se pueden encender
+   y apagar por separado por más que se vean como siete elementos
+   sueltos. Lo que sí se puede es ponerles ENCIMA un halo dibujado que
+   late. Las posiciones no se eligen a ojo: las busca `bombitas()` en el
+   propio archivo, midiendo las manchas naranjas saturadas. Si algún día
+   se cambia la ilustración, los halos se mudan solos.
+
+   ⚠️ El contenedor va `position:relative` SIN z-index: un z-index abre
+   un stacking context y el `multiply` de la acuarela se mezclaría
+   contra ese contexto —que es transparente— en vez de contra el papel,
+   y la guirnalda volvería a quedar recortada en un rectángulo blanco.
+   El SVG queda arriba igual, porque va después en el DOM. */
+.luces{position:relative;max-width:460px;margin:26px auto 0}
+.luces img{width:100%;display:block;mix-blend-mode:multiply}
+.luces svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.luces circle{animation:destello var(--dur,3s) var(--esp,0s) ease-in-out infinite}
+@keyframes destello{0%,100%{opacity:.12}45%{opacity:.85}}
 .acto .acuarela{max-width:520px;margin:0 auto 26px}
 .acto .motivo{margin-bottom:16px}
 
@@ -517,6 +622,9 @@ footer a{color:var(--hondo);text-decoration:none}
   .cae{opacity:1 !important;transform:none !important}
   .acto h2::after{transform:scaleX(1);transition:none}
   .ruta{opacity:.9 !important}
+  /* Las bombitas dejan de titilar y se quedan prendidas: apagarlas del
+     todo dejaría la guirnalda más pálida que la ilustración original. */
+  .luces circle{animation:none;opacity:.5}
 }
 </style>
 </head>
@@ -633,27 +741,40 @@ footer a{color:var(--hondo);text-decoration:none}
        suelto abajo dejaba 180px de papel vacío con un pétalo perdido,
        que se lee como un error y no como un efecto. -->
   <div class="petalos" id="petalos-ceremonia" aria-hidden="true"></div>
+
+  <!-- ⚠️ EL ALTAR VA A SANGRÍA, FUERA DE `.wrap`. Fer lo pidió más
+       grande y en un celular no había otra forma: la columna de texto
+       mide 334px de los 390 de pantalla, así que la acuarela ya estaba
+       al 100% de lo que podía dentro del wrap y subirle el `max-width`
+       no cambiaba un píxel. Sacándola del wrap gana los 56px del margen.
+       ⚠️ `.acto .acuarela{max-width:520px}` le gana a `.sangra`, así que
+       el tope se anula acá, en el elemento. Es el mismo problema que ya
+       había dejado la acuarela de la portada como una estampita
+       centrada mientras el trazo de encima abarcaba la sección entera. -->
+  <img class="acuarela sangra rev" src="__ALTAR__" style="max-width:none"
+       alt="El altar al borde del lago">
+
   <div class="wrap">
-    <img class="acuarela rev" src="__ALTAR__" style="max-width:420px"
-         alt="El altar al borde del lago" >
     <p class="rot rev" style="margin-top:22px">La ceremonia</p>
     <!-- ⚠️ Decía "Sobre el PICO, frente al lago". Guillermina avisó que no
          se entendía, y tiene razón: "pico" es jerga del mapa, no de una
-         invitación. El invitado no tiene que descifrar nada acá. -->
-    <h2 class="rev">Al aire libre, <em>frente al laguito</em></h2>
-    <div class="dato rev">
-      <p class="hora">18:00</p>
-      <p class="donde">Con viol&iacute;n y piano en vivo</p>
-    </div>
+         invitación. El invitado no tiene que descifrar nada acá.
+         ⚠️ Y dice "el lago", no "el laguito": lo eligió Fer. Ella había
+         dicho laguito, pero el diminutivo le baja el porte al lugar
+         justo en la línea que lo presenta. -->
+    <h2 class="rev">Al aire libre, <em>frente al lago</em></h2>
 
-    <!-- ⚠️ El violín y el piano van CHIQUITOS y DEBAJO de la línea que
-         habla de la música en vivo: ilustran ese dato, no encabezan la
-         sección. Arriba competirían con el altar, que es la escena.
-         Pareados por ALTO y no por ancho: el piano es apaisado y el
-         violín es vertical, y emparejarlos por ancho deja el violín del
-         doble de alto. -->
-    <div class="duo chico rev">
-      <img src="__VIOLIN__" alt=""><img src="__PIANO__" alt="">
+    <!-- ⚠️ EL VIOLÍN Y EL PIANO VAN A LOS COSTADOS DE LA HORA, uno de
+         cada lado. No es capricho de composición: apilados debajo
+         empujaban las alianzas fuera del centro de la sección, y las
+         alianzas son las que cierran. -->
+    <div class="dato rev">
+      <div class="flanco">
+        <img class="ala" src="__VIOLIN__" alt="">
+        <p class="hora">18:00</p>
+        <img class="ala" src="__PIANO__" alt="">
+      </div>
+      <p class="donde">Con viol&iacute;n y piano en vivo</p>
     </div>
 
     <!-- Las alianzas cierran la sección. ⚠️ VAN GRANDES A PROPÓSITO: el
@@ -666,14 +787,12 @@ footer a{color:var(--hondo);text-decoration:none}
   </div>
 </section>
 
-<!-- La copita de Aperol: la bisagra entre la ceremonia y la fiesta.
-     ⚠️ Va MÁS GRANDE que cuando era separador (56px): a ella le gusta y
-     acá tiene un trabajo que hacer —decir que lo que viene es informal—,
-     no sólo despegar dos bloques.
-     ⚠️ Los separadores viven ENTRE las secciones, no adentro, así que el
-     observador de `.acto` no los alcanza: se pintan con el suyo propio y
-     sin eso se quedan invisibles para siempre, en opacidad 0. -->
-<img class="sep rev" src="__APEROL__" alt="" aria-hidden="true" style="width:104px">
+<!-- ⚠️ ACÁ ESTUVO LA COPITA DE APEROL DE SEPARADOR, primero a 56px entre
+     los nombres y el mapa, después a 104px como bisagra entre la
+     ceremonia y la fiesta. Suelta en el medio del papel era "mucho"
+     —palabra de Fer—: un dibujo grande, solo, sin nada que decir. Se
+     mudó adentro de la fiesta, al costado del horario, donde tiene un
+     trabajo. Ver el `.flanco` de abajo. -->
 
 <!-- ══════════ 4 · LA FIESTA ══════════ -->
 <section class="acto" id="fiesta">
@@ -693,28 +812,45 @@ footer a{color:var(--hondo);text-decoration:none}
          peor que no tener imagen.
          El archivo sigue en `web/` por si alguna vez sirve para otra
          boda, pero para ésta no se usa. -->
+    <!-- Las dos que van CENTRADAS: la torre de copas y la guirnalda. -->
     <img class="acuarela rev" src="__COPAS__" style="max-width:400px"
          alt="Una torre de copas de champagne">
-    <img class="acuarela rev" src="__LUCES__" style="max-width:460px;margin-top:26px" alt="">
+
+    <!-- ⚠️⚠️ LA GUIRNALDA TITILA, y las bombitas son PÍXELES adentro del
+         JPEG: no se encienden por separado. Lo que late es un halo
+         dibujado ENCIMA de cada una, y las posiciones las mide
+         `bombitas()` en el propio archivo — no están escritas a mano.
+         ⚠️ El contenedor va `position:relative` SIN z-index: un z-index
+         abriría un stacking context y el `multiply` de la acuarela se
+         mezclaría contra ese contexto en vez de contra el papel, y la
+         guirnalda quedaría recortada en un rectángulo blanco. El SVG
+         igual queda arriba, porque va después en el DOM. -->
+    <div class="luces rev">
+      <img src="__LUCES__" alt="Una guirnalda de luces c&aacute;lidas">
+      <svg viewBox="__VB_LUZ__" aria-hidden="true">__T_LUZ__</svg>
+    </div>
+
     <p class="rot rev" style="margin-top:22px">La fiesta</p>
     <h2 class="rev">En el mismo <em>lugar</em></h2>
+
+    <!-- ⚠️ LA COPITA DE APEROL Y LA MÁSCARA, una de cada lado del
+         horario, igual que el violín y el piano en la ceremonia. Las dos
+         dicen lo mismo que el dato: que esto es informal, de pie y con
+         copa en la mano.
+         ⚠️ La máscara lleva `angosta`: emparejada por alto con la copa
+         igual se come el doble de renglón, porque un antifaz es
+         apaisado y una copa es alta y flaca. -->
     <div class="dato rev">
-      <p class="hora">20:00</p>
+      <div class="flanco">
+        <img class="ala" src="__APEROL__" alt="">
+        <p class="hora">20:00</p>
+        <img class="ala angosta" src="__MASCARA__" alt="">
+      </div>
       <!-- Lo resumido que pidió ella: transcurre adentro y afuera del
            salón. Dos datos y se termina — la invitación no explica el
            catering, lo insinúan la torre de copas y la máscara. -->
       <p class="donde">Adentro y afuera del sal&oacute;n</p>
     </div>
-
-    <!-- ⚠️ LA MÁSCARA VA ACÁ, AL FINAL DE LA FIESTA, Y NO EN EL DRESS
-         CODE. No es cómo hay que vestirse —el cotillón se reparte en la
-         pista—: es lo que los espera. Y es lo que hace que "se sienta la
-         onda del evento" al abrir la invitación, que es textual lo que
-         pidió ella.
-         ⚠️ Es veneciana, y la luna de miel es en Italia: es el mismo hilo
-         que la etiqueta de valija de la portada. No es un adorno suelto. -->
-    <img class="acuarela rev" src="__MASCARA__" style="max-width:280px;margin-top:30px"
-         alt="Una m&aacute;scara veneciana">
   </div>
 </section>
 
@@ -728,7 +864,10 @@ footer a{color:var(--hondo);text-decoration:none}
          la invitación que se lee como "vestite así", y un vestido crema
          dibujado acá termina en alguien vestida como la novia. Si algún
          día se regenera, ese es el primer control. -->
-    <img class="acuarela rev" src="__DRESSCODE__" style="max-width:400px"
+    <!-- ⚠️ 400 -> 260px, a pedido de Fer: quedaba muy grande. Es una
+         referencia de qué ponerse, no una escena — no tiene por qué
+         ocupar lo mismo que el altar o que la acuarela de ellos. -->
+    <img class="acuarela rev" src="__DRESSCODE__" style="max-width:260px"
          alt="Un vestido largo terracota y un traje verde oliva">
     <p class="rot rev">Dress code</p>
     <h2 class="rev"><em>Elegante</em></h2>
@@ -1301,7 +1440,8 @@ CLAVES = {'etiqueta':'ETIQUETA','ellos':'ELLOS','altar':'ALTAR','mapa':'MAPA',
 for k, v in IM.items():
     HTML = HTML.replace('__' + CLAVES[k] + '__', v)
 HTML = (HTML.replace('__VB_ESC__', VB_ESC).replace('__T_ESC__', T_ESC)
-            .replace('__VB_CAR__', VB_CAR).replace('__T_CAR__', T_CAR))
+            .replace('__VB_CAR__', VB_CAR).replace('__T_CAR__', T_CAR)
+            .replace('__VB_LUZ__', VB_LUZ).replace('__T_LUZ__', T_LUZ))
 
 # El evento de ellos en NUESTRO panel: admin.html?evento=guille-sebas.
 # La invitación es a medida en el diseño, no en el sistema — los links,
