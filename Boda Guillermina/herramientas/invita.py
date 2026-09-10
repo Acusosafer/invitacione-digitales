@@ -356,6 +356,36 @@ h1,h2{font-family:'Marcellus',Georgia,serif;font-weight:400;line-height:1.18;
    sección. Es para lo que se dibujaron. */
 .sep{width:74px;margin:0 auto;display:block;mix-blend-mode:multiply;opacity:.9}
 
+/* ══════════ "DESLIZÁ" ══════════
+   Mucha gente no se da cuenta de que la página sigue para abajo y se
+   queda en la primera pantalla. Es el mismo indicador que llevan
+   nuestras invitaciones, con el mismo texto y el mismo chevron.
+
+   ⚠️ Va DEBAJO DEL CARTEL DE LA FINCA, no al fondo de la pantalla. Lo
+   eligió Fer mirándola en el celular, y la medición le da la razón: en
+   390x844 el cartel termina en 602 y la sección en 660, así que el
+   indicador queda a la vista sin tapar nada. Al fondo de la pantalla
+   habría que anclarlo con `position:fixed` y taparía la acuarela.
+
+   ⚠️ Entra con 1,6s de demora: enseguida compite con los nombres, que
+   es lo primero que hay que leer. */
+.desliza{display:flex;flex-direction:column;align-items:center;gap:5px;
+  margin-top:26px;color:var(--tinta-2);pointer-events:none;opacity:0;
+  transform:translateY(6px);
+  animation:desliza-entra 700ms 1.6s var(--ease) forwards}
+.desliza span{font-family:'Marcellus',serif;font-size:.6rem;letter-spacing:.28em;
+  text-transform:uppercase}
+.desliza svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round;
+  animation:desliza-baja 2.4s 2.4s ease-in-out infinite}
+@keyframes desliza-entra{to{opacity:1;transform:none}}
+/* Sólo transform y opacity: no toca ni el layout ni el pintado. */
+@keyframes desliza-baja{0%,100%{transform:translateY(0);opacity:.9}
+                        50%{transform:translateY(5px);opacity:.35}}
+/* Ya deslizó: cumplió su función y no vuelve. */
+.desliza.ido{opacity:0;transform:translateY(10px);animation:none;
+  transition:opacity 280ms var(--ease),transform 280ms var(--ease)}
+
 /* ══════════ EL DIBUJO QUE SE PINTA SOLO ══════════
    El papel arranca en blanco, la línea se dibuja, y cuando termina la
    acuarela aparece por debajo mientras el trazo se apaga.
@@ -674,6 +704,9 @@ footer a{color:var(--hondo);text-decoration:none}
   .cae{opacity:1 !important;transform:none !important}
   .acto h2::after{transform:scaleX(1);transition:none}
   .ruta{opacity:.9 !important}
+  /* Se ve, pero quieto: el aviso hace falta igual. */
+  .desliza{animation:none;opacity:1;transform:none}
+  .desliza svg{animation:none;opacity:.75}
   /* Las bombitas dejan de titilar y se quedan prendidas: apagarlas del
      todo dejaría la guirnalda más pálida que la ilustración original. */
   .luces circle{animation:none;opacity:.5}
@@ -696,7 +729,11 @@ footer a{color:var(--hondo);text-decoration:none}
           <div class="nom n2">Sebasti&aacute;n</div>
         </div>
         <div class="escrito dorso">
-          <div class="dat">S&aacute;bado<span class="g">03 &middot; IV &middot; 2027</span>
+          <!-- ⚠️ La fecha va como "03 - abr - 2027" y no en romanos: lo
+               pidió Guillermina. Y de paso queda igual a lo que está
+               grabado adentro del anillo, que es el único otro lugar de
+               la invitación donde la fecha aparece escrita a mano. -->
+          <div class="dat">S&aacute;bado<span class="g">03 - abr - 2027</span>
             Finca<br>La Josefina<br>Berisso</div>
         </div>
       </div>
@@ -750,6 +787,15 @@ footer a{color:var(--hondo);text-decoration:none}
          la caja, y el SVG escala solo. -->
     <svg class="dibujo rev bucle" id="dib-cartel" viewBox="__VB_CAR__"
          style="width:100%;max-width:240px;margin-top:30px" aria-hidden="true">__T_CAR__</svg>
+
+    <!-- ⚠️ NO lleva `.rev`. El indicador tiene su propia entrada con
+         demora, y `.rev` lo dejaría en opacidad 0 hasta que el
+         observador de la sección lo despierte: en la primera pantalla,
+         que es justo donde hace falta, no se vería nunca. -->
+    <div class="desliza" id="desliza" aria-hidden="true">
+      <span>Desliz&aacute;</span>
+      <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
   </div>
 </section>
 
@@ -829,12 +875,19 @@ footer a{color:var(--hondo);text-decoration:none}
       <p class="donde">Con viol&iacute;n y piano en vivo</p>
     </div>
 
-    <!-- Las alianzas cierran la sección. ⚠️ VAN GRANDES A PROPÓSITO: el
-         anillo trae grabado "03 - abr - 2027" y ese grabado mide 110px
-         en una imagen de 1408. A 150px de ancho en la página es una
-         manchita ilegible; a 300px se lee como lo que es. Es el único
-         lugar de la invitación donde la fecha aparece escrita a mano. -->
-    <img class="acuarela rev" src="__ALIANZAS__" style="max-width:290px;margin-top:12px"
+    <!-- Las alianzas cierran la sección, y van CHICAS: son el sello del
+         final, no el titular.
+         ⚠️ Estuvieron grandes por una razón que dejó de valer. El anillo
+         trae grabado "03 - abr - 2027" y ese grabado es diminuto, así
+         que había que agrandarlas para que se leyera: era el único
+         lugar donde la fecha aparecía escrita a mano. Desde que
+         Guillermina pidió esa misma fecha en la etiqueta de la portada,
+         el grabado dejó de cargar solo ese peso y puede volver a ser lo
+         que es — un detalle para el que se acerca a mirar.
+         Y suelta un problema de jerarquía: en esta sección manda el
+         altar, que es el lugar. Dos acuarelas grandes seguidas se
+         disputan la sección y ninguna gana. -->
+    <img class="acuarela rev" src="__ALIANZAS__" style="max-width:200px;margin-top:12px"
          alt="Las alianzas, con la fecha grabada">
   </div>
 </section>
@@ -1234,6 +1287,23 @@ const ojoSep=new IntersectionObserver(es=>es.forEach(e=>{
 new IntersectionObserver(es=>es.forEach(e=>{
   if(e.isIntersecting){ e.target.classList.add('on'); }
 }),{threshold:.3}).observe(document.getElementById('mapa'));
+
+/* ── "Deslizá": se va apenas deslizan ─────────────────────────────
+   ⚠️ Escucha en el elemento que scrollea de verdad. Con `html,body`
+   en `height:100%` y `body.adentro{overflow-y:auto}`, quién scrollea
+   depende del navegador: por eso va `document.scrollingElement` y no
+   `window.scrollY` a secas.
+   ⚠️ `once:true` y `passive:true`: cumplió su función y no vuelve, y
+   un listener de scroll que no es pasivo traba el desplazamiento. */
+(function(){
+  const d=document.getElementById('desliza'); if(!d) return;
+  const irse=()=>d.classList.add('ido');
+  addEventListener('scroll',function chau(){
+    if((document.scrollingElement||document.documentElement).scrollTop>60){
+      irse(); removeEventListener('scroll',chau);
+    }
+  },{passive:true});
+})();
 
 /* ── Copiar el alias ─────────────────────────────────────────────── */
 document.getElementById('copiar').onclick=async function(){
