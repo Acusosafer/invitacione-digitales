@@ -56,22 +56,74 @@ def recortar_al_motivo(im, aire=14):
     cuánto papel trajo cada una.
 
     Se compara cada píxel contra el color de la esquina, que es el papel.
-    Lo que se despega, es dibujo."""
+    Lo que se despega, es dibujo.
+
+    ⚠️⚠️ EL UMBRAL ES 20, NO 12. Con 12 entraban al recorte lavados tan
+    tenues que no se ven, y la caja quedaba enorme: las alianzas medían
+    894px de ancho cuando la tinta de verdad terminaba a los 481. Ese
+    papel fantasma a la derecha era lo que hacía ver los anillos corridos
+    a la izquierda — y como el CSS estaba perfecto, uno va a mirar el
+    lugar equivocado. Medido en las ocho ilustraciones: de 12 a 20 la
+    torre de copas pasa de 1130 a 499 de ancho."""
     from PIL import ImageChops
     fondo = Image.new('RGB', im.size, im.getpixel((2, 2)))
-    caja = ImageChops.difference(im, fondo).convert('L').point(lambda v: 255 if v > 12 else 0).getbbox()
+    caja = ImageChops.difference(im, fondo).convert('L').point(lambda v: 255 if v > 20 else 0).getbbox()
     if not caja:
         return im
     x0, y0, x1, y1 = caja
     return im.crop((max(0, x0-aire), max(0, y0-aire),
                     min(im.width, x1+aire), min(im.height, y1+aire)))
 
-def jpg(nombre, ancho, q=78, limpiar=True, recortar=False):
+def centrar_el_peso(im):
+    """Corre el marco para que el PESO del dibujo quede en el medio.
+
+    ⚠️⚠️ RECORTAR AL MOTIVO NO ES CENTRARLO. El recorte deja la caja
+    pegada al dibujo, y el navegador centra esa caja — pero si adentro
+    el dibujo está desbalanceado, sigue viéndose corrido. Medido: las
+    alianzas tenían el peso 23,5 puntos a la izquierda (los dos anillos
+    macizos de un lado, una ramita finita del otro) y el dress code 16,2
+    a la derecha (el traje verde oscuro pesa mucho más que el vestido).
+    A ojo se ve como "no está centrado" y uno va a mirar el CSS, que
+    está perfecto.
+
+    Se mide cuánto se despega cada columna de píxeles del papel —eso es
+    la tinta— y se agrega papel del lado liviano hasta que el centro de
+    masa cae en el medio.
+
+    ⚠️ El agregado tiene tope. Sin tope, las alianzas pedían 427px de
+    papel en blanco: quedaban centradas y un 32% más chicas, con más
+    aire adentro de la imagen. Justo lo contrario de lo que se busca."""
+    import numpy as np
+    a = np.asarray(im, np.float32)
+    papel = np.median(np.concatenate([a[:4].reshape(-1, 3), a[-4:].reshape(-1, 3)]), axis=0)
+    tinta = np.clip(papel.mean() - a.mean(2), 0, None)
+    tinta[tinta < 8] = 0
+    peso = tinta.sum(0)
+    if peso.sum() <= 0:
+        return im, 0.0
+    AN = im.width
+    cx = float((peso * np.arange(AN)).sum() / peso.sum())
+    p = int(round(abs(AN - 2*cx)))
+    tope = int(AN * .22)
+    if p > tope:
+        p = tope
+    if p < 3:
+        return im, cx/AN
+    fondo = tuple(int(v) for v in papel)
+    nueva = Image.new('RGB', (AN + p, im.height), fondo)
+    nueva.paste(im, (p if cx < AN/2 else 0, 0))
+    return nueva, cx/AN
+
+def jpg(nombre, ancho, q=78, limpiar=True, recortar=False, centrar=False):
     im = Image.open(f"{W}/{nombre}").convert('RGB')
     if recortar:
         antes = im.size
         im = recortar_al_motivo(im)
         print(f'    recorte {antes[0]}x{antes[1]} -> {im.width}x{im.height}')
+    if centrar:
+        antes = im.width
+        im, viejo = centrar_el_peso(im)
+        print(f'    peso {100*viejo:.1f}% -> centrado, +{im.width-antes}px de papel')
     if im.width > ancho:
         im = im.resize((ancho, round(ancho*im.height/im.width)), Image.LANCZOS)
     if limpiar:
@@ -186,12 +238,12 @@ IM = {
   # una servilleta y dos copas de vino sobre un mantel: una cena sentada
   # con lugares asignados, justo la fiesta que NO van a hacer. Lo marcó
   # Guillermina — es fingerfood, bandejeo y livings.
-  'copas':    jpg('torre-copas.jpg', 560, recortar=True),
+  'copas':    jpg('torre-copas.jpg', 560, recortar=True, centrar=True),
   # Las cinco de setiembre. Todas con `recortar`: vienen con el motivo
   # chiquito en el medio de un rectángulo casi vacío.
-  'alianzas': jpg('alianzas.jpg', 560, recortar=True),
+  'alianzas': jpg('alianzas.jpg', 620, recortar=True, centrar=True),
   'mascara':  jpg('mascara.jpg', 460, recortar=True),
-  'dresscode':jpg('dresscode.jpg', 620, recortar=True),
+  'dresscode':jpg('dresscode.jpg', 620, recortar=True, centrar=True),
   'eiffel':   jpg('eiffel.jpg', 300, recortar=True),
   'coliseo':  jpg('coliseo.jpg', 380, recortar=True),
   'violin':   jpg('violin.jpg', 300, recortar=True),
@@ -402,7 +454,7 @@ h1,h2{font-family:'Marcellus',Georgia,serif;font-weight:400;line-height:1.18;
   100%{transform:translate3d(var(--dx),var(--caida),0) rotate(var(--giro));opacity:0}}
 
 /* ══════════ SECCIONES ══════════ */
-.acto{padding:86px 0;text-align:center}
+.acto{padding:58px 0;text-align:center}
 .acto.junto{padding-top:0}
 /* ⚠ La primera sección arranca PEGADA al borde de arriba: los 86px de
    papel en blanco entre la etiqueta que sube y la acuarela rompían la
@@ -479,12 +531,12 @@ h1,h2{font-family:'Marcellus',Georgia,serif;font-weight:400;line-height:1.18;
    contra ese contexto —que es transparente— en vez de contra el papel,
    y la guirnalda volvería a quedar recortada en un rectángulo blanco.
    El SVG queda arriba igual, porque va después en el DOM. */
-.luces{position:relative;max-width:460px;margin:26px auto 0}
+.luces{position:relative;max-width:400px;margin:14px auto 0}
 .luces img{width:100%;display:block;mix-blend-mode:multiply}
 .luces svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .luces circle{animation:destello var(--dur,3s) var(--esp,0s) ease-in-out infinite}
 @keyframes destello{0%,100%{opacity:.12}45%{opacity:.85}}
-.acto .acuarela{max-width:520px;margin:0 auto 26px}
+.acto .acuarela{max-width:520px;margin:0 auto 18px}
 .acto .motivo{margin-bottom:16px}
 
 .btn{display:inline-block;margin-top:26px;text-decoration:none;
@@ -782,7 +834,7 @@ footer a{color:var(--hondo);text-decoration:none}
          en una imagen de 1408. A 150px de ancho en la página es una
          manchita ilegible; a 300px se lee como lo que es. Es el único
          lugar de la invitación donde la fecha aparece escrita a mano. -->
-    <img class="acuarela rev" src="__ALIANZAS__" style="max-width:300px;margin-top:28px"
+    <img class="acuarela rev" src="__ALIANZAS__" style="max-width:290px;margin-top:12px"
          alt="Las alianzas, con la fecha grabada">
   </div>
 </section>
@@ -813,7 +865,7 @@ footer a{color:var(--hondo);text-decoration:none}
          El archivo sigue en `web/` por si alguna vez sirve para otra
          boda, pero para ésta no se usa. -->
     <!-- Las dos que van CENTRADAS: la torre de copas y la guirnalda. -->
-    <img class="acuarela rev" src="__COPAS__" style="max-width:400px"
+    <img class="acuarela rev" src="__COPAS__" style="max-width:240px"
          alt="Una torre de copas de champagne">
 
     <!-- ⚠️⚠️ LA GUIRNALDA TITILA, y las bombitas son PÍXELES adentro del
@@ -867,7 +919,7 @@ footer a{color:var(--hondo);text-decoration:none}
     <!-- ⚠️ 400 -> 260px, a pedido de Fer: quedaba muy grande. Es una
          referencia de qué ponerse, no una escena — no tiene por qué
          ocupar lo mismo que el altar o que la acuarela de ellos. -->
-    <img class="acuarela rev" src="__DRESSCODE__" style="max-width:260px"
+    <img class="acuarela rev" src="__DRESSCODE__" style="max-width:210px"
          alt="Un vestido largo terracota y un traje verde oliva">
     <p class="rot rev">Dress code</p>
     <h2 class="rev"><em>Elegante</em></h2>
@@ -970,7 +1022,15 @@ footer a{color:var(--hondo);text-decoration:none}
      target="_blank" rel="noopener">Invitaciones Digitales Oficial</a>
 </footer>
 
-<!-- "Sarà perché ti amo" — 46s desde el 0:28, mono, 96 kbps, 539 KB.
+<!-- "Sarà perché ti amo", VERSIÓN DE PIANO — 46s desde el 0:30, mono,
+     96 kbps, 539 KB.
+     ⚠️ Instrumental a pedido de Guillermina: "nos gustaría instrumental,
+     como la que te mandé, que sea encantada". La versión cantada de
+     Ricchi e Poveri quedó descartada.
+     ⚠️ El tramo se eligió midiendo la energía del tema cada 2 segundos,
+     no a ojo: el pico está entre el 0:32 y el 0:40, que es donde entra
+     el estribillo. Igual esto hay que ESCUCHARLO — una medición dice
+     dónde sube el volumen, no dónde empieza la melodía que se reconoce.
      ⚠️ La canción entera pesaba 4,3 MB: nadie con datos móviles en el
      medio del campo baja eso. Y un link de Spotify no sirve — no se
      reproduce embebido sin cuenta y sesión iniciada.
