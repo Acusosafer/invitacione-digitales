@@ -593,7 +593,12 @@ footer a{color:var(--hondo);text-decoration:none}
   </div>
 </section>
 
-<img class="sep rev" src="__APEROL__" alt="" aria-hidden="true" style="width:56px">
+<!-- ⚠️ ACÁ ESTABA LA COPITA DE APEROL, de separador entre los nombres y
+     el mapa. Se movió abajo, entre la ceremonia y la fiesta: lo pidió
+     Guillermina —"me encanta, me gusta para la parte de informar"— y
+     tiene razón. Arriba era un adorno de 56px que separaba dos bloques;
+     abajo es la bisagra entre el rato formal y el rato informal, que es
+     justo lo que la copa cuenta. -->
 
 <!-- ══════════ 2 · CÓMO LLEGAR ══════════ -->
 <section class="acto junto" id="mapa-sec">
@@ -661,6 +666,15 @@ footer a{color:var(--hondo);text-decoration:none}
   </div>
 </section>
 
+<!-- La copita de Aperol: la bisagra entre la ceremonia y la fiesta.
+     ⚠️ Va MÁS GRANDE que cuando era separador (56px): a ella le gusta y
+     acá tiene un trabajo que hacer —decir que lo que viene es informal—,
+     no sólo despegar dos bloques.
+     ⚠️ Los separadores viven ENTRE las secciones, no adentro, así que el
+     observador de `.acto` no los alcanza: se pintan con el suyo propio y
+     sin eso se quedan invisibles para siempre, en opacidad 0. -->
+<img class="sep rev" src="__APEROL__" alt="" aria-hidden="true" style="width:104px">
+
 <!-- ══════════ 4 · LA FIESTA ══════════ -->
 <section class="acto" id="fiesta">
   <div class="wrap">
@@ -670,16 +684,17 @@ footer a{color:var(--hondo);text-decoration:none}
          ⚠️ Se saca ENTERA, no con `hidden`: la regla del navegador
          `[hidden]{display:none}` pierde contra `.dibujo{display:block}`
          y la copa se seguía viendo igual. -->
-    <!-- ⚠️⚠️ ESTA ACUARELA SE REEMPLAZA POR LA TORRE DE COPAS (D1).
-         Hoy es `copas-brindis.jpg`: un plato, una servilleta doblada y dos
-         copas de vino sobre un mantel. O sea una CENA SENTADA con lugares
-         asignados — justo la fiesta que NO van a hacer. Guillermina lo
-         marcó ella: es fingerfood, bandejeo, livings y gente parada, y
+    <!-- ⚠️⚠️ LA MESA TENDIDA SE FUE, Y NO VUELVE. Acá había
+         `copas-brindis.jpg`: un plato, una servilleta doblada y dos copas
+         de vino sobre un mantel. O sea una CENA SENTADA con lugares
+         asignados — justo la fiesta que NO van a hacer. Lo marcó
+         Guillermina: es fingerfood, bandejeo, livings y gente parada, y
          nadie tiene mesa asignada. Una imagen que promete otra cosa es
          peor que no tener imagen.
-         En cuanto exista `torre-copas.png`, cambiar la entrada 'copas'
-         de la lista IM de arriba. El alt también. -->
-    <img class="acuarela rev" src="__COPAS__" alt="">
+         El archivo sigue en `web/` por si alguna vez sirve para otra
+         boda, pero para ésta no se usa. -->
+    <img class="acuarela rev" src="__COPAS__" style="max-width:400px"
+         alt="Una torre de copas de champagne">
     <img class="acuarela rev" src="__LUCES__" style="max-width:460px;margin-top:26px" alt="">
     <p class="rot rev" style="margin-top:22px">La fiesta</p>
     <h2 class="rev">En el mismo <em>lugar</em></h2>
