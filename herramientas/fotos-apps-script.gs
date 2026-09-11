@@ -78,12 +78,17 @@ function doPost(e) {
 function carpeta_(ev) {
   const guardada = PROPS.getProperty('carpeta_' + ev);
   if (guardada) {
-    try { return DriveApp.getFolderById(guardada); } catch (e) { /* la borraron: se crea otra */ }
+    // ⚠️ Una carpeta en la PAPELERA se sigue encontrando por id: sin el
+    // isTrashed() las fotos de la fiesta irían a la papelera, y Google la
+    // vacía sola a los 30 días.
+    try {
+      const f = DriveApp.getFolderById(guardada);
+      if (!f.isTrashed()) return f;
+    } catch (e) { /* la borraron del todo: se crea otra */ }
   }
-  const raices = DriveApp.getFoldersByName(RAIZ);
-  const raiz = raices.hasNext() ? raices.next() : DriveApp.createFolder(RAIZ);
-  const hijas = raiz.getFoldersByName(ev);
-  const carpeta = hijas.hasNext() ? hijas.next() : raiz.createFolder(ev);
+  const sinPapelera = it => { while (it.hasNext()) { const f = it.next(); if (!f.isTrashed()) return f; } return null; };
+  const raiz = sinPapelera(DriveApp.getFoldersByName(RAIZ)) || DriveApp.createFolder(RAIZ);
+  const carpeta = sinPapelera(raiz.getFoldersByName(ev)) || raiz.createFolder(ev);
   PROPS.setProperty('carpeta_' + ev, carpeta.getId());
   return carpeta;
 }
