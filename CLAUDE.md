@@ -1514,6 +1514,63 @@ peor desvío es **0,16% del lado**. Estaba en las cuatro variantes; las cuatro s
 Quien sepa el slug del evento puede escribir un deseo, igual que puede confirmar asistencia.
 Es spam, no una fuga: no puede leer nada. Tope de 2000 por evento.
 
+## Subí tus fotos — el QR también junta las fotos de la noche (11/09/2026)
+
+Con `config.fotos_activo`, el QR de las mesas abre dos opciones: **dejar un deseo** o
+**subir fotos**. Apagado, la pantalla queda exactamente como antes. Los QR ya impresos
+sirven igual: apuntan a la misma `/deseos`.
+
+**Van al Drive de Fer, no a Supabase.** El Storage free es 1 GB compartido con el
+almacén "Lo de Inés"; Drive da 15 GB. El celular achica cada foto (1600px, JPEG 82%, de
+~4 MB a ~250 KB) y la manda a un **Apps Script** (`herramientas/fotos-apps-script.gs`,
+proyecto "Fotos eventos") que corre con la cuenta de Fer y la guarda en
+`Mi unidad / Fotos de las fiestas / <evento> / 0050 - mesa 3 - Nombre.jpg`.
+**El invitado nunca ve Google ni se loguea.** No sirve el "pedir archivos" de Drive:
+obliga a iniciar sesión.
+
+⚠️ **La URL del script la puede llamar cualquiera**, así que el script se defiende solo:
+lista `EVENTOS` con fecha `hasta` y `tope` de fotos, sólo JPEG, hasta 6 MB. La URL está
+escrita en `FOTOS_URL` de `deseos.html`, y no es un secreto.
+
+⚠️ **Para un evento nuevo: agregarlo a `EVENTOS` y "Implementar → Gestionar
+implementaciones → ✏️ → Nueva versión".** "Nueva implementación" da OTRA URL y la
+página seguiría llamando a la vieja.
+
+⚠️ **Una carpeta en la PAPELERA se sigue encontrando por id.** Sin `isTrashed()`, las
+fotos de la fiesta iban a la papelera y Google la vacía a los 30 días.
+
+⚠️ **El número del archivo no vuelve atrás** al borrar: es un contador del script. Las
+pruebas del 11/09 hicieron que las de Alma arranquen en 50.
+
+⚠️ `fetch` con `Content-Type: text/plain`: con JSON el navegador hace el pedido previo de
+CORS y Apps Script no lo contesta. Con reintento automático (5 intentos, espera
+creciente) para el pico después del vals: medido con 30 envíos a la vez, 30 de 30 en 16 s.
+
+⚠️ **Se achica de a una y se sube de a dos**: 30 fotos de 12 MP decodificadas juntas
+cuelgan Safari. Las miniaturas salen de la foto ya achicada, nunca del original.
+
+**Es privado, como los deseos**: el invitado sube y no ve nada. Después de la fiesta se
+comparte la carpeta con la familia, y **cuando la descargan se borra**. Son fotos de
+invitados, muchos menores: no se guardan para siempre.
+
+### La pantalla entra entera en el celular
+
+Con `libro_fondo` cargado (`body.ambiente`), la acuarela del libro va de fondo, la
+agasajada en un **retrato redondo** y los textos sobre una hoja de papel. Lo pidió Fer:
+**todo en una pantalla, sin scrollear**. Se mide con el alto VISIBLE, no con el del
+teléfono: 390×664 (iPhone con las barras de Safari) y 375×553 (SE).
+
+- La silueta es `flex:1 1 0`: ocupa sólo lo que sobra, y desaparece en pantallas chicas
+  antes de obligar a scrollear. ⚠️ `.silueta:not([hidden])`, o sale en todas las fiestas.
+- ⚠️ El fondo va a `100lvh`, no a `inset:0`: al esconderse la barra del navegador el alto
+  cambia y el fondo "saltaba".
+- "Dejale un deseo" en la pantalla de fotos aparece **recién después de subir**: antes le
+  come justo el lugar que falta.
+- El nombre de las fotos va en la manuscrita de la firma (Caveat), a pedido de Fer.
+- Las opciones van del acento del evento, con texto `--on-accent` sólido.
+- **Nuestro footer** va abajo de todo, con `utm_source=deseos`: quien escanea el QR de una
+  mesa es un próximo cliente.
+
 ## Deploy
 
 El sitio está en Vercel con auto-deploy desde GitHub.
