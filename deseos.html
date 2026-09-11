@@ -301,6 +301,49 @@ textarea:focus,input:focus{
 }
 .otro:active{transform:scale(.975)}
 
+/* ── Elegir: deseo o fotos ────────────────────────────────────────────
+   Aparece sólo si el evento tiene las dos cosas activas. Dos opciones y
+   nada más: a la una de la mañana cada decisión extra pierde gente. */
+.opciones{display:flex;flex-direction:column;gap:12px;margin-top:22px}
+.opcion{
+  width:100%;text-align:left;cursor:pointer;font-family:inherit;color:var(--primary);
+  background:var(--velo-1);border:1px solid var(--borde);border-radius:18px;
+  padding:18px 20px;min-height:84px;display:flex;align-items:center;gap:16px;
+  transition:transform 160ms var(--curva), background 200ms ease;
+}
+.opcion:active{transform:scale(.975);background:var(--velo-2)}
+.opcion svg{width:34px;height:34px;flex:none;color:var(--primary)}
+.opcion b{display:block;font-family:var(--font-titulo);font-weight:400;font-size:1.4rem;line-height:1.15}
+.opcion span{display:block;margin-top:3px;font-size:.84rem;line-height:1.4;color:var(--ink-soft)}
+
+.volver{
+  background:transparent;border:0;color:var(--ink-soft);font-family:inherit;
+  font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:12px 0;min-height:44px;cursor:pointer;margin-top:6px;
+}
+
+/* ── Subir fotos ──────────────────────────────────────────────────────
+   Elegir y listo: la subida arranca sola, sin un segundo botón. */
+.opc{font-size:.62rem;letter-spacing:.08em;text-transform:none;opacity:.85}
+.fotos-campo{margin-top:18px}
+.barra{margin-top:20px;height:8px;border-radius:8px;background:var(--velo-2);overflow:hidden}
+.barra i{display:block;height:100%;width:0;background:var(--secondary);
+         transition:width 400ms var(--curva)}
+.fotos-estado{margin-top:12px;text-align:center;font-size:.9rem;line-height:1.5;
+              color:var(--primary);text-wrap:pretty}
+.fotos-estado small{display:block;margin-top:4px;font-size:.78rem;color:var(--ink-soft)}
+.miniaturas{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:6px;margin-top:16px}
+.mini{aspect-ratio:1;border-radius:10px;background:var(--velo-2) center/cover no-repeat;
+      position:relative;overflow:hidden}
+.mini.espera{animation:latir 1100ms ease-in-out infinite alternate}
+@keyframes latir{from{opacity:.45}to{opacity:1}}
+.mini.ok::after,.mini.mal::after{
+  position:absolute;right:4px;bottom:4px;width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;
+}
+.mini.ok::after{content:'✓';background:var(--secondary);color:var(--on-accent)}
+.mini.mal::after{content:'!';background:#b3261e;color:#fff}
+
 @media (prefers-reduced-motion:reduce){
   *{animation:none !important;transition:none !important}
   .entra{opacity:1;transform:none}
@@ -323,8 +366,44 @@ textarea:focus,input:focus{
     </div>
   </header>
 
+  <!-- PASO 0 — elegir (sólo con fotos activas) -->
+  <section id="paso-elegir" hidden>
+    <div class="opciones">
+      <button class="opcion entra" id="op-deseo" type="button" style="animation-delay:180ms">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3.5 7l8.5 6.5L20.5 7"/></svg>
+        <div><b>Dejale un deseo</b><span id="op-deseo-sub">Unas líneas que va a leer después de la fiesta</span></div>
+      </button>
+      <button class="opcion entra" id="op-fotos" type="button" style="animation-delay:260ms">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 8h3l1.6-2.2h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.3" r="3.6"/></svg>
+        <div><b>Subí tus fotos</b><span id="op-fotos-sub">Las que sacaste esta noche, directo a su álbum</span></div>
+      </button>
+    </div>
+  </section>
+
+  <!-- PASO FOTOS -->
+  <section id="paso-fotos" hidden>
+    <button class="volver" type="button" data-volver hidden>‹ Volver</button>
+    <p class="ayuda" id="fotos-ayuda"></p>
+    <div class="campo fotos-campo">
+      <label for="fotos-nombre">Tu nombre <span class="opc">opcional</span></label>
+      <input id="fotos-nombre" type="text" maxlength="40" autocomplete="name"
+        placeholder="Así sabe quién las sacó">
+    </div>
+    <button class="enviar" id="btn-fotos" type="button">Elegir fotos</button>
+    <input id="fotos-input" type="file" accept="image/*" multiple hidden>
+    <div id="fotos-progreso" hidden>
+      <div class="barra"><i id="fotos-barra"></i></div>
+      <p class="fotos-estado" id="fotos-estado"></p>
+      <div class="miniaturas" id="miniaturas"></div>
+    </div>
+    <div style="text-align:center"><button class="otro" id="btn-a-deseo" type="button" hidden>Dejale un deseo</button></div>
+  </section>
+
   <!-- PASO 1 — escribir -->
   <section id="paso-escribir">
+    <button class="volver" type="button" data-volver hidden>‹ Volver</button>
     <p class="ayuda entra" id="ayuda" style="animation-delay:180ms"></p>
 
     <div class="chips entra" id="chips" style="animation-delay:240ms"></div>
@@ -378,6 +457,7 @@ textarea:focus,input:focus{
       </div>
 
       <button class="otro" id="btn-otro">Escribir otro</button>
+      <br><button class="otro" id="btn-listo-fotos" type="button" hidden>Subí tus fotos</button>
     </div>
   </section>
 
@@ -392,6 +472,11 @@ const sb = supabase.createClient(SUPA_URL, SUPA_KEY, { db: { schema: 'invitacion
 const params   = new URLSearchParams(location.search);
 const eventoId = (params.get('evento') || 'almamia15').trim();
 const mesa     = (params.get('mesa') || '').trim();
+
+/* El receptor de fotos: un Apps Script que corre con la cuenta de Fer y
+   guarda en su Drive (herramientas/fotos-apps-script.gs). El invitado no
+   ve Google ni se loguea. Además tiene que estar `config.fotos_activo`. */
+const FOTOS_URL = 'https://script.google.com/macros/s/AKfycbzS8jztHN0_1B6JPdF9pKlDL068RNMSlhG03TxJ_oVFJ3-vzoc2uTI-JG1rLp4b_FQ1/exec';
 
 // La misma tabla de duplas que invitacion.html. Los pesos son los que
 // publica cada familia: si se le pide a Google uno que no existe, falla el
@@ -546,6 +631,11 @@ function pintarCabecera() {
   document.getElementById('ok-texto').textContent =
     nombre ? `${nombre} lo ${leen} a leer después de la fiesta, con todos los demás.`
            : `Lo ${leen} a leer después de la fiesta.`;
+
+  preguntaDeseo = document.getElementById('pregunta').textContent;
+  document.getElementById('fotos-ayuda').textContent =
+    nombre ? `Elegí las que sacaste esta noche. Van directo al álbum de ${nombre}: nadie más las ve.`
+           : 'Elegí las que sacaste esta noche. Nadie más las ve.';
 }
 
 /* El recordatorio del alias. Muchos invitados recibieron la invitación
@@ -638,13 +728,22 @@ function crecer() {
 }
 ta.addEventListener('input', crecer);
 
+let preguntaDeseo = '';
+const esPlural = () => (params.get('t') || '').toLowerCase() === 'p' || /\s(&|y)\s/i.test(C.nombre || '');
+
 function mostrar(id) {
-  ['paso-escribir','paso-listo'].forEach(p => {
+  ['paso-elegir','paso-escribir','paso-listo','paso-fotos'].forEach(p => {
     document.getElementById(p).hidden = (p !== id);
   });
   // Ya contestó: la portada se achica y la pregunta se guarda. Preguntarle
   // de nuevo "¿qué le deseás?" arriba de "quedó guardado" se contradice.
   document.body.classList.toggle('compacta', id === 'paso-listo');
+  // La pregunta de la portada cambia con el paso (en `cerrado()` ya no existe).
+  const h = document.getElementById('pregunta');
+  if (h) h.textContent =
+      id === 'paso-elegir' ? `¿Qué querés dejarle${esPlural() ? 's' : ''} a ${C.nombre || 'la fiesta'}?`
+    : id === 'paso-fotos'  ? 'Subí tus fotos de la noche'
+    : preguntaDeseo;
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
@@ -752,6 +851,140 @@ function cerrado(txt) {
   document.getElementById('ok-texto').textContent = txt;
 }
 
+/* ── Las fotos ─────────────────────────────────────────────────────────
+   Elegir y listo: la subida arranca sola. Cada foto se achica EN EL
+   CELULAR (1600px, JPEG) antes de salir: de ~4 MB a ~300 KB. Con la señal
+   de un salón, eso es la diferencia entre subir y no subir.
+   ⚠️ De a una por vez al achicar y de a dos al subir: 30 fotos de 12 MP
+   decodificadas juntas cuelgan Safari. Por lo mismo las miniaturas salen
+   de la foto ya achicada, nunca del original. */
+const FATAL = ['cerrado', 'lleno', 'formato', 'grande'];
+
+async function achicar(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    img.src = url;
+    await img.decode();
+    const r = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.naturalWidth * r);
+    c.height = Math.round(img.naturalHeight * r);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    const b64 = c.toDataURL('image/jpeg', 0.82).split(',')[1];
+    const t = document.createElement('canvas');
+    const tr = 160 / Math.max(c.width, c.height);
+    t.width = Math.round(c.width * tr); t.height = Math.round(c.height * tr);
+    t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
+    const mini = t.toDataURL('image/jpeg', 0.7);
+    c.width = c.height = 0;
+    return { b64, mini };
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+/* ⚠️ Con reintento: en el pico de la fiesta (después del vals) Google
+   atiende unas 30 a la vez por cuenta y el resto rebota. El invitado no
+   se entera: la página espera un poco y vuelve a probar sola. */
+async function enviarFoto(b64) {
+  let espera = 1200;
+  for (let n = 0; n < 5; n++) {
+    try {
+      const r = await fetch(FOTOS_URL, {
+        method: 'POST',
+        // text/plain y no JSON: así el navegador no hace el pedido previo
+        // de CORS, que Apps Script no contesta.
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ evento: eventoId, mesa,
+          nombre: document.getElementById('fotos-nombre').value.trim(), datos: b64 })
+      });
+      const j = await r.json();
+      if (j.ok) return j.n;
+      if (FATAL.includes(j.error)) throw new Error(j.error);
+    } catch (err) {
+      if (FATAL.includes(err.message)) throw err;
+    }
+    await new Promise(ok => setTimeout(ok, espera + Math.random() * 900));
+    espera *= 2;
+  }
+  throw new Error('red');
+}
+
+const btnFotos = document.getElementById('btn-fotos');
+const inFotos  = document.getElementById('fotos-input');
+btnFotos.onclick = () => { if (!btnFotos.disabled) inFotos.click(); };
+inFotos.onchange = () => {
+  const files = [...inFotos.files].slice(0, 40);
+  inFotos.value = '';
+  if (files.length) subirTanda(files);
+};
+
+async function subirTanda(files) {
+  btnFotos.disabled = true;
+  btnFotos.textContent = 'Subiendo…';
+  document.getElementById('fotos-progreso').hidden = false;
+  const cont = document.getElementById('miniaturas');
+  cont.textContent = '';
+  const minis = files.map(() => {
+    const d = document.createElement('div');
+    d.className = 'mini espera';
+    cont.appendChild(d);
+    return d;
+  });
+
+  const total = files.length;
+  let ok = 0, mal = 0, motivo = '', i = 0;
+  const estado = document.getElementById('fotos-estado');
+  const pintar = () => {
+    document.getElementById('fotos-barra').style.width = ((ok + mal) / total * 100) + '%';
+    estado.textContent = '';
+    estado.append(`Subiendo ${Math.min(ok + mal + 1, total)} de ${total}…`);
+    const s = document.createElement('small');
+    s.textContent = 'No cierres esta pantalla hasta que termine.';
+    estado.append(s);
+  };
+  pintar();
+
+  const trabajador = async () => {
+    while (i < total) {
+      const k = i++;
+      try {
+        const { b64, mini } = await achicar(files[k]);
+        minis[k].style.backgroundImage = `url("${mini}")`;
+        await enviarFoto(b64);
+        minis[k].className = 'mini ok';
+        ok++;
+      } catch (err) {
+        minis[k].className = 'mini mal';
+        mal++;
+        if (FATAL.includes(err.message)) motivo = err.message;
+      }
+      if (ok + mal < total) pintar();
+    }
+  };
+  await Promise.all([trabajador(), trabajador()]);
+
+  document.getElementById('fotos-barra').style.width = '100%';
+  estado.textContent = '';
+  const nombre = C.nombre || 'la fiesta';
+  if (motivo === 'cerrado' || motivo === 'lleno') {
+    estado.append('El álbum ya no está recibiendo fotos.');
+  } else if (!mal) {
+    estado.append(ok === 1 ? '¡Listo! Tu foto ya está en el álbum ♡' : `¡Listo! Subiste ${ok} fotos ♡`);
+    const s = document.createElement('small');
+    s.textContent = `${nombre} las va a ver después de la fiesta.`;
+    estado.append(s);
+  } else {
+    estado.append(`Subieron ${ok} de ${total}.`);
+    const s = document.createElement('small');
+    s.textContent = 'Las marcadas con ! no pasaron: probá de nuevo con mejor señal.';
+    estado.append(s);
+  }
+  btnFotos.disabled = false;
+  btnFotos.textContent = ok ? 'Subir más fotos' : 'Elegir fotos';
+}
+
 (async () => {
   const { data } = await sb.from('eventos').select('id, config').eq('id', eventoId).maybeSingle();
   C = (data && data.config) || {};
@@ -761,12 +994,33 @@ function cerrado(txt) {
   pintarChips();
   crecer();
 
+  const hayDeseos = esSi(C.deseos_activo);
+  const hayFotos  = !!FOTOS_URL && esSi(C.fotos_activo);
+  const ambos     = hayDeseos && hayFotos;
+
   if (!data) {
     cerrado('No encontramos esta fiesta. Fijate que el link esté completo.');
   } else if (esSi(C.pausada)) {
     cerrado('Esta invitación está pausada.');
-  } else if (!esSi(C.deseos_activo)) {
+  } else if (!hayDeseos && !hayFotos) {
     cerrado('Esta fiesta no tiene libro de deseos.');
+  } else if (ambos) {
+    // Los QR impresos apuntan acá: con fotos activas, primero se elige.
+    document.querySelectorAll('[data-volver]').forEach(b => {
+      b.hidden = false;
+      b.onclick = () => mostrar('paso-elegir');
+    });
+    document.getElementById('op-deseo').onclick = () => mostrar('paso-escribir');
+    document.getElementById('op-fotos').onclick = () => mostrar('paso-fotos');
+    const aFotos = document.getElementById('btn-listo-fotos');
+    aFotos.hidden = false;
+    aFotos.onclick = () => mostrar('paso-fotos');
+    const aDeseo = document.getElementById('btn-a-deseo');
+    aDeseo.hidden = false;
+    aDeseo.onclick = () => mostrar('paso-escribir');
+    mostrar('paso-elegir');
+  } else if (hayFotos) {
+    mostrar('paso-fotos');
   }
   await (document.fonts ? document.fonts.ready : Promise.resolve());
   document.body.classList.add('listo');
