@@ -204,8 +204,8 @@ textarea:focus,input:focus{
 /* La firma se escribe a mano, como en una tarjeta de verdad. Es el toque
    que la hace sentir personal sin romper un casamiento clásico: la letra
    manuscrita funciona igual de bien en los dos. */
-#firma{font-family:var(--font-mano);font-size:1.5rem;padding-top:11px;padding-bottom:11px}
-#firma::placeholder{font-family:var(--font);font-size:1.05rem}
+#firma,#fotos-nombre{font-family:var(--font-mano);font-size:1.5rem;padding-top:11px;padding-bottom:11px}
+#firma::placeholder,#fotos-nombre::placeholder{font-family:var(--font);font-size:1.05rem}
 .campo + .campo{margin-top:14px}
 
 .cuenta{
@@ -328,24 +328,43 @@ textarea:focus,input:focus{
    ⚠️ El texto nunca se apoya sobre la imagen: el fondo lo elige el
    cliente y puede ser un mediodía o una noche. La hoja trae su piso.
    ⚠️ No con background-attachment:fixed: iOS lo ignora. Va un div fijo. */
-#ambiente{position:fixed;inset:0;z-index:-1;background:var(--bg) center/cover no-repeat;display:none}
+/* ⚠️ 100lvh y no inset:0 — al scrollear, el celular esconde su barra, el
+   alto de la pantalla cambia y un fondo de 100% "salta". Con el alto
+   GRANDE de la pantalla, la acuarela ya cubre todo y no se mueve. */
+#ambiente{position:fixed;left:0;right:0;top:0;height:100lvh;z-index:-1;
+  background:var(--bg) center/cover no-repeat;display:none}
 body.ambiente #ambiente{display:block}
 body.ambiente{background:var(--bg)}
-body.ambiente .portada{min-height:0;margin:16px 0 0;padding:0;display:block}
+
+/* Todo en UNA pantalla: la agasajada en un retrato redondo (reconocer su
+   cara confirma que escaneaste el QR correcto), y la acuarela de fondo de
+   protagonista. La hoja se arma en columna para que la silueta ocupe
+   sólo el lugar que sobra. */
+body.ambiente .hoja{display:flex;flex-direction:column}
+body.ambiente .portada{min-height:0;margin:16px 0 0;padding:0;display:flex;
+  flex-direction:column;align-items:center}
 body.ambiente .portada .foto{
-  position:relative;height:clamp(300px, 50dvh, 460px);border-radius:24px;
-  border:4px solid var(--bg);box-shadow:0 14px 34px -18px rgba(0,0,0,.55);
+  position:relative;inset:auto;width:112px;height:112px;border-radius:50%;flex:none;
+  border:4px solid var(--bg);box-shadow:0 10px 24px -12px rgba(0,0,0,.55);
 }
+body.ambiente .portada .foto > i{background-position:center 22%}
 body.ambiente .marca{
-  margin-top:-34px;padding:22px 20px 4px;background:var(--bg);
+  margin-top:12px;padding:18px 20px 2px;background:var(--bg);
   border-radius:22px 22px 0 0;
 }
 body.ambiente .marca::before{display:none}
-body.ambiente section{background:var(--bg);border-radius:0 0 22px 22px;padding:2px 20px 22px}
+body.ambiente h1{font-size:clamp(1.55rem,6.4vw,1.95rem)}
+body.ambiente section{background:var(--bg);border-radius:0 0 22px 22px;padding:2px 20px 20px}
+body.ambiente .opciones{margin-top:16px;gap:10px}
+body.ambiente .volver{margin:0;padding:8px 0}
+body.ambiente .fotos-campo{margin-top:12px}
+body.ambiente #paso-fotos .ayuda{margin-top:4px}
+body.ambiente .opcion{min-height:76px;padding:14px 18px}
 body.ambiente .portada.sin-foto .marca{margin-top:0}
-body.ambiente.compacta .portada .foto{height:clamp(170px, 26dvh, 230px)}
-@media (max-height:760px){
-  body.ambiente .portada .foto{height:clamp(230px, 40dvh, 330px)}
+body.ambiente.compacta .portada .foto{width:84px;height:84px}
+@media (max-height:620px){
+  body.ambiente .portada .foto{width:84px;height:84px}
+  body.ambiente .portada{margin-top:10px}
 }
 /* ── Nuestro footer ───────────────────────────────────────────────────
    El mismo de invitacion.html, y la misma excepción a los tokens: bloque
@@ -363,11 +382,24 @@ body.ambiente.compacta .portada .foto{height:clamp(170px, 26dvh, 230px)}
   border-bottom:1px solid rgba(255,255,255,.3);padding-bottom:1px}
 .pie .cta{margin-top:10px;font-size:.76rem}
 .pie .cta a{color:rgba(255,255,255,.72);font-weight:400;border-bottom-color:rgba(255,255,255,.2)}
+/* Con ambiente el footer es una franja fina: tiene que entrar en la misma
+   pantalla que las dos opciones. */
+body.ambiente .pie{margin-top:14px;padding-top:14px;padding-bottom:calc(16px + env(safe-area-inset-bottom));
+  font-size:.74rem;line-height:1.45}
+/* Dos renglones centrados: en uno solo no entra a 375px y el CTA se partía
+   a la mitad ("¿Querés algo así / para tu fiesta?"). */
+body.ambiente .pie br{display:none}
+body.ambiente .pie .cta{margin-top:4px;font-size:inherit}
 
 /* ⚠️ :not([hidden]) — con display:block a secas, la regla del navegador
    [hidden]{display:none} pierde y la silueta sale en todas las fiestas. */
-.silueta:not([hidden]){display:block;height:170px;width:auto;margin:22px auto 0;
+/* La silueta ocupa SÓLO lo que sobra de la pantalla (flex-basis 0): con
+   mucho lugar llega a 170px, con poco se achica, y en una pantalla
+   donde no entra nada, desaparece antes de obligar a scrollear. */
+.silueta:not([hidden]){display:block;flex:1 1 0;min-height:0;max-height:170px;
+  width:100%;object-fit:contain;object-position:center bottom;margin-top:14px;
   filter:drop-shadow(0 6px 10px rgba(0,0,0,.18))}
+@media (max-height:600px){ .silueta:not([hidden]){display:none} }
 
 .volver{
   background:transparent;border:0;color:var(--ink-soft);font-family:inherit;
@@ -1056,6 +1088,8 @@ async function subirTanda(files) {
   }
   btnFotos.disabled = false;
   btnFotos.textContent = ok ? 'Subir más fotos' : 'Elegir fotos';
+  const aDeseo = document.getElementById('btn-a-deseo');
+  if (ok && aDeseo.dataset.ofrecer) aDeseo.hidden = false;
 }
 
 (async () => {
@@ -1088,8 +1122,10 @@ async function subirTanda(files) {
     const aFotos = document.getElementById('btn-listo-fotos');
     aFotos.hidden = false;
     aFotos.onclick = () => mostrar('paso-fotos');
+    // "Dejale un deseo" aparece recién cuando terminó de subir (ver
+    // subirTanda): antes le come a la pantalla justo el lugar que falta.
     const aDeseo = document.getElementById('btn-a-deseo');
-    aDeseo.hidden = false;
+    aDeseo.dataset.ofrecer = '1';
     aDeseo.onclick = () => mostrar('paso-escribir');
     mostrar('paso-elegir');
   } else if (hayFotos) {
