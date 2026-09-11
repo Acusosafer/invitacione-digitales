@@ -64,7 +64,10 @@ body{
 }
 body.listo{opacity:1}
 
-.hoja{max-width:520px;margin:0 auto}
+/* Columna: la hoja crece y el footer queda pegado abajo aunque la
+   pantalla sea corta (el libro cerrado, un deseo ya enviado). */
+body{display:flex;flex-direction:column}
+.hoja{max-width:520px;width:100%;margin:0 auto;flex:1 0 auto}
 
 /* Entrada escalonada. Cada bloque entra 60ms después del anterior: se lee
    como una sola cosa que se acomoda, no como cinco que aparecen sueltas. */
@@ -305,16 +308,66 @@ textarea:focus,input:focus{
    Aparece sólo si el evento tiene las dos cosas activas. Dos opciones y
    nada más: a la una de la mañana cada decisión extra pierde gente. */
 .opciones{display:flex;flex-direction:column;gap:12px;margin-top:22px}
+/* Pintadas del acento del evento. El texto va en --on-accent, SÓLIDO: lo
+   calcula el JS para que se lea sobre un verde pastel o sobre un bordó. */
 .opcion{
-  width:100%;text-align:left;cursor:pointer;font-family:inherit;color:var(--primary);
-  background:var(--velo-1);border:1px solid var(--borde);border-radius:18px;
+  width:100%;text-align:left;cursor:pointer;font-family:inherit;color:var(--on-accent);
+  background:var(--secondary);border:0;border-radius:18px;
   padding:18px 20px;min-height:84px;display:flex;align-items:center;gap:16px;
-  transition:transform 160ms var(--curva), background 200ms ease;
+  box-shadow:0 6px 18px -10px color-mix(in srgb, var(--primary) 45%, transparent);
+  transition:transform 160ms var(--curva), filter 200ms ease;
 }
-.opcion:active{transform:scale(.975);background:var(--velo-2)}
-.opcion svg{width:34px;height:34px;flex:none;color:var(--primary)}
+.opcion:active{transform:scale(.975);filter:brightness(.94)}
+.opcion svg{width:34px;height:34px;flex:none;color:var(--on-accent)}
 .opcion b{display:block;font-family:var(--font-titulo);font-weight:400;font-size:1.4rem;line-height:1.15}
-.opcion span{display:block;margin-top:3px;font-size:.84rem;line-height:1.4;color:var(--ink-soft)}
+.opcion span{display:block;margin-top:3px;font-size:.84rem;line-height:1.4;color:var(--on-accent)}
+
+/* ── Con ambiente (el fondo del libro de deseos) ──────────────────────
+   La acuarela va fija detrás de todo; la foto de la agasajada, enmarcada
+   y entera arriba; y todo lo que tiene texto sobre UNA hoja de papel.
+   ⚠️ El texto nunca se apoya sobre la imagen: el fondo lo elige el
+   cliente y puede ser un mediodía o una noche. La hoja trae su piso.
+   ⚠️ No con background-attachment:fixed: iOS lo ignora. Va un div fijo. */
+#ambiente{position:fixed;inset:0;z-index:-1;background:var(--bg) center/cover no-repeat;display:none}
+body.ambiente #ambiente{display:block}
+body.ambiente{background:var(--bg)}
+body.ambiente .portada{min-height:0;margin:16px 0 0;padding:0;display:block}
+body.ambiente .portada .foto{
+  position:relative;height:clamp(300px, 50dvh, 460px);border-radius:24px;
+  border:4px solid var(--bg);box-shadow:0 14px 34px -18px rgba(0,0,0,.55);
+}
+body.ambiente .marca{
+  margin-top:-34px;padding:22px 20px 4px;background:var(--bg);
+  border-radius:22px 22px 0 0;
+}
+body.ambiente .marca::before{display:none}
+body.ambiente section{background:var(--bg);border-radius:0 0 22px 22px;padding:2px 20px 22px}
+body.ambiente .portada.sin-foto .marca{margin-top:0}
+body.ambiente.compacta .portada .foto{height:clamp(170px, 26dvh, 230px)}
+@media (max-height:760px){
+  body.ambiente .portada .foto{height:clamp(230px, 40dvh, 330px)}
+}
+/* ── Nuestro footer ───────────────────────────────────────────────────
+   El mismo de invitacion.html, y la misma excepción a los tokens: bloque
+   oscuro fijo con texto blanco, para que se lea sobre cualquier tema.
+   Cada invitado que escanea el QR de una mesa es un próximo cliente.
+   Los ?utm_ son la única medición: viajan en el link y sólo cuentan a quien
+   hace clic. Acá no hay ni GA4 ni píxel. */
+.pie{
+  margin:36px -22px calc(-40px - env(safe-area-inset-bottom));
+  padding:30px 22px calc(34px + env(safe-area-inset-bottom));
+  background:#1a1a1a;text-align:center;font-size:.8rem;line-height:1.6;
+  color:rgba(255,255,255,.72);
+}
+.pie a{color:rgba(255,255,255,.95);font-weight:600;text-decoration:none;
+  border-bottom:1px solid rgba(255,255,255,.3);padding-bottom:1px}
+.pie .cta{margin-top:10px;font-size:.76rem}
+.pie .cta a{color:rgba(255,255,255,.72);font-weight:400;border-bottom-color:rgba(255,255,255,.2)}
+
+/* ⚠️ :not([hidden]) — con display:block a secas, la regla del navegador
+   [hidden]{display:none} pierde y la silueta sale en todas las fiestas. */
+.silueta:not([hidden]){display:block;height:170px;width:auto;margin:22px auto 0;
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.18))}
 
 .volver{
   background:transparent;border:0;color:var(--ink-soft);font-family:inherit;
@@ -352,6 +405,7 @@ textarea:focus,input:focus{
 </style>
 </head>
 <body>
+<div id="ambiente" aria-hidden="true"></div>
 
 <div class="hoja">
 
@@ -461,7 +515,14 @@ textarea:focus,input:focus{
     </div>
   </section>
 
+  <img class="silueta" id="silueta" alt="" hidden>
 </div>
+
+<footer class="pie">
+  <p>Creado por<br>
+    <a href="https://invitacionesdigitalesoficial.com/?utm_source=deseos&amp;utm_medium=footer&amp;utm_content=marca" target="_blank" rel="noopener">Invitaciones Digitales OFICIAL</a></p>
+  <p class="cta"><a href="https://invitacionesdigitalesoficial.com/?utm_source=deseos&amp;utm_medium=footer&amp;utm_content=cta" target="_blank" rel="noopener">¿Querés algo así para tu fiesta?</a></p>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -610,6 +671,18 @@ function pintarCabecera() {
   const foto = C.foto_splash || C.foto_hero || C.foto_hashtag;
   if (foto) document.querySelector('#foto > i').style.backgroundImage = `url("${foto}")`;
   else      document.getElementById('portada').classList.add('sin-foto');
+
+  // El ambiente del libro de deseos, si el evento lo tiene: la acuarela de
+  // fondo y la silueta. Sin él, la pantalla queda como siempre.
+  if (C.libro_fondo) {
+    document.body.classList.add('ambiente');
+    document.getElementById('ambiente').style.backgroundImage = `url("${C.libro_fondo}")`;
+    if (C.libro_silueta) {
+      const s = document.getElementById('silueta');
+      s.src = C.libro_silueta;
+      s.hidden = false;
+    }
+  }
 
   // Una PREGUNTA, no "dejá tu mensaje". A una caja vacía la gente le
   // escribe "felicidades!!"; a una pregunta le contesta de verdad.
